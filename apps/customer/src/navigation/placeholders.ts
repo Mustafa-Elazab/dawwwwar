@@ -8,11 +8,10 @@ import {
   MODAL_ROUTES,
 } from './routes';
 
-// Auth
 export { PhoneScreen } from '../features/auth/screens/PhoneScreen';
-export const OtpScreen = createPlaceholder(AUTH_ROUTES.OTP, 12);
-export const RoleScreen = createPlaceholder(AUTH_ROUTES.ROLE, 12);
-export const PendingApprovalScreen = createPlaceholder(AUTH_ROUTES.PENDING_APPROVAL, 12);
+export { OtpScreen } from '../features/auth/screens/OtpScreen';
+export { RoleScreen } from '../features/auth/screens/RoleScreen';
+export { PendingApprovalScreen } from '../features/auth/screens/PendingApprovalScreen';
 export const CustomerOnboardingScreen = createPlaceholder(AUTH_ROUTES.CUSTOMER_ONBOARDING, 12);
 export const MerchantOnboardingScreen = createPlaceholder(AUTH_ROUTES.MERCHANT_ONBOARDING, 12);
 export const DriverOnboardingScreen = createPlaceholder(AUTH_ROUTES.DRIVER_ONBOARDING, 12);
