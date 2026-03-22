@@ -1,0 +1,17 @@
+{
+  "name": "@dawwar/mocks",
+  "version": "0.0.1",
+  "private": true,
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "type-check": "tsc --noEmit",
+    "build": "echo 'source-only'"
+  },
+  "dependencies": {
+    "@dawwar/types": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0"
+  }
+}
