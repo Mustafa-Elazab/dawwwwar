@@ -1,6 +1,10 @@
-// Atoms (complete)
+// Atoms
 export * from './atoms';
 
-// Molecules — Task 07
-// Organisms — Task 07
+// Molecules
+export * from './molecules';
+
+// Organisms
+export * from './organisms';
+
 // Templates — Task 08
