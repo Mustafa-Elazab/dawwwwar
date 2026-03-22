@@ -10,7 +10,7 @@ export const createStyles = (colors: AppColors) =>
       backgroundColor: colors.surfaceVariant,
       borderRadius: radius.full,
       paddingHorizontal: space.md,
-      paddingVertical: space[2],
+      paddingVertical: space.sm,
       gap: space.sm,
     },
     input: {
@@ -20,5 +20,5 @@ export const createStyles = (colors: AppColors) =>
       textAlign: I18nManager.isRTL ? 'right' : 'left',
       paddingVertical: 0,   // remove default Android padding
     },
-    clearButton: { padding: space[1] },
+    clearButton: { padding: space.xs },
   });

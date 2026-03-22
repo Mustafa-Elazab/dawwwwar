@@ -4,7 +4,7 @@ import { space, radius, typography } from '@dawwar/theme';
 
 export const createStyles = (colors: AppColors, isFocused: boolean, hasError: boolean) =>
   StyleSheet.create({
-    container: { gap: space[1] },
+    container: { gap: space.xs },
     label: {
       ...typography.label,
       color: colors.textSecondary,
@@ -31,7 +31,7 @@ export const createStyles = (colors: AppColors, isFocused: boolean, hasError: bo
       textAlign: I18nManager.isRTL ? 'right' : 'left',
       writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr',
     },
-    iconContainer: { paddingHorizontal: space[1] },
+    iconContainer: { paddingHorizontal: space.xs },
     error: {
       ...typography.caption,
       color: colors.error,

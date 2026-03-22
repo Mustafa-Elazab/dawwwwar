@@ -6,7 +6,7 @@ export const createStyles = (colors: AppColors) =>
   StyleSheet.create({
     banner: {
       backgroundColor: colors.error,
-      paddingVertical: space[2],
+      paddingVertical: space.sm,
       paddingHorizontal: space.base,
       flexDirection: 'row',
       alignItems: 'center',

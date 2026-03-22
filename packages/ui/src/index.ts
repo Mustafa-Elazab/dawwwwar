@@ -1,10 +1,11 @@
-// Atoms
+// ─── Atoms ───────────────────────────────────────────────
 export * from './atoms';
 
-// Molecules
+// ─── Molecules ───────────────────────────────────────────
 export * from './molecules';
 
-// Organisms
+// ─── Organisms ───────────────────────────────────────────
 export * from './organisms';
 
-// Templates — Task 08
+// ─── Templates ───────────────────────────────────────────
+export * from './templates';

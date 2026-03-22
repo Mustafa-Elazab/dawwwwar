@@ -15,7 +15,7 @@ export const createStyles = (colors: AppColors) =>
     left: { flexShrink: 0 },
     content: {
       flex: 1,
-      gap: space[1],
+      gap: space.xs,
       alignItems: I18nManager.isRTL ? 'flex-end' : 'flex-start',
     },
     title: {

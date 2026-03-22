@@ -23,7 +23,7 @@ export function ListItem({
 
   return (
     <Wrapper
-      style={[styles.container, disabled && styles.disabled, style] as any}
+      style={[styles.container, disabled && styles.disabled, style]}
       onPress={onPress}
       activeOpacity={0.7}
       disabled={disabled}

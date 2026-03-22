@@ -10,8 +10,8 @@ export const createStyles = (colors: AppColors) =>
       alignItems: 'center',
       justifyContent: 'center',
     },
-    sm: { paddingHorizontal: space[2], paddingVertical: 2 },
-    md: { paddingHorizontal: space[2], paddingVertical: space[1] },
+    sm: { paddingHorizontal: space.sm, paddingVertical: 2 },
+    md: { paddingHorizontal: space.sm, paddingVertical: space.xs },
     dot: { width: 8, height: 8, padding: 0 },
 
     success: { backgroundColor: colors.successBg },

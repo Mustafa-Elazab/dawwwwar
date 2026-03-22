@@ -25,7 +25,7 @@ export const createStyles = (colors: AppColors) =>
     label: {
       ...typography.caption,
       color: colors.textSecondary,
-      marginTop: space[1],
+      marginTop: space.xs,
       textAlign: 'center',
     },
     labelCurrent: { color: colors.primary, fontWeight: '600' },
