@@ -12,6 +12,7 @@ export function Text({
   selectable = false,
   style,
   children,
+  onPress,
   testID,
 }: TextProps) {
   const { colors } = useTheme();
@@ -31,6 +32,7 @@ export function Text({
       ]}
       numberOfLines={numberOfLines}
       selectable={selectable}
+      onPress={onPress}
       testID={testID}
     >
       {children}

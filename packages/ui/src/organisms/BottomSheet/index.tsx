@@ -50,7 +50,6 @@ export const BottomSheet = forwardRef<BottomSheetRef, BottomSheetProps>(
         backdropComponent={renderBackdrop}
         handleComponent={() => <View style={styles.handle} />}
         backgroundStyle={styles.background}
-        testID={testID}
       >
         {children}
       </GorhomBottomSheet>

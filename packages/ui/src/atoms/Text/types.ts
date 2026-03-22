@@ -7,6 +7,7 @@ export interface TextProps {
   align?: 'auto' | 'left' | 'right' | 'center' | 'justify';
   numberOfLines?: number;
   selectable?: boolean;
+  onPress?: () => void;
   style?: StyleProp<TextStyle>;
   children?: React.ReactNode;
   testID?: string;
