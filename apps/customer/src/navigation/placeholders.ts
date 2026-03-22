@@ -9,7 +9,7 @@ import {
 } from './routes';
 
 // Auth
-export const PhoneScreen = createPlaceholder(AUTH_ROUTES.PHONE, 11);
+export { PhoneScreen } from '../features/auth/screens/PhoneScreen';
 export const OtpScreen = createPlaceholder(AUTH_ROUTES.OTP, 12);
 export const RoleScreen = createPlaceholder(AUTH_ROUTES.ROLE, 12);
 export const PendingApprovalScreen = createPlaceholder(AUTH_ROUTES.PENDING_APPROVAL, 12);
