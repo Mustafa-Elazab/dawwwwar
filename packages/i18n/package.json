@@ -1,0 +1,22 @@
+{
+  "name": "@dawwar/i18n",
+  "version": "0.0.1",
+  "private": true,
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "type-check": "tsc --noEmit",
+    "build": "echo 'source-only'"
+  },
+  "peerDependencies": {
+    "i18next": ">=23.0.0",
+    "react-i18next": ">=14.0.0",
+    "react-native": ">=0.73.0",
+    "react-native-localize": ">=3.0.0",
+    "react-native-mmkv": ">=2.0.0",
+    "react-native-restart": ">=0.0.27"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0"
+  }
+}
