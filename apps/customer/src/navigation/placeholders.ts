@@ -17,7 +17,7 @@ export const MerchantOnboardingScreen = createPlaceholder(AUTH_ROUTES.MERCHANT_O
 export const DriverOnboardingScreen = createPlaceholder(AUTH_ROUTES.DRIVER_ONBOARDING, 12);
 
 // Home
-export const HomeScreen = createPlaceholder(HOME_ROUTES.HOME, 13);
+export { HomeScreen } from '../features/home/screens/HomeScreen';
 export const SearchScreen = createPlaceholder(HOME_ROUTES.SEARCH, 18);
 export const CategoryMerchantsScreen = createPlaceholder(HOME_ROUTES.CATEGORY_MERCHANTS, 15);
 export const MerchantDetailScreen = createPlaceholder(HOME_ROUTES.MERCHANT_DETAIL, 14);
