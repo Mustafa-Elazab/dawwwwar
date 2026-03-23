@@ -19,11 +19,11 @@ export const DriverOnboardingScreen = createPlaceholder(AUTH_ROUTES.DRIVER_ONBOA
 // Home
 export { HomeScreen } from '../features/home/screens/HomeScreen';
 export const SearchScreen = createPlaceholder(HOME_ROUTES.SEARCH, 18);
-export const CategoryMerchantsScreen = createPlaceholder(HOME_ROUTES.CATEGORY_MERCHANTS, 15);
-export const MerchantDetailScreen = createPlaceholder(HOME_ROUTES.MERCHANT_DETAIL, 14);
+export { CategoryMerchantsScreen } from '../features/categories/screens/CategoryMerchantsScreen';
+export { MerchantDetailScreen } from '../features/merchant/screens/MerchantDetailScreen';
 
 // Categories
-export const CategoriesScreen = createPlaceholder('CategoriesScreen', 15);
+export { CategoriesScreen } from '../features/categories/screens/CategoriesScreen';
 
 // Orders
 export const OrdersListScreen = createPlaceholder(ORDER_ROUTES.ORDERS_LIST, 15);
