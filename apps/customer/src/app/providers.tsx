@@ -42,15 +42,19 @@ interface AppProvidersProps {
 
 export function AppProviders({ children }: AppProvidersProps) {
   useEffect(() => {
+    console.log('[AppProviders] Mounted');
     // Try to restore session from MMKV on app launch
     const hasToken = !!storage.getString(StorageKeys.ACCESS_TOKEN);
+    console.log('[AppProviders] Has token:', hasToken);
     if (!hasToken) {
       // No token — not authenticated, stop loading
+      console.log('[AppProviders] No token, dispatching finishLoading');
       store.dispatch(finishLoading());
     }
     // If token exists, RootNavigator will handle validation
     // For Phase 1 (mock): we just trust the token is valid
     if (hasToken) {
+      console.log('[AppProviders] Has token, dispatching finishLoading');
       store.dispatch(finishLoading());
     }
   }, []);

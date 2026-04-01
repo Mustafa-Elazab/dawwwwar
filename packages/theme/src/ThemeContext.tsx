@@ -40,6 +40,7 @@ export function ThemeProvider({ children, storage }: ThemeProviderProps) {
 
   const [mode, setModeState] = useState<ThemeMode>(() => {
     const stored = storage.getString(THEME_STORAGE_KEY);
+    console.log('[ThemeProvider] Initial mode from storage:', stored);
     if (stored === ThemeMode.LIGHT) return ThemeMode.LIGHT;
     if (stored === ThemeMode.DARK) return ThemeMode.DARK;
     return ThemeMode.SYSTEM;
@@ -55,6 +56,8 @@ export function ThemeProvider({ children, storage }: ThemeProviderProps) {
     () => (isDark ? darkColors : lightColors),
     [isDark],
   );
+
+  console.log('[ThemeProvider] Render:', { mode, isDark, systemScheme, colors: colors === lightColors ? 'light' : 'dark' });
 
   const setMode = useCallback(
     (newMode: ThemeMode) => {

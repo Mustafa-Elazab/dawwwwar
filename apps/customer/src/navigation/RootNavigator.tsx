@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useAppSelector } from '../store/hooks';
 import {
@@ -23,8 +23,21 @@ export function RootNavigator() {
   const role = useAppSelector(selectRole);
   const isApproved = useAppSelector(selectIsApproved);
 
+  // Debug logging
+  useEffect(() => {
+    console.log('[RootNavigator] Auth state:', {
+      isAuthenticated,
+      isLoading,
+      role,
+      isApproved,
+    });
+  }, [isAuthenticated, isLoading, role, isApproved]);
+
+  console.log('[RootNavigator] Rendering with:', { isAuthenticated, isLoading, role, isApproved });
+
   // Show loading while session is being restored
   if (isLoading) {
+    console.log('[RootNavigator] Showing LoadingSpinner');
     return <LoadingSpinner fullscreen message="Loading..." />;
   }
 

@@ -19,3 +19,16 @@ buildscript {
 }
 
 apply plugin: "com.facebook.react.rootproject"
+
+subprojects {
+    project.configurations.all {
+        resolutionStrategy.eachDependency { details ->
+            // force consistent versions if needed
+        }
+    }
+    plugins.withId("com.android.library") {
+        android {
+            compileSdkVersion rootProject.ext.compileSdkVersion
+        }
+    }
+}

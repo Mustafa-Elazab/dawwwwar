@@ -1,25 +1,16 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { enableScreens } from 'react-native-screens';
 import { NavigationContainer } from '@react-navigation/native';
 import { AppProviders } from './providers';
 import { RootNavigator } from '../navigation/RootNavigator';
 import { linking } from '../navigation/linking';
-import '../utils/reactotron'; // Initialize Reactotron
 
 enableScreens();  // must be called before NavigationContainer renders
 
 export function App() {
-  useEffect(() => {
-    console.log('[App] Mounted');
-  }, []);
-
-  console.log('[App] Rendering');
-
   return (
     <AppProviders>
-      <NavigationContainer linking={linking} onStateChange={(state) => {
-        console.log('[NavigationContainer] State changed:', state);
-      }}>
+      <NavigationContainer linking={linking}>
         <RootNavigator />
       </NavigationContainer>
     </AppProviders>

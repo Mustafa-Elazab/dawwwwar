@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, TextInput, TouchableOpacity } from 'react-native';
 import { ScreenTemplate, Text, Button, Icon } from '@dawwar/ui';
 import { useTheme } from '@dawwar/theme';
@@ -9,6 +9,12 @@ export function PhoneScreen() {
   const { colors } = useTheme();
   const styles = createStyles(colors);
   const ctrl = useController();
+
+  useEffect(() => {
+    console.log('[PhoneScreen] Mounted');
+  }, []);
+
+  console.log('[PhoneScreen] Render:', { phone: ctrl.phone, isLoading: ctrl.isLoading, phoneError: ctrl.phoneError });
 
   return (
     <ScreenTemplate edges={['top', 'bottom']}>

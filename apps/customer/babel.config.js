@@ -11,7 +11,7 @@ module.exports = {
         },
       },
     ],
-    // react-native-reanimated/plugin MUST be last
+    // React Native Reanimated plugin must be last
     'react-native-reanimated/plugin',
   ],
 };

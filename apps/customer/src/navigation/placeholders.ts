@@ -44,4 +44,4 @@ export const AppearanceScreen = createPlaceholder(PROFILE_ROUTES.APPEARANCE, 17)
 // Modals
 export { CartModal } from '../features/cart/screens/CartModal';
 export { CheckoutScreen as CheckoutModal } from '../features/checkout/screens/CheckoutScreen';
-export const CustomOrderModal = createPlaceholder(MODAL_ROUTES.CUSTOM_ORDER, 16);
+export { CustomOrderScreen as CustomOrderModal } from '../features/custom-order/screens/CustomOrderScreen';

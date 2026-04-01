@@ -1,12 +1,6 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSequence,
-  withTiming,
-  withRepeat,
-} from 'react-native-reanimated';
+import { Animated } from 'react-native';
 import { useTranslation } from '@dawwar/i18n';
 import { useVerifyOtp, useSendOtp } from '../../core/hooks';
 import { useOtpCountdown } from '../../hooks/useOtpCountdown';
@@ -24,17 +18,18 @@ export function useController() {
   const [otpError, setOtpError] = useState<string | null>(null);
 
   // Shake animation (triggered on wrong OTP)
-  const shakeX = useSharedValue(0);
-  const shakeStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: shakeX.value }],
-  }));
+  const shakeX = useRef(new Animated.Value(0)).current;
 
   const triggerShake = useCallback(() => {
-    shakeX.value = withSequence(
-      withTiming(-10, { duration: 50 }),
-      withRepeat(withTiming(10, { duration: 100 }), 4, true),
-      withTiming(0, { duration: 50 }),
-    );
+    Animated.sequence([
+      Animated.timing(shakeX, { toValue: -10, duration: 50, useNativeDriver: true }),
+      Animated.timing(shakeX, { toValue: 10, duration: 100, useNativeDriver: true }),
+      Animated.timing(shakeX, { toValue: -10, duration: 100, useNativeDriver: true }),
+      Animated.timing(shakeX, { toValue: 10, duration: 100, useNativeDriver: true }),
+      Animated.timing(shakeX, { toValue: -10, duration: 100, useNativeDriver: true }),
+      Animated.timing(shakeX, { toValue: 10, duration: 100, useNativeDriver: true }),
+      Animated.timing(shakeX, { toValue: 0, duration: 50, useNativeDriver: true }),
+    ]).start();
   }, [shakeX]);
 
   // Main OTP countdown (120 seconds)
@@ -117,7 +112,7 @@ export function useController() {
     digits,
     otpError,
     isLoading: verifyMutation.isPending,
-    shakeStyle,
+    shakeX,
     timerSeconds: otpTimer.seconds,
     isOtpExpired: otpTimer.isExpired,
     canResend: resendTimer.isExpired,

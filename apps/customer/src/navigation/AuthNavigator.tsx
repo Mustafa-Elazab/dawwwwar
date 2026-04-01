@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { AUTH_ROUTES } from './routes';
 import type { AuthStackParamList } from './types';
@@ -15,6 +15,12 @@ import {
 const Stack = createStackNavigator<AuthStackParamList>();
 
 export function AuthNavigator() {
+  useEffect(() => {
+    console.log('[AuthNavigator] Rendering auth stack');
+  }, []);
+
+  console.log('[AuthNavigator] Routes:', AUTH_ROUTES);
+
   return (
     <Stack.Navigator
       screenOptions={{

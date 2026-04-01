@@ -1,10 +1,5 @@
 import React from 'react';
-import { ActivityIndicator, TouchableOpacity } from 'react-native';
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-} from 'react-native-reanimated';
+import { ActivityIndicator, TouchableOpacity, Animated } from 'react-native';
 import { useTheme } from '@dawwar/theme';
 import { Text } from '../Text';
 import { createStyles } from './styles';
@@ -27,18 +22,24 @@ export function Button({
 }: ButtonProps) {
   const { colors } = useTheme();
   const styles = createStyles(colors);
-  const scale = useSharedValue(1);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
+  const scale = React.useRef(new Animated.Value(1)).current;
 
   const handlePressIn = () => {
-    scale.value = withSpring(0.96, { damping: 15, stiffness: 400 });
+    Animated.spring(scale, {
+      toValue: 0.96,
+      useNativeDriver: true,
+      bounciness: 0,
+      speed: 20,
+    }).start();
   };
 
   const handlePressOut = () => {
-    scale.value = withSpring(1, { damping: 15, stiffness: 400 });
+    Animated.spring(scale, {
+      toValue: 1,
+      useNativeDriver: true,
+      bounciness: 0,
+      speed: 20,
+    }).start();
   };
 
   const isDisabled = disabled || loading;
@@ -58,7 +59,7 @@ export function Button({
         styles[size],
         fullWidth && styles.fullWidth,
         isDisabled && styles.disabled,
-        animatedStyle,
+        { transform: [{ scale }] },
         style,
       ]}
       onPress={onPress}

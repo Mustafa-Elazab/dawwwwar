@@ -1,6 +1,5 @@
-import React from 'react';
-import { View, TouchableOpacity, ActivityIndicator } from 'react-native';
-import Animated from 'react-native-reanimated';
+import React, { useEffect } from 'react';
+import { View, TouchableOpacity, ActivityIndicator, Animated } from 'react-native';
 import { ScrollScreenTemplate, Text, Icon } from '@dawwar/ui';
 import { useTheme } from '@dawwar/theme';
 import { OtpInput } from '../../components/OtpInput';
@@ -11,6 +10,12 @@ export function OtpScreen() {
   const { colors } = useTheme();
   const styles = createStyles(colors);
   const ctrl = useController();
+
+  useEffect(() => {
+    console.log('[OtpScreen] Mounted');
+  }, []);
+
+  console.log('[OtpScreen] Render:', { digits: ctrl.digits, isLoading: ctrl.isLoading, otpError: ctrl.otpError });
 
   return (
     <ScrollScreenTemplate
@@ -35,7 +40,7 @@ export function OtpScreen() {
         </Text>
 
         {/* OTP boxes — wrapped in shake animation */}
-        <Animated.View style={[styles.otpWrapper, ctrl.shakeStyle]}>
+        <Animated.View style={[styles.otpWrapper, { transform: [{ translateX: ctrl.shakeX }] }]}>
           <OtpInput
             value={ctrl.digits}
             onChange={ctrl.handleDigitChange}
