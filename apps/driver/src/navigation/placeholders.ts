@@ -2,13 +2,13 @@ import { createPlaceholder } from './PlaceholderScreen';
 import { AUTH_ROUTES, DRIVER_ROUTES } from './routes';
 
 // Auth (same as customer — shared logic, same mock)
-export const PhoneScreen = createPlaceholder(AUTH_ROUTES.PHONE, 19);
-export const OtpScreen = createPlaceholder(AUTH_ROUTES.OTP, 19);
-export const RoleScreen = createPlaceholder(AUTH_ROUTES.ROLE, 19);
-export const PendingApprovalScreen = createPlaceholder(AUTH_ROUTES.PENDING, 19);
+export { PhoneScreen } from '../features/auth/screens/PhoneScreen';
+export { OtpScreen } from '../features/auth/screens/OtpScreen';
+export { RoleScreen } from '../features/auth/screens/RoleScreen';
+export { PendingApprovalScreen } from '../features/auth/screens/PendingApprovalScreen';
 
 // Driver screens — built in Tasks 20+
-export const AvailableOrdersScreen = createPlaceholder(DRIVER_ROUTES.AVAILABLE_ORDERS, 20);
+export { AvailableOrdersScreen } from '../features/available-orders/screens/AvailableOrdersScreen';
 export const ActiveDeliveryScreen = createPlaceholder(DRIVER_ROUTES.ACTIVE_DELIVERY, 20);
 export const CompletedDeliveryScreen = createPlaceholder(DRIVER_ROUTES.COMPLETED_DELIVERY, 20);
 export const EarningsScreen = createPlaceholder(DRIVER_ROUTES.EARNINGS, 21);

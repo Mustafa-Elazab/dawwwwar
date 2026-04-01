@@ -7,7 +7,14 @@
     "lint": "turbo lint",
     "test": "turbo test",
     "type-check": "turbo type-check",
-    "clean": "turbo clean"
+    "clean": "turbo clean",
+    "clean:all": "turbo clean && rm -rf node_modules apps/*/node_modules packages/*/node_modules pnpm-lock.yaml",
+    "customer:android": "pnpm --filter @dawwar/customer android",
+    "customer:ios": "pnpm --filter @dawwar/customer ios",
+    "customer:start": "pnpm --filter @dawwar/customer start",
+    "customer:clean": "pnpm --filter @dawwar/customer android:clean && pnpm --filter @dawwar/customer ios:clean",
+    "android": "pnpm --filter @dawwar/customer android",
+    "ios": "pnpm --filter @dawwar/customer ios"
   },
   "devDependencies": {
     "turbo": "^2.5.0",
@@ -16,5 +23,11 @@
     "@typescript-eslint/parser": "^8.0.0",
     "eslint": "^9.0.0",
     "prettier": "^3.4.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "react": "19.2.3",
+      "react-native": "0.84.0"
+    }
   }
 }
