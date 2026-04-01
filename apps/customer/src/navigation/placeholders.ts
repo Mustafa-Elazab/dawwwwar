@@ -26,13 +26,13 @@ export { MerchantDetailScreen } from '../features/merchant/screens/MerchantDetai
 export { CategoriesScreen } from '../features/categories/screens/CategoriesScreen';
 
 // Orders
-export const OrdersListScreen = createPlaceholder(ORDER_ROUTES.ORDERS_LIST, 15);
-export const OrderDetailScreen = createPlaceholder(ORDER_ROUTES.ORDER_DETAIL, 15);
+export { OrdersListScreen } from '../features/orders/screens/OrdersListScreen';
+export { TrackingScreen as OrderDetailScreen } from '../features/orders/screens/TrackingScreen';
 export { TrackingScreen } from '../features/orders/screens/TrackingScreen';
 
 // Wallet
-export const WalletScreen = createPlaceholder(WALLET_ROUTES.WALLET, 16);
-export const TransactionsScreen = createPlaceholder(WALLET_ROUTES.TRANSACTIONS, 16);
+export { WalletScreen } from '../features/wallet/screens/WalletScreen';
+export { TransactionsScreen } from '../features/wallet/screens/TransactionsScreen';
 
 // Profile
 export const ProfileScreen = createPlaceholder(PROFILE_ROUTES.PROFILE, 17);
