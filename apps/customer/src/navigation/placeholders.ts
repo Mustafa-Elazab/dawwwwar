@@ -35,11 +35,11 @@ export { WalletScreen } from '../features/wallet/screens/WalletScreen';
 export { TransactionsScreen } from '../features/wallet/screens/TransactionsScreen';
 
 // Profile
-export const ProfileScreen = createPlaceholder(PROFILE_ROUTES.PROFILE, 17);
-export const AddressesScreen = createPlaceholder(PROFILE_ROUTES.ADDRESSES, 17);
-export const AddAddressScreen = createPlaceholder(PROFILE_ROUTES.ADD_ADDRESS, 17);
-export const LanguageScreen = createPlaceholder(PROFILE_ROUTES.LANGUAGE, 17);
-export const AppearanceScreen = createPlaceholder(PROFILE_ROUTES.APPEARANCE, 17);
+export { ProfileScreen } from '../features/profile/screens/ProfileScreen';
+export { AddressesScreen } from '../features/profile/screens/AddressesScreen';
+export { AddAddressScreen } from '../features/profile/screens/AddAddressScreen';
+export { LanguageScreen } from '../features/profile/screens/LanguageScreen';
+export { AppearanceScreen } from '../features/profile/screens/AppearanceScreen';
 
 // Modals
 export { CartModal } from '../features/cart/screens/CartModal';

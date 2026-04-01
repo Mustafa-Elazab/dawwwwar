@@ -4,3 +4,4 @@ export * from './merchants';
 export * from './products';
 export * from './orders';
 export * from './wallets';
+export * from './addresses';
