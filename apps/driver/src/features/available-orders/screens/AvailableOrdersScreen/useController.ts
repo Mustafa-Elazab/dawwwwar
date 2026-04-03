@@ -8,7 +8,7 @@ import {
   selectIsOnline, selectActiveOrderId,
 } from '../../../../store/slices/driver.slice';
 import { availableOrdersApi } from '../../core/api';
-import { TAB_ROUTES, DRIVER_ROUTES } from '../../../navigation/routes';
+import { TAB_ROUTES, DRIVER_ROUTES } from '../../../../navigation/routes';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { DriverTabParamList } from '../../../../navigation/types';
 import Toast from 'react-native-toast-message';
