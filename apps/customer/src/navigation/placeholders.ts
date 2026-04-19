@@ -18,7 +18,7 @@ export const DriverOnboardingScreen = createPlaceholder(AUTH_ROUTES.DRIVER_ONBOA
 
 // Home
 export { HomeScreen } from '../features/home/screens/HomeScreen';
-export const SearchScreen = createPlaceholder(HOME_ROUTES.SEARCH, 18);
+export { SearchScreen } from '../features/search/screens/SearchScreen';
 export { CategoryMerchantsScreen } from '../features/categories/screens/CategoryMerchantsScreen';
 export { MerchantDetailScreen } from '../features/merchant/screens/MerchantDetailScreen';
 
