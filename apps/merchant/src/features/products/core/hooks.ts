@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { productsCatalogApi } from './api';
-import { useAppSelector } from '../../../../store/hooks';
-import { selectUser } from '../../../../store/slices/auth.slice';
+import { useAppSelector } from '../../../store/hooks';
+import { selectUser } from '../../../store/slices/auth.slice';
 import { mockMerchants } from '@dawwar/mocks';
 import Toast from 'react-native-toast-message';
 import { useTranslation } from '@dawwar/i18n';

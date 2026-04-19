@@ -39,7 +39,7 @@ export function useController() {
     queryFn: () => merchantOrdersApi.getOrders(merchant?.id ?? ''),
     enabled: !!merchant?.id,
     staleTime: 30_000,
-    select: (res) => res.data,
+    select: (res: { data: Order[] }) => res.data,
   });
 
   // Simulate new order arriving 8 seconds after mount (demo/test)

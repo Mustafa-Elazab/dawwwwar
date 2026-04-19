@@ -4,7 +4,7 @@ import Config from 'react-native-config';
 
 const API_BASE_URL = Config.API_URL || 'http://10.0.2.2:3000/api';
 
-export const apiClient = axios.create({
+const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
@@ -32,3 +32,6 @@ apiClient.interceptors.response.use(
 );
 
 export type { AxiosError, AxiosResponse } from 'axios';
+
+export const api = apiClient;
+export default apiClient;
