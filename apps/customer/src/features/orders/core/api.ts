@@ -1,18 +1,27 @@
+import { USE_MOCK_API } from '../../../../core/api/config';
+import api from '../../../../core/api/client';
 import { ordersMock } from '@dawwar/mocks';
 import type { ApiResponse, Order } from '@dawwar/types';
 
-export const ordersApi = {
-  getMyOrders: (customerId: string): Promise<ApiResponse<Order[]>> =>
-    ordersMock.getMyOrders(customerId),
-
-  getById: (id: string): Promise<ApiResponse<Order>> =>
-    ordersMock.getById(id),
-
-  placeOrder: (
-    payload: Parameters<typeof ordersMock.placeOrder>[0],
-  ): Promise<ApiResponse<Order>> => ordersMock.placeOrder(payload),
-
-  placeCustomOrder: (
-    payload: Parameters<typeof ordersMock.placeCustomOrder>[0],
-  ): Promise<ApiResponse<Order>> => ordersMock.placeCustomOrder(payload),
+// ── Phase 2 real implementations ─────────────────────────────────────
+const realOrdersApi = {
+  getMyOrders: async (customerId: string): Promise<ApiResponse<Order[]>> => {
+    const { data } = await api.get(`/orders?customerId=${customerId}`);
+    return data;
+  },
+  getById: async (id: string): Promise<ApiResponse<Order>> => {
+    const { data } = await api.get(`/orders/${id}`);
+    return data;
+  },
+  placeOrder: async (payload: object): Promise<ApiResponse<Order>> => {
+    const { data } = await api.post('/orders', payload);
+    return data;
+  },
+  placeCustomOrder: async (payload: object): Promise<ApiResponse<Order>> => {
+    const { data } = await api.post('/orders/custom', payload);
+    return data;
+  },
 };
+
+// ── Export: mock when USE_MOCK_API=true, real when false ──────────────
+export const ordersApi = USE_MOCK_API ? ordersMock : realOrdersApi;

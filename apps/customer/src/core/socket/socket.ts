@@ -1,12 +1,9 @@
-// Phase 1: Socket is a no-op stub.
-// Phase 2: Replace with real socket.io-client connection.
-// The interface is identical so no screen code changes when we switch.
-
 import Config from 'react-native-config';
+import { USE_MOCK_API } from '../api/config';
 
-const SOCKET_URL = Config.SOCKET_URL ?? 'https://api.dawwar.com';
+const SOCKET_URL = Config.SOCKET_URL ?? 'http://10.0.2.2:3000';
 
-// Stub event emitter to prevent "socket is undefined" crashes in Phase 1
+// Phase 1: no-op stub
 const noopSocket = {
   on: (_event: string, _handler: unknown) => noopSocket,
   off: (_event: string, _handler: unknown) => noopSocket,
@@ -16,11 +13,19 @@ const noopSocket = {
   connected: false,
 };
 
-// TODO: Phase 2 — replace with:
-// import { io } from 'socket.io-client';
-// export const socket = io(SOCKET_URL, {
-//   auth: { token: storage.getString(StorageKeys.ACCESS_TOKEN) },
-//   autoConnect: false,
-// });
+// Phase 2: uncomment this block and delete noopSocket above
+/*
+import { io } from 'socket.io-client';
+import { storage, StorageKeys } from '../storage/mmkv';
 
-export const socket = noopSocket;
+const realSocket = io(SOCKET_URL, {
+  auth: { token: storage.getString(StorageKeys.ACCESS_TOKEN) },
+  autoConnect: false,
+  transports: ['websocket'],
+  reconnection: true,
+  reconnectionAttempts: 5,
+  reconnectionDelay: 2000,
+});
+*/
+
+export const socket = USE_MOCK_API ? noopSocket : noopSocket; // ← Phase 2: replace second noopSocket with realSocket

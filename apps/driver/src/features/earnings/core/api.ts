@@ -1,5 +1,6 @@
-import { delay } from '@dawwar/mocks';
-import { mockWallets, mockTransactions } from '@dawwar/mocks';
+import { USE_MOCK_API } from '../../../../core/api/config';
+import api from '../../../../core/api/client';
+import { delay, mockWallets, mockTransactions } from '@dawwar/mocks';
 import type { WalletTransaction } from '@dawwar/types';
 
 export interface DailyEarning {
@@ -33,30 +34,48 @@ function generateWeeklyData(): DailyEarning[] {
   }));
 }
 
-export const earningsApi = {
+// ── Phase 2 real implementations ─────────────────────────────────────
+const realEarningsApi = {
+  getSummary: async (driverId: string) => {
+    const { data } = await api.get(`/driver/earnings?driverId=${driverId}`);
+    return data;
+  },
+  getTransactions: async (driverId: string) => {
+    const { data } = await api.get(`/driver/transactions?driverId=${driverId}`);
+    return data;
+  },
+  getWalletBalance: async (driverId: string) => {
+    const { data } = await api.get(`/driver/wallet?driverId=${driverId}`);
+    return data;
+  },
+};
+
+// ── Phase 1 mock implementation ──────────────────────────────────────
+const mockEarningsApi = {
   getSummary: async (driverId: string): Promise<EarningsSummary> => {
     await delay(500);
     const weekly = generateWeeklyData();
     const today = weekly[new Date().getDay()];
     return {
       todayDeliveries: today?.deliveries ?? 0,
-      todayGross: (today?.net ?? 0) + 3 * 5, // net + commissions paid
+      todayGross: (today?.net ?? 0) + 3 * 5,
       todayCommission: 3 * 5,
       todayNet: today?.net ?? 0,
       weeklyData: weekly,
     };
   },
-
   getTransactions: async (driverId: string): Promise<WalletTransaction[]> => {
     await delay(400);
     const wallet = mockWallets.find((w) => w.userId === driverId);
     if (!wallet) return [];
     return mockTransactions.filter((t) => t.walletId === wallet.id);
   },
-
   getWalletBalance: async (driverId: string): Promise<number> => {
     await delay(300);
     const wallet = mockWallets.find((w) => w.userId === driverId);
     return wallet?.balance ?? 0;
   },
 };
+
+// ── Export: mock when USE_MOCK_API=true, real when false ──────────────
+export const earningsApi = USE_MOCK_API ? mockEarningsApi : realEarningsApi;

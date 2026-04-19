@@ -1,5 +1,6 @@
-import { delay } from '@dawwar/mocks';
-import { mockOrders } from '@dawwar/mocks';
+import { USE_MOCK_API } from '../../../../core/api/config';
+import api from '../../../../core/api/client';
+import { delay, mockOrders } from '@dawwar/mocks';
 import { OrderStatus } from '@dawwar/types';
 
 export interface MerchantAnalytics {
@@ -9,7 +10,16 @@ export interface MerchantAnalytics {
   commissionPaid: number;
 }
 
-export const analyticsApi = {
+// ── Phase 2 real implementations ─────────────────────────────────────
+const realAnalyticsApi = {
+  getToday: async (merchantId: string) => {
+    const { data } = await api.get(`/merchant/analytics?merchantId=${merchantId}`);
+    return data;
+  },
+};
+
+// ── Phase 1 mock implementation ──────────────────────────────────────
+const mockAnalyticsApi = {
   getToday: async (merchantId: string): Promise<MerchantAnalytics> => {
     await delay(400);
     const orders = mockOrders.filter(
@@ -26,3 +36,6 @@ export const analyticsApi = {
     };
   },
 };
+
+// ── Export: mock when USE_MOCK_API=true, real when false ──────────────
+export const analyticsApi = USE_MOCK_API ? mockAnalyticsApi : realAnalyticsApi;
