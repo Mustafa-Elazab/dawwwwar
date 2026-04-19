@@ -1,5 +1,3 @@
-import type { BottomSheetModal } from '@gorhom/bottom-sheet';
-
 export interface BottomSheetRef {
   open: () => void;
   close: () => void;

@@ -79,7 +79,7 @@ export function useController() {
 
   const handleCartBarPress = useCallback(() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    navigation.navigate(MODAL_ROUTES.CART as any);
+    navigation.navigate(MODAL_ROUTES.CART as never);
   }, [navigation]);
 
   const isLoading = merchantLoading || productsLoading;

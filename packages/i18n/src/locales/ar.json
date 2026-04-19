@@ -32,6 +32,19 @@
   },
 
   "auth": {
+    "auth_selection_title": "مرحباً بك في دور",
+    "auth_selection_subtitle": "أسهل طريقة لإعادة التدوير والحصول على مكافآت.",
+    "login_title": "تسجيل الدخول",
+    "login_subtitle": "أدخل رقم هاتفك وكلمة المرور لتسجيل الدخول.",
+    "register_title": "إنشاء حساب",
+    "register_subtitle": "أدخل بياناتك لإنشاء حساب جديد.",
+    "login_btn": "تسجيل دخول",
+    "signup_btn": "إنشاء حساب",
+    "name_label": "الاسم بالكامل",
+    "password_label": "كلمة المرور",
+    "confirm_password_label": "تأكيد كلمة المرور",
+    "no_account": "ليس لديك حساب؟",
+    "already_account": "لديك حساب بالفعل؟",
     "phone_label": "رقم الهاتف",
     "phone_placeholder": "01X XXXX XXXX",
     "phone_hint": "رقم مصري يبدأ بـ 010 أو 011 أو 012 أو 015",
@@ -46,7 +59,7 @@
     "terms_required": "يرجى قبول الشروط للمتابعة",
 
     "otp_title": "أدخل الرمز",
-    "otp_subtitle": "أرسلنا رمزاً مكوناً من 6 أرقام إلى\n{{phone}}",
+    "otp_subtitle": "لقد أرسلنا كوداً مكوناً من 6 أرقام إلى\n",
     "otp_sandbox_hint": "وضع الاختبار: استخدم الرمز 123456",
     "otp_expires": "ينتهي الرمز خلال {{seconds}} ثانية",
     "otp_expired": "انتهت صلاحية الرمز. اطلب رمزاً جديداً.",

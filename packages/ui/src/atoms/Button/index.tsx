@@ -1,11 +1,9 @@
 import React from 'react';
-import { ActivityIndicator, TouchableOpacity, Animated } from 'react-native';
+import { ActivityIndicator, TouchableOpacity } from 'react-native';
 import { useTheme } from '@dawwar/theme';
 import { Text } from '../Text';
 import { createStyles } from './styles';
 import type { ButtonProps } from './types';
-
-const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
 
 export function Button({
   variant = 'primary',
@@ -22,25 +20,6 @@ export function Button({
 }: ButtonProps) {
   const { colors } = useTheme();
   const styles = createStyles(colors);
-  const scale = React.useRef(new Animated.Value(1)).current;
-
-  const handlePressIn = () => {
-    Animated.spring(scale, {
-      toValue: 0.96,
-      useNativeDriver: true,
-      bounciness: 0,
-      speed: 20,
-    }).start();
-  };
-
-  const handlePressOut = () => {
-    Animated.spring(scale, {
-      toValue: 1,
-      useNativeDriver: true,
-      bounciness: 0,
-      speed: 20,
-    }).start();
-  };
 
   const isDisabled = disabled || loading;
 
@@ -52,21 +31,18 @@ export function Button({
     | 'labelDanger';
 
   return (
-    <AnimatedTouchable
+    <TouchableOpacity
       style={[
         styles.base,
         styles[variant],
         styles[size],
         fullWidth && styles.fullWidth,
         isDisabled && styles.disabled,
-        { transform: [{ scale }] },
         style,
       ]}
       onPress={onPress}
-      onPressIn={handlePressIn}
-      onPressOut={handlePressOut}
       disabled={isDisabled}
-      activeOpacity={1}
+      activeOpacity={0.85}
       testID={testID}
     >
       {loading ? (
@@ -83,6 +59,6 @@ export function Button({
           {rightIcon}
         </>
       )}
-    </AnimatedTouchable>
+    </TouchableOpacity>
   );
 }

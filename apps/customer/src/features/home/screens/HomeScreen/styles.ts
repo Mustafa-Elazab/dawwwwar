@@ -47,7 +47,7 @@ export const createStyles = (colors: AppColors) =>
       color: colors.placeholder,
     },
     merchantsList: {
-      paddingLeft: space.base,
+      paddingStart: space.base,
       marginBottom: space.lg,
     },
     productsGrid: {

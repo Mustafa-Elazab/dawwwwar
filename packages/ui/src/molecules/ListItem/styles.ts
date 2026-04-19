@@ -12,7 +12,7 @@ export const createStyles = (colors: AppColors) =>
       gap: space.md,
       backgroundColor: colors.card,
     },
-    left: { flexShrink: 0 },
+    leftElement: { flexShrink: 0 },
     content: {
       flex: 1,
       gap: space.xs,
@@ -28,7 +28,7 @@ export const createStyles = (colors: AppColors) =>
       color: colors.textSecondary,
       textAlign: I18nManager.isRTL ? 'right' : 'left',
     },
-    right: { flexShrink: 0 },
+    rightElement: { flexShrink: 0 },
     chevron: { color: colors.textDisabled },
     disabled: { opacity: 0.5 },
   });

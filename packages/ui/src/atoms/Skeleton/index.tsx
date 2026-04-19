@@ -1,9 +1,15 @@
-import React, { useEffect } from 'react';
-import { View, Animated, Easing } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, StyleSheet } from 'react-native';
 import { useTheme } from '@dawwar/theme';
 import { radius } from '@dawwar/theme';
 import type { SkeletonProps } from './types';
 
+/**
+ * Skeleton — CSS-style opacity pulse using React state instead of
+ * Animated API. The Animated API in packages/ui resolves react-native
+ * through pnpm's symlink, creating a second module instance that
+ * produces duplicate native node IDs under RN 0.84 New Architecture.
+ */
 export function Skeleton({
   width,
   height,
@@ -11,32 +17,31 @@ export function Skeleton({
   style,
 }: SkeletonProps) {
   const { colors } = useTheme();
-  const opacity = React.useRef(new Animated.Value(1)).current;
+  const [dim, setDim] = React.useState(false);
 
   useEffect(() => {
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(opacity, {
-          toValue: 0.4,
-          duration: 800,
-          easing: Easing.inOut(Easing.ease),
-          useNativeDriver: true,
-        }),
-        Animated.timing(opacity, {
-          toValue: 1,
-          duration: 800,
-          easing: Easing.inOut(Easing.ease),
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
-  }, [opacity]);
+    let cancelled = false;
+    const tick = () => {
+      if (cancelled) return;
+      setDim((prev) => !prev);
+    };
+    const id = setInterval(tick, 800);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
+  }, []);
 
   return (
-    <Animated.View
+    <View
       style={[
-        { width, height, borderRadius, backgroundColor: colors.shimmer },
-        { opacity },
+        {
+          width,
+          height,
+          borderRadius,
+          backgroundColor: colors.shimmer,
+          opacity: dim ? 0.4 : 1,
+        },
         style,
       ]}
     />

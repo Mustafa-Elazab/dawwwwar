@@ -22,13 +22,13 @@ export function useController() {
 
   const triggerShake = useCallback(() => {
     Animated.sequence([
-      Animated.timing(shakeX, { toValue: -10, duration: 50, useNativeDriver: true }),
-      Animated.timing(shakeX, { toValue: 10, duration: 100, useNativeDriver: true }),
-      Animated.timing(shakeX, { toValue: -10, duration: 100, useNativeDriver: true }),
-      Animated.timing(shakeX, { toValue: 10, duration: 100, useNativeDriver: true }),
-      Animated.timing(shakeX, { toValue: -10, duration: 100, useNativeDriver: true }),
-      Animated.timing(shakeX, { toValue: 10, duration: 100, useNativeDriver: true }),
-      Animated.timing(shakeX, { toValue: 0, duration: 50, useNativeDriver: true }),
+      Animated.timing(shakeX, { toValue: -10, duration: 50, useNativeDriver: false }),
+      Animated.timing(shakeX, { toValue: 10, duration: 100, useNativeDriver: false }),
+      Animated.timing(shakeX, { toValue: -10, duration: 100, useNativeDriver: false }),
+      Animated.timing(shakeX, { toValue: 10, duration: 100, useNativeDriver: false }),
+      Animated.timing(shakeX, { toValue: -10, duration: 100, useNativeDriver: false }),
+      Animated.timing(shakeX, { toValue: 10, duration: 100, useNativeDriver: false }),
+      Animated.timing(shakeX, { toValue: 0, duration: 50, useNativeDriver: false }),
     ]).start();
   }, [shakeX]);
 
@@ -77,7 +77,7 @@ export function useController() {
       next[index] = char;
       setDigits(next);
       setOtpError(null);
-      // Auto-submit when all 6 boxes filled
+      // Auto-submit when all 4 boxes filled
       if (next.every((d) => d !== '') && index === 5) {
         void submitOtp(next);
       }
@@ -98,7 +98,7 @@ export function useController() {
     if (!resendTimer.isExpired) return;
     try {
       await sendOtpMutation.mutateAsync({ phone });
-      setDigits(Array(6).fill(''));
+      setDigits(Array(4).fill(''));
       setOtpError(null);
       otpTimer.reset(120);
       resendTimer.reset(30);

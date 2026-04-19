@@ -29,12 +29,12 @@ export function ListItem({
       disabled={disabled}
       testID={testID}
     >
-      {leftElement && <View style={styles.left}>{leftElement}</View>}
+      {leftElement && <View style={styles.leftElement}>{leftElement}</View>}
       <View style={styles.content}>
         <Text style={styles.title}>{title}</Text>
         {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
       </View>
-      {rightElement && <View style={styles.right}>{rightElement}</View>}
+      {rightElement && <View style={styles.rightElement}>{rightElement}</View>}
       {showChevron && !rightElement && (
         <Icon
           name={I18nManager.isRTL ? 'chevron-left' : 'chevron-right'}

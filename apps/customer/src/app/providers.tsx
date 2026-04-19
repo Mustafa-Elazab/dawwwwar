@@ -6,12 +6,13 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from '@dawwar/theme';
 import { initI18n, getStoredLanguage } from '@dawwar/i18n';
 import Toast from 'react-native-toast-message';
+import { AppErrorBoundary } from '@dawwar/ui';
 import { store } from '../store';
 import { storage, StorageKeys } from '../core/storage/mmkv';
 import { finishLoading } from '../store/slices/auth.slice';
 
 // Initialize i18n before the component tree renders
-const storedLang = getStoredLanguage(storage as any);
+const storedLang = getStoredLanguage(storage);
 initI18n(storedLang);
 
 const queryClient = new QueryClient({
@@ -61,16 +62,18 @@ export function AppProviders({ children }: AppProvidersProps) {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <ReduxProvider store={store}>
-        <QueryClientProvider client={queryClient}>
-          <ThemeProvider storage={storage as any}>
-            <SafeAreaProvider>
-              {children}
-              <Toast />
-            </SafeAreaProvider>
-          </ThemeProvider>
-        </QueryClientProvider>
-      </ReduxProvider>
+      <AppErrorBoundary>
+        <ReduxProvider store={store}>
+          <QueryClientProvider client={queryClient}>
+            <ThemeProvider storage={storage}>
+              <SafeAreaProvider>
+                {children}
+                <Toast />
+              </SafeAreaProvider>
+            </ThemeProvider>
+          </QueryClientProvider>
+        </ReduxProvider>
+      </AppErrorBoundary>
     </GestureHandlerRootView>
   );
 }

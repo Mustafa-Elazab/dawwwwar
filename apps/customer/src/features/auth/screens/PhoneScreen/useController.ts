@@ -40,7 +40,7 @@ export function useController() {
 
     try {
       await sendOtpMutation.mutateAsync({ phone: normalized });
-      navigation.navigate(AUTH_ROUTES.OTP, { phone: normalized });
+      navigation.navigate(AUTH_ROUTES.OTP, { phone: normalized, context: 'login' });
     } catch (err) {
       const error = err as Error;
       if (error.message === 'INVALID_PHONE') {

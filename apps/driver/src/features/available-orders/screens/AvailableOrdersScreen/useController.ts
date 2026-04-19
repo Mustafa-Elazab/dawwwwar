@@ -36,10 +36,10 @@ export function useController() {
     onSuccess: (res, orderId) => {
       dispatch(setActiveOrder(orderId));
       // Navigate to Active Delivery tab
-      navigation.navigate(TAB_ROUTES.ACTIVE_DELIVERY_TAB as any, {
+      navigation.navigate(TAB_ROUTES.ACTIVE_DELIVERY_TAB as never, {
         screen: DRIVER_ROUTES.ACTIVE_DELIVERY,
         params: { orderId },
-      } as any);
+      } as never);
     },
     onError: () => {
       Toast.show({ type: 'error', text1: t('driver.order_taken') });

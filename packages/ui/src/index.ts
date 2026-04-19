@@ -11,5 +11,5 @@ export { Header, BottomSheet } from './organisms';
 export type { HeaderProps, HeaderAction, BottomSheetProps, BottomSheetRef } from './organisms';
 
 // ─── Templates ───────────────────────────────────────────
-export { ScreenTemplate, ScrollScreenTemplate, ListScreenTemplate, TabScreenTemplate } from './templates';
+export { ScreenTemplate, ScrollScreenTemplate, ListScreenTemplate, TabScreenTemplate, AppErrorBoundary } from './templates';
 export type { ScreenTemplateProps, ScrollScreenTemplateProps, ListScreenTemplateProps } from './templates';

@@ -9,7 +9,7 @@ export const createStyles = (colors: AppColors) =>
     backBtn: {
       position: 'absolute',
       top: space.md,
-      left: space.md,
+      start: space.md,
       width: 36,
       height: 36,
       borderRadius: 18,

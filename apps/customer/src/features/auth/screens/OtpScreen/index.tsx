@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { View, TouchableOpacity, ActivityIndicator, Animated } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { ScrollScreenTemplate, Text, Icon } from '@dawwar/ui';
 import { useTheme } from '@dawwar/theme';
 import { OtpInput } from '../../components/OtpInput';
@@ -10,6 +11,7 @@ export function OtpScreen() {
   const { colors } = useTheme();
   const styles = createStyles(colors);
   const ctrl = useController();
+  const navigation = useNavigation();
 
   useEffect(() => {
     console.log('[OtpScreen] Mounted');
@@ -27,7 +29,7 @@ export function OtpScreen() {
         {/* Back button */}
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => { /* navigation.goBack() handled by stack */ }}
+          onPress={() => navigation.goBack()}
         >
           <Icon name="arrow-left" size={24} color={colors.text} />
         </TouchableOpacity>

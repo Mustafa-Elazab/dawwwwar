@@ -11,8 +11,11 @@ import type {
 
 // ─── Auth Stack ──────────────────────────────────────────
 export type AuthStackParamList = {
+  [AUTH_ROUTES.AUTH_SELECTION]: undefined;
+  [AUTH_ROUTES.LOGIN]: undefined;
+  [AUTH_ROUTES.REGISTER]: undefined;
+  [AUTH_ROUTES.OTP]: { phone: string; context: 'login' | 'signup' };
   [AUTH_ROUTES.PHONE]: undefined;
-  [AUTH_ROUTES.OTP]: { phone: string };
   [AUTH_ROUTES.ROLE]: undefined;
   [AUTH_ROUTES.CUSTOMER_ONBOARDING]: undefined;
   [AUTH_ROUTES.MERCHANT_ONBOARDING]: undefined;

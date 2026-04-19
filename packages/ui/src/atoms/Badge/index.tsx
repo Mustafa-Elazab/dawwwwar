@@ -1,5 +1,5 @@
 import React from 'react';
-import { View } from 'react-native';
+import { View, StyleProp, ViewStyle } from 'react-native';
 import { useTheme } from '@dawwar/theme';
 import { Text } from '../Text';
 import { createStyles } from './styles';
@@ -19,7 +19,7 @@ export function Badge({
   if (dot) {
     return (
       <View
-        style={[styles.base, styles.dot, styles[`dot${variant.charAt(0).toUpperCase()}${variant.slice(1)}` as keyof typeof styles] as any, style]}
+        style={[styles.base, styles.dot, styles[`dot${variant.charAt(0).toUpperCase()}${variant.slice(1)}` as keyof typeof styles] as StyleProp<ViewStyle>, style]}
         testID={testID}
       />
     );

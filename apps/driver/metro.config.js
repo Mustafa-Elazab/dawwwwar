@@ -16,6 +16,12 @@ const config = {
     extraNodeModules: {
       'react': path.resolve(monorepoRoot, 'node_modules/react'),
       'react-native': path.resolve(monorepoRoot, 'node_modules/react-native'),
+      'react-native-safe-area-context': path.resolve(projectRoot, 'node_modules/react-native-safe-area-context'),
+      'react-native-screens': path.resolve(projectRoot, 'node_modules/react-native-screens'),
+      'react-native-gesture-handler': path.resolve(projectRoot, 'node_modules/react-native-gesture-handler'),
+      '@react-navigation/elements': path.resolve(projectRoot, 'node_modules/@react-navigation/elements'),
+      'react-native-reanimated': path.resolve(projectRoot, 'node_modules/react-native-reanimated'),
+      '@gorhom/bottom-sheet': path.resolve(projectRoot, 'node_modules/@gorhom/bottom-sheet'),
     },
   },
 

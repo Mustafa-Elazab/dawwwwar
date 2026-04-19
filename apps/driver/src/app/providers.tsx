@@ -7,13 +7,14 @@ import { ThemeProvider } from '@dawwar/theme';
 import { I18nextProvider } from 'react-i18next';
 import { initI18n, getStoredLanguage, i18n } from '@dawwar/i18n';
 import Toast from 'react-native-toast-message';
+import { AppErrorBoundary } from '@dawwar/ui';
 import { store } from '../store';
 import { storage, StorageKeys } from '../core/storage/mmkv';
 import { setThemeMode, setLanguage } from '../store/slices/ui.slice';
 import { ThemeMode } from '@dawwar/types';
 
 // Initialize i18n before the component tree renders
-const storedLang = getStoredLanguage(storage as any);
+const storedLang = getStoredLanguage(storage);
 initI18n(storedLang);
 
 // Initialize theme from storage
@@ -22,7 +23,7 @@ if (storedMode && Object.values(ThemeMode).includes(storedMode as ThemeMode)) {
   store.dispatch(setThemeMode(storedMode as ThemeMode));
 }
 if (storedLang) {
-  store.dispatch(setLanguage(storedLang as any));
+  store.dispatch(setLanguage(storedLang));
 }
 
 const queryClient = new QueryClient({
@@ -49,18 +50,20 @@ const queryClient = new QueryClient({
 export function AppProviders({ children }: { children: React.ReactNode }) {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <ReduxProvider store={store}>
-        <QueryClientProvider client={queryClient}>
-          <ThemeProvider storage={storage as any}>
-            <SafeAreaProvider>
-              <I18nextProvider i18n={i18n}>
-                {children}
-                <Toast />
-              </I18nextProvider>
-            </SafeAreaProvider>
-          </ThemeProvider>
-        </QueryClientProvider>
-      </ReduxProvider>
+      <AppErrorBoundary>
+        <ReduxProvider store={store}>
+          <QueryClientProvider client={queryClient}>
+            <ThemeProvider storage={storage}>
+              <SafeAreaProvider>
+                <I18nextProvider i18n={i18n}>
+                  {children}
+                  <Toast />
+                </I18nextProvider>
+              </SafeAreaProvider>
+            </ThemeProvider>
+          </QueryClientProvider>
+        </ReduxProvider>
+      </AppErrorBoundary>
     </GestureHandlerRootView>
   );
 }

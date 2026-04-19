@@ -20,9 +20,11 @@ export function OtpInput({
     inputs.current[index]?.focus();
   };
 
+  const length = value.length;
+
   return (
     <View style={styles.row} testID={testID}>
-      {Array.from({ length: 6 }).map((_, i) => (
+      {Array.from({ length }).map((_, i) => (
         <TouchableOpacity
           key={i}
           style={[styles.box, value[i] ? styles.boxFilled : null]}
@@ -46,7 +48,7 @@ export function OtpInput({
               if (digit) {
                 onChange(i, digit);
                 // Auto-focus next box
-                if (i < 5) {
+                if (i < length - 1) {
                   setTimeout(() => focusBox(i + 1), 10);
                 }
               }

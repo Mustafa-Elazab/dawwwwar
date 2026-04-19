@@ -1,17 +1,34 @@
-import React, { forwardRef, useImperativeHandle, useRef, useCallback } from 'react';
-import { View } from 'react-native';
-import GorhomBottomSheet, {
-  BottomSheetBackdrop,
-  type BottomSheetBackdropProps,
-} from '@gorhom/bottom-sheet';
+/**
+ * BottomSheet — pure React Native implementation with NO native animated nodes.
+ *
+ * We deliberately avoid:
+ *   1. @gorhom/bottom-sheet  → causes Reanimated to bundle twice via pnpm virtual store
+ *   2. Animated API with useNativeDriver:true → causes "Animated node already exists"
+ *      crash under React Native 0.84 New Architecture (Fabric)
+ *
+ * If you need the full Gorhom experience, import it directly inside the app,
+ * NOT from this shared package.
+ */
+import React, {
+  forwardRef,
+  useImperativeHandle,
+  useState,
+  useCallback,
+} from 'react';
+import {
+  Modal,
+  View,
+  TouchableWithoutFeedback,
+  StyleSheet,
+  Platform,
+} from 'react-native';
 import { useTheme } from '@dawwar/theme';
-import { createStyles } from './styles';
+import { radius } from '@dawwar/theme';
 import type { BottomSheetRef, BottomSheetProps } from './types';
 
 export const BottomSheet = forwardRef<BottomSheetRef, BottomSheetProps>(
   (
     {
-      snapPoints = ['50%'],
       children,
       onClose,
       enablePanDownToClose = true,
@@ -20,41 +37,80 @@ export const BottomSheet = forwardRef<BottomSheetRef, BottomSheetProps>(
     ref,
   ) => {
     const { colors } = useTheme();
-    const styles = createStyles(colors);
-    const sheetRef = useRef<GorhomBottomSheet>(null);
+    const [visible, setVisible] = useState(false);
 
-    useImperativeHandle(ref, () => ({
-      open: () => sheetRef.current?.expand(),
-      close: () => sheetRef.current?.close(),
-    }));
+    const open = useCallback(() => {
+      setVisible(true);
+    }, []);
 
-    const renderBackdrop = useCallback(
-      (props: BottomSheetBackdropProps) => (
-        <BottomSheetBackdrop
-          {...props}
-          disappearsOnIndex={-1}
-          appearsOnIndex={0}
-          opacity={0.5}
-        />
-      ),
-      [],
-    );
+    const close = useCallback(() => {
+      setVisible(false);
+      onClose?.();
+    }, [onClose]);
+
+    useImperativeHandle(ref, () => ({ open, close }));
+
+    const handleBackdropPress = useCallback(() => {
+      if (enablePanDownToClose) {
+        close();
+      }
+    }, [enablePanDownToClose, close]);
 
     return (
-      <GorhomBottomSheet
-        ref={sheetRef}
-        index={-1}
-        snapPoints={snapPoints}
-        enablePanDownToClose={enablePanDownToClose}
-        onClose={onClose}
-        backdropComponent={renderBackdrop}
-        handleComponent={() => <View style={styles.handle} />}
-        backgroundStyle={styles.background}
+      <Modal
+        visible={visible}
+        transparent
+        animationType="slide"
+        onRequestClose={handleBackdropPress}
+        statusBarTranslucent={Platform.OS === 'android'}
+        testID={testID}
       >
-        {children}
-      </GorhomBottomSheet>
+        <View style={styles.container}>
+          {/* Backdrop */}
+          <TouchableWithoutFeedback onPress={handleBackdropPress}>
+            <View style={styles.backdrop} />
+          </TouchableWithoutFeedback>
+
+          {/* Sheet */}
+          <View
+            style={[
+              styles.sheet,
+              { backgroundColor: colors.card },
+            ]}
+          >
+            {/* Handle bar */}
+            <View style={[styles.handle, { backgroundColor: colors.border }]} />
+            {children}
+          </View>
+        </View>
+      </Modal>
     );
   },
 );
 
 BottomSheet.displayName = 'BottomSheet';
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  sheet: {
+    borderTopLeftRadius: radius['2xl'],
+    borderTopRightRadius: radius['2xl'],
+    paddingBottom: 34,
+    minHeight: 200,
+  },
+  handle: {
+    width: 40,
+    height: 4,
+    borderRadius: radius.full,
+    alignSelf: 'center',
+    marginTop: 8,
+    marginBottom: 8,
+  },
+});

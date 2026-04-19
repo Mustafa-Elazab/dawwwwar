@@ -50,7 +50,7 @@ export function useController() {
       dispatch(updateUser({ role: role as Role }));
       if (role !== 'DRIVER') {
         // Customer/Merchant go to pending screen (wrong app for their role)
-        navigation.navigate(AUTH_ROUTES.PENDING as any);
+        navigation.navigate(AUTH_ROUTES.PENDING as never);
       }
       // DRIVER: RootNavigator detects isAuthenticated + role = DRIVER → shows DriverTabs
     },

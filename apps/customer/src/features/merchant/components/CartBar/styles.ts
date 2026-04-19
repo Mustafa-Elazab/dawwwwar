@@ -7,8 +7,8 @@ export const createStyles = (colors: AppColors) =>
     bar: {
       position: 'absolute',
       bottom: 0,
-      left: 0,
-      right: 0,
+      start: 0,
+      end: 0,
       flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
       alignItems: 'center',
       justifyContent: 'space-between',

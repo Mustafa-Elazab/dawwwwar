@@ -11,7 +11,7 @@ export const createStyles = (colors: AppColors) =>
       borderRadius: radius.xl,
       backgroundColor: colors.primaryMuted,
       overflow: 'hidden',
-      marginRight: space.md,
+      marginEnd: space.md,
     },
     bannerImage: { width: '100%', height: '100%' },
     dotsRow: {

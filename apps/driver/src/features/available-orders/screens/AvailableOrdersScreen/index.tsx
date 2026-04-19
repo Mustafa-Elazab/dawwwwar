@@ -49,6 +49,10 @@ export function AvailableOrdersScreen() {
             onRefresh={ctrl.refetch}
             refreshing={false}
             showsVerticalScrollIndicator={false}
+            removeClippedSubviews
+            windowSize={5}
+            maxToRenderPerBatch={8}
+            initialNumToRender={10}
           />
         )
       ) : (

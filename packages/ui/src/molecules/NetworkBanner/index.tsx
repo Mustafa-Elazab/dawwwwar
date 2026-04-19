@@ -10,29 +10,24 @@ export function NetworkBanner({ testID }: NetworkBannerProps) {
   const { colors } = useTheme();
   const styles = createStyles(colors);
   const [isOffline, setIsOffline] = React.useState(false);
-  const translateY = React.useRef(new Animated.Value(-50)).current;
 
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener((state) => {
-      const offline = !state.isConnected;
-      setIsOffline(offline);
-      Animated.timing(translateY, {
-        toValue: offline ? 0 : -50,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
+      setIsOffline(!state.isConnected);
     });
     return unsubscribe;
-  }, [translateY]);
+  }, []);
 
-  if (!isOffline) return null;
+  if (!isOffline) {
+    return null;
+  }
 
   return (
-    <Animated.View style={[{ transform: [{ translateY }] }]} testID={testID}>
+    <View testID={testID}>
       <View style={styles.banner}>
         <Icon name="wifi-off" size={16} color="#FFFFFF" />
         <Text style={styles.text}>No internet connection</Text>
       </View>
-    </Animated.View>
+    </View>
   );
 }

@@ -53,7 +53,7 @@ export function useController() {
   const handleCustomOrder = useCallback(() => {
     // Navigate to the modal — cast to any because MODAL_ROUTES is in RootParamList
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    navigation.navigate(MODAL_ROUTES.CUSTOM_ORDER as any);
+    navigation.navigate(MODAL_ROUTES.CUSTOM_ORDER as never);
   }, [navigation]);
 
   const handleSearchPress = useCallback(() => {

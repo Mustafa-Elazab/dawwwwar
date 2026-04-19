@@ -1,7 +1,10 @@
 // ─── Auth Stack ──────────────────────────────────────────
 export const AUTH_ROUTES = {
-  PHONE: 'PhoneScreen',
+  AUTH_SELECTION: 'AuthSelectionScreen',
+  LOGIN: 'LoginScreen',
+  REGISTER: 'RegisterScreen',
   OTP: 'OtpScreen',
+  PHONE: 'PhoneScreen',
   ROLE: 'RoleScreen',
   CUSTOMER_ONBOARDING: 'CustomerOnboardingScreen',
   MERCHANT_ONBOARDING: 'MerchantOnboardingScreen',

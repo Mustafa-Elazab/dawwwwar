@@ -9,7 +9,7 @@ export { PendingApprovalScreen } from '../features/auth/screens/PendingApprovalS
 
 // Driver screens — built in Tasks 20+
 export { AvailableOrdersScreen } from '../features/available-orders/screens/AvailableOrdersScreen';
-export const ActiveDeliveryScreen = createPlaceholder(DRIVER_ROUTES.ACTIVE_DELIVERY, 20);
-export const CompletedDeliveryScreen = createPlaceholder(DRIVER_ROUTES.COMPLETED_DELIVERY, 20);
-export const EarningsScreen = createPlaceholder(DRIVER_ROUTES.EARNINGS, 21);
-export const DriverProfileScreen = createPlaceholder(DRIVER_ROUTES.PROFILE, 21);
+export { ActiveDeliveryScreen } from '../features/active-delivery/screens/ActiveDeliveryScreen';
+export { CompletedDeliveryScreen } from '../features/active-delivery/screens/CompletedDeliveryScreen';
+export { EarningsScreen } from '../features/earnings/screens/EarningsScreen';
+export { DriverProfileScreen } from '../features/profile/screens/DriverProfileScreen';

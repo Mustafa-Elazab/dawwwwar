@@ -32,6 +32,19 @@
   },
 
   "auth": {
+    "auth_selection_title": "Welcome to Dawwar",
+    "auth_selection_subtitle": "The easiest way to recycle and earn rewards.",
+    "login_title": "Login",
+    "login_subtitle": "Enter your phone number and password to login.",
+    "register_title": "Create Account",
+    "register_subtitle": "Enter your details to create a new account.",
+    "login_btn": "Login",
+    "signup_btn": "Sign Up",
+    "name_label": "Full Name",
+    "password_label": "Password",
+    "confirm_password_label": "Confirm Password",
+    "no_account": "Don't have an account?",
+    "already_account": "Already have an account?",
     "phone_label": "Phone Number",
     "phone_placeholder": "01X XXXX XXXX",
     "phone_hint": "Egyptian number starting with 010, 011, 012, or 015",
@@ -46,7 +59,7 @@
     "terms_required": "Please accept the terms to continue",
 
     "otp_title": "Enter the Code",
-    "otp_subtitle": "We sent a 6-digit code to\n{{phone}}",
+    "otp_subtitle": "We sent a 6-digit code to\n",
     "otp_sandbox_hint": "Sandbox mode: use code 123456",
     "otp_expires": "Code expires in {{seconds}}s",
     "otp_expired": "Code has expired. Request a new one.",

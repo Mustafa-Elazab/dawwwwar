@@ -8,7 +8,7 @@ export const createStyles = (colors: AppColors) =>
       width: 180,
       borderRadius: radius.xl,
       backgroundColor: colors.card,
-      marginRight: space.md,
+      marginEnd: space.md,
       overflow: 'hidden',
       ...shadows.md,
     },
@@ -37,6 +37,6 @@ export const createStyles = (colors: AppColors) =>
     badgeWrapper: {
       position: 'absolute',
       top: space.sm,
-      right: space.sm,
+      end: space.sm,
     },
   });
