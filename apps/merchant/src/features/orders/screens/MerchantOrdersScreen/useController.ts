@@ -7,8 +7,10 @@ import { selectUser } from '../../../../store/slices/auth.slice';
 import { incrementNewOrders, clearNewOrders } from '../../../../store/slices/merchant.slice';
 import { merchantOrdersApi } from '../../core/api';
 import { mockMerchants } from '@dawwar/mocks';
+import { useOrders, useAcceptOrder, useRejectOrder } from '../../core/hooks';
 import { OrderStatus } from '@dawwar/types';
 import type { Order } from '@dawwar/types';
+import { preloadAlertSound, playAlertSound, stopAlertSound } from '../../../../utils/sound';
 
 export type OrderTab = 'new' | 'preparing' | 'ready' | 'active' | 'completed';
 
@@ -49,19 +51,26 @@ export function useController() {
           setPendingOrder(pending);
           setShowModal(true);
           dispatch(incrementNewOrders());
+          playAlertSound();
         }
       }
     }, 8000);
     return () => clearTimeout(t);
   }, [orders, dispatch]);
 
-  const acceptMutation = useMutation({
+  // Preload sound on mount
+  useEffect(() => {
+    preloadAlertSound();
+  }, []);
+
+  const acceptMutation = useAcceptOrder({
     mutationFn: ({ orderId, prepMinutes }: { orderId: string; prepMinutes: number }) =>
       merchantOrdersApi.acceptOrder(orderId, prepMinutes),
     onSuccess: () => {
       setShowModal(false);
       setPendingOrder(null);
       dispatch(clearNewOrders());
+      stopAlertSound();
       void queryClient.invalidateQueries({ queryKey: ['merchant', 'orders'] });
       Toast.show({ type: 'success', text1: t('merchant_app.accept') });
     },
@@ -75,6 +84,7 @@ export function useController() {
       setShowModal(false);
       setPendingOrder(null);
       dispatch(clearNewOrders());
+      stopAlertSound();
       void queryClient.invalidateQueries({ queryKey: ['merchant', 'orders'] });
     },
   });

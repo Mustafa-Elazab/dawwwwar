@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Switch } from 'react-native';
+import { View, Switch, TouchableOpacity } from 'react-native';
+import FastImage from 'react-native-fast-image';
 import { ScrollScreenTemplate, Header, Input, Text, Button } from '@dawwar/ui';
 import { useTheme } from '@dawwar/theme';
 import { space } from '@dawwar/theme';
@@ -70,6 +71,33 @@ export function AddEditProductScreen() {
             thumbColor={ctrl.isFeatured ? colors.primary : colors.textDisabled}
           />
         </View>
+
+        {/* Image picker */}
+        <TouchableOpacity
+          onPress={ctrl.handlePickImage}
+          style={{
+            width: 100, height: 100,
+            borderRadius: 12,
+            overflow: 'hidden',
+            alignSelf: 'center',
+            marginVertical: space.md,
+          }}
+        >
+          <FastImage
+            source={{ uri: ctrl.imageUri }}
+            style={{ width: '100%', height: '100%' }}
+            resizeMode={FastImage.resizeMode.cover}
+          />
+          <View style={{
+            position: 'absolute', bottom: 0, left: 0, right: 0,
+            backgroundColor: 'rgba(0,0,0,0.4)',
+            alignItems: 'center', padding: 4,
+          }}>
+            <Text variant="caption" color="#fff">
+              {ctrl.t('merchant_app.add_image')}
+            </Text>
+          </View>
+        </TouchableOpacity>
       </View>
     </ScrollScreenTemplate>
   );

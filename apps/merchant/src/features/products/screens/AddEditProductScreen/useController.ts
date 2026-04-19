@@ -1,5 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { useForm } from 'react-hook-form';
+import { launchImageLibrary } from 'react-native-image-picker';
 import { useTranslation } from '@dawwar/i18n';
 import { useSaveProduct } from '../../core/hooks';
 import { mockCategories } from '@dawwar/mocks';
@@ -19,8 +21,17 @@ export function useController() {
   const [categoryId, setCategoryId] = useState(mockCategories[0]?.id ?? '');
   const [isAvailable, setIsAvailable] = useState(true);
   const [isFeatured, setIsFeatured] = useState(false);
-  // Phase 1: placeholder image URL
-  const [imageUri] = useState(`https://placehold.co/400x400/FF6B35/white?text=${encodeURIComponent('Product')}`);
+  const [imageUri, setImageUri] = useState(
+    `https://placehold.co/400x400/FF6B35/white?text=${encodeURIComponent('Product')}`,
+  );
+
+  const handlePickImage = useCallback(() => {
+    launchImageLibrary({ mediaType: 'photo', quality: 0.8 }, (res) => {
+      if (res.assets?.[0]?.uri) {
+        setImageUri(res.assets[0].uri!);
+      }
+    });
+  }, []);
 
   const saveMutation = useSaveProduct();
 
@@ -53,6 +64,8 @@ export function useController() {
     isLoading: saveMutation.isPending,
     isButtonDisabled,
     handleBack: () => navigation.goBack(),
+    imageUri,
+    handlePickImage,
     t,
   };
 }

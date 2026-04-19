@@ -17,5 +17,18 @@ export const createStyles = (colors: AppColors) =>
     info: { flex: 1, gap: 3 },
     name: { ...typography.label, color: colors.text },
     price: { ...typography.label, color: colors.primary },
-    unavailable: { opacity: 0.5 },
+    unavailable: {
+      opacity: 0.5,
+    },
+    swipeAction: {
+      width: 80,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderBottomWidth: 1,
+      borderBottomColor: colors.borderLight,
+    },
+    swipeActionInner: {
+      alignItems: 'center',
+      gap: space[1],
+    },
   });
