@@ -1,0 +1,24 @@
+{
+  "extends": "@react-native/typescript-config/tsconfig.json",
+  "compilerOptions": {
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "jsx": "react-native",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@dawwar/types": ["../../packages/types/src"],
+      "@dawwar/types/*": ["../../packages/types/src/*"],
+      "@dawwar/theme": ["../../packages/theme/src"],
+      "@dawwar/theme/*": ["../../packages/theme/src/*"],
+      "@dawwar/i18n": ["../../packages/i18n/src"],
+      "@dawwar/i18n/*": ["../../packages/i18n/src/*"],
+      "@dawwar/mocks": ["../../packages/mocks/src"],
+      "@dawwar/mocks/*": ["../../packages/mocks/src/*"],
+      "@dawwar/ui": ["../../packages/ui/src"],
+      "@dawwar/ui/*": ["../../packages/ui/src/*"]
+    }
+  },
+  "include": ["src", "index.js"]
+}
