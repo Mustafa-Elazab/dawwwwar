@@ -12,6 +12,7 @@ import { CategoriesModule } from './modules/categories/categories.module';
 import { MerchantsModule } from './modules/merchants/merchants.module';
 import { ProductsModule } from './modules/products/products.module';
 import { SearchModule } from './modules/search/search.module';
+import { OrdersModule } from './modules/orders/orders.module';
 
 // Import all entities
 import {
@@ -70,6 +71,7 @@ import {
     MerchantsModule,
     ProductsModule,
     SearchModule,
+    OrdersModule,
   ],
 })
 export class AppModule {}
