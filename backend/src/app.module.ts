@@ -13,6 +13,9 @@ import { MerchantsModule } from './modules/merchants/merchants.module';
 import { ProductsModule } from './modules/products/products.module';
 import { SearchModule } from './modules/search/search.module';
 import { OrdersModule } from './modules/orders/orders.module';
+import { WalletModule } from './modules/wallet/wallet.module';
+import { AddressesModule } from './modules/addresses/addresses.module';
+import { DriversModule } from './modules/drivers/drivers.module';
 
 // Import all entities
 import {
@@ -72,6 +75,9 @@ import {
     ProductsModule,
     SearchModule,
     OrdersModule,
+    WalletModule,
+    AddressesModule,
+    DriversModule,
   ],
 })
 export class AppModule {}
