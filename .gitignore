@@ -16,6 +16,9 @@ build/
 .env
 .env.local
 .env.*.local
+backend/.env.development
+backend/.env.staging
+backend/.env.production
 
 # React Native
 android/build/
