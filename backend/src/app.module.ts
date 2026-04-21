@@ -1,10 +1,13 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { CacheModule } from '@nestjs/cache-manager';
 import { databaseConfig } from './config/database.config';
 import { jwtConfig } from './config/jwt.config';
 import { appConfig } from './config/app.config';
 import { HealthModule } from './modules/health/health.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { UsersModule } from './modules/users/users.module';
 
 // Import all entities
 import {
@@ -26,6 +29,10 @@ import {
       isGlobal: true,
       envFilePath: ['.env.development', '.env'],
       load: [databaseConfig, jwtConfig, appConfig],
+    }),
+    CacheModule.register({
+      isGlobal: true,
+      ttl: 60000, // 60 seconds default
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
@@ -53,6 +60,8 @@ import {
       }),
     }),
     HealthModule,
+    AuthModule,
+    UsersModule,
   ],
 })
 export class AppModule {}
