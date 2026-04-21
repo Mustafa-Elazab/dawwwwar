@@ -23,6 +23,7 @@ import { DriverProfileEntity } from '../../database/entities/driver-profile.enti
 import { MerchantsService } from '../merchants/merchants.service';
 import { OrderNumberService } from './order-number.service';
 import { GatewayService } from '../gateway/gateway.service';
+import { OrderNotificationsService } from '../notifications/order-notifications.service';
 import type { PlaceOrderDto } from './dto/place-order.dto';
 import type { PlaceCustomOrderDto } from './dto/place-custom-order.dto';
 import type { UpdateDeliveryStatusDto } from './dto/update-delivery-status.dto';
@@ -58,6 +59,7 @@ export class OrdersService {
     private readonly orderNumberService: OrderNumberService,
     private readonly dataSource: DataSource,
     private readonly gatewayService: GatewayService,
+    private readonly orderNotifications: OrderNotificationsService,
   ) {}
 
   // ── Customer: place regular order ─────────────────────────────────
@@ -137,6 +139,8 @@ export class OrdersService {
       // Notify merchant of new order (outside transaction)
       if (order.merchantId) {
         this.gatewayService.notifyNewOrder(order.merchantId, order);
+        // FCM push notification for merchant
+        void this.orderNotifications.notifyMerchantNewOrder(order).catch(() => {});
       }
       return order;
     });
@@ -246,10 +250,14 @@ export class OrdersService {
 
     const updated = await this.getOrderById(orderId);
     // Notify customer of status change
-    if (order.customerId) {
+    if (updated.customerId) {
       this.gatewayService.notifyOrderStatusChanged(orderId, OrderStatus.ACCEPTED, updated);
+      // FCM push notification for customer
+      void this.orderNotifications.notifyCustomerStatusChange(
+        updated,
+        '✅ قبل المحل طلبك — جاري التحضير',
+      ).catch(() => {});
     }
-
     return updated;
   }
 
@@ -278,10 +286,11 @@ export class OrdersService {
 
     const updated = await this.getOrderById(orderId);
     // Notify customer of status change
-    if (order.customerId) {
+    if (updated.customerId) {
       this.gatewayService.notifyOrderStatusChanged(orderId, OrderStatus.REJECTED, updated);
+      // FCM push notification for customer
+      void this.orderNotifications.notifyCustomerOrderRejected(updated).catch(() => {});
     }
-
     return updated;
   }
 
@@ -295,19 +304,12 @@ export class OrdersService {
     await this.orderRepo.update(orderId, { status: OrderStatus.DRIVER_ASSIGNED });
     const updated = await this.getOrderById(orderId);
     // Notify customer of status change
-    if (order.customerId) {
+    if (updated.customerId) {
       this.gatewayService.notifyOrderStatusChanged(orderId, OrderStatus.DRIVER_ASSIGNED, updated);
+      // FCM push notification for customer
+      void this.orderNotifications.notifyCustomerDriverAssigned(updated).catch(() => {});
     }
     return updated;
-  }
-
-  // ── Driver: get available orders ───────────────────────────────────
-  async getAvailableOrders(): Promise<OrderEntity[]> {
-    return this.orderRepo.find({
-      where: { status: OrderStatus.PENDING },
-      relations: ['merchant', 'items'],
-      order: { createdAt: 'ASC' },
-    });
   }
 
   // ── Driver: accept order ───────────────────────────────────────────
@@ -323,7 +325,14 @@ export class OrdersService {
       assignedAt: new Date(),
     });
 
-    return this.getOrderById(orderId);
+    const updated = await this.getOrderById(orderId);
+    // Notify customer of driver assignment
+    if (order.customerId) {
+      this.gatewayService.notifyOrderStatusChanged(orderId, OrderStatus.DRIVER_ASSIGNED, updated);
+      // FCM push notification for customer
+      void this.orderNotifications.notifyCustomerDriverAssigned(updated).catch(() => {});
+    }
+    return updated;
   }
 
   // ── Driver: decline order ──────────────────────────────────────────
@@ -368,11 +377,24 @@ export class OrdersService {
       }
     }
 
-    await this.orderRepo.update(orderId, updateData);
+    await this.orderRepo.update(orderId, updateData as any);
     const updated = await this.getOrderById(orderId);
     // Notify customer of status change
     if (order.customerId) {
       this.gatewayService.notifyOrderStatusChanged(orderId, dto.status, updated);
+      // FCM push notifications for key status changes
+      if (dto.status === OrderStatus.IN_TRANSIT) {
+        void this.orderNotifications.notifyCustomerStatusChange(
+          updated,
+          '🛵 طلبك في الطريق إليك',
+        ).catch(() => {});
+      }
+      if (dto.status === OrderStatus.COMPLETED) {
+        void this.orderNotifications.notifyCustomerStatusChange(
+          updated,
+          '✅ تم توصيل طلبك بنجاح',
+        ).catch(() => {});
+      }
     }
     return updated;
   }

@@ -6,6 +6,7 @@ import { databaseConfig } from './config/database.config';
 import { jwtConfig } from './config/jwt.config';
 import { appConfig } from './config/app.config';
 import { uploadConfig } from './config/upload.config';
+import { firebaseConfig } from './config/firebase.config';
 import { HealthModule } from './modules/health/health.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
@@ -39,7 +40,7 @@ import {
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env.development', '.env'],
-      load: [databaseConfig, jwtConfig, appConfig, uploadConfig],
+      load: [databaseConfig, jwtConfig, appConfig, uploadConfig, firebaseConfig],
     }),
     CacheModule.register({
       isGlobal: true,

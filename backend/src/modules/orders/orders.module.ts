@@ -10,6 +10,7 @@ import { WalletTransactionEntity } from '../../database/entities/wallet-transact
 import { DriverProfileEntity } from '../../database/entities/driver-profile.entity';
 import { MerchantsModule } from '../merchants/merchants.module';
 import { GatewayModule } from '../gateway/gateway.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { GatewayModule } from '../gateway/gateway.module';
     ]),
     MerchantsModule,
     GatewayModule,
+    NotificationsModule,
   ],
   controllers: [OrdersController],
   providers: [OrdersService, OrderNumberService],
