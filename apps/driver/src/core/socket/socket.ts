@@ -13,19 +13,20 @@ const noopSocket = {
   connected: false,
 };
 
-// Phase 2: uncomment this block and delete noopSocket above
-/*
-import { io } from 'socket.io-client';
-import { storage, StorageKeys } from '../storage/mmkv';
+function createRealSocket() {
+  // Dynamic import so the mock build doesn't bundle socket.io-client
+  const { io } = require('socket.io-client') as typeof import('socket.io-client');
+  const { storage, StorageKeys } = require('../storage/mmkv');
+  const token = storage.getString(StorageKeys.ACCESS_TOKEN);
+  return io(SOCKET_URL, {
+    auth: { token },
+    autoConnect: false,
+    transports: ['websocket'],
+    reconnection: true,
+    reconnectionAttempts: 10,
+    reconnectionDelay: 2000,
+    timeout: 10000,
+  });
+}
 
-const realSocket = io(SOCKET_URL, {
-  auth: { token: storage.getString(StorageKeys.ACCESS_TOKEN) },
-  autoConnect: false,
-  transports: ['websocket'],
-  reconnection: true,
-  reconnectionAttempts: 5,
-  reconnectionDelay: 2000,
-});
-*/
-
-export const socket = USE_MOCK_API ? noopSocket : noopSocket; // ← Phase 2: replace second noopSocket with realSocket
+export const socket = USE_MOCK_API ? noopSocket : createRealSocket();

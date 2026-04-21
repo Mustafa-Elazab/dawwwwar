@@ -9,6 +9,7 @@ import { WalletEntity } from '../../database/entities/wallet.entity';
 import { WalletTransactionEntity } from '../../database/entities/wallet-transaction.entity';
 import { DriverProfileEntity } from '../../database/entities/driver-profile.entity';
 import { MerchantsModule } from '../merchants/merchants.module';
+import { GatewayModule } from '../gateway/gateway.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { MerchantsModule } from '../merchants/merchants.module';
       DriverProfileEntity,
     ]),
     MerchantsModule,
+    GatewayModule,
   ],
   controllers: [OrdersController],
   providers: [OrdersService, OrderNumberService],

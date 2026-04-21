@@ -16,6 +16,7 @@ import { OrdersModule } from './modules/orders/orders.module';
 import { WalletModule } from './modules/wallet/wallet.module';
 import { AddressesModule } from './modules/addresses/addresses.module';
 import { DriversModule } from './modules/drivers/drivers.module';
+import { GatewayModule } from './modules/gateway/gateway.module';
 
 // Import all entities
 import {
@@ -78,6 +79,7 @@ import {
     WalletModule,
     AddressesModule,
     DriversModule,
+    GatewayModule,
   ],
 })
 export class AppModule {}

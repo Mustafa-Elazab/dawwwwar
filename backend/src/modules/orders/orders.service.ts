@@ -22,6 +22,7 @@ import {
 import { DriverProfileEntity } from '../../database/entities/driver-profile.entity';
 import { MerchantsService } from '../merchants/merchants.service';
 import { OrderNumberService } from './order-number.service';
+import { GatewayService } from '../gateway/gateway.service';
 import type { PlaceOrderDto } from './dto/place-order.dto';
 import type { PlaceCustomOrderDto } from './dto/place-custom-order.dto';
 import type { UpdateDeliveryStatusDto } from './dto/update-delivery-status.dto';
@@ -56,6 +57,7 @@ export class OrdersService {
     private readonly merchantsService: MerchantsService,
     private readonly orderNumberService: OrderNumberService,
     private readonly dataSource: DataSource,
+    private readonly gatewayService: GatewayService,
   ) {}
 
   // ── Customer: place regular order ─────────────────────────────────
@@ -131,6 +133,12 @@ export class OrdersService {
         where: { id: saved.id },
         relations: ['items'],
       }) as Promise<OrderEntity>;
+    }).then((order) => {
+      // Notify merchant of new order (outside transaction)
+      if (order.merchantId) {
+        this.gatewayService.notifyNewOrder(order.merchantId, order);
+      }
+      return order;
     });
   }
 
@@ -236,7 +244,13 @@ export class OrdersService {
       acceptedAt: new Date(),
     });
 
-    return this.getOrderById(orderId);
+    const updated = await this.getOrderById(orderId);
+    // Notify customer of status change
+    if (order.customerId) {
+      this.gatewayService.notifyOrderStatusChanged(orderId, OrderStatus.ACCEPTED, updated);
+    }
+
+    return updated;
   }
 
   // ── Merchant: reject order ─────────────────────────────────────────
@@ -262,7 +276,13 @@ export class OrdersService {
       cancelledAt: new Date(),
     });
 
-    return this.getOrderById(orderId);
+    const updated = await this.getOrderById(orderId);
+    // Notify customer of status change
+    if (order.customerId) {
+      this.gatewayService.notifyOrderStatusChanged(orderId, OrderStatus.REJECTED, updated);
+    }
+
+    return updated;
   }
 
   // ── Merchant: mark ready ───────────────────────────────────────────
@@ -273,7 +293,12 @@ export class OrdersService {
       throw new ForbiddenException();
     }
     await this.orderRepo.update(orderId, { status: OrderStatus.DRIVER_ASSIGNED });
-    return this.getOrderById(orderId);
+    const updated = await this.getOrderById(orderId);
+    // Notify customer of status change
+    if (order.customerId) {
+      this.gatewayService.notifyOrderStatusChanged(orderId, OrderStatus.DRIVER_ASSIGNED, updated);
+    }
+    return updated;
   }
 
   // ── Driver: get available orders ───────────────────────────────────
@@ -344,7 +369,12 @@ export class OrdersService {
     }
 
     await this.orderRepo.update(orderId, updateData);
-    return this.getOrderById(orderId);
+    const updated = await this.getOrderById(orderId);
+    // Notify customer of status change
+    if (order.customerId) {
+      this.gatewayService.notifyOrderStatusChanged(orderId, dto.status, updated);
+    }
+    return updated;
   }
 
   // ── Driver: get active order ───────────────────────────────────────
