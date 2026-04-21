@@ -84,6 +84,8 @@ import {
     DriversModule,
     GatewayModule,
     UploadModule,
+    AnalyticsModule,
   ],
 })
+export class AppModule {}
 export class AppModule {}

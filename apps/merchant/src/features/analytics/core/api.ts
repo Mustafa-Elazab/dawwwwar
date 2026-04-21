@@ -12,9 +12,9 @@ export interface MerchantAnalytics {
 
 // ── Phase 2 real implementations ─────────────────────────────────────
 const realAnalyticsApi = {
-  getToday: async (merchantId: string) => {
-    const { data } = await api.get(`/merchant/analytics?merchantId=${merchantId}`);
-    return data;
+  getToday: async (_merchantId: string) => {
+    const { data } = await api.get('/analytics/today');
+    return data.data;
   },
 };
 

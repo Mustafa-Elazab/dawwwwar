@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, In, Repository } from 'typeorm';
+import { DataSource, In, IsNull, Repository } from 'typeorm';
 import {
   OrderEntity,
   OrderStatus,
@@ -397,6 +397,18 @@ export class OrdersService {
       }
     }
     return updated;
+  }
+
+  // ── Driver: get available orders ────────────────────────────────────
+  async getAvailableOrders(): Promise<OrderEntity[]> {
+    return this.orderRepo.find({
+      where: {
+        status: In([OrderStatus.PENDING, OrderStatus.ACCEPTED]),
+        driverId: IsNull(),
+      },
+      relations: ['merchant', 'items'],
+      order: { createdAt: 'ASC' },
+    });
   }
 
   // ── Driver: get active order ───────────────────────────────────────
