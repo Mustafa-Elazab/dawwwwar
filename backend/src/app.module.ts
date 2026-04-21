@@ -8,6 +8,10 @@ import { appConfig } from './config/app.config';
 import { HealthModule } from './modules/health/health.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
+import { CategoriesModule } from './modules/categories/categories.module';
+import { MerchantsModule } from './modules/merchants/merchants.module';
+import { ProductsModule } from './modules/products/products.module';
+import { SearchModule } from './modules/search/search.module';
 
 // Import all entities
 import {
@@ -62,6 +66,10 @@ import {
     HealthModule,
     AuthModule,
     UsersModule,
+    CategoriesModule,
+    MerchantsModule,
+    ProductsModule,
+    SearchModule,
   ],
 })
 export class AppModule {}
