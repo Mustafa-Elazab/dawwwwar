@@ -5,6 +5,7 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { databaseConfig } from './config/database.config';
 import { jwtConfig } from './config/jwt.config';
 import { appConfig } from './config/app.config';
+import { uploadConfig } from './config/upload.config';
 import { HealthModule } from './modules/health/health.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
@@ -17,6 +18,7 @@ import { WalletModule } from './modules/wallet/wallet.module';
 import { AddressesModule } from './modules/addresses/addresses.module';
 import { DriversModule } from './modules/drivers/drivers.module';
 import { GatewayModule } from './modules/gateway/gateway.module';
+import { UploadModule } from './modules/upload/upload.module';
 
 // Import all entities
 import {
@@ -37,7 +39,7 @@ import {
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env.development', '.env'],
-      load: [databaseConfig, jwtConfig, appConfig],
+      load: [databaseConfig, jwtConfig, appConfig, uploadConfig],
     }),
     CacheModule.register({
       isGlobal: true,
@@ -80,6 +82,7 @@ import {
     AddressesModule,
     DriversModule,
     GatewayModule,
+    UploadModule,
   ],
 })
 export class AppModule {}
