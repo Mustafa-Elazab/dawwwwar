@@ -11,6 +11,8 @@ import { useOrders, useAcceptOrder, useRejectOrder } from '../../core/hooks';
 import { OrderStatus } from '@dawwar/types';
 import type { Order } from '@dawwar/types';
 import { preloadAlertSound, playAlertSound, stopAlertSound } from '../../../../utils/sound';
+import { socket } from '../../../../core/socket/socket';
+import { USE_MOCK_API } from '../../../../core/api/config';
 
 export type OrderTab = 'new' | 'preparing' | 'ready' | 'active' | 'completed';
 
@@ -42,8 +44,36 @@ export function useController() {
     select: (res: { data: Order[] }) => res.data,
   });
 
-  // Simulate new order arriving 8 seconds after mount (demo/test)
+  // Phase 2: Real-time socket for new orders
   useEffect(() => {
+    if (USE_MOCK_API) return;
+    if (!merchant?.id) return;
+
+    socket.connect();
+    socket.emit('join:merchant_room', { merchantId: merchant.id });
+
+    // Handler for new orders
+    const handleNewOrder = (order: Order) => {
+      setPendingOrder(order);
+      setShowModal(true);
+      dispatch(incrementNewOrders());
+      playAlertSound();
+      // Refresh orders list
+      void queryClient.invalidateQueries({ queryKey: ['merchant', 'orders'] });
+    };
+
+    // Listen for new orders
+    socket.on('order:new', handleNewOrder);
+
+    return () => {
+      socket.off('order:new', handleNewOrder);
+      socket.disconnect();
+    };
+  }, [merchant?.id, USE_MOCK_API, dispatch, queryClient]);
+
+  // Phase 1: Simulate new order arriving 8 seconds after mount (demo/test)
+  useEffect(() => {
+    if (!USE_MOCK_API) return;
     const t = setTimeout(() => {
       if (orders && orders.length > 0) {
         const pending = orders.find((o) => o.status === OrderStatus.PENDING);
