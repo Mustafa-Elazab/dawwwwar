@@ -30,6 +30,11 @@ async function seed() {
   await AppDataSource.initialize();
   console.log('DB connected — starting seed...');
 
+  // Enable PostGIS extension (runs once, idempotent)
+  await AppDataSource.query('CREATE EXTENSION IF NOT EXISTS postgis;');
+  await AppDataSource.query('CREATE EXTENSION IF NOT EXISTS postgis_topology;');
+  console.log('PostGIS enabled');
+
   const userRepo = AppDataSource.getRepository(UserEntity);
   const merchantRepo = AppDataSource.getRepository(MerchantEntity);
   const categoryRepo = AppDataSource.getRepository(CategoryEntity);
@@ -40,14 +45,14 @@ async function seed() {
   const addressRepo = AppDataSource.getRepository(AddressEntity);
 
   // ── Clear existing data (order matters for FK constraints) ─────────
-  await txRepo.delete({});
-  await walletRepo.delete({});
-  await addressRepo.delete({});
-  await productRepo.delete({});
-  await driverRepo.delete({});
-  await merchantRepo.delete({});
-  await userRepo.delete({});
-  await categoryRepo.delete({});
+  await AppDataSource.query('TRUNCATE TABLE wallet_transactions CASCADE');
+  await AppDataSource.query('TRUNCATE TABLE wallets CASCADE');
+  await AppDataSource.query('TRUNCATE TABLE addresses CASCADE');
+  await AppDataSource.query('TRUNCATE TABLE products CASCADE');
+  await AppDataSource.query('TRUNCATE TABLE driver_profiles CASCADE');
+  await AppDataSource.query('TRUNCATE TABLE merchants CASCADE');
+  await AppDataSource.query('TRUNCATE TABLE users CASCADE');
+  await AppDataSource.query('TRUNCATE TABLE categories CASCADE');
   console.log('Cleared existing data');
 
   // ── Categories ─────────────────────────────────────────────────────
@@ -129,6 +134,16 @@ async function seed() {
   ]);
   console.log(`Seeded ${merchants.length} merchants`);
 
+  // Update merchant location geography from latitude/longitude:
+  for (const merchant of merchants) {
+    await AppDataSource.query(
+      `UPDATE merchants SET location = ST_SetSRID(ST_MakePoint($1, $2), 4326)
+       WHERE id = $3`,
+      [merchant.longitude, merchant.latitude, merchant.id],
+    );
+  }
+  console.log('Merchant locations indexed');
+
   const [grocery, restaurant, pharmacy] = merchants;
 
   // ── Products ───────────────────────────────────────────────────────
@@ -166,6 +181,24 @@ async function seed() {
     { userId: d2user!.id, vehicleType: VehicleType.BICYCLE, isOnline: false, isApproved: true, canReceiveOrders: true, rating: 4.5, totalRatings: 67, totalDeliveries: 89, commissionRate: 5 },
   ]);
   console.log('Seeded 2 driver profiles');
+
+  // Update driver location geography from latitude/longitude (default location)
+  const drivers = await driverRepo.find();
+  for (const driver of drivers) {
+    // Set default location to Sinbellawin area
+    const defaultLat = 30.8704;
+    const defaultLng = 31.4741;
+    await driverRepo.update(driver.id, {
+      currentLatitude: defaultLat,
+      currentLongitude: defaultLng,
+    });
+    await AppDataSource.query(
+      `UPDATE driver_profiles SET location = ST_SetSRID(ST_MakePoint($1, $2), 4326)
+       WHERE id = $3`,
+      [defaultLng, defaultLat, driver.id],
+    );
+  }
+  console.log('Driver locations indexed');
 
   // ── Wallets ────────────────────────────────────────────────────────
   const wallets = await walletRepo.save([

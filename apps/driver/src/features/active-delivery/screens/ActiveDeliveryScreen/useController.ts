@@ -3,11 +3,14 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { Linking } from 'react-native';
 import { useTranslation } from '@dawwar/i18n';
 import Toast from 'react-native-toast-message';
-import { useAppDispatch } from '../../../../store/hooks';
-import { setActiveOrder, updateLocation } from '../../../../store/slices/driver.slice';
+import { useAppDispatch, useAppSelector } from '../../../../store/hooks';
+import { setActiveOrder, updateLocation, selectActiveOrderId } from '../../../../store/slices/driver.slice';
 import { useActiveOrder, useUpdateStatus, useSendPhotos } from '../../core/hooks';
 import { OrderStatus, OrderType } from '@dawwar/types';
 import { DRIVER_ROUTES } from '../../../navigation/routes';
+import { locationService } from '../../../../core/location/location.service';
+import { USE_MOCK_API } from '../../../../core/api/config';
+import { socket } from '../../../../core/socket/socket';
 import type { RouteProp } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { ActiveDeliveryStackParamList } from '../../../../navigation/types';
@@ -21,24 +24,53 @@ export function useController() {
   const route = useRoute<RouteProp<ActiveDeliveryStackParamList, typeof DRIVER_ROUTES.ACTIVE_DELIVERY>>();
   const dispatch = useAppDispatch();
   const { orderId } = route.params;
+  const activeOrderId = useAppSelector(selectActiveOrderId);
 
-  // Mock driver location — moves every 5 seconds
+  // Real GPS driver location — Phase 3
   const [driverLocation, setDriverLocation] = useState(DRIVER_START);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
-    intervalRef.current = setInterval(() => {
-      setDriverLocation((prev) => {
-        const next = {
-          latitude: prev.latitude + (Math.random() - 0.5) * 0.0006,
-          longitude: prev.longitude + (Math.random() - 0.5) * 0.0006,
-        };
+    if (USE_MOCK_API) {
+      // Phase 1/2 fallback: keep the random mock movement
+      const interval = setInterval(() => {
+        setDriverLocation((prev) => {
+          const next = {
+            latitude: prev.latitude + (Math.random() - 0.5) * 0.0006,
+            longitude: prev.longitude + (Math.random() - 0.5) * 0.0006,
+          };
+          dispatch(updateLocation(next));
+          return next;
+        });
+      }, 5000);
+      return () => clearInterval(interval);
+    }
+
+    // Phase 3: real GPS watch
+    locationService.startWatching(
+      (loc) => {
+        const next = { latitude: loc.latitude, longitude: loc.longitude };
+        setDriverLocation(next);
         dispatch(updateLocation(next));
-        return next;
-      });
-    }, 5000);
-    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
-  }, [dispatch]);
+
+        // Broadcast to Socket.io (customer tracking map)
+        if (activeOrderId) {
+          socket.emit('driver:location_update', {
+            latitude: loc.latitude,
+            longitude: loc.longitude,
+            heading: loc.heading ?? undefined,
+            orderId: activeOrderId,
+          });
+        }
+      },
+      (err) => {
+        console.warn('GPS error:', err.message);
+      },
+      true, // high accuracy during active delivery
+    );
+
+    return () => locationService.stopWatching();
+  }, [activeOrderId, dispatch]);
 
   const { data: order, isLoading: orderLoading } = useActiveOrder(orderId);
   const updateStatusMutation = useUpdateStatus(orderId);
@@ -97,6 +129,7 @@ export function useController() {
         netEarnings: (order?.deliveryFee ?? 12) - 5,
       });
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [handleStatusUpdate, dispatch, navigation, orderId, order]);
 
   const handleNavigate = useCallback(() => {

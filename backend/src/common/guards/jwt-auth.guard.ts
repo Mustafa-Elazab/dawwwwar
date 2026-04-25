@@ -26,10 +26,10 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     return super.canActivate(context);
   }
 
-  handleRequest(err: unknown, user: unknown) {
+  handleRequest<TUser = unknown>(err: unknown, user: unknown): TUser {
     if (err || !user) {
       throw err || new UnauthorizedException('Access token required');
     }
-    return user;
+    return user as TUser;
   }
 }

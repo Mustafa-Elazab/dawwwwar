@@ -4,19 +4,6 @@ import { Repository } from 'typeorm';
 import { MerchantEntity } from '../../database/entities/merchant.entity';
 import type { NearbyFilterDto } from './dto/nearby-filter.dto';
 
-// Haversine distance in km
-function haversine(lat1: number, lon1: number, lat2: number, lon2: number): number {
-  const R = 6371;
-  const dLat = ((lat2 - lat1) * Math.PI) / 180;
-  const dLon = ((lon2 - lon1) * Math.PI) / 180;
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLon / 2) ** 2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
-
 @Injectable()
 export class MerchantsService {
   constructor(
@@ -25,28 +12,45 @@ export class MerchantsService {
   ) {}
 
   async findNearby(filter: NearbyFilterDto): Promise<MerchantEntity[]> {
-    const { latitude = 30.8704, longitude = 31.4741, radius = 10, categoryId, filter: openFilter } = filter;
+    const {
+      latitude = 30.8704,
+      longitude = 31.4741,
+      radius = 10,          // km
+      categoryId,
+      filter: openFilter,
+    } = filter;
 
-    const query = this.repo.createQueryBuilder('merchant')
-      .where('merchant.isApproved = true');
+    const radiusMetres = radius * 1000;
+
+    // PostGIS ST_DWithin — uses spatial index, O(log n) instead of O(n)
+    let query = this.repo
+      .createQueryBuilder('merchant')
+      .where('merchant.isApproved = true')
+      .andWhere(
+        `ST_DWithin(
+          merchant.location,
+          ST_SetSRID(ST_MakePoint(:lng, :lat), 4326)::geography,
+          :radius
+        )`,
+        { lat: latitude, lng: longitude, radius: radiusMetres },
+      )
+      .orderBy(
+        `ST_Distance(
+          merchant.location,
+          ST_SetSRID(ST_MakePoint(:lng2, :lat2), 4326)::geography
+        )`,
+        'ASC',
+      )
+      .setParameters({ lat2: latitude, lng2: longitude });
 
     if (openFilter === 'open') {
-      query.andWhere('merchant.isOpen = true');
+      query = query.andWhere('merchant.isOpen = true');
     }
-
     if (categoryId) {
-      query.andWhere('merchant.category = :categoryId', { categoryId });
+      query = query.andWhere('merchant.category = :categoryId', { categoryId });
     }
 
-    const merchants = await query.getMany();
-
-    // Filter by radius (Haversine — could use PostGIS in Phase 3)
-    return merchants
-      .filter((m) => haversine(latitude, longitude, Number(m.latitude), Number(m.longitude)) <= radius)
-      .sort((a, b) =>
-        haversine(latitude, longitude, Number(a.latitude), Number(a.longitude)) -
-        haversine(latitude, longitude, Number(b.latitude), Number(b.longitude)),
-      );
+    return query.getMany();
   }
 
   async findById(id: string): Promise<MerchantEntity> {

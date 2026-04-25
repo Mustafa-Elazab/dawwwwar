@@ -12,8 +12,18 @@ export interface MerchantAnalytics {
 
 // ── Phase 2 real implementations ─────────────────────────────────────
 const realAnalyticsApi = {
-  getToday: async (_merchantId: string) => {
-    const { data } = await api.get('/analytics/today');
+  getToday: async (_merchantId: string): Promise<MerchantAnalytics> => {
+    const { data } = await api.get('/analytics/merchant/today');
+    return data.data;
+  },
+  getRange: async (
+    _merchantId: string,
+    startDate: string,
+    endDate: string,
+  ): Promise<MerchantAnalytics> => {
+    const { data } = await api.get('/analytics/merchant/range', {
+      params: { startDate, endDate },
+    });
     return data.data;
   },
 };
@@ -33,6 +43,26 @@ const mockAnalyticsApi = {
       totalRevenue,
       avgOrderValue: orders.length > 0 ? totalRevenue / orders.length : 0,
       commissionPaid,
+    };
+  },
+  getRange: async (
+    merchantId: string,
+    _startDate: string,
+    _endDate: string,
+  ): Promise<MerchantAnalytics> => {
+    await delay(400);
+    // Same as today for mock
+    const orders = mockOrders.filter(
+      (o) => o.merchantId === merchantId &&
+        (o.status === OrderStatus.COMPLETED || o.status === OrderStatus.DELIVERED),
+    );
+    const totalRevenue = orders.reduce((sum, o) => sum + o.total, 0);
+    const commissionPaid = orders.length * 5;
+    return {
+      totalOrders: orders.length * 3, // Simulate 3x for range
+      totalRevenue: totalRevenue * 3,
+      avgOrderValue: orders.length > 0 ? totalRevenue / orders.length : 0,
+      commissionPaid: commissionPaid * 3,
     };
   },
 };

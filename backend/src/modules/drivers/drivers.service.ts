@@ -57,11 +57,20 @@ export class DriversService {
 
   async updateLocation(userId: string, dto: UpdateLocationDto): Promise<void> {
     const profile = await this.getProfile(userId);
+
     await this.driverRepo.update(profile.id, {
       currentLatitude: dto.latitude,
       currentLongitude: dto.longitude,
       lastLocationUpdate: new Date(),
     });
+
+    // Update PostGIS geography column
+    await this.driverRepo.query(
+      `UPDATE driver_profiles
+       SET location = ST_SetSRID(ST_MakePoint($1, $2), 4326)
+       WHERE id = $3`,
+      [dto.longitude, dto.latitude, profile.id],
+    );
   }
 
   async getEarningsSummary(userId: string): Promise<DriverEarningsSummary> {
@@ -120,5 +129,37 @@ export class DriversService {
       where: { isOnline: true, isApproved: true, canReceiveOrders: true },
       relations: ['user'],
     });
+  }
+
+  /** Find nearest online driver to a location — for auto-assignment */
+  async findNearestOnlineDriver(
+    latitude: number,
+    longitude: number,
+    radiusKm = 5,
+  ): Promise<DriverProfileEntity | null> {
+    const radiusMetres = radiusKm * 1000;
+
+    return this.driverRepo
+      .createQueryBuilder('driver')
+      .where('driver.isOnline = true')
+      .andWhere('driver.isApproved = true')
+      .andWhere('driver.canReceiveOrders = true')
+      .andWhere(
+        `ST_DWithin(
+          driver.location,
+          ST_SetSRID(ST_MakePoint(:lng, :lat), 4326)::geography,
+          :radius
+        )`,
+        { lat: latitude, lng: longitude, radius: radiusMetres },
+      )
+      .orderBy(
+        `ST_Distance(
+          driver.location,
+          ST_SetSRID(ST_MakePoint(:lng2, :lat2), 4326)::geography
+        )`,
+        'ASC',
+      )
+      .setParameters({ lat2: latitude, lng2: longitude })
+      .getOne();
   }
 }

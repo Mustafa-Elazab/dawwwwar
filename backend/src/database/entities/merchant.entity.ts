@@ -80,4 +80,14 @@ export class MerchantEntity extends BaseEntity {
 
   @Column({ name: 'opening_hours', type: 'jsonb', nullable: true })
   openingHours: OpeningHours;
+
+  @Column({
+    name: 'location',
+    type: 'geography',
+    spatialFeatureType: 'Point',
+    srid: 4326,
+    nullable: true,
+    select: false,
+  })
+  location?: string;
 }

@@ -20,6 +20,7 @@ import { AddressesModule } from './modules/addresses/addresses.module';
 import { DriversModule } from './modules/drivers/drivers.module';
 import { GatewayModule } from './modules/gateway/gateway.module';
 import { UploadModule } from './modules/upload/upload.module';
+import { AnalyticsModule } from './modules/analytics/analytics.module';
 
 // Import all entities
 import {
@@ -69,6 +70,10 @@ import {
         ],
         synchronize: config.get<boolean>('database.synchronize'),
         logging: config.get<boolean>('database.logging'),
+        extra: {
+          // Required for PostGIS geography type in TypeORM
+          nativeEnums: true,
+        },
       }),
     }),
     HealthModule,
@@ -87,5 +92,4 @@ import {
     AnalyticsModule,
   ],
 })
-export class AppModule {}
 export class AppModule {}

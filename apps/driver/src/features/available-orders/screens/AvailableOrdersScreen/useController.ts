@@ -14,6 +14,7 @@ import type { DriverTabParamList } from '../../../../navigation/types';
 import Toast from 'react-native-toast-message';
 import { socket } from '../../../../core/socket/socket';
 import { USE_MOCK_API } from '../../../../core/api/config';
+import { locationService } from '../../../../core/location/location.service';
 
 export function useController() {
   const { t } = useTranslation();
@@ -33,7 +34,7 @@ export function useController() {
     select: (res) => res.data,
   });
 
-  // Phase 2: Socket for real-time updates
+  // Phase 3: Real GPS + Socket for real-time updates
   const locationIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   useEffect(() => {
     if (USE_MOCK_API) return;
@@ -42,21 +43,22 @@ export function useController() {
     // Connect socket when going online
     socket.connect();
 
-    // Emit driver location every 5 seconds (mock GPS for now)
-    // Phase 3: Replace with real GPS location
-    locationIntervalRef.current = setInterval(() => {
-      socket.emit('driver:location_update', {
-        latitude: 30.0444 + (Math.random() - 0.5) * 0.01,
-        longitude: 31.2357 + (Math.random() - 0.5) * 0.01,
-        heading: Math.random() * 360,
-      });
-    }, 5000);
+    // Start watching real GPS location (balanced accuracy when idle)
+    locationService.startWatching(
+      (loc) => {
+        dispatch(updateLocation({ latitude: loc.latitude, longitude: loc.longitude }));
+        // Update backend DB (for nearest-driver queries)
+        void availableOrdersApi.updateLocation(loc.latitude, loc.longitude);
+      },
+      () => {},
+      false, // balanced accuracy when idle (saves battery)
+    );
 
     return () => {
-      if (locationIntervalRef.current) clearInterval(locationIntervalRef.current);
+      locationService.stopWatching();
       socket.disconnect();
     };
-  }, [isOnline]);
+  }, [isOnline, dispatch]);
 
   const acceptMutation = useMutation({
     mutationFn: availableOrdersApi.acceptOrder,
@@ -80,10 +82,16 @@ export function useController() {
 
   const handleToggleOnline = useCallback(async () => {
     if (!isOnline) {
-      // Request location permission first (Phase 1: skip real permission, just set flag)
+      // Request location permission first
+      const granted = await locationService.requestPermission();
+      if (!granted) {
+        Toast.show({ type: 'error', text1: 'Location permission required to go online' });
+        return;
+      }
       dispatch(setLocationPermission(true));
       dispatch(setOnline(true));
     } else {
+      locationService.stopWatching();
       dispatch(setOnline(false));
     }
   }, [isOnline, dispatch]);

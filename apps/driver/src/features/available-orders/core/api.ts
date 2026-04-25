@@ -18,6 +18,10 @@ const realAvailableOrdersApi = {
     const { data } = await api.post(`/driver/orders/${orderId}/decline`);
     return data;
   },
+  updateLocation: async (latitude: number, longitude: number) => {
+    const { data } = await api.patch('/driver/location', { latitude, longitude });
+    return data;
+  },
 };
 
 // ── Phase 1 mock implementation ──────────────────────────────────────
@@ -41,6 +45,10 @@ const mockAvailableOrdersApi = {
   declineOrder: async (orderId: string): Promise<ApiResponse<{ declined: boolean }>> => {
     await delay(400);
     return { success: true, data: { declined: true } };
+  },
+  updateLocation: async (_latitude: number, _longitude: number): Promise<ApiResponse<{ updated: boolean }>> => {
+    await delay(200);
+    return { success: true, data: { updated: true } };
   },
 };
 

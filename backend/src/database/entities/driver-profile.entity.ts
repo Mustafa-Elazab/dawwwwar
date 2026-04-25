@@ -52,4 +52,14 @@ export class DriverProfileEntity extends BaseEntity {
 
   @Column({ name: 'commission_rate', type: 'decimal', precision: 10, scale: 2, default: 5 })
   commissionRate: number;
+
+  @Column({
+    name: 'location',
+    type: 'geography',
+    spatialFeatureType: 'Point',
+    srid: 4326,
+    nullable: true,
+    select: false,
+  })
+  location?: string;
 }

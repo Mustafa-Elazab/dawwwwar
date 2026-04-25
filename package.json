@@ -14,7 +14,9 @@
     "customer:start": "pnpm --filter @dawwar/customer start",
     "customer:clean": "pnpm --filter @dawwar/customer android:clean && pnpm --filter @dawwar/customer ios:clean",
     "android": "pnpm --filter @dawwar/customer android",
-    "ios": "pnpm --filter @dawwar/customer ios"
+    "ios": "pnpm --filter @dawwar/customer ios",
+    "admin:dev": "pnpm --filter @dawwar/admin dev",
+    "admin:build": "pnpm --filter @dawwar/admin build"
   },
   "devDependencies": {
     "turbo": "^2.5.0",
@@ -28,7 +30,8 @@
     "overrides": {
       "react": "19.2.3",
       "react-native": "0.84.0",
-      "react-native-reanimated": "3.19.5"
+      "react-native-reanimated": "3.19.5",
+      "@types/react": "18.3.0"
     }
   }
 }
