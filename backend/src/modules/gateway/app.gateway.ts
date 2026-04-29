@@ -23,15 +23,13 @@ import { Inject, forwardRef } from '@nestjs/common';
 
 @WebSocketGateway({
   cors: {
-    origin: '*',   // restrict in production
+    origin: '*', // restrict in production
     credentials: true,
   },
   namespace: '/',
   transports: ['websocket', 'polling'],
 })
-export class AppGateway
-  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
-{
+export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
 
@@ -54,9 +52,8 @@ export class AppGateway
   handleConnection(client: Socket) {
     try {
       const token =
-        client.handshake.auth['token'] as string | undefined ??
-        (client.handshake.headers['authorization'] as string | undefined)
-          ?.replace('Bearer ', '');
+        (client.handshake.auth['token'] as string | undefined) ??
+        (client.handshake.headers['authorization'] as string | undefined)?.replace('Bearer ', '');
 
       if (!token) {
         client.disconnect(true);
@@ -72,7 +69,6 @@ export class AppGateway
 
       // Auto-join user's personal room
       void client.join(Rooms.customer(payload.sub));
-
     } catch {
       this.logger.warn(`Client disconnected (bad token): ${client.id}`);
       client.disconnect(true);
@@ -85,10 +81,7 @@ export class AppGateway
 
   // ── Join/Leave order room ─────────────────────────────────────────
   @SubscribeMessage(SOCKET_EVENTS.JOIN_ORDER_ROOM)
-  handleJoinOrderRoom(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() data: { orderId: string },
-  ) {
+  handleJoinOrderRoom(@ConnectedSocket() client: Socket, @MessageBody() data: { orderId: string }) {
     void client.join(Rooms.order(data.orderId));
     this.logger.debug(`${client.id} joined order room: ${data.orderId}`);
     return { joined: true, room: Rooms.order(data.orderId) };
@@ -117,23 +110,22 @@ export class AppGateway
   @SubscribeMessage(SOCKET_EVENTS.DRIVER_LOCATION_UPDATE)
   handleDriverLocation(
     @ConnectedSocket() client: Socket,
-    @MessageBody() data: { latitude: number; longitude: number; heading?: number; orderId?: string },
+    @MessageBody()
+    data: { latitude: number; longitude: number; heading?: number; orderId?: string },
   ) {
     const user = client.data['user'] as JwtPayload | undefined;
     if (!user) throw new WsException('Not authenticated');
 
     // Broadcast to the active order room so the customer tracking map updates
     if (data.orderId) {
-      this.server
-        .to(Rooms.order(data.orderId))
-        .emit(SOCKET_EVENTS.DRIVER_LOCATION, {
-          orderId: data.orderId,
-          driverId: user.sub,
-          latitude: data.latitude,
-          longitude: data.longitude,
-          heading: data.heading,
-          timestamp: Date.now(),
-        });
+      this.server.to(Rooms.order(data.orderId)).emit(SOCKET_EVENTS.DRIVER_LOCATION, {
+        orderId: data.orderId,
+        driverId: user.sub,
+        latitude: data.latitude,
+        longitude: data.longitude,
+        heading: data.heading,
+        timestamp: Date.now(),
+      });
     }
 
     // No ack needed — fire and forget
@@ -158,9 +150,7 @@ export class AppGateway
       );
 
       // Broadcast to everyone in the order room (including the sender)
-      this.server
-        .to(Rooms.order(data.orderId))
-        .emit(SOCKET_EVENTS.CHAT_MESSAGE, savedMessage);
+      this.server.to(Rooms.order(data.orderId)).emit(SOCKET_EVENTS.CHAT_MESSAGE, savedMessage);
 
       return { sent: true };
     } catch (err: unknown) {

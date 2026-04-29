@@ -1,9 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Patch,
-} from '@nestjs/common';
+import { Body, Controller, Get, Patch } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -42,10 +37,7 @@ export class UsersController {
 
   @Patch('me')
   @ApiOperation({ summary: 'Update current user profile' })
-  updateMe(
-    @CurrentUser() user: UserEntity,
-    @Body() dto: UpdateProfileDto,
-  ) {
+  updateMe(@CurrentUser() user: UserEntity, @Body() dto: UpdateProfileDto) {
     return this.usersService.updateProfile(user.id, dto);
   }
 }

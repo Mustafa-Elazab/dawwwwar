@@ -68,7 +68,12 @@ export class AuthService {
   async verifyOtp(
     rawPhone: string,
     code: string,
-  ): Promise<{ accessToken: string; refreshToken: string; user: UserEntity; isFirstLogin: boolean }> {
+  ): Promise<{
+    accessToken: string;
+    refreshToken: string;
+    user: UserEntity;
+    isFirstLogin: boolean;
+  }> {
     const phone = this.normalizePhone(rawPhone);
     const { valid, remaining } = await this.otpService.verifyOtp(phone, code);
 

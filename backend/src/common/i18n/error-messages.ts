@@ -223,10 +223,7 @@ export function resolveLanguage(acceptLanguage?: string): SupportedLang {
 /**
  * Get a localized message for an error code.
  */
-export function getLocalizedMessage(
-  errorCode: string,
-  lang: SupportedLang = 'en',
-): string {
+export function getLocalizedMessage(errorCode: string, lang: SupportedLang = 'en'): string {
   const def = ERROR_MESSAGES[errorCode];
   if (!def) return ERROR_MESSAGES['GENERIC_ERROR']?.[lang] ?? errorCode;
   return def[lang];

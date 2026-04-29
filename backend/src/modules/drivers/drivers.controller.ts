@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Patch,
-  Post,
-} from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { IsBoolean } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
@@ -38,20 +30,14 @@ export class DriversController {
   @Post('online')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Toggle driver online/offline status' })
-  toggleOnline(
-    @CurrentUser() user: UserEntity,
-    @Body() dto: ToggleOnlineDto,
-  ) {
+  toggleOnline(@CurrentUser() user: UserEntity, @Body() dto: ToggleOnlineDto) {
     return this.driversService.setOnline(user.id, dto.isOnline);
   }
 
   @Patch('location')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Update driver location (called frequently)' })
-  updateLocation(
-    @CurrentUser() user: UserEntity,
-    @Body() dto: UpdateLocationDto,
-  ) {
+  updateLocation(@CurrentUser() user: UserEntity, @Body() dto: UpdateLocationDto) {
     return this.driversService.updateLocation(user.id, dto);
   }
 

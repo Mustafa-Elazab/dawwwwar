@@ -5,7 +5,7 @@ export const SOCKET_EVENTS = {
   ORDER_DRIVER_ASSIGNED: 'order:driver_assigned',
   DRIVER_LOCATION: 'driver:location',
   MERCHANT_ORDER_ALERT: 'merchant:order_alert',
-  CHAT_MESSAGE: 'chat:message',   // P3-05 · in-order chat
+  CHAT_MESSAGE: 'chat:message', // P3-05 · in-order chat
   ERROR: 'error',
 
   // Client → Server
@@ -14,8 +14,8 @@ export const SOCKET_EVENTS = {
   LEAVE_ORDER_ROOM: 'leave:order_room',
   JOIN_MERCHANT_ROOM: 'join:merchant_room',
   JOIN_DRIVER_ROOM: 'join:driver_room',
-  CHAT_SEND: 'chat:send',          // P3-05 · client sends a chat message
-  CHAT_READ: 'chat:read',          // P3-05 · client marks messages as read
+  CHAT_SEND: 'chat:send', // P3-05 · client sends a chat message
+  CHAT_READ: 'chat:read', // P3-05 · client marks messages as read
 } as const;
 
 // Room naming conventions

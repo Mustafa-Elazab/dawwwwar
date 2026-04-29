@@ -1,13 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Param,
-  Patch,
-  Post,
-} from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { OrdersService } from './orders.service';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -35,10 +26,7 @@ export class OrdersController {
 
   @Post('custom')
   @ApiOperation({ summary: 'Place a custom order' })
-  placeCustomOrder(
-    @CurrentUser() user: UserEntity,
-    @Body() dto: PlaceCustomOrderDto,
-  ) {
+  placeCustomOrder(@CurrentUser() user: UserEntity, @Body() dto: PlaceCustomOrderDto) {
     return this.ordersService.placeCustomOrder(user.id, dto);
   }
 
@@ -57,21 +45,14 @@ export class OrdersController {
   @Post(':id/tip')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Add a tip to a completed order' })
-  addTip(
-    @Param('id') id: string,
-    @CurrentUser() user: UserEntity,
-    @Body('amount') amount: number,
-  ) {
+  addTip(@Param('id') id: string, @CurrentUser() user: UserEntity, @Body('amount') amount: number) {
     return this.ordersService.addTip(id, user.id, amount);
   }
 
   @Post(':id/cancel')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Customer cancels a PENDING order' })
-  cancelOrder(
-    @Param('id') id: string,
-    @CurrentUser() user: UserEntity,
-  ) {
+  cancelOrder(@Param('id') id: string, @CurrentUser() user: UserEntity) {
     return this.ordersService.customerCancel(id, user.id);
   }
 
