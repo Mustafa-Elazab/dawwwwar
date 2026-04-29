@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CacheModule } from '@nestjs/cache-manager';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { databaseConfig } from './config/database.config';
 import { jwtConfig } from './config/jwt.config';
 import { appConfig } from './config/app.config';
@@ -21,6 +22,11 @@ import { DriversModule } from './modules/drivers/drivers.module';
 import { GatewayModule } from './modules/gateway/gateway.module';
 import { UploadModule } from './modules/upload/upload.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
+import { ReviewsModule } from './modules/reviews/reviews.module';
+import { PromoModule } from './modules/promo/promo.module';
+import { FavoritesModule } from './modules/favorites/favorites.module';
+import { ChatModule } from './modules/chat/chat.module';
+import { SchedulerModule } from './modules/scheduler/scheduler.module';
 
 // Import all entities
 import {
@@ -34,6 +40,10 @@ import {
   WalletEntity,
   WalletTransactionEntity,
   AddressEntity,
+  ReviewEntity,
+  PromoCodeEntity,
+  ChatMessageEntity,
+  FavoriteEntity,
 } from './database/entities';
 
 @Module({
@@ -47,6 +57,10 @@ import {
       isGlobal: true,
       ttl: 60000, // 60 seconds default
     }),
+    ThrottlerModule.forRoot([{
+      ttl: 600000, // 10 minutes
+      limit: 3,
+    }]),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
@@ -67,6 +81,10 @@ import {
           WalletEntity,
           WalletTransactionEntity,
           AddressEntity,
+          ReviewEntity,
+          PromoCodeEntity,
+          ChatMessageEntity,
+          FavoriteEntity,
         ],
         synchronize: config.get<boolean>('database.synchronize'),
         logging: config.get<boolean>('database.logging'),
@@ -90,6 +108,11 @@ import {
     GatewayModule,
     UploadModule,
     AnalyticsModule,
+    ReviewsModule,
+    PromoModule,
+    FavoritesModule,
+    ChatModule,
+    SchedulerModule,
   ],
 })
 export class AppModule {}

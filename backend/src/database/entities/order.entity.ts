@@ -158,6 +158,14 @@ export class OrderEntity extends BaseEntity {
   @Column({ name: 'cancelled_at', type: 'timestamptz', nullable: true })
   cancelledAt?: Date;
 
+  // Scheduled order — null means deliver ASAP
+  @Column({ name: 'deliver_at', type: 'timestamptz', nullable: true })
+  deliverAt?: Date;
+
+  // Tip — optional amount added to driver wallet on COMPLETED
+  @Column({ name: 'tip_amount', type: 'decimal', precision: 10, scale: 2, default: 0 })
+  tipAmount: number;
+
   @OneToMany('OrderItemEntity', 'order', { cascade: true })
   items: unknown[];
 }

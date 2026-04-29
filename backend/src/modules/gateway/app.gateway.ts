@@ -16,7 +16,10 @@ import { Server, Socket } from 'socket.io';
 import { WsJwtGuard } from './ws-jwt.guard';
 import { SOCKET_EVENTS, Rooms } from './events';
 import { GatewayService } from './gateway.service';
+import { ChatService } from '../chat/chat.service';
+import { SenderRole } from '../../database/entities/chat-message.entity';
 import type { JwtPayload } from '../auth/jwt.strategy';
+import { Inject, forwardRef } from '@nestjs/common';
 
 @WebSocketGateway({
   cors: {
@@ -38,6 +41,8 @@ export class AppGateway
     private readonly jwtService: JwtService,
     private readonly config: ConfigService,
     private readonly gatewayService: GatewayService,
+    @Inject(forwardRef(() => ChatService))
+    private readonly chatService: ChatService,
   ) {}
 
   afterInit(server: Server) {
@@ -133,5 +138,34 @@ export class AppGateway
 
     // No ack needed — fire and forget
     return { received: true };
+  }
+
+  // ── Chat messages ─────────────────────────────────────────────────
+  @SubscribeMessage(SOCKET_EVENTS.CHAT_SEND)
+  async handleChatMessage(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { orderId: string; message: string; senderRole: string },
+  ) {
+    const user = client.data['user'] as JwtPayload | undefined;
+    if (!user) throw new WsException('Not authenticated');
+
+    try {
+      const savedMessage = await this.chatService.saveMessage(
+        data.orderId,
+        user.sub,
+        data.senderRole as SenderRole,
+        data.message,
+      );
+
+      // Broadcast to everyone in the order room (including the sender)
+      this.server
+        .to(Rooms.order(data.orderId))
+        .emit(SOCKET_EVENTS.CHAT_MESSAGE, savedMessage);
+
+      return { sent: true };
+    } catch (err: unknown) {
+      this.logger.error(`Failed to send chat message for order ${data.orderId}`, err);
+      throw new WsException('Failed to send message');
+    }
   }
 }

@@ -24,6 +24,7 @@ import { MerchantsService } from '../merchants/merchants.service';
 import { OrderNumberService } from './order-number.service';
 import { GatewayService } from '../gateway/gateway.service';
 import { OrderNotificationsService } from '../notifications/order-notifications.service';
+import { DriversService } from '../drivers/drivers.service';
 import type { PlaceOrderDto } from './dto/place-order.dto';
 import type { PlaceCustomOrderDto } from './dto/place-custom-order.dto';
 import type { UpdateDeliveryStatusDto } from './dto/update-delivery-status.dto';
@@ -60,6 +61,7 @@ export class OrdersService {
     private readonly dataSource: DataSource,
     private readonly gatewayService: GatewayService,
     private readonly orderNotifications: OrderNotificationsService,
+    private readonly driversService: DriversService,
   ) {}
 
   // ── Customer: place regular order ─────────────────────────────────
@@ -258,7 +260,34 @@ export class OrdersService {
         '✅ قبل المحل طلبك — جاري التحضير',
       ).catch(() => {});
     }
-    return updated;
+
+    // P3-03 · Auto Driver Assignment
+    if (updated.deliveryLatitude && updated.deliveryLongitude) {
+      // Find nearest online driver within 5km from the merchant
+      const searchLat = updated.merchant?.latitude ?? updated.deliveryLatitude;
+      const searchLng = updated.merchant?.longitude ?? updated.deliveryLongitude;
+      const nearestDriver = await this.driversService.findNearestOnlineDriver(searchLat, searchLng, 5);
+
+      if (nearestDriver) {
+        // Auto-assign
+        await this.orderRepo.update(orderId, {
+          driverId: nearestDriver.userId,
+          status: OrderStatus.DRIVER_ASSIGNED,
+          assignedAt: new Date(),
+        });
+
+        const assignedOrder = await this.getOrderById(orderId);
+        
+        // Notify customer
+        this.gatewayService.notifyOrderStatusChanged(orderId, OrderStatus.DRIVER_ASSIGNED, assignedOrder);
+        void this.orderNotifications.notifyCustomerDriverAssigned(assignedOrder).catch(() => {});
+        
+        // Notify the assigned driver
+        this.gatewayService.notifyDriverAssigned(orderId, updated.customerId, nearestDriver.user);
+      }
+    }
+
+    return this.getOrderById(orderId);
   }
 
   // ── Merchant: reject order ─────────────────────────────────────────
@@ -428,6 +457,58 @@ export class OrdersService {
       },
       relations: ['merchant', 'items'],
     });
+  }
+
+  // ── Customer: tip for completed order ──────────────────────────────
+  async addTip(orderId: string, customerId: string, amount: number): Promise<OrderEntity> {
+    const order = await this.getOrderById(orderId);
+    if (!order) throw new NotFoundException('Order not found');
+    if (order.customerId !== customerId) throw new ForbiddenException('Not your order');
+    if (order.status !== OrderStatus.COMPLETED) {
+      throw new BadRequestException('Can only tip completed orders');
+    }
+    if (amount <= 0) throw new BadRequestException('Invalid tip amount');
+
+    // Make sure they have wallet balance
+    await this.checkWalletBalance(customerId, amount);
+
+    await this.dataSource.transaction(async (manager) => {
+      // deduct from customer
+      await this.deductWallet(
+        manager,
+        customerId,
+        amount,
+        orderId,
+        `Tip for order ${order.orderNumber}`
+      );
+
+      // add to driver
+      if (order.driverId) {
+        const wallet = await manager.findOne(WalletEntity, { where: { userId: order.driverId } });
+        if (wallet) {
+          const balanceBefore = Number(wallet.balance);
+          const balanceAfter = balanceBefore + amount;
+          await manager.update(WalletEntity, wallet.id, { balance: balanceAfter });
+          await manager.save(
+            manager.create(WalletTransactionEntity, {
+              walletId: wallet.id,
+              type: TransactionType.CREDIT,
+              amount,
+              reason: TransactionReason.REFUND, // close enough logic for now
+              orderId,
+              description: `Tip from customer for order ${order.orderNumber}`,
+              balanceBefore,
+              balanceAfter,
+            }),
+          );
+        }
+      }
+
+      const currentTip = Number(order.tipAmount || 0);
+      await manager.update(OrderEntity, orderId, { tipAmount: currentTip + amount });
+    });
+
+    return this.getOrderById(orderId);
   }
 
   // ── Private helpers ───────────────────────────────────────────────

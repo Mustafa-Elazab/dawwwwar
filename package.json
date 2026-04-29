@@ -10,6 +10,8 @@
     "clean": "turbo clean",
     "clean:all": "turbo clean && rm -rf node_modules apps/*/node_modules packages/*/node_modules pnpm-lock.yaml",
     "customer:android": "pnpm --filter @dawwar/customer android",
+    "customer:driver": "pnpm --filter @dawwar/driver android",
+    "customer:merchant": "pnpm --filter @dawwar/merchant android",
     "customer:ios": "pnpm --filter @dawwar/customer ios",
     "customer:start": "pnpm --filter @dawwar/customer start",
     "customer:clean": "pnpm --filter @dawwar/customer android:clean && pnpm --filter @dawwar/customer ios:clean",

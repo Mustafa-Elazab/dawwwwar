@@ -1,11 +1,15 @@
 export { AddressEntity } from './address.entity';
 export { BaseEntity } from './base.entity';
 export { CategoryEntity } from './category.entity';
+export { ChatMessageEntity, SenderRole } from './chat-message.entity';
 export { DriverProfileEntity, VehicleType } from './driver-profile.entity';
+export { FavoriteEntity } from './favorite.entity';
 export { MerchantEntity, OpeningHours, DayHours } from './merchant.entity';
 export { OrderEntity, OrderStatus, OrderType, PaymentMethod } from './order.entity';
 export { OrderItemEntity } from './order-item.entity';
 export { ProductEntity } from './product.entity';
+export { PromoCodeEntity, DiscountType } from './promo-code.entity';
+export { ReviewEntity } from './review.entity';
 export { UserEntity, UserRole } from './user.entity';
 export { WalletEntity } from './wallet.entity';
 export { WalletTransactionEntity, TransactionType, TransactionReason } from './wallet-transaction.entity';

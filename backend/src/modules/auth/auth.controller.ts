@@ -20,6 +20,7 @@ import { SendOtpDto } from './dto/send-otp.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
 import { SelectRoleDto } from './dto/select-role.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { ThrottlerGuard } from '@nestjs/throttler';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -28,6 +29,7 @@ export class AuthController {
 
   @Post('send-otp')
   @Public()
+  @UseGuards(ThrottlerGuard)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Send OTP to phone number' })
   sendOtp(@Body() dto: SendOtpDto) {

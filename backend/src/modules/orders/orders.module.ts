@@ -11,6 +11,7 @@ import { DriverProfileEntity } from '../../database/entities/driver-profile.enti
 import { MerchantsModule } from '../merchants/merchants.module';
 import { GatewayModule } from '../gateway/gateway.module';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { DriversModule } from '../drivers/drivers.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { NotificationsModule } from '../notifications/notifications.module';
     MerchantsModule,
     GatewayModule,
     NotificationsModule,
+    DriversModule,
   ],
   controllers: [OrdersController],
   providers: [OrdersService, OrderNumberService],

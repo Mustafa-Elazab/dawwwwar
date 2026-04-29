@@ -1,11 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { UserEntity } from '../../database/entities/user.entity';
 import { Cache } from 'cache-manager';
 import { Inject } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import axios from 'axios';
 
 @Injectable()
 export class OtpService {
@@ -35,18 +33,58 @@ export class OtpService {
     if (isSandbox) {
       this.logger.log(`[SANDBOX] OTP for ${phone}: ${code}`);
     } else {
-      // Phase 2 Twilio integration — inject after Task 03
-      // const twilio = new Twilio(accountSid, authToken);
-      // await twilio.messages.create({
-      //   body: `Dawwar verification code: ${code}`,
-      //   from: this.config.get('TWILIO_PHONE_NUMBER'),
-      //   to: `+20${phone.replace(/^0/, '')}`,
-      // });
-      this.logger.log(`OTP sent to ${phone} via SMS`);
+      await this.sendViaSms(phone, code);
     }
 
     return { expiresIn: expiresSeconds };
   }
+
+  // ── Verifyway SMS (P3-01) ─────────────────────────────────────────
+  private async sendViaSms(phone: string, code: string): Promise<void> {
+    const apiKey = this.config.get<string>('app.verifywayApiKey');
+    const baseUrl = this.config.get<string>('app.verifywayBaseUrl');
+
+    if (!apiKey) {
+      // No API key configured — log and continue (sandbox should handle dev)
+      this.logger.warn(`[OTP] VERIFYWAY_API_KEY not set — OTP for ${phone}: ${code}`);
+      return;
+    }
+
+    const intlPhone = `+20${phone.replace(/^0/, '')}`;
+
+    try {
+      await axios.post(
+        `${baseUrl}/send-otp`,
+        {
+          phone: intlPhone,
+          message: `دوّار — رمز التحقق الخاص بك هو: ${code}. صالح لمدة دقيقتين.`,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+          timeout: 8000,
+        },
+      );
+      this.logger.log(`OTP sent to ${phone} via Verifyway`);
+    } catch (err: unknown) {
+      // Never block auth flow — log and continue
+      const msg = err instanceof Error ? err.message : String(err);
+      this.logger.error(`Verifyway SMS failed for ${phone}: ${msg}`);
+      // Store SMS_SERVICE_UNAVAILABLE marker so mobile can handle gracefully
+      const key = `otp:${phone}`;
+      const existing = await this.cache.get<string>(key);
+      if (existing) {
+        const data = JSON.parse(existing) as { code: string; attempts: number; smsError?: boolean };
+        data.smsError = true;
+        const expiresSeconds = this.config.get<number>('app.otpExpiresSeconds') ?? 120;
+        await this.cache.set(key, JSON.stringify(data), expiresSeconds * 1000);
+      }
+    }
+  }
+
+
 
   async verifyOtp(
     phone: string,

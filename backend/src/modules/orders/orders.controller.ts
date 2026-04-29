@@ -53,6 +53,17 @@ export class OrdersController {
     return this.ordersService.getOrderById(id);
   }
 
+  @Post(':id/tip')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Add a tip to a completed order' })
+  addTip(
+    @Param('id') id: string,
+    @CurrentUser() user: UserEntity,
+    @Body('amount') amount: number,
+  ) {
+    return this.ordersService.addTip(id, user.id, amount);
+  }
+
   // ── Merchant ─────────────────────────────────────────────────────
 
   @Get('merchant/all')

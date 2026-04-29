@@ -14,6 +14,17 @@ export class AnalyticsController {
 
   // ─── Merchant Analytics ───────────────────────────────────────────
 
+  /**
+   * Alias used by the merchant mobile app: GET /analytics/today
+   * Equivalent to /analytics/merchant/today
+   */
+  @Get('today')
+  @ApiOperation({ summary: 'Get merchant analytics for today (mobile alias)' })
+  async getToday(@CurrentUser() user: UserEntity) {
+    const data = await this.analyticsService.getMerchantToday(user.id);
+    return { success: true, data };
+  }
+
   @Get('merchant/today')
   @ApiOperation({ summary: 'Get merchant analytics for today' })
   async getMerchantToday(@CurrentUser() user: UserEntity) {
