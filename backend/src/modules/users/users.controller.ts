@@ -20,6 +20,11 @@ class UpdateProfileDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
+  profileImage?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
   fcmToken?: string;
 }
 

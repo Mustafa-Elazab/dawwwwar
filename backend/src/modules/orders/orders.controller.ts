@@ -11,7 +11,8 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { OrdersService } from './orders.service';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import { UserEntity } from '../../database/entities/user.entity';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { UserEntity, UserRole } from '../../database/entities/user.entity';
 import { PlaceOrderDto } from './dto/place-order.dto';
 import { PlaceCustomOrderDto } from './dto/place-custom-order.dto';
 import { AcceptOrderDto } from './dto/accept-order.dto';
@@ -64,15 +65,27 @@ export class OrdersController {
     return this.ordersService.addTip(id, user.id, amount);
   }
 
+  @Post(':id/cancel')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Customer cancels a PENDING order' })
+  cancelOrder(
+    @Param('id') id: string,
+    @CurrentUser() user: UserEntity,
+  ) {
+    return this.ordersService.customerCancel(id, user.id);
+  }
+
   // ── Merchant ─────────────────────────────────────────────────────
 
   @Get('merchant/all')
+  @Roles(UserRole.MERCHANT)
   @ApiOperation({ summary: 'Get merchant orders' })
   getMerchantOrders(@CurrentUser() user: UserEntity) {
     return this.ordersService.getMerchantOrders(user.id);
   }
 
   @Post('merchant/:id/accept')
+  @Roles(UserRole.MERCHANT)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Merchant accepts order' })
   merchantAccept(
@@ -84,6 +97,7 @@ export class OrdersController {
   }
 
   @Post('merchant/:id/reject')
+  @Roles(UserRole.MERCHANT)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Merchant rejects order' })
   merchantReject(
@@ -95,6 +109,7 @@ export class OrdersController {
   }
 
   @Post('merchant/:id/ready')
+  @Roles(UserRole.MERCHANT)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Merchant marks order as ready' })
   merchantMarkReady(@Param('id') id: string, @CurrentUser() user: UserEntity) {
@@ -104,18 +119,21 @@ export class OrdersController {
   // ── Driver ───────────────────────────────────────────────────────
 
   @Get('driver/available')
+  @Roles(UserRole.DRIVER)
   @ApiOperation({ summary: 'Get available orders for driver' })
   getAvailable() {
     return this.ordersService.getAvailableOrders();
   }
 
   @Get('driver/active')
+  @Roles(UserRole.DRIVER)
   @ApiOperation({ summary: 'Get driver active order' })
   getDriverActive(@CurrentUser() user: UserEntity) {
     return this.ordersService.getDriverActiveOrder(user.id);
   }
 
   @Post('driver/:id/accept')
+  @Roles(UserRole.DRIVER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Driver accepts order' })
   driverAccept(@Param('id') id: string, @CurrentUser() user: UserEntity) {
@@ -123,6 +141,7 @@ export class OrdersController {
   }
 
   @Post('driver/:id/decline')
+  @Roles(UserRole.DRIVER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Driver declines order' })
   driverDecline(@Param('id') id: string, @CurrentUser() user: UserEntity) {
@@ -130,6 +149,7 @@ export class OrdersController {
   }
 
   @Patch('driver/:id/status')
+  @Roles(UserRole.DRIVER)
   @ApiOperation({ summary: 'Driver updates delivery status' })
   updateStatus(
     @Param('id') id: string,

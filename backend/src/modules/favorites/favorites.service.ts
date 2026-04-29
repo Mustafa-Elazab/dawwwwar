@@ -28,10 +28,10 @@ export class FavoritesService {
 
   async add(userId: string, merchantId: string): Promise<FavoriteEntity> {
     const merchant = await this.merchantRepo.findOne({ where: { id: merchantId } });
-    if (!merchant) throw new NotFoundException('Merchant not found');
+    if (!merchant) throw new NotFoundException('MERCHANT_NOT_FOUND');
 
     const existing = await this.repo.findOne({ where: { userId, merchantId } });
-    if (existing) throw new ConflictException('Already in favorites');
+    if (existing) throw new ConflictException('ALREADY_IN_FAVORITES');
 
     const fav = this.repo.create({ userId, merchantId });
     return this.repo.save(fav);
@@ -39,7 +39,7 @@ export class FavoritesService {
 
   async remove(userId: string, merchantId: string): Promise<void> {
     const fav = await this.repo.findOne({ where: { userId, merchantId } });
-    if (!fav) throw new NotFoundException('Favorite not found');
+    if (!fav) throw new NotFoundException('FAVORITE_NOT_FOUND');
     if (fav.userId !== userId) throw new ForbiddenException();
     await this.repo.remove(fav);
   }

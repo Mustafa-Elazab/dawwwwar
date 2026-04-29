@@ -30,7 +30,7 @@ export class WalletService {
 
   async getWallet(userId: string): Promise<WalletEntity> {
     const wallet = await this.walletRepo.findOne({ where: { userId } });
-    if (!wallet) throw new NotFoundException('Wallet not found');
+    if (!wallet) throw new NotFoundException('WALLET_NOT_FOUND');
     return wallet;
   }
 
@@ -52,7 +52,7 @@ export class WalletService {
     amount: number,
   ): Promise<{ paymentKey: string; requestedAmount: number }> {
     if (amount < 10) {
-      throw new BadRequestException('Minimum recharge amount is 10 EGP');
+      throw new BadRequestException('MIN_RECHARGE_AMOUNT');
     }
 
     const apiKey = this.config.get<string>('app.paymobApiKey');
@@ -108,7 +108,7 @@ export class WalletService {
       return { paymentKey: keyRes.data.token, requestedAmount: amount };
     } catch (err: unknown) {
       this.logger.error('Paymob API error', err);
-      throw new BadRequestException('Payment gateway error');
+      throw new BadRequestException('PAYMENT_GATEWAY_ERROR');
     }
   }
 

@@ -35,7 +35,7 @@ export class ProductsService {
 
   async findById(id: string): Promise<ProductEntity> {
     const product = await this.repo.findOne({ where: { id } });
-    if (!product) throw new NotFoundException('Product not found');
+    if (!product) throw new NotFoundException('PRODUCT_NOT_FOUND');
     return product;
   }
 
@@ -44,7 +44,7 @@ export class ProductsService {
     dto: CreateProductDto,
   ): Promise<ProductEntity> {
     const merchant = await this.merchantsService.findByUserId(userId);
-    if (!merchant) throw new ForbiddenException('Not a merchant');
+    if (!merchant) throw new ForbiddenException('NOT_A_MERCHANT');
 
     const product = this.repo.create({ ...dto, merchantId: merchant.id });
     return this.repo.save(product);
@@ -58,7 +58,7 @@ export class ProductsService {
     const product = await this.findById(id);
     const merchant = await this.merchantsService.findByUserId(userId);
     if (!merchant || product.merchantId !== merchant.id) {
-      throw new ForbiddenException('Cannot update this product');
+      throw new ForbiddenException('CANNOT_UPDATE_PRODUCT');
     }
     Object.assign(product, dto);
     return this.repo.save(product);
@@ -76,7 +76,7 @@ export class ProductsService {
     const product = await this.findById(id);
     const merchant = await this.merchantsService.findByUserId(userId);
     if (!merchant || product.merchantId !== merchant.id) {
-      throw new ForbiddenException('Cannot delete this product');
+      throw new ForbiddenException('CANNOT_DELETE_PRODUCT');
     }
     await this.repo.remove(product);
   }

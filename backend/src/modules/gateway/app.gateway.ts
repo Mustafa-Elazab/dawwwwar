@@ -168,4 +168,22 @@ export class AppGateway
       throw new WsException('Failed to send message');
     }
   }
+
+  // ── Chat mark as read ─────────────────────────────────────────────
+  @SubscribeMessage(SOCKET_EVENTS.CHAT_READ)
+  async handleChatRead(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { orderId: string },
+  ) {
+    const user = client.data['user'] as JwtPayload | undefined;
+    if (!user) throw new WsException('Not authenticated');
+
+    try {
+      await this.chatService.markRead(data.orderId, user.sub);
+      return { read: true };
+    } catch (err: unknown) {
+      this.logger.error(`Failed to mark chat as read for order ${data.orderId}`, err);
+      return { read: false };
+    }
+  }
 }

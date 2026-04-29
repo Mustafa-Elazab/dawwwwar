@@ -19,7 +19,7 @@ export class ChatService {
 
   async getHistory(orderId: string, requesterId: string): Promise<ChatMessageEntity[]> {
     const order = await this.orderRepo.findOne({ where: { id: orderId } });
-    if (!order) throw new NotFoundException('Order not found');
+    if (!order) throw new NotFoundException('ORDER_NOT_FOUND');
 
     // Allow customer, driver, or merchant of this order
     const isAllowed =
@@ -27,7 +27,7 @@ export class ChatService {
       order.driverId === requesterId ||
       order.merchantId === requesterId;
 
-    if (!isAllowed) throw new ForbiddenException('Not your order');
+    if (!isAllowed) throw new ForbiddenException('CHAT_NOT_YOUR_ORDER');
 
     return this.chatRepo.find({
       where: { orderId },

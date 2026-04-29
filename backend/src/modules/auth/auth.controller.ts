@@ -48,8 +48,8 @@ export class AuthController {
   @Public()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Refresh access token using refresh token' })
-  refresh(@Body() dto: RefreshTokenDto & { userId: string }) {
-    return this.authService.refreshTokens(dto.userId, dto.refreshToken);
+  refresh(@Body() dto: RefreshTokenDto) {
+    return this.authService.refreshTokens(dto.refreshToken);
   }
 
   @Post('logout')

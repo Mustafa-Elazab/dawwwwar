@@ -121,7 +121,7 @@ export class PromoService {
 
   async toggle(id: string, isActive: boolean): Promise<PromoCodeEntity> {
     const promo = await this.repo.findOne({ where: { id } });
-    if (!promo) throw new NotFoundException('Promo code not found');
+    if (!promo) throw new NotFoundException('PROMO_NOT_FOUND');
     await this.repo.update(id, { isActive });
     return this.repo.findOne({ where: { id } }) as Promise<PromoCodeEntity>;
   }

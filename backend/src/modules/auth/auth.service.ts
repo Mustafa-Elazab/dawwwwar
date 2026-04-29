@@ -97,12 +97,22 @@ export class AuthService {
   }
 
   // ── Refresh tokens ────────────────────────────────────────────────
-  async refreshTokens(userId: string, refreshToken: string): Promise<AuthTokens> {
-    const user = await this.userRepo.findOne({ where: { id: userId } });
-    if (!user?.refreshToken) throw new ForbiddenException('Access denied');
+  async refreshTokens(refreshToken: string): Promise<AuthTokens> {
+    // Extract userId from the refresh token payload (secure — no client-supplied userId)
+    let payload: JwtPayload;
+    try {
+      payload = this.jwtService.verify<JwtPayload>(refreshToken, {
+        secret: this.config.get<string>('jwt.refreshSecret'),
+      });
+    } catch {
+      throw new ForbiddenException('INVALID_REFRESH_TOKEN');
+    }
+
+    const user = await this.userRepo.findOne({ where: { id: payload.sub } });
+    if (!user?.refreshToken) throw new ForbiddenException('ACCESS_DENIED');
 
     const matches = await bcrypt.compare(refreshToken, user.refreshToken);
-    if (!matches) throw new ForbiddenException('Access denied');
+    if (!matches) throw new ForbiddenException('ACCESS_DENIED');
 
     const tokens = await this.generateTokens(user);
     user.refreshToken = await bcrypt.hash(tokens.refreshToken, 10);
@@ -117,7 +127,7 @@ export class AuthService {
 
   // ── Select role (first login) ─────────────────────────────────────
   async selectRole(userId: string, role: UserRole): Promise<UserEntity> {
-    if (role === UserRole.ADMIN) throw new ForbiddenException('Cannot assign admin role');
+    if (role === UserRole.ADMIN) throw new ForbiddenException('CANNOT_ASSIGN_ADMIN');
 
     const user = await this.userRepo.findOneOrFail({ where: { id: userId } });
     user.role = role;

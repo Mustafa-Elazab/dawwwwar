@@ -12,6 +12,10 @@ import {
   SafeAreaProvider,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
+import { initFirebaseServices } from './src/core/firebase';
+
+// Initialize Firebase Crashlytics + Analytics on app startup
+initFirebaseServices();
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';

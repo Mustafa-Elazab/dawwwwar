@@ -55,7 +55,7 @@ export class MerchantsService {
 
   async findById(id: string): Promise<MerchantEntity> {
     const merchant = await this.repo.findOne({ where: { id }, relations: ['user'] });
-    if (!merchant) throw new NotFoundException('Merchant not found');
+    if (!merchant) throw new NotFoundException('MERCHANT_NOT_FOUND');
     return merchant;
   }
 

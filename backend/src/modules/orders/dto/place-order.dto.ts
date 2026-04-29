@@ -77,4 +77,14 @@ export class PlaceOrderDto {
   @IsNumber()
   @IsPositive()
   deliveryFee: number;
+
+  @ApiProperty({ required: false, description: 'Promo code to apply' })
+  @IsOptional()
+  @IsString()
+  promoCode?: string;
+
+  @ApiProperty({ required: false, description: 'ISO date string for scheduled delivery' })
+  @IsOptional()
+  @IsString()
+  deliverAt?: string;
 }

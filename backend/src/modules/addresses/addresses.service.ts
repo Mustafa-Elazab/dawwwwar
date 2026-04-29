@@ -25,7 +25,7 @@ export class AddressesService {
 
   async findById(id: string, userId: string): Promise<AddressEntity> {
     const address = await this.repo.findOne({ where: { id } });
-    if (!address) throw new NotFoundException('Address not found');
+    if (!address) throw new NotFoundException('ADDRESS_NOT_FOUND');
     if (address.userId !== userId) throw new ForbiddenException();
     return address;
   }

@@ -69,4 +69,9 @@ export class PlaceCustomOrderDto {
   @IsNumber()
   @IsPositive()
   deliveryFee: number;
+
+  @ApiProperty({ required: false, description: 'ISO date string for scheduled delivery' })
+  @IsOptional()
+  @IsString()
+  deliverAt?: string;
 }

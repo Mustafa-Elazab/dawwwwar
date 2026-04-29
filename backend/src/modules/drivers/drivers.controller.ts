@@ -12,7 +12,8 @@ import { IsBoolean } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { DriversService } from './drivers.service';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import { UserEntity } from '../../database/entities/user.entity';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { UserEntity, UserRole } from '../../database/entities/user.entity';
 import { UpdateLocationDto } from './dto/update-location.dto';
 
 class ToggleOnlineDto {
@@ -24,6 +25,7 @@ class ToggleOnlineDto {
 @ApiTags('Drivers')
 @Controller('driver')
 @ApiBearerAuth('access-token')
+@Roles(UserRole.DRIVER)
 export class DriversController {
   constructor(private readonly driversService: DriversService) {}
 

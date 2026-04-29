@@ -29,16 +29,6 @@ export class UserEntity extends BaseEntity {
   @Column({ name: 'fcm_token', nullable: true })
   fcmToken?: string;
 
-  // OTP fields (temporary, cleared after verification)
-  @Column({ name: 'otp_code', nullable: true })
-  otpCode?: string;
-
-  @Column({ name: 'otp_expires_at', type: 'timestamptz', nullable: true })
-  otpExpiresAt?: Date;
-
-  @Column({ name: 'otp_attempts', default: 0 })
-  otpAttempts: number;
-
   // Refresh token (hashed)
   @Column({ name: 'refresh_token', nullable: true })
   refreshToken?: string;

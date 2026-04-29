@@ -15,6 +15,7 @@ export const SOCKET_EVENTS = {
   JOIN_MERCHANT_ROOM: 'join:merchant_room',
   JOIN_DRIVER_ROOM: 'join:driver_room',
   CHAT_SEND: 'chat:send',          // P3-05 · client sends a chat message
+  CHAT_READ: 'chat:read',          // P3-05 · client marks messages as read
 } as const;
 
 // Room naming conventions

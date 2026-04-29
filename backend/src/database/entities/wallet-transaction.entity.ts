@@ -13,6 +13,7 @@ export enum TransactionReason {
   WALLET_RECHARGE = 'WALLET_RECHARGE',
   REFUND = 'REFUND',
   ADJUSTMENT = 'ADJUSTMENT',
+  TIP = 'TIP',
 }
 
 @Entity('wallet_transactions')

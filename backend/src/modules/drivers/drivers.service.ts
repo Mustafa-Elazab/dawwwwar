@@ -42,7 +42,7 @@ export class DriversService {
       where: { userId },
       relations: ['user'],
     });
-    if (!profile) throw new NotFoundException('Driver profile not found');
+    if (!profile) throw new NotFoundException('DRIVER_PROFILE_NOT_FOUND');
     return profile;
   }
 
@@ -75,7 +75,7 @@ export class DriversService {
 
   async getEarningsSummary(userId: string): Promise<DriverEarningsSummary> {
     const wallet = await this.walletRepo.findOne({ where: { userId } });
-    if (!wallet) throw new NotFoundException('Wallet not found');
+    if (!wallet) throw new NotFoundException('WALLET_NOT_FOUND');
 
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
@@ -96,24 +96,31 @@ export class DriversService {
     const todayCommission = todayDeliveries * COMMISSION;
     const todayNet = todayDeliveries * DELIVERY_FEE;
 
-    // Build 7-day chart: query past 7 days grouped by day
-    const weeklyData = DAYS_EN.map((day, i) => {
+    // Build 7-day chart: query past 7 days with real daily totals
+    const weeklyData: DriverEarningsSummary['weeklyData'] = [];
+    for (let i = 0; i < 7; i++) {
       const dayStart = new Date();
-      // Offset to get each day of this week
       const diff = i - dayStart.getDay();
       dayStart.setDate(dayStart.getDate() + diff);
       dayStart.setHours(0, 0, 0, 0);
       const dayEnd = new Date(dayStart);
       dayEnd.setHours(23, 59, 59, 999);
-      const isToday = i === new Date().getDay();
-      // For the chart use local delivery count (full DB query would be more precise in prod)
-      return {
-        day,
-        dayAr: DAYS_AR[i] ?? day,
-        net: isToday ? todayNet : 0,   // Phase 3: query real daily totals
-        deliveries: isToday ? todayDeliveries : 0,
-      };
-    });
+
+      const dayTxs = await this.txRepo
+        .createQueryBuilder('tx')
+        .where('tx.walletId = :walletId', { walletId: wallet.id })
+        .andWhere("tx.reason = 'COMMISSION_DEDUCTION'")
+        .andWhere('tx.createdAt >= :start', { start: dayStart })
+        .andWhere('tx.createdAt <= :end', { end: dayEnd })
+        .getCount();
+
+      weeklyData.push({
+        day: DAYS_EN[i] ?? '',
+        dayAr: DAYS_AR[i] ?? '',
+        net: dayTxs * DELIVERY_FEE,
+        deliveries: dayTxs,
+      });
+    }
 
     return { todayDeliveries, todayGross, todayCommission, todayNet, weeklyData };
   }

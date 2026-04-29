@@ -47,15 +47,15 @@ export class ReviewsService {
   async createReview(customerId: string, dto: CreateReviewDto): Promise<ReviewEntity> {
     // Order must exist and belong to this customer
     const order = await this.orderRepo.findOne({ where: { id: dto.orderId } });
-    if (!order) throw new NotFoundException('Order not found');
-    if (order.customerId !== customerId) throw new ForbiddenException('Not your order');
+    if (!order) throw new NotFoundException('ORDER_NOT_FOUND');
+    if (order.customerId !== customerId) throw new ForbiddenException('NOT_YOUR_ORDER');
     if (order.status !== OrderStatus.COMPLETED) {
-      throw new BadRequestException('Can only review COMPLETED orders');
+      throw new BadRequestException('CAN_ONLY_REVIEW_COMPLETED');
     }
 
     // One review per order
     const existing = await this.reviewRepo.findOne({ where: { orderId: dto.orderId } });
-    if (existing) throw new ConflictException('Already reviewed this order');
+    if (existing) throw new ConflictException('ALREADY_REVIEWED');
 
     const review = this.reviewRepo.create({
       orderId: dto.orderId,
