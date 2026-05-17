@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { View, TouchableOpacity, TextInput, Alert } from 'react-native';
+import { View, TouchableOpacity, Alert } from 'react-native';
 import { useTheme } from '@dawwar/theme';
 import { Text, Button } from '@dawwar/ui';
 import { useTranslation } from '@dawwar/i18n';
+import RTLTextInput from '../../../../components/RTLTextInput';
 import { useRecharge } from '../../core/hooks';
 import { createStyles } from './styles';
 
@@ -10,7 +11,7 @@ const PRESET_AMOUNTS = [50, 100, 200, 500];
 
 export function RechargeChips() {
   const { colors } = useTheme();
-  const styles = createStyles(colors);
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const { t } = useTranslation();
   const rechargeMutation = useRecharge();
 
@@ -48,6 +49,9 @@ export function RechargeChips() {
     );
   };
 
+  const isSelected = selected !== null || (showCustom && customAmount);
+  const currentAmount = showCustom ? customAmount : selected;
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{t('wallet.select_amount')}</Text>
@@ -72,7 +76,7 @@ export function RechargeChips() {
           </Text>
         </TouchableOpacity>
         {showCustom && (
-          <TextInput
+          <RTLTextInput
             style={styles.customInput}
             value={customAmount}
             onChangeText={setCustomAmount}
@@ -83,17 +87,21 @@ export function RechargeChips() {
           />
         )}
       </View>
-      {(selected !== null || (showCustom && customAmount)) && (
-        <>
-          <Button
-            label={t('wallet.confirm_recharge')}
-            onPress={handleConfirm}
-            loading={rechargeMutation.isPending}
-            fullWidth
-            style={styles.confirmBtn}
-          />
-          <Text style={styles.note}>{t('wallet.recharge_note')}</Text>
-        </>
+      <Button
+        label={isSelected
+          ? `${t('wallet.recharge')} ${currentAmount} ${t('common.egp')}`
+          : t('wallet.select_amount_first')}
+        onPress={handleConfirm}
+        loading={rechargeMutation.isPending}
+        disabled={!isSelected}
+        fullWidth
+        style={[
+          styles.confirmBtn,
+          !isSelected && { backgroundColor: colors.border, opacity: 0.5 }
+        ]}
+      />
+      {isSelected && (
+        <Text style={styles.note}>{t('wallet.recharge_note')}</Text>
       )}
     </View>
   );

@@ -1,11 +1,11 @@
-import { StyleSheet, I18nManager } from 'react-native';
+import { StyleSheet } from 'react-native';
 import type { AppColors } from '@dawwar/theme';
 import { space, typography, radius } from '@dawwar/theme';
 
 export const createStyles = (colors: AppColors) =>
   StyleSheet.create({
     row: {
-      flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
+      flexDirection: 'row',
       alignItems: 'center',
       paddingVertical: space.md,
       paddingHorizontal: space.base,

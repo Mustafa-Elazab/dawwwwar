@@ -5,7 +5,7 @@ import { space, radius, typography } from '@dawwar/theme';
 export const createStyles = (colors: AppColors) =>
   StyleSheet.create({
     container: { paddingHorizontal: space.base, marginBottom: space.base },
-    title: { ...typography.label, color: colors.textSecondary, marginBottom: space.md },
+    title: { ...typography.label, color: colors.textSecondary, marginBottom: space.md ,alignSelf:"flex-start"},
     row: { flexDirection: 'row', gap: space.sm, flexWrap: 'wrap' },
     chip: {
       borderWidth: 1.5, borderColor: colors.border,

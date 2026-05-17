@@ -12,10 +12,15 @@ export const createStyles = (colors: AppColors) =>
       padding: 3,
     },
     tab: {
-      flex: 1, paddingVertical: space.sm,
+      flex: 1,
+      paddingVertical: 10,
       borderRadius: radius.full,
       alignItems: 'center',
     },
-    tabActive: { backgroundColor: colors.card },
-    tabLabel: { ...typography.label },
+    tabActive: { 
+      backgroundColor: colors.primary,
+    },
+    tabLabel: { 
+      ...typography.label,
+    },
   });

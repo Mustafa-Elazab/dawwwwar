@@ -1,66 +1,69 @@
 import { StyleSheet } from 'react-native';
 import type { AppColors } from '@dawwar/theme';
-import { space, typography, radius } from '@dawwar/theme';
+import { typography } from '@dawwar/theme';
 
 export const createStyles = (colors: AppColors) =>
   StyleSheet.create({
-    coverContainer: { height: 220, position: 'relative' },
-    cover: { width: '100%', height: '100%' },
-    backBtn: {
+    coverContainer: {
+      height: 220,
+      width: '100%',
+      position: 'relative',
+      backgroundColor: colors.surfaceVariant,
+    },
+    cover: {
+      width: '100%',
+      height: '100%',
+      backgroundColor: colors.surfaceVariant,
+    },
+    overlay: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: 'rgba(0,0,0,0.15)',
+    },
+    gradient: {
       position: 'absolute',
-      top: space.md,
-      start: space.md,
-      width: 36,
-      height: 36,
-      borderRadius: 18,
-      backgroundColor: 'rgba(0,0,0,0.4)',
-      alignItems: 'center',
-      justifyContent: 'center',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      height: 120,
+      backgroundColor: 'rgba(0,0,0,0.6)', // Simple solid fade to text, or use gradient if installed
     },
-    infoCard: {
-      backgroundColor: colors.card,
-      borderTopLeftRadius: radius['2xl'],
-      borderTopRightRadius: radius['2xl'],
-      marginTop: -24,
-      paddingHorizontal: space.base,
-      paddingTop: space.lg,
-      paddingBottom: space.md,
+    headerContent: {
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      padding: 16,
     },
-    logoRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: space.md,
-      marginBottom: space.sm,
-    },
-    logo: {
-      width: 60,
-      height: 60,
-      borderRadius: radius.lg,
-    },
-    nameBlock: { flex: 1 },
     businessName: {
-      ...typography.h3,
-      color: colors.text,
+      ...typography.h2,
+      color: '#fff',
+      marginBottom: 8,
     },
     metaRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: space.sm,
-      flexWrap: 'wrap',
-      marginTop: 4,
+      marginBottom: 12,
     },
-    metaText: {
-      ...typography.caption,
-      color: colors.textSecondary,
+    ratingRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: 'rgba(0,0,0,0.4)',
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+      borderRadius: 12,
     },
     ratingText: {
-      ...typography.caption,
-      color: colors.warning,
+      ...typography.label,
+      color: '#fff',
+      marginStart: 4,
       fontWeight: '700',
     },
-    closedText: {
-      ...typography.caption,
-      color: colors.error,
-      fontWeight: '600',
+    metaText: {
+      ...typography.body2,
+      color: '#eee',
+      marginHorizontal: 4,
+    },
+    badgeWrapper: {
+      alignSelf: 'flex-start',
     },
   });

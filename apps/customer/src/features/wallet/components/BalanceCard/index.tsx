@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View } from 'react-native';
 import { useTheme } from '@dawwar/theme';
 import { Text } from '@dawwar/ui';
@@ -11,14 +11,14 @@ interface BalanceCardProps {
 
 export function BalanceCard({ balance }: BalanceCardProps) {
   const { colors } = useTheme();
-  const styles = createStyles(colors);
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const { t } = useTranslation();
 
   return (
     <View style={styles.card}>
       <Text style={styles.label}>{t('wallet.balance_label')}</Text>
       <View style={styles.amountRow}>
-        <Text style={styles.amount}>{balance.toFixed(2)}</Text>
+        <Text style={styles.amount}>{Number(balance || 0).toFixed(2)}</Text>
         <Text style={styles.currency}>{t('common.egp')}</Text>
       </View>
     </View>

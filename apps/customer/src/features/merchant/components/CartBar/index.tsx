@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { TouchableOpacity } from 'react-native';
 import { useTheme } from '@dawwar/theme';
 import { Text } from '@dawwar/ui';
@@ -13,7 +13,7 @@ interface CartBarProps {
 
 export function CartBar({ itemCount, total, onPress }: CartBarProps) {
   const { colors } = useTheme();
-  const styles = createStyles(colors);
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const { t } = useTranslation();
 
   if (itemCount === 0) return null;

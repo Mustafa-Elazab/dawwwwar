@@ -1,30 +1,55 @@
 import { StyleSheet } from 'react-native';
 import type { AppColors } from '@dawwar/theme';
-import { space, radius } from '@dawwar/theme';
+import { space, typography, radius } from '@dawwar/theme';
 
 export const createStyles = (colors: AppColors) =>
   StyleSheet.create({
-    grid: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
-    cell: {
-      width: 80, height: 80,
-      borderRadius: radius.md,
-      overflow: 'hidden',
-      position: 'relative',
+    container: {
+      paddingVertical: space.sm,
     },
-    image: { width: '100%', height: '100%' },
-    removeBtn: {
-      position: 'absolute', top: 2, right: 2,
-      backgroundColor: 'rgba(0,0,0,0.6)',
-      borderRadius: 10, width: 20, height: 20,
-      alignItems: 'center', justifyContent: 'center',
+    scrollContent: {
+      flexDirection: 'row',
+      gap: space.md,
+      paddingHorizontal: 2,
     },
-    addCell: {
-      width: 80, height: 80,
+    addBtn: {
+      width: 80,
+      height: 80,
       borderRadius: radius.md,
-      borderWidth: 1.5, borderStyle: 'dashed',
+      borderWidth: 2,
       borderColor: colors.border,
-      alignItems: 'center', justifyContent: 'center',
-      gap: space.sm,
+      borderStyle: 'dashed',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.background,
     },
-    addText: { fontSize: 10, color: colors.textSecondary },
+    count: {
+      ...typography.overline,
+      color: colors.textDisabled,
+      fontWeight: '700',
+      marginTop: 2,
+    },
+    photoWrapper: {
+      position: 'relative',
+      width: 80,
+      height: 80,
+    },
+    image: {
+      width: 80,
+      height: 80,
+      borderRadius: radius.md,
+      backgroundColor: colors.background,
+    },
+    removeBtn: {
+      position: 'absolute',
+      top: -8,
+      right: -8,
+      backgroundColor: '#fff',
+      borderRadius: 12,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.2,
+      shadowRadius: 2,
+      elevation: 3,
+    },
   });

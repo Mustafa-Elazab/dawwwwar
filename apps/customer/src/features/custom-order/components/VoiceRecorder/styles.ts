@@ -1,43 +1,82 @@
 import { StyleSheet } from 'react-native';
 import type { AppColors } from '@dawwar/theme';
-import { space, typography, radius } from '@dawwar/theme';
+import { space, typography, radius, shadows } from '@dawwar/theme';
 
-export const createStyles = (colors: AppColors, isRecording: boolean) =>
+export const createStyles = (colors: AppColors, isRecording?: boolean) =>
   StyleSheet.create({
     container: {
-      borderWidth: 1.5,
-      borderRadius: radius.xl,
-      borderColor: isRecording ? colors.error : colors.border,
-      padding: space.md,
-      gap: space.sm,
+      alignItems: 'center',
+      paddingVertical: space.md,
     },
-    label: { ...typography.label, color: colors.textSecondary },
+    label: {
+      ...typography.caption,
+      color: colors.textSecondary,
+      marginBottom: space.lg,
+      fontWeight: '600',
+    },
+    
+    // ── Record Button ──────────────────────────────────
     recordBtn: {
-      flexDirection: 'row', alignItems: 'center', gap: space.sm,
-      backgroundColor: isRecording ? colors.errorBg : colors.surfaceVariant,
-      borderRadius: radius.full, paddingHorizontal: space.lg, paddingVertical: space.md,
-      alignSelf: 'flex-start',
+      width: 72, // 72px circular mic button
+      height: 72,
+      borderRadius: 36,
+      backgroundColor: colors.primary, // primary orange
+      alignItems: 'center',
+      justifyContent: 'center',
+      ...shadows.md,
+      elevation: 5,
+    },
+    pulseRing: {
+      position: 'absolute',
+      width: 88,
+      height: 88,
+      borderRadius: 44,
+      borderWidth: 2,
+      borderColor: colors.primary,
+      opacity: 0.3,
     },
     recordText: {
-      ...typography.label,
-      color: isRecording ? colors.error : colors.text,
+      ...typography.caption,
+      color: colors.primary,
+      fontWeight: '700',
+      marginTop: space.md,
     },
+    
+    // ── Player ──────────────────────────────────────────
     playerRow: {
-      flexDirection: 'row', alignItems: 'center', gap: space.md,
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.background,
+      borderRadius: radius.full,
+      padding: space.sm,
+      width: '100%',
+      gap: space.sm,
+      borderWidth: 1,
+      borderColor: colors.borderLight,
     },
     playBtn: {
-      width: 40, height: 40, borderRadius: 20,
-      backgroundColor: colors.primaryMuted,
-      alignItems: 'center', justifyContent: 'center',
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: colors.surface,
+      alignItems: 'center',
+      justifyContent: 'center',
+      ...shadows.sm,
     },
-    duration: { ...typography.body2, color: colors.textSecondary },
-    clearBtn: { padding: space.sm },
     waveform: {
-      flex: 1, height: 32,
-      flexDirection: 'row', alignItems: 'center', gap: 2,
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 3,
+      height: 30,
     },
     wavebar: {
-      width: 3, backgroundColor: colors.primary,
-      borderRadius: 2,
+      width: 3,
+      backgroundColor: colors.primary,
+      borderRadius: 1.5,
+    },
+    clearBtn: {
+      padding: space.xs,
     },
   });

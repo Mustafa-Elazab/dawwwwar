@@ -1,52 +1,79 @@
-import { StyleSheet, I18nManager } from 'react-native';
+import { StyleSheet } from 'react-native';
 import type { AppColors } from '@dawwar/theme';
-import { space, typography, radius } from '@dawwar/theme';
+import { space, typography, radius, shadows } from '@dawwar/theme';
 
 export const createStyles = (colors: AppColors) =>
   StyleSheet.create({
     row: {
-      flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
+      flexDirection: 'row',
+      padding: space.md,
+      backgroundColor: colors.surface,
+      borderRadius: radius.lg,
+      marginBottom: space.sm,
+      borderWidth: 1,
+      borderColor: colors.borderLight,
       alignItems: 'center',
-      paddingVertical: space.md,
-      paddingHorizontal: space.base,
       gap: space.md,
-      borderBottomWidth: 1,
-      borderBottomColor: colors.borderLight,
+      marginHorizontal: space.base,
     },
-    image: { width: 72, height: 72, borderRadius: radius.md },
-    info: { flex: 1 },
-    name: { ...typography.label, color: colors.text },
-    description: { ...typography.caption, color: colors.textSecondary, marginTop: 2 },
-    price: { ...typography.label, color: colors.primary, marginTop: 4 },
+    image: {
+      width: 80,
+      height: 80,
+      borderRadius: radius.md,
+      backgroundColor: colors.background,
+    },
+    info: {
+      flex: 1,
+      gap: 4,
+      alignItems: 'flex-start',
+    },
+    name: {
+      ...typography.label,
+      color: colors.text,
+      fontWeight: '700',
+      textAlign: 'left',
+    },
+    description: {
+      ...typography.caption,
+      color: colors.textSecondary,
+      textAlign: 'left',
+    },
+    price: {
+      ...typography.body2,
+      color: colors.primary,
+      fontWeight: '800',
+    },
     unavailableBadge: { marginTop: 4 },
     stepper: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: space.sm,
+      gap: space.xs,
     },
     stepperBtn: {
-      width: 28,
-      height: 28,
-      borderRadius: 14,
+      width: 32,
+      height: 32,
+      borderRadius: 16,
       backgroundColor: colors.primary,
       alignItems: 'center',
       justifyContent: 'center',
     },
     stepperBtnMinus: {
-      backgroundColor: colors.surfaceVariant,
+      backgroundColor: colors.background,
+      borderWidth: 1.5,
+      borderColor: colors.border,
     },
     stepperCount: {
       ...typography.label,
-      color: colors.text,
       minWidth: 20,
       textAlign: 'center',
     },
     addBtn: {
-      width: 34,
-      height: 34,
-      borderRadius: 17,
+      width: 36,
+      height: 36,
+      borderRadius: 18,
       backgroundColor: colors.primary,
       alignItems: 'center',
       justifyContent: 'center',
+      ...shadows.sm,
     },
   });

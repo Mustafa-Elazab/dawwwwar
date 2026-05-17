@@ -1,6 +1,4 @@
-import { USE_MOCK_API } from '../../../../core/api/config';
-import api from '../../../../core/api/client';
-import { walletMock } from '@dawwar/mocks';
+import api from '../../../core/api/client';
 import type { ApiResponse, Wallet, WalletTransaction } from '@dawwar/types';
 
 // ── Phase 2 real implementations ─────────────────────────────────────
@@ -20,4 +18,4 @@ const realWalletApi = {
 };
 
 // ── Export: mock when USE_MOCK_API=true, real when false ──────────────
-export const walletApi = USE_MOCK_API ? walletMock : realWalletApi;
+export const walletApi = realWalletApi;

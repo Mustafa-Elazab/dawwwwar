@@ -1,6 +1,4 @@
-import { USE_MOCK_API } from '../../../../core/api/config';
-import api from '../../../../core/api/client';
-import { merchantsMock } from '@dawwar/mocks';
+import api from '../../../core/api/client';
 import type { ApiResponse, Merchant, Product } from '@dawwar/types';
 
 // ── Phase 2 real implementations ─────────────────────────────────────
@@ -16,4 +14,4 @@ const realMerchantApi = {
 };
 
 // ── Export: mock when USE_MOCK_API=true, real when false ──────────────
-export const merchantApi = USE_MOCK_API ? merchantsMock : realMerchantApi;
+export const merchantApi = realMerchantApi;

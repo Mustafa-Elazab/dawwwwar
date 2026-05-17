@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { View, Modal, TouchableOpacity } from 'react-native';
-import MapView, { Marker, PROVIDER_GOOGLE, type Region } from 'react-native-maps';
+import { View, Modal, TouchableOpacity, I18nManager } from 'react-native';
+import MapView, { PROVIDER_GOOGLE, type Region } from 'react-native-maps';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@dawwar/theme';
-import { Text, Button } from '@dawwar/ui';
+import { Text, Button, Icon } from '@dawwar/ui';
 import { useTranslation } from '@dawwar/i18n';
 import { createStyles } from './styles';
 import type { MapPickerModalProps } from './types';
 
-// Sinbellawin center
 const DEFAULT_LAT = 30.8704;
 const DEFAULT_LNG = 31.4741;
 
@@ -19,8 +19,9 @@ export function MapPickerModal({
   onClose,
 }: MapPickerModalProps) {
   const { colors } = useTheme();
-  const styles = createStyles(colors);
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
 
   const [region, setRegion] = useState<Region>({
     latitude: initialLatitude,
@@ -29,9 +30,8 @@ export function MapPickerModal({
     longitudeDelta: 0.01,
   });
 
-  // Phase 1: mock reverse geocode using coordinates
   const getAddressFromCoords = (lat: number, lng: number): string =>
-    `${lat.toFixed(4)}, ${lng.toFixed(4)} — سنبلاوين`;
+    `${Number(lat || 0).toFixed(4)}, ${Number(lng || 0).toFixed(4)} — سنبلاوين`;
 
   const handleConfirm = () => {
     const address = getAddressFromCoords(region.latitude, region.longitude);
@@ -41,14 +41,16 @@ export function MapPickerModal({
   return (
     <Modal visible={visible} animationType="slide" statusBarTranslucent>
       <View style={styles.overlay}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={onClose}>
-            <View style={{ width: 24 }} />
+        {/* Floating Header */}
+        <View style={[styles.mapHeader, { top: insets.top }]}>
+          <TouchableOpacity onPress={onClose} style={styles.mapBackBtn}>
+            <Icon 
+              name={I18nManager.isRTL ? 'chevron-right' : 'chevron-left'} 
+              size={24} 
+              color={colors.text}
+            />
           </TouchableOpacity>
-          <Text style={styles.title}>{t('addresses.map_title')}</Text>
-          <TouchableOpacity onPress={onClose}>
-            <View style={{ width: 24 }} />
-          </TouchableOpacity>
+          <Text style={styles.mapTitle}>{'اختر موقعك'}</Text>
         </View>
 
         <MapView
@@ -56,33 +58,32 @@ export function MapPickerModal({
           provider={PROVIDER_GOOGLE}
           initialRegion={region}
           onRegionChangeComplete={setRegion}
-        >
-          <Marker
-            coordinate={{ latitude: region.latitude, longitude: region.longitude }}
-            draggable
-            onDragEnd={(e) => {
-              const { latitude, longitude } = e.nativeEvent.coordinate;
-              setRegion((prev) => ({ ...prev, latitude, longitude }));
-            }}
-          />
-        </MapView>
+        />
+
+        {/* Fixed Center Crosshair */}
+        <View style={styles.centerPin} pointerEvents="none">
+          <Icon name="map-marker" size={40} color={colors.primary} />
+        </View>
 
         <View style={styles.hint}>
           <Text style={styles.hintText}>{t('addresses.map_instructions')}</Text>
         </View>
 
-        <View style={styles.addressPreview}>
-          <Text style={styles.addressText}>
-            {getAddressFromCoords(region.latitude, region.longitude)}
-          </Text>
-        </View>
+        {/* Bottom Panel */}
+        <View style={[styles.bottomContainer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
+          <View style={styles.addressPreview}>
+            <Text style={styles.addressText}>
+              {getAddressFromCoords(region.latitude, region.longitude)}
+            </Text>
+          </View>
 
-        <Button
-          label={t('addresses.confirm_location')}
-          onPress={handleConfirm}
-          fullWidth
-          style={styles.confirmBtn}
-        />
+          <Button
+            label={t('location.confirm')}
+            onPress={handleConfirm}
+            fullWidth
+            style={styles.confirmBtn}
+          />
+        </View>
       </View>
     </Modal>
   );

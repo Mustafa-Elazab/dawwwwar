@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View } from 'react-native';
+import { useTranslation } from '@dawwar/i18n';
+import MapView, { Marker } from 'react-native-maps';
 import {
   ScrollScreenTemplate,
-  Header,
   Text,
   Button,
   LoadingSpinner,
@@ -15,8 +16,9 @@ import { useController } from './useController';
 import { createStyles } from './styles';
 
 export function TrackingScreen() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
-  const styles = createStyles(colors);
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const ctrl = useController();
 
   if (ctrl.isLoading) {
@@ -29,28 +31,38 @@ export function TrackingScreen() {
   return (
     <ScrollScreenTemplate
       edges={['top', 'bottom']}
-      header={
-        <Header
-          title={ctrl.t('orders.order_number', { number: ctrl.order.orderNumber })}
-        />
-      }
+      headerProps={{
+        title: t('orders.order_number', { number: ctrl.order.orderNumber }),
+      }}
     >
       {/* Status timeline */}
       <View style={styles.timelineContainer}>
         <StatusTimeline status={ctrl.order.status} orderType={ctrl.order.type} />
         <Text style={styles.statusLabel}>
-          {ctrl.t(`tracking.status.${ctrl.order.status}`)}
+          {t(`tracking.status.${ctrl.order.status}`)}
         </Text>
       </View>
 
-      {/* Map placeholder — Phase 1 uses grey view, Phase 2 wires MapView */}
+      {/* Map implementation */}
       {ctrl.driverLocation && (
-        <View style={styles.mapPlaceholder}>
-          <Icon name="map-marker-radius-outline" size={32} color={colors.primary} />
-          <Text style={styles.mapPlaceholderText}>
-            {`${ctrl.driverLocation.latitude.toFixed(4)}, ${ctrl.driverLocation.longitude.toFixed(4)}`}
-          </Text>
-        </View>
+        <MapView
+          style={styles.mapPlaceholder}
+          region={{
+            latitude: ctrl.driverLocation.latitude,
+            longitude: ctrl.driverLocation.longitude,
+            latitudeDelta: 0.01,
+            longitudeDelta: 0.01,
+          }}
+          scrollEnabled={false}
+          zoomEnabled={false}
+        >
+          <Marker
+            coordinate={ctrl.driverLocation}
+            title={t('driver.on_the_way')}
+          >
+            <Icon name="motorbike" size={28} color={colors.primary} />
+          </Marker>
+        </MapView>
       )}
 
       {/* Driver card */}
@@ -58,7 +70,7 @@ export function TrackingScreen() {
         <View style={styles.driverCard}>
           <Icon name="account-circle-outline" size={44} color={colors.primary} />
           <View style={styles.driverInfo}>
-            <Text style={styles.driverName}>{ctrl.t('driver.on_the_way')}</Text>
+            <Text style={styles.driverName}>{t('driver.on_the_way')}</Text>
             <Text style={styles.driverMeta}>
               {ctrl.order.orderNumber}
             </Text>
@@ -72,9 +84,10 @@ export function TrackingScreen() {
       {/* Cancel button — only PENDING or ACCEPTED */}
       {ctrl.canCancel && (
         <Button
-          label={ctrl.t('tracking.cancel_order')}
+          label={t('tracking.cancel_order')}
           variant="outline"
           style={styles.cancelBtn}
+          onPress={(ctrl as any).handleCancelOrder}
         />
       )}
     </ScrollScreenTemplate>

@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, FlatList, TouchableOpacity } from 'react-native';
-import { ScreenTemplate, Header, Text, EmptyState, Skeleton } from '@dawwar/ui';
+import { useTranslation } from '@dawwar/i18n';
+import { ScreenTemplate, Text, EmptyState, Skeleton } from '@dawwar/ui';
 import { useTheme } from '@dawwar/theme';
 import { OrderCard } from '../../components/OrderCard';
 import { useController } from './useController';
@@ -8,14 +9,25 @@ import { createStyles } from './styles';
 import type { Order } from '@dawwar/types';
 
 export function OrdersListScreen() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
-  const styles = createStyles(colors);
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const ctrl = useController();
+
+  const renderItem = React.useCallback(({ item }: { item: Order }) => (
+    <OrderCard
+      order={item}
+      onTrack={() => ctrl.handleTrack(item.id)}
+      onViewDetail={() => ctrl.handleDetail(item.id)}
+    />
+  ), [ctrl.handleTrack, ctrl.handleDetail]);
 
   return (
     <ScreenTemplate
-      edges={['top']}
-      header={<Header title={ctrl.t('orders.title')} />}
+      headerProps={{ 
+        title: t('orders.title'),
+        type: 'none'
+      }}
     >
       {/* Tab switcher */}
       <View style={styles.tabRow}>
@@ -26,10 +38,13 @@ export function OrdersListScreen() {
             onPress={() => ctrl.setActiveTab(tab)}
           >
             <Text
-              style={styles.tabLabel}
-              color={ctrl.activeTab === tab ? colors.primary : colors.textSecondary}
+              style={[
+                styles.tabLabel,
+                { fontWeight: ctrl.activeTab === tab ? '700' : '400' }
+              ]}
+              color={ctrl.activeTab === tab ? '#fff' : colors.textSecondary}
             >
-              {ctrl.t(`orders.tab_${tab}`)}
+              {t(`orders.tab_${tab}`)}
             </Text>
           </TouchableOpacity>
         ))}
@@ -44,19 +59,13 @@ export function OrdersListScreen() {
       ) : ctrl.orders.length === 0 ? (
         <EmptyState
           icon="clipboard-list-outline"
-          title={ctrl.t(`orders.empty_${ctrl.activeTab}`)}
-          subtitle={ctrl.t(`orders.empty_${ctrl.activeTab}_sub`)}
+          title={t(`orders.empty_${ctrl.activeTab}`)}
+          subtitle={t(`orders.empty_${ctrl.activeTab}_sub`)}
         />
       ) : (
         <FlatList<Order>
           data={ctrl.orders}
-          renderItem={({ item }) => (
-            <OrderCard
-              order={item}
-              onTrack={() => ctrl.handleTrack(item.id)}
-              onViewDetail={() => ctrl.handleDetail(item.id)}
-            />
-          )}
+          renderItem={renderItem}
           keyExtractor={(item) => item.id}
           onRefresh={ctrl.refetch}
           refreshing={false}

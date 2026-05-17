@@ -14,13 +14,15 @@ import {
 } from '../../../../store/slices/cart.slice';
 import { MODAL_ROUTES } from '../../../../navigation/routes';
 
+import type { StackNavigationProp } from '@react-navigation/stack';
+import type { RootParamList } from '../../../../navigation/types';
+
 const DELIVERY_FEE = 12;
 
 export function useController() {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const navigation = useNavigation<any>();
+  const navigation = useNavigation<StackNavigationProp<RootParamList>>();
 
   const items = useAppSelector(selectCartItems);
   const subtotal = useAppSelector(selectCartTotal);

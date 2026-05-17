@@ -1,6 +1,4 @@
-import { USE_MOCK_API } from '../../../../core/api/config';
-import api from '../../../../core/api/client';
-import { ordersMock } from '@dawwar/mocks';
+import api from '../../../core/api/client';
 import type { ApiResponse, Order } from '@dawwar/types';
 
 // ── Phase 2 real implementations ─────────────────────────────────────
@@ -24,4 +22,4 @@ const realOrdersApi = {
 };
 
 // ── Export: mock when USE_MOCK_API=true, real when false ──────────────
-export const ordersApi = USE_MOCK_API ? ordersMock : realOrdersApi;
+export const ordersApi = realOrdersApi;

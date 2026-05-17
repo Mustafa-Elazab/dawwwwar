@@ -1,40 +1,66 @@
-import { StyleSheet, I18nManager } from 'react-native';
+import { StyleSheet } from 'react-native';
 import type { AppColors } from '@dawwar/theme';
-import { space, typography, radius } from '@dawwar/theme';
+import { space, typography, radius, shadows } from '@dawwar/theme';
 
 export const createStyles = (colors: AppColors) =>
   StyleSheet.create({
     row: {
-      flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
+      flexDirection: 'row',
       alignItems: 'center',
       gap: space.md,
       paddingVertical: space.md,
-      borderBottomWidth: 1,
-      borderBottomColor: colors.borderLight,
+      backgroundColor: colors.surface,
     },
-    image: { width: 60, height: 60, borderRadius: radius.md },
-    info: { flex: 1, gap: 4 },
-    name: { ...typography.label, color: colors.text },
-    price: { ...typography.body2, color: colors.primary, fontWeight: '600' },
+    image: { 
+      width: 80, // 80x80px image
+      height: 80, 
+      borderRadius: radius.lg,
+      backgroundColor: colors.background,
+    },
+    info: { 
+      flex: 1, 
+      gap: 2,
+      alignItems: 'flex-start',
+    },
+    name: { 
+      ...typography.label, 
+      color: colors.text,
+      fontWeight: '800', // Bold product name
+      textAlign: 'left',
+    },
+    merchantName: {
+      ...typography.caption,
+      color: colors.textSecondary,
+      marginBottom: 4,
+    },
+    price: { 
+      ...typography.body2, 
+      color: colors.primary, // Primary orange price
+      fontWeight: '800',
+      textAlign: 'left',
+    },
     stepper: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: space.sm,
+      backgroundColor: colors.background,
+      borderRadius: radius.full,
+      padding: 4,
     },
     stepBtn: {
-      width: 28,
-      height: 28,
-      borderRadius: 14,
+      width: 32, // Circular buttons
+      height: 32,
+      borderRadius: 16,
       alignItems: 'center',
       justifyContent: 'center',
-      borderWidth: 1.5,
-      borderColor: colors.border,
+      backgroundColor: colors.surface,
+      ...shadows.sm,
     },
-    stepBtnActive: { borderColor: colors.primary },
     count: {
       ...typography.label,
       color: colors.text,
-      minWidth: 24,
+      minWidth: 28,
       textAlign: 'center',
+      fontWeight: '700',
     },
   });

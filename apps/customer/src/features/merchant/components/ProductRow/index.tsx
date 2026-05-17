@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, TouchableOpacity, Image } from 'react-native';
 import { useTheme } from '@dawwar/theme';
 import { Text, Icon, Badge } from '@dawwar/ui';
@@ -6,15 +6,15 @@ import { useTranslation } from '@dawwar/i18n';
 import { createStyles } from './styles';
 import type { ProductRowProps } from './types';
 
-export function ProductRow({ product, quantity, onAdd, onRemove }: ProductRowProps) {
+export const ProductRow = React.memo(function ProductRow({ product, quantity = 0, onAdd, onRemove }: ProductRowProps) {
   const { colors } = useTheme();
-  const styles = createStyles(colors);
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const { t } = useTranslation();
 
   return (
     <View style={[styles.row, !product.isAvailable && { opacity: 0.5 }]}>
       <Image
-        source={{ uri: product.images[0] }}
+        source={{ uri: product.images[0] || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=1000' }}
         style={styles.image}
         resizeMode="cover"
       />
@@ -57,4 +57,4 @@ export function ProductRow({ product, quantity, onAdd, onRemove }: ProductRowPro
       ) : null}
     </View>
   );
-}
+});

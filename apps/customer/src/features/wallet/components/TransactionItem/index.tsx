@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View } from 'react-native';
 import { useTheme } from '@dawwar/theme';
 import { Text, Icon } from '@dawwar/ui';
@@ -11,9 +11,9 @@ interface TransactionItemProps {
   transaction: WalletTransaction;
 }
 
-export function TransactionItem({ transaction }: TransactionItemProps) {
+export const TransactionItem = React.memo(function TransactionItem({ transaction }: TransactionItemProps) {
   const { colors } = useTheme();
-  const styles = createStyles(colors);
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const { t } = useTranslation();
 
   const isCredit = transaction.type === TransactionType.CREDIT;
@@ -45,4 +45,4 @@ export function TransactionItem({ transaction }: TransactionItemProps) {
       </View>
     </View>
   );
-}
+});

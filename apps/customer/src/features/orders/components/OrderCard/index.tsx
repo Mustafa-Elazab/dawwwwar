@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View } from 'react-native';
 import { useTheme } from '@dawwar/theme';
 import { Text, Badge, Button } from '@dawwar/ui';
@@ -14,9 +14,9 @@ function getStatusVariant(status: string) {
   return 'info';
 }
 
-export function OrderCard({ order, onTrack, onViewDetail }: OrderCardProps) {
+export const OrderCard = React.memo(function OrderCard({ order, onTrack, onViewDetail }: OrderCardProps) {
   const { colors } = useTheme();
-  const styles = createStyles(colors);
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const { t } = useTranslation();
 
   const isActive = ACTIVE_ORDER_STATUSES.includes(order.status);
@@ -67,4 +67,4 @@ export function OrderCard({ order, onTrack, onViewDetail }: OrderCardProps) {
       </View>
     </View>
   );
-}
+});

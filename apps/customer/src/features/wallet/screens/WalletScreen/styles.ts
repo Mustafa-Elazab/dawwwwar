@@ -12,6 +12,11 @@ export const createStyles = (colors: AppColors) =>
       justifyContent: 'space-between',
       alignItems: 'center',
     },
-    historyTitle: { ...typography.h4, color: colors.text },
+    divider: {
+      height: 8,
+      backgroundColor: colors.surfaceVariant,
+      marginVertical: space.md,
+    },
+    historyTitle: { ...typography.h4, color: colors.text,alignSelf:"flex-start" },
     seeAllText: { ...typography.label, color: colors.primary },
   });
