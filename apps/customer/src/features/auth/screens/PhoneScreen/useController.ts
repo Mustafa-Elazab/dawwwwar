@@ -2,8 +2,7 @@ import { useState, useCallback } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from '@dawwar/i18n';
 import { useSendOtp } from '../../core/hooks';
-import { isValidEgyptianPhone, normalizePhone } from '../../utils/phone';
-import { AUTH_ROUTES } from '../../navigation/route';
+import { AUTH_ROUTES, PROFILE_ROUTES } from '../../../../navigation/routes';
 import type { PhoneScreenNavProp } from './types';
 
 export function useController() {
@@ -11,61 +10,58 @@ export function useController() {
   const navigation = useNavigation<PhoneScreenNavProp>();
 
   const [phone, setPhone] = useState('');
-  const [termsAccepted, setTermsAccepted] = useState(false);
   const [phoneError, setPhoneError] = useState<string | null>(null);
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   const sendOtpMutation = useSendOtp();
 
-  // Inline validation as user types
-  const handlePhoneChange = useCallback((value: string) => {
-    // Only allow digits, max 11 chars
-    const digits = value.replace(/\D/g, '').slice(0, 11);
-    setPhone(digits);
-    // Clear error when user starts correcting
-    if (phoneError) setPhoneError(null);
-  }, [phoneError]);
+  const handlePhoneChange = useCallback((text: string) => {
+    const cleaned = text.replace(/[^0-9]/g, '');
+    setPhone(cleaned);
+    setPhoneError(null);
+  }, []);
+
+  const handleTermsToggle = useCallback(() => {
+    setTermsAccepted((prev) => !prev);
+  }, []);
+
+  const handleTermsPress = useCallback(() => {
+    navigation.navigate(PROFILE_ROUTES.TERMS);
+  }, [navigation]);
+
+  const handlePrivacyPress = useCallback(() => {
+    navigation.navigate(PROFILE_ROUTES.PRIVACY);
+  }, [navigation]);
 
   const handleSendOtp = useCallback(async () => {
-    const normalized = normalizePhone(phone);
-
-    // Validate before API call
-    if (!isValidEgyptianPhone(phone)) {
-      setPhoneError(t('auth.phone_invalid'));
+    // Basic Egyptian phone validation: starts with 01 and exactly 11 digits
+    const isValidEgyptianPhone = /^01[0125][0-9]{8}$/.test(phone);
+    if (!isValidEgyptianPhone) {
+      setPhoneError(t('errors.invalid_phone'));
       return;
     }
-    if (!termsAccepted) {
-      setPhoneError(t('auth.terms_required'));
-      return;
-    }
+    if (!termsAccepted) return;
 
     try {
-      await sendOtpMutation.mutateAsync({ phone: normalized });
-      navigation.navigate(AUTH_ROUTES.OTP, { phone: normalized, context: 'login' });
+      await sendOtpMutation.mutateAsync(phone);
+      navigation.navigate(AUTH_ROUTES.OTP, { phone });
     } catch (err) {
-      const error = err as Error;
-      if (error.message === 'INVALID_PHONE') {
-        setPhoneError(t('auth.phone_invalid'));
-      } else {
-        setPhoneError(t('errors.server'));
-      }
+      console.error('[PhoneScreen] sendOtp error:', err);
+      setPhoneError(t('errors.server'));
     }
   }, [phone, termsAccepted, sendOtpMutation, navigation, t]);
 
-  const isButtonDisabled =
-    phone.length < 11 || !termsAccepted || sendOtpMutation.isPending;
-
   return {
-    // state
     phone,
-    termsAccepted,
     phoneError,
+    termsAccepted,
     isLoading: sendOtpMutation.isPending,
-    isButtonDisabled,
-    // handlers
+    isButtonDisabled: phone.length < 11 || !termsAccepted || sendOtpMutation.isPending,
     handlePhoneChange,
-    handleTermsToggle: () => setTermsAccepted((v) => !v),
+    handleTermsToggle,
+    handleTermsPress,
+    handlePrivacyPress,
     handleSendOtp,
-    // i18n
     t,
   };
 }

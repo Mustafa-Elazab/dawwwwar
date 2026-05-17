@@ -4,7 +4,7 @@ import { Animated } from 'react-native';
 import { useTranslation } from '@dawwar/i18n';
 import { useVerifyOtp, useSendOtp } from '../../core/hooks';
 import { useOtpCountdown } from '../../hooks/useOtpCountdown';
-import { AUTH_ROUTES } from '../../navigation/route';
+import { AUTH_ROUTES } from '../../../../navigation/routes';
 import type { OtpScreenNavProp, OtpScreenRouteProp } from './types';
 
 export function useController() {
@@ -13,8 +13,8 @@ export function useController() {
   const route = useRoute<OtpScreenRouteProp>();
   const { phone } = route.params;
 
-  // 6-element array — one per box
-  const [digits, setDigits] = useState<string[]>(Array(6).fill(''));
+  // OTP string
+  const [digits, setDigits] = useState('');
   const [otpError, setOtpError] = useState<string | null>(null);
 
   // Shake animation (triggered on wrong OTP)
@@ -40,23 +40,18 @@ export function useController() {
 
   const verifyMutation = useVerifyOtp();
   const sendOtpMutation = useSendOtp();
+const submitOtp = useCallback(
+  async (code: string) => {
+    if (code.length < 6) return;
 
-  const submitOtp = useCallback(
-    async (codeDigits: string[]) => {
-      const code = codeDigits.join('');
-      if (code.length < 6) return;
-
-      setOtpError(null);
-      try {
-        const res = await verifyMutation.mutateAsync({ phone, code });
-        // verifyOtp onSuccess dispatches setAuth → RootNavigator re-renders
-        if (res.data.isFirstLogin) {
-          navigation.navigate(AUTH_ROUTES.ROLE);
-        }
-        // If not first login: RootNavigator auth guard handles redirect automatically
-      } catch (err) {
-        const error = err as Error;
-        triggerShake();
+    setOtpError(null);
+    try {
+      await verifyMutation.mutateAsync({ phone, code });
+      // verifyOtp onSuccess dispatches setAuth → RootNavigator re-renders
+    } catch (err) {
+      console.error('[OtpScreen] verifyOtp error:', err);
+      const error = err as Error;
+      triggerShake();
         if (error.message === 'INVALID_OTP') {
           setOtpError(t('auth.otp_invalid'));
         } else if (error.message === 'OTP_EXPIRED') {
@@ -65,44 +60,33 @@ export function useController() {
           setOtpError(t('errors.server'));
         }
         // Clear digits on error
-        setDigits(Array(6).fill(''));
+        setDigits('');
       }
     },
     [phone, verifyMutation, navigation, triggerShake, t],
   );
 
-  const handleDigitChange = useCallback(
-    (index: number, char: string) => {
-      const next = [...digits];
-      next[index] = char;
-      setDigits(next);
+  const handleOtpChange = useCallback(
+    (code: string) => {
+      setDigits(code);
       setOtpError(null);
-      // Auto-submit when all 4 boxes filled
-      if (next.every((d) => d !== '') && index === 5) {
-        void submitOtp(next);
+      if (code.length === 6) {
+        void submitOtp(code);
       }
     },
-    [digits, submitOtp],
-  );
-
-  const handleBackspace = useCallback(
-    (index: number) => {
-      const next = [...digits];
-      next[index] = '';
-      setDigits(next);
-    },
-    [digits],
+    [submitOtp],
   );
 
   const handleResend = useCallback(async () => {
     if (!resendTimer.isExpired) return;
     try {
-      await sendOtpMutation.mutateAsync({ phone });
-      setDigits(Array(4).fill(''));
+      await sendOtpMutation.mutateAsync(phone);
+      setDigits('');
       setOtpError(null);
       otpTimer.reset(120);
       resendTimer.reset(30);
-    } catch {
+    } catch (err) {
+      console.error('[OtpScreen] handleResend error:', err);
       setOtpError(t('errors.server'));
     }
   }, [resendTimer, sendOtpMutation, phone, otpTimer, t]);
@@ -118,9 +102,9 @@ export function useController() {
     canResend: resendTimer.isExpired,
     resendSeconds: resendTimer.seconds,
     // handlers
-    handleDigitChange,
-    handleBackspace,
+    handleOtpChange,
     handleResend,
+    handleBack: () => navigation.goBack(),
     // display
     phone,
     t,

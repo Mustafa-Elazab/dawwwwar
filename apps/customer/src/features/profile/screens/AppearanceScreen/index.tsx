@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, TouchableOpacity } from 'react-native';
-import { ScreenTemplate, Header, Text } from '@dawwar/ui';
+import { useTranslation } from '@dawwar/i18n';
+import { ScreenTemplate, Text } from '@dawwar/ui';
 import { useTheme } from '@dawwar/theme';
 import { ThemeMode } from '@dawwar/types';
 import { useController } from './useController';
@@ -13,14 +14,14 @@ const MODES = [
 ] as const;
 
 export function AppearanceScreen() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
-  const styles = createStyles(colors);
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const ctrl = useController();
 
   return (
     <ScreenTemplate
-      edges={['top', 'bottom']}
-      header={<Header title={ctrl.t('appearance.title')} leftAction={{ icon: 'arrow-left', onPress: ctrl.handleBack }} />}
+      headerProps={{ title: t('appearance.title') }}
     >
       <View style={styles.card}>
         {MODES.map((mode, idx) => (
@@ -32,9 +33,9 @@ export function AppearanceScreen() {
             <View style={styles.optionLeft}>
               <Text style={styles.flag}>{mode.icon}</Text>
               <View>
-                <Text style={styles.optionLabel}>{ctrl.t(mode.labelKey)}</Text>
+                <Text style={styles.optionLabel}>{t(mode.labelKey)}</Text>
                 {'subtitleKey' in mode && (
-                  <Text variant="caption" color={colors.textSecondary}>{ctrl.t(mode.subtitleKey)}</Text>
+                  <Text variant="caption" color={colors.textSecondary}>{t(mode.subtitleKey)}</Text>
                 )}
               </View>
             </View>

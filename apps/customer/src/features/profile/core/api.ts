@@ -1,6 +1,4 @@
-import { USE_MOCK_API } from '../../../../core/api/config';
-import api from '../../../../core/api/client';
-import { addressesMock } from '@dawwar/mocks';
+import api from '../../../core/api/client';
 import type { Address } from '@dawwar/types';
 
 // ── Phase 2 real implementations ─────────────────────────────────────
@@ -19,5 +17,6 @@ const realProfileApi = {
   },
 };
 
-// ── Export: mock when USE_MOCK_API=true, real when false ──────────────
-export const profileApi = USE_MOCK_API ? addressesMock : realProfileApi;
+// ── Mock implementation wrapper to match real API ──────────────────
+
+export const profileApi = realProfileApi;

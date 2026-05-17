@@ -1,70 +1,66 @@
 import React, { useRef } from 'react';
-import { View, TextInput, TouchableOpacity } from 'react-native';
+import { View, TextInput, TouchableOpacity, Keyboard } from 'react-native';
 import { useTheme } from '@dawwar/theme';
 import { Text } from '@dawwar/ui';
 import { createStyles } from './styles';
 import type { OtpInputProps } from './types';
 
 export function OtpInput({
-  value,
+  value = '',
+  length = 6,
   onChange,
-  onBackspace,
   hasError,
   testID,
-}: OtpInputProps) {
+}: OtpInputProps & { length?: number }) {
   const { colors } = useTheme();
   const styles = createStyles(colors, hasError);
-  const inputs = useRef<(TextInput | null)[]>([]);
+  const inputRef = useRef<TextInput>(null);
 
-  const focusBox = (index: number) => {
-    inputs.current[index]?.focus();
+  const focusInput = () => {
+    inputRef.current?.focus();
   };
 
-  const length = value.length;
+  const renderBoxes = () => {
+    const boxes = [];
+    for (let i = 0; i < length; i++) {
+      const char = value[i] || '';
+      const isFocused = value.length === i;
+
+      boxes.push(
+        <TouchableOpacity
+          key={i}
+          style={[
+            styles.box,
+            char ? styles.boxFilled : null,
+            isFocused ? styles.boxFocused : null,
+          ]}
+          onPress={focusInput}
+          activeOpacity={1}
+        >
+          <Text style={styles.digit}>{char}</Text>
+        </TouchableOpacity>
+      );
+    }
+    return boxes;
+  };
 
   return (
     <View style={styles.row} testID={testID}>
-      {Array.from({ length }).map((_, i) => (
-        <TouchableOpacity
-          key={i}
-          style={[styles.box, value[i] ? styles.boxFilled : null]}
-          onPress={() => focusBox(i)}
-          activeOpacity={1}
-        >
-          <Text style={styles.digit}>{value[i] ?? ''}</Text>
-
-          {/* Hidden TextInput for keyboard input */}
-          <TextInput
-            ref={(ref) => {
-              inputs.current[i] = ref;
-            }}
-            style={styles.hiddenInput}
-            value={value[i] ?? ''}
-            keyboardType="number-pad"
-            maxLength={1}
-            caretHidden
-            onChangeText={(char) => {
-              const digit = char.replace(/\D/g, '');
-              if (digit) {
-                onChange(i, digit);
-                // Auto-focus next box
-                if (i < length - 1) {
-                  setTimeout(() => focusBox(i + 1), 10);
-                }
-              }
-            }}
-            onKeyPress={({ nativeEvent }) => {
-              if (nativeEvent.key === 'Backspace' && !value[i]) {
-                // Move to previous box on backspace when current is empty
-                onBackspace(i);
-                if (i > 0) {
-                  setTimeout(() => focusBox(i - 1), 10);
-                }
-              }
-            }}
-          />
-        </TouchableOpacity>
-      ))}
+      {renderBoxes()}
+      <TextInput
+        ref={inputRef}
+        style={styles.hiddenInput}
+        value={value}
+        onChangeText={(text) => {
+          const cleanText = text.replace(/\D/g, '').slice(0, length);
+          if (onChange) {
+            onChange(cleanText);
+          }
+        }}
+        keyboardType="number-pad"
+        maxLength={length}
+        autoFocus
+      />
     </View>
   );
 }

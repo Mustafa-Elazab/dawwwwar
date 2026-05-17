@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, TouchableOpacity } from 'react-native';
-import { ScreenTemplate, Header, Text } from '@dawwar/ui';
+import { useTranslation } from '@dawwar/i18n';
+import { ScreenTemplate, Text } from '@dawwar/ui';
 import { useTheme } from '@dawwar/theme';
 import { Language } from '@dawwar/types';
 import { useController } from './useController';
@@ -12,14 +13,14 @@ const LANGUAGES = [
 ] as const;
 
 export function LanguageScreen() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
-  const styles = createStyles(colors);
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const ctrl = useController();
 
   return (
     <ScreenTemplate
-      edges={['top', 'bottom']}
-      header={<Header title={ctrl.t('language.title')} leftAction={{ icon: 'arrow-left', onPress: ctrl.handleBack }} />}
+      headerProps={{ title: t('language.title') }}
     >
       <View style={styles.card}>
         {LANGUAGES.map((lang, idx) => (

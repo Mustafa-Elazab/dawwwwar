@@ -1,73 +1,90 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, TouchableOpacity, Alert } from 'react-native';
-import { ListScreenTemplate, Header, Text, Icon, Badge } from '@dawwar/ui';
+import { useTranslation } from '@dawwar/i18n';
+import { ListScreenTemplate, Text, Icon } from '@dawwar/ui';
 import { useTheme } from '@dawwar/theme';
-import { space } from '@dawwar/theme';
 import { useController } from './useController';
+import { createStyles } from './styles';
 import type { Address } from '@dawwar/types';
 
 export function AddressesScreen() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const ctrl = useController();
 
-  const confirmDelete = (id: string, label: string) => {
+  const handleMenuPress = (item: Address) => {
     Alert.alert(
-      ctrl.t('addresses.delete_confirm_title'),
-      ctrl.t('addresses.delete_confirm_body'),
+      item.label,
+      '',
       [
-        { text: ctrl.t('common.cancel'), style: 'cancel' },
-        { text: ctrl.t('addresses.delete'), style: 'destructive', onPress: () => ctrl.handleDelete(id) },
+        { text: t('common.cancel'), style: 'cancel' },
+        { text: t('addresses.edit'), onPress: () => ctrl.handleEdit(item.id) },
+        { text: t('addresses.delete'), style: 'destructive', onPress: () => confirmDelete(item.id) },
       ],
     );
   };
 
-  return (
-    <ListScreenTemplate<Address>
-      header={
-        <Header
-          title={ctrl.t('addresses.title')}
-          leftAction={{ icon: 'arrow-left', onPress: ctrl.handleBack }}
-          rightAction={{ icon: 'plus', onPress: ctrl.handleAddNew }}
-        />
-      }
-      data={ctrl.addresses}
-      renderItem={({ item }) => (
-        <View style={{
-          flexDirection: 'row', alignItems: 'center',
-          padding: space.base, backgroundColor: colors.card,
-          borderBottomWidth: 1, borderBottomColor: colors.borderLight,
-          gap: space.md,
-        }}>
-          <Icon name="map-marker" size={24} color={colors.primary} />
-          <View style={{ flex: 1 }}>
-            <View style={{ flexDirection: 'row', gap: space.sm, alignItems: 'center' }}>
-              <Text variant="label" color={colors.text}>{item.label}</Text>
-              {item.isDefault && (
-                <Badge label={ctrl.t('addresses.default')} variant="primary" size="sm" />
-              )}
-            </View>
-            <Text variant="body2" color={colors.textSecondary} numberOfLines={2}>
-              {item.address}
-            </Text>
-          </View>
-          <TouchableOpacity onPress={() => ctrl.handleEdit(item.id)}>
-            <Icon name="pencil-outline" size={20} color={colors.icon} />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => confirmDelete(item.id, item.label)}>
-            <Icon name="trash-can-outline" size={20} color={colors.error} />
-          </TouchableOpacity>
+  const confirmDelete = (id: string) => {
+    Alert.alert(
+      t('addresses.delete_confirm_title'),
+      t('addresses.delete_confirm_body'),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        { text: t('addresses.delete'), style: 'destructive', onPress: () => ctrl.handleDelete(id) },
+      ],
+    );
+  };
+
+  const renderItem = React.useCallback(({ item }: { item: Address }) => (
+    <View style={styles.card}>
+      {item.isDefault && (
+        <View style={styles.defaultBadge}>
+          <Text style={styles.defaultText}>{t('addresses.default')}</Text>
         </View>
       )}
+      
+      <View style={[styles.iconCircle, { backgroundColor: item.label === 'Home' || item.label === 'المنزل' ? `${colors.primary}20` : '#E3F2FD' }]}>
+        <Icon 
+          name={item.label === 'Home' || item.label === 'المنزل' ? 'home-variant' : 'briefcase-variant'} 
+          size={22} 
+          color={item.label === 'Home' || item.label === 'المنزل' ? colors.primary : '#2196F3'} 
+        />
+      </View>
+
+      <View style={styles.info}>
+        <Text style={styles.label}>{t(`address_labels.${(item.label || 'other').toLowerCase()}`, { defaultValue: item.label || t('addresses.other', 'أخرى') })}</Text>
+        <Text style={styles.street} numberOfLines={1}>{item.address}</Text>
+      </View>
+
+      <TouchableOpacity style={styles.menuBtn} onPress={() => handleMenuPress(item)}>
+        <Icon name="dots-vertical" size={22} color={colors.textSecondary} />
+      </TouchableOpacity>
+    </View>
+  ), [colors.primary, colors.textSecondary, handleMenuPress, styles, t]);
+
+  return (
+    <ListScreenTemplate<Address>
+      headerProps={{
+        title: t('addresses.title'),
+        onBackPress: ctrl.handleBack,
+      }}
+      ListHeaderComponent={
+        <TouchableOpacity style={styles.addCard} onPress={ctrl.handleAddNew} activeOpacity={0.7}>
+          <Icon name="plus" size={24} color={colors.primary} />
+          <Text style={styles.addText}>{t('addresses.add')}</Text>
+        </TouchableOpacity>
+      }
+      data={ctrl.addresses}
+      renderItem={renderItem}
       keyExtractor={(item) => item.id}
       isLoading={ctrl.isLoading}
       isError={ctrl.isError}
       onRetry={ctrl.refetch}
       onRefresh={ctrl.refetch}
       refreshing={false}
-      emptyIcon="map-marker-off-outline"
-      emptyTitle={ctrl.t('addresses.empty')}
-      emptySubtitle={ctrl.t('addresses.empty_sub')}
-      emptyAction={{ label: ctrl.t('addresses.add'), onPress: ctrl.handleAddNew }}
+      emptyTitle={t('addresses.empty')}
+      emptySubtitle={t('addresses.empty_sub')}
     />
   );
 }

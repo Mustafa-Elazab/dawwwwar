@@ -1,23 +1,22 @@
-import { useMutation } from '@tanstack/react-query';
-import { authApi } from './api';
+import { useSendOtp as useBaseSendOtp, useVerifyOtp as useBaseVerifyOtp } from '@dawwar/api-client';
 import { useAppDispatch } from '../../../store/hooks';
 import { setAuth } from '../../../store/slices/auth.slice';
 import { USE_MOCK_API } from '../../../core/api/config';
 import { api } from '../../../core/api/client';
 
 export function useSendOtp() {
-  return useMutation({
-    mutationFn: ({ phone }: { phone: string }) => authApi.sendOtp(phone),
-  });
+  return useBaseSendOtp();
 }
 
 export function useVerifyOtp() {
   const dispatch = useAppDispatch();
+  const mutation = useBaseVerifyOtp();
 
-  return useMutation({
-    mutationFn: ({ phone, code }: { phone: string; code: string }) =>
-      authApi.verifyOtp(phone, code),
-    onSuccess: async (res) => {
+  return {
+    ...mutation,
+    mutateAsync: async (params: { phone: string; code: string }) => {
+      const res = await mutation.mutateAsync(params);
+      
       dispatch(
         setAuth({
           user: res.data.user,
@@ -36,6 +35,8 @@ export function useVerifyOtp() {
           // FCM not configured — not a blocking error
         }
       }
-    },
-  });
+      
+      return res;
+    }
+  };
 }
