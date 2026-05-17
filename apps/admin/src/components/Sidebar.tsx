@@ -10,14 +10,22 @@ import {
   ShoppingCart,
   Settings,
   LogOut,
+  Users,
+  Ticket,
+  CreditCard,
+  MessageSquare,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 
 const navItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/customers', label: 'Customers', icon: Users },
   { href: '/merchants', label: 'Merchants', icon: Store },
   { href: '/drivers', label: 'Drivers', icon: Truck },
   { href: '/orders', label: 'Orders', icon: ShoppingCart },
+  { href: '/payouts', label: 'Payouts', icon: CreditCard },
+  { href: '/support', label: 'Support', icon: MessageSquare },
+  { href: '/promo', label: 'Promo Codes', icon: Ticket },
   { href: '/settings', label: 'Settings', icon: Settings },
 ];
 

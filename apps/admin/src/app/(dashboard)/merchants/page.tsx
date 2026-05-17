@@ -1,28 +1,31 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
-import { api } from '@/lib/api';
+import { useAdminMerchants, useApproveMerchant, useRejectMerchant } from '@dawwar/api-client';
 import { formatDate } from '@/lib/utils';
+import { Check, X, Eye } from 'lucide-react';
 import Link from 'next/link';
-
-interface Merchant {
-  id: string;
-  name: string;
-  nameAr: string;
-  isApproved: boolean;
-  isOpen: boolean;
-  phone: string;
-  createdAt: string;
-}
+import { useState } from 'react';
 
 export default function MerchantsPage() {
-  const { data: merchants, isLoading } = useQuery<Merchant[]>({
-    queryKey: ['merchants'],
-    queryFn: async () => {
-      const { data } = await api.get('/merchants');
-      return data;
-    },
-  });
+  const [filter, setFilter] = useState<'all' | 'pending' | 'approved'>('all');
+  const { data: res, isLoading } = useAdminMerchants(filter === 'all' ? undefined : filter);
+  const merchants = res?.data;
+
+  const approveMutation = useApproveMerchant();
+  const rejectMutation = useRejectMerchant();
+
+  const handleApprove = async (id: string) => {
+    if (confirm('Are you sure you want to approve this merchant?')) {
+      await approveMutation.mutateAsync(id);
+    }
+  };
+
+  const handleReject = async (id: string) => {
+    const reason = prompt('Please enter rejection reason:');
+    if (reason) {
+      await rejectMutation.mutateAsync({ id, reason });
+    }
+  };
 
   if (isLoading) {
     return (
@@ -33,81 +36,122 @@ export default function MerchantsPage() {
   }
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Merchants</h1>
-        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-          Add Merchant
-        </button>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-gray-900">Merchant Management</h1>
+        <div className="flex bg-gray-100 p-1 rounded-lg">
+          {(['all', 'pending', 'approved'] as const).map((f) => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`px-4 py-1.5 text-sm font-medium rounded-md capitalize transition-colors ${
+                filter === f
+                  ? 'bg-white text-blue-600 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              {f}
+            </button>
+          ))}
+        </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <table className="w-full">
-          <thead className="bg-gray-50">
+          <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
-              <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">
-                Name
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                Merchant Info
               </th>
-              <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">
-                Phone
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                Contact
               </th>
-              <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 Status
               </th>
-              <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">
-                Approved
-              </th>
-              <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 Joined
               </th>
-              <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">
+              <th className="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 Actions
               </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            {merchants?.map((merchant) => (
-              <tr key={merchant.id}>
-                <td className="px-6 py-4">
-                  <div className="font-medium text-gray-900">{merchant.name}</div>
-                  <div className="text-sm text-gray-500">{merchant.nameAr}</div>
-                </td>
-                <td className="px-6 py-4 text-gray-600">{merchant.phone}</td>
-                <td className="px-6 py-4">
-                  <span
-                    className={`px-2 py-1 text-xs rounded-full ${
-                      merchant.isOpen
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-red-100 text-red-700'
-                    }`}
-                  >
-                    {merchant.isOpen ? 'Open' : 'Closed'}
-                  </span>
-                </td>
-                <td className="px-6 py-4">
-                  <span
-                    className={`px-2 py-1 text-xs rounded-full ${
-                      merchant.isApproved
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-yellow-100 text-yellow-700'
-                    }`}
-                  >
-                    {merchant.isApproved ? 'Approved' : 'Pending'}
-                  </span>
-                </td>
-                <td className="px-6 py-4 text-gray-600">
-                  {formatDate(merchant.createdAt)}
-                </td>
-                <td className="px-6 py-4">
-                  <Link
-                    href={`/merchants/${merchant.id}`}
-                    className="text-blue-600 hover:text-blue-800 text-sm"
-                  >
-                    View
-                  </Link>
+            {merchants?.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="px-6 py-10 text-center text-gray-500">
+                  No merchants found
                 </td>
               </tr>
-            ))}
+            ) : (
+              merchants?.map((merchant) => (
+                <tr key={merchant.id} className="hover:bg-gray-50 transition-colors">
+                  <td className="px-6 py-4">
+                    <div className="font-semibold text-gray-900">{merchant.businessName}</div>
+                    <div className="text-sm text-gray-500">{merchant.address}</div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="text-sm text-gray-900">{merchant.user?.phone}</div>
+                    <div className="text-xs text-gray-500">{merchant.user?.name}</div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex flex-col gap-1">
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium w-fit ${
+                          merchant.isApproved
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-yellow-100 text-yellow-800'
+                        }`}
+                      >
+                        {merchant.isApproved ? 'Approved' : 'Pending Approval'}
+                      </span>
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium w-fit ${
+                          merchant.isOpen
+                            ? 'bg-blue-100 text-blue-800'
+                            : 'bg-gray-100 text-gray-800'
+                        }`}
+                      >
+                        {merchant.isOpen ? 'Open' : 'Closed'}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-600">
+                    {formatDate(merchant.createdAt)}
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <div className="flex justify-end gap-2">
+                      {!merchant.isApproved && (
+                        <>
+                          <button
+                            onClick={() => handleApprove(merchant.id)}
+                            className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                            title="Approve"
+                          >
+                            <Check size={18} />
+                          </button>
+                          <button
+                            onClick={() => handleReject(merchant.id)}
+                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            title="Reject"
+                          >
+                            <X size={18} />
+                          </button>
+                        </>
+                      )}
+                      <Link
+                        href={`/merchants/${merchant.id}`}
+                        className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                        title="View Details"
+                      >
+                        <Eye size={18} />
+                      </Link>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

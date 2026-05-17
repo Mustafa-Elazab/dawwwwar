@@ -1,31 +1,33 @@
-import axios from 'axios';
+import { createApiClient, setupInterceptors, tokenManager, TokenStorage, idempotencyManager, IdempotencyStorage } from '@dawwar/api-client';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
-export const api = axios.create({
-  baseURL: `${API_BASE_URL}/api/v1`,
-  headers: {
-    'Content-Type': 'application/json',
+const browserTokenStorage: TokenStorage = {
+  getAccessToken: () => typeof window !== 'undefined' ? localStorage.getItem('admin_token') : null,
+  setAccessToken: (token) => localStorage.setItem('admin_token', token),
+  getRefreshToken: () => typeof window !== 'undefined' ? localStorage.getItem('admin_refresh_token') : null,
+  setRefreshToken: (token) => localStorage.setItem('admin_refresh_token', token),
+  clearTokens: () => {
+    localStorage.removeItem('admin_token');
+    localStorage.removeItem('admin_refresh_token');
+  },
+};
+
+const browserIdempotencyStorage: IdempotencyStorage = {
+  getItem: (key) => typeof window !== 'undefined' ? localStorage.getItem(key) : null,
+  setItem: (key, value) => localStorage.setItem(key, value),
+  removeItem: (key) => localStorage.removeItem(key),
+};
+
+tokenManager.setStorage(browserTokenStorage);
+idempotencyManager.setStorage(browserIdempotencyStorage);
+
+export const api = createApiClient(`${API_BASE_URL}/api/v1`);
+
+setupInterceptors(api, {
+  onUnauthorized: () => {
+    window.location.href = '/login';
   },
 });
 
-// Add auth token to requests
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('admin_token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
-// Handle auth errors
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('admin_token');
-      window.location.href = '/login';
-    }
-    return Promise.reject(error);
-  }
-);
+export default api;
