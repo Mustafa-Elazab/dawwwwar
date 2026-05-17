@@ -1,18 +1,18 @@
 // Brand palette — raw values, not used directly by components
 export const palette = {
-  brand: '#FF6B35',
-  brandDark: '#E55A2B',
-  brandLight: '#FF8C5A',
-  brandMuted: '#FFF0EB',
+  brand: '#1DB954',         // Green
+  brandDark: '#17A348',     // Darker green
+  brandLight: '#E8F8EF',    // Lightest green tint
+  brandMuted: '#A8E6C3',    // Muted green
 
-  green: '#00B894',
-  greenLight: '#D4EFEA',
-  red: '#E17055',
-  redLight: '#FDECEA',
-  orange: '#FDCB6E',
-  orangeLight: '#FEF9EC',
-  blue: '#74B9FF',
-  blueLight: '#EBF5FF',
+  green: '#1DB954',
+  greenLight: '#E8F8EF',
+  red: '#EF4444',
+  redLight: '#FEE2E2',
+  orange: '#F59E0B',
+  orangeLight: '#FEF3C7',
+  blue: '#3B82F6',
+  blueLight: '#DBEAFE',
 
   gray50: '#F9FAFB',
   gray100: '#F3F4F6',
@@ -32,8 +32,8 @@ export const palette = {
 // Light theme — every key is a semantic name, not a raw color
 export const lightColors = {
   // Backgrounds
-  background: palette.white,
-  surface: palette.gray50,
+  background: palette.gray50,
+  surface: palette.white,
   surfaceVariant: palette.gray100,
   card: palette.white,
 
@@ -45,6 +45,7 @@ export const lightColors = {
   // Text
   text: palette.gray900,
   textSecondary: palette.gray500,
+  textTertiary: palette.gray400,
   textDisabled: palette.gray300,
   textInverse: palette.white,
   textLink: palette.brand,
@@ -84,51 +85,52 @@ export const lightColors = {
 
   // Status bar
   statusBarStyle: 'dark-content' as const,
-  statusBarBg: palette.white,
+  statusBarBg: palette.gray50,
 } as const;
 
 // Dark theme — EVERY key from lightColors must be present here
 export const darkColors = {
   // Backgrounds
-  background: '#0D0D0D',
+  background: '#0A0A0A',
   surface: '#1A1A1A',
   surfaceVariant: '#252525',
-  card: '#1C1C1E',
+  card: '#1A1A1A',
 
   // Borders
-  border: '#3A3A3C',
+  border: '#2A2A2A',
   borderLight: '#2C2C2E',
   borderFocus: palette.brand,
 
   // Text
-  text: palette.gray50,
-  textSecondary: palette.gray400,
-  textDisabled: palette.gray600,
-  textInverse: palette.gray900,
-  textLink: palette.brandLight,
+  text: '#F9FAFB',
+  textSecondary: '#9CA3AF',
+  textTertiary: '#6B7280',
+  textDisabled: '#6B7280',
+  textInverse: '#111827',
+  textLink: palette.brand,
 
   // Brand (same in both themes)
   primary: palette.brand,
   primaryDark: palette.brandDark,
   primaryLight: palette.brandLight,
-  primaryMuted: '#3D1F13',
+  primaryMuted: '#0F5132',
   primaryText: palette.white,
 
   // Status
-  success: '#00D2A8',
-  successBg: '#0A2E28',
-  error: '#FF8A7A',
+  success: '#1DB954',
+  successBg: '#0F5132',
+  error: '#EF4444',
   errorBg: '#2E1410',
-  warning: '#FFD93D',
+  warning: '#F59E0B',
   warningBg: '#2E2A0A',
-  info: '#93CFFF',
+  info: '#3B82F6',
   infoBg: '#0A1A2E',
 
   // UI elements
-  icon: palette.gray400,
+  icon: '#9CA3AF',
   iconActive: palette.brand,
-  iconInverse: palette.gray900,
-  placeholder: palette.gray600,
+  iconInverse: '#111827',
+  placeholder: '#6B7280',
   overlay: 'rgba(0, 0, 0, 0.7)',
   shadow: 'rgba(0, 0, 0, 0.4)',
   shimmer: '#2A2A2A',
@@ -136,13 +138,13 @@ export const darkColors = {
 
   // Navigation
   tabBar: '#1A1A1A',
-  tabBarBorder: '#3A3A3C',
-  tabBarIcon: palette.gray600,
+  tabBarBorder: '#2A2A2A',
+  tabBarIcon: '#6B7280',
   tabBarIconActive: palette.brand,
 
   // Status bar
   statusBarStyle: 'light-content' as const,
-  statusBarBg: '#0D0D0D',
+  statusBarBg: '#0A0A0A',
 } as const;
 
 // AppColors type — derived from lightColors (both themes must satisfy this type)

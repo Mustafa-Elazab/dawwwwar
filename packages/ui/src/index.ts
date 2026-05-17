@@ -9,6 +9,7 @@ export type { CardProps, CardVariant, ListItemProps, EmptyStateProps, ErrorState
 // ─── Organisms ───────────────────────────────────────────
 export { Header, BottomSheet } from './organisms';
 export type { HeaderProps, HeaderAction, BottomSheetProps, BottomSheetRef } from './organisms';
+export { ChatInterface } from './organisms/Chat';
 
 // ─── Templates ───────────────────────────────────────────
 export { ScreenTemplate, ScrollScreenTemplate, ListScreenTemplate, TabScreenTemplate, AppErrorBoundary } from './templates';

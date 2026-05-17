@@ -3,6 +3,7 @@ export { BottomSheet } from './BottomSheet/index';
 export { ImageGallery } from './ImageGallery/index';
 export { RatingBar } from './RatingBar/index';
 export { FormField } from './FormField/index';
+export { ChatInterface } from './Chat/index';
 
 export type { HeaderProps, HeaderAction } from './Header/types';
 export type { BottomSheetProps, BottomSheetRef } from './BottomSheet/types';

@@ -5,7 +5,7 @@ import { space, typography } from '@dawwar/theme';
 export const createStyles = (colors: AppColors) =>
   StyleSheet.create({
     container: {
-      flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
+      flexDirection: 'row', // Let RN handle the flip automatically
       alignItems: 'center',
       paddingVertical: space.md,
       paddingHorizontal: space.base,
@@ -16,11 +16,14 @@ export const createStyles = (colors: AppColors) =>
     content: {
       flex: 1,
       gap: space.xs,
-      alignItems: I18nManager.isRTL ? 'flex-end' : 'flex-start',
+      // Use logical alignment or stretch
+      alignItems: 'flex-start',
     },
     title: {
       ...typography.body1,
       color: colors.text,
+      // textAlign: 'auto' is usually best, but 'left'/'right' in RN are NOT logical.
+      // In RTL, we want visual right.
       textAlign: I18nManager.isRTL ? 'right' : 'left',
     },
     subtitle: {

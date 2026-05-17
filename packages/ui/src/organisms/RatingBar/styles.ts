@@ -7,11 +7,11 @@ export const createStyles = (colors: AppColors) =>
     row: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: space[1],
+      gap: space.xs,
     },
     value: {
       ...typography.label,
       color: colors.text,
-      marginLeft: space[2],
+      marginLeft: space.sm,
     },
   });

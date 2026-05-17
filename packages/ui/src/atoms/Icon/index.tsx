@@ -3,7 +3,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { useTheme } from '@dawwar/theme';
 import type { IconProps } from './types';
 
-export function Icon({ name, size = 24, color, testID }: IconProps) {
+export function Icon({ name, size = 24, color, testID, style }: IconProps) {
   const { colors } = useTheme();
   return (
     <MaterialCommunityIcons
@@ -11,6 +11,8 @@ export function Icon({ name, size = 24, color, testID }: IconProps) {
       size={size}
       color={color ?? colors.icon}
       testID={testID}
+      // @ts-ignore
+      style={style}
     />
   );
 }

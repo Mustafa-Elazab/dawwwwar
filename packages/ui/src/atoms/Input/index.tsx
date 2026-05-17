@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, TextInput } from 'react-native';
+import { View, TextInput, I18nManager } from 'react-native';
 import { useTheme } from '@dawwar/theme';
 import { Text } from '../Text';
 import { createStyles } from './styles';
@@ -50,12 +50,13 @@ export function Input({
           autoFocus={autoFocus}
           onFocus={() => { setIsFocused(true); onFocus?.(); }}
           onBlur={() => { setIsFocused(false); onBlur?.(); }}
+          inputAccessoryViewID={undefined}
           testID={testID}
         />
         {rightIcon && <View style={styles.iconContainer}>{rightIcon}</View>}
       </View>
-      {error && <Text style={styles.error}>{error}</Text>}
-      {!error && hint && <Text style={styles.hint}>{hint}</Text>}
+      {!!error && <Text style={styles.error}>{error}</Text>}
+      {!error && !!hint && <Text style={styles.hint}>{hint}</Text>}
     </View>
   );
 }

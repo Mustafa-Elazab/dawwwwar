@@ -8,7 +8,7 @@ export const createStyles = (colors: AppColors, isFocused: boolean, hasError: bo
     label: {
       ...typography.label,
       color: colors.textSecondary,
-      textAlign: I18nManager.isRTL ? 'right' : 'left',
+      textAlign:"auto"
     },
     inputRow: {
       flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',

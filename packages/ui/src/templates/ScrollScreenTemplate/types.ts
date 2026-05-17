@@ -8,4 +8,5 @@ export interface ScrollScreenTemplateProps extends ScreenTemplateProps {
   scrollEnabled?: boolean;
   showsVerticalScrollIndicator?: boolean;
   bounces?: boolean;
+  stickyHeaderIndices?: number[];
 }

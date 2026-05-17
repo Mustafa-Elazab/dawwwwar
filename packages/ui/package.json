@@ -9,7 +9,9 @@
     "build": "echo 'source-only'"
   },
   "dependencies": {
-    "@dawwar/theme": "workspace:*"
+    "@dawwar/theme": "workspace:*",
+    "@dawwar/api-client": "workspace:*",
+    "@dawwar/types": "workspace:*"
   },
   "peerDependencies": {
     "react": ">=18.0.0",

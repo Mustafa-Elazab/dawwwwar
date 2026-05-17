@@ -3,12 +3,14 @@ import { StatusBar, KeyboardAvoidingView, Platform, ScrollView, RefreshControl }
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@dawwar/theme';
 import { NetworkBanner } from '../../molecules/NetworkBanner';
+import { Header } from '../../organisms/Header';
 import { createStyles } from './styles';
 import type { ScrollScreenTemplateProps } from './types';
 
 export function ScrollScreenTemplate({
   children,
   header,
+  headerProps,
   footer,
   backgroundColor,
   edges = ['top', 'bottom'],
@@ -20,6 +22,7 @@ export function ScrollScreenTemplate({
   scrollEnabled = true,
   showsVerticalScrollIndicator = false,
   bounces = true,
+  stickyHeaderIndices,
   testID,
 }: ScrollScreenTemplateProps) {
   const { colors } = useTheme();
@@ -36,7 +39,7 @@ export function ScrollScreenTemplate({
         barStyle={colors.statusBarStyle}
         backgroundColor={resolvedBg}
       />
-      {header}
+      {headerProps ? <Header {...headerProps} /> : header}
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -49,6 +52,7 @@ export function ScrollScreenTemplate({
           scrollEnabled={scrollEnabled}
           showsVerticalScrollIndicator={showsVerticalScrollIndicator}
           bounces={bounces}
+          stickyHeaderIndices={stickyHeaderIndices}
           refreshControl={
             onRefresh ? (
               <RefreshControl

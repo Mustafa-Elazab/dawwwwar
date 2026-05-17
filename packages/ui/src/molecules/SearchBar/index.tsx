@@ -32,6 +32,7 @@ export function SearchBar({
         editable={editable}
         autoFocus={autoFocus}
         returnKeyType="search"
+        inputAccessoryViewID={undefined} // Disable accessory toolbars
         testID={testID}
       />
       {value && value.length > 0 && onClear && (

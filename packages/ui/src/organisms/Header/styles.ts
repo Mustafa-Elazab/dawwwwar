@@ -1,30 +1,61 @@
-import { StyleSheet, I18nManager } from 'react-native';
-import type { AppColors } from '@dawwar/theme';
-import { space, shadows, typography } from '@dawwar/theme';
+import { StyleSheet } from 'react-native';
+import { AppColors } from '@dawwar/theme';
 
-export const createStyles = (colors: AppColors, transparent: boolean) =>
+export const createStyles = (colors: AppColors) =>
   StyleSheet.create({
-    container: {
-      height: 56,
-      flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
-      alignItems: 'center',
-      paddingHorizontal: space.sm,
-      backgroundColor: transparent ? 'transparent' : colors.card,
-      ...(transparent ? {} : shadows.sm),
-      borderBottomWidth: transparent ? 0 : 1,
+    root: {
+      paddingHorizontal: 16,
+      paddingTop: 12,
+      paddingBottom: 16,
+      backgroundColor: colors.background,
+      borderBottomWidth: 1,
       borderBottomColor: colors.border,
+    },
+    rootTransparent: {
+      backgroundColor: 'transparent',
+      borderBottomWidth: 0,
+    },
+    actionsRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: 12,
+    },
+    sideContainer: {
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    spacer: {
+      flex: 1,
     },
     actionBtn: {
       width: 44,
       height: 44,
+      borderRadius: 22,
+      backgroundColor: colors.surface,
       alignItems: 'center',
       justifyContent: 'center',
-      borderRadius: 22,
     },
-    titleContainer: { flex: 1, alignItems: 'center' },
+    actionBtnTransparent: {
+      backgroundColor: 'rgba(0,0,0,0.05)',
+    },
+    titleContainer: {
+      alignItems: 'flex-start',
+      justifyContent: 'center',
+      paddingHorizontal: 4,
+    },
     title: {
-      ...typography.h4,
+      fontSize: 28,
+      fontWeight: 'bold',
       color: colors.text,
-      textAlign: 'center',
+      lineHeight: 34,
+      textAlign: 'left',
+    },
+    subtitle: {
+      fontSize: 14,
+      color: colors.textSecondary,
+      marginTop: 4,
+      textAlign: 'left',
+      lineHeight: 20,
     },
   });

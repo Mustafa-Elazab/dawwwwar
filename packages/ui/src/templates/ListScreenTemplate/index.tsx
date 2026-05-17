@@ -6,6 +6,7 @@ import { Skeleton } from '../../atoms/Skeleton';
 import { EmptyState } from '../../molecules/EmptyState';
 import { ErrorState } from '../../molecules/ErrorState';
 import { NetworkBanner } from '../../molecules/NetworkBanner';
+import { Header } from '../../organisms/Header';
 import { createStyles } from './styles';
 import type { ListScreenTemplateProps } from './types';
 
@@ -23,6 +24,7 @@ function DefaultSkeleton() {
 export function ListScreenTemplate<T>({
   children,
   header,
+  headerProps,
   footer,
   backgroundColor,
   edges = ['top', 'bottom'],
@@ -67,7 +69,7 @@ export function ListScreenTemplate<T>({
     return (
       <SafeAreaView style={[styles.safeArea, { backgroundColor: resolvedBg }, style]} edges={edges}>
         <StatusBar barStyle={colors.statusBarStyle} backgroundColor={resolvedBg} />
-        {header}
+        {headerProps ? <Header {...headerProps} /> : header}
         <View style={styles.list}>
           {Array.from({ length: skeletonCount }).map((_, i) => (
             <React.Fragment key={`skeleton-${i}`}>
@@ -85,7 +87,7 @@ export function ListScreenTemplate<T>({
     return (
       <SafeAreaView style={[styles.safeArea, { backgroundColor: resolvedBg }, style]} edges={edges}>
         <StatusBar barStyle={colors.statusBarStyle} backgroundColor={resolvedBg} />
-        {header}
+        {headerProps ? <Header {...headerProps} /> : header}
         <ErrorState onRetry={onRetry} />
         <NetworkBanner />
       </SafeAreaView>
@@ -101,7 +103,7 @@ export function ListScreenTemplate<T>({
       testID={testID}
     >
       <StatusBar barStyle={colors.statusBarStyle} backgroundColor={resolvedBg} />
-      {header}
+      {headerProps ? <Header {...headerProps} /> : header}
       <FlatList<T>
         style={styles.list}
         data={data}

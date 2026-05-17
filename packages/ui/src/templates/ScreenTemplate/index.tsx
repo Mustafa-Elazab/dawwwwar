@@ -3,12 +3,14 @@ import { StatusBar, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@dawwar/theme';
 import { NetworkBanner } from '../../molecules/NetworkBanner';
+import { Header } from '../../organisms/Header';
 import { createStyles } from './styles';
 import type { ScreenTemplateProps } from './types';
 
 export function ScreenTemplate({
   children,
   header,
+  headerProps,
   footer,
   backgroundColor,
   edges = ['top', 'bottom'],
@@ -30,7 +32,7 @@ export function ScreenTemplate({
         backgroundColor={backgroundColor ?? colors.statusBarBg}
         translucent={false}
       />
-      {header}
+      {headerProps ? <Header {...headerProps} /> : header}
       <View style={[styles.content, contentStyle]}>
         {children}
       </View>
