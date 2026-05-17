@@ -1,9 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Inject } from '@nestjs/common';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
+import { Repository, IsNull } from 'typeorm';
 import { CategoryEntity } from '../../database/entities/category.entity';
 
 @Injectable()
@@ -11,21 +8,35 @@ export class CategoriesService {
   constructor(
     @InjectRepository(CategoryEntity)
     private readonly repo: Repository<CategoryEntity>,
-    @Inject(CACHE_MANAGER) private readonly cache: Cache,
   ) {}
 
   async findAll(): Promise<CategoryEntity[]> {
-    const cacheKey = 'categories:all';
-    const cached = await this.cache.get<CategoryEntity[]>(cacheKey);
-    if (cached) return cached;
-
-    const categories = await this.repo.find({
+    return this.repo.find({
       where: { isActive: true },
       order: { sortOrder: 'ASC' },
     });
+  }
 
-    await this.cache.set(cacheKey, categories, 10 * 60 * 1000); // 10 min
-    return categories;
+  async getTree(): Promise<CategoryEntity[]> {
+    return this.repo.find({
+      where: { parentId: IsNull(), isActive: true },
+      relations: ['children'],
+      order: { sortOrder: 'ASC' },
+    });
+  }
+
+  async getParents(): Promise<CategoryEntity[]> {
+    return this.repo.find({
+      where: { parentId: IsNull(), isActive: true },
+      order: { sortOrder: 'ASC' },
+    });
+  }
+
+  async getChildren(parentId: string): Promise<CategoryEntity[]> {
+    return this.repo.find({
+      where: { parentId, isActive: true },
+      order: { sortOrder: 'ASC' },
+    });
   }
 
   async findById(id: string): Promise<CategoryEntity | null> {

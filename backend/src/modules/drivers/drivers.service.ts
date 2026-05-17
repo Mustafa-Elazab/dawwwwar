@@ -54,13 +54,38 @@ export class DriversService {
   async updateLocation(userId: string, dto: UpdateLocationDto): Promise<void> {
     const profile = await this.getProfile(userId);
 
+    // 1. Sequence and Freshness Validation (P0-03)
+    if (dto.sequence !== undefined && dto.sequence <= profile.lastSequenceNumber) {
+      // Out of order update, likely from a buffer replay or network lag. 
+      // Skip but don't error to allow original order processing.
+      return;
+    }
+
+    const lastUpdate = profile.lastLocationUpdate ? new Date(profile.lastLocationUpdate).getTime() : 0;
+    const incomingTime = dto.timestamp ? new Date(dto.timestamp).getTime() : Date.now();
+
+    if (incomingTime < lastUpdate) {
+      return; // Chronologically stale update
+    }
+
+    // 2. Reject impossible jumps or very low accuracy points (Optional Hardening)
+    if (dto.accuracy !== undefined && dto.accuracy > 100) {
+      // GPS noise — log it but maybe don't update map for customer
+    }
+
+    // 3. Update Profile with tracking metadata
     await this.driverRepo.update(profile.id, {
       currentLatitude: dto.latitude,
       currentLongitude: dto.longitude,
-      lastLocationUpdate: new Date(),
+      lastLocationUpdate: dto.timestamp ? new Date(dto.timestamp) : new Date(),
+      lastSequenceNumber: dto.sequence ?? profile.lastSequenceNumber + 1,
+      currentAccuracy: dto.accuracy,
+      currentSpeed: dto.speed,
+      batteryLevel: dto.batteryLevel,
+      lastAppState: dto.appState,
     });
 
-    // Update PostGIS geography column
+    // 4. Update PostGIS geography column
     await this.driverRepo.query(
       `UPDATE driver_profiles
        SET location = ST_SetSRID(ST_MakePoint($1, $2), 4326)
@@ -164,5 +189,42 @@ export class DriversService {
       )
       .setParameters({ lat2: latitude, lng2: longitude })
       .getOne();
+  }
+
+  async findAllForAdmin(status?: string): Promise<any[]> {
+    const query = this.driverRepo
+      .createQueryBuilder('driver')
+      .leftJoinAndSelect('driver.user', 'user');
+
+    if (status === 'online') {
+      query.where('driver.isOnline = true');
+    } else if (status === 'pending') {
+      query.where('driver.isApproved = false');
+    }
+
+    const drivers = await query.orderBy('driver.createdAt', 'DESC').getMany();
+
+    // Add operational health flags
+    const STALE_THRESHOLD_MS = 60 * 1000; // 60 seconds
+    const now = Date.now();
+
+    return drivers.map((driver) => {
+      const lastUpdate = driver.lastLocationUpdate ? new Date(driver.lastLocationUpdate).getTime() : 0;
+      const isLocationStale = driver.isOnline && (now - lastUpdate > STALE_THRESHOLD_MS);
+      
+      return {
+        ...driver,
+        isLocationStale,
+      };
+    });
+  }
+
+  async setApprovalStatus(id: string, isApproved: boolean): Promise<DriverProfileEntity> {
+    await this.driverRepo.update(id, { isApproved });
+    return this.driverRepo.findOne({ where: { id }, relations: ['user'] }) as Promise<DriverProfileEntity>;
+  }
+
+  async findById(id: string): Promise<DriverProfileEntity | null> {
+    return this.driverRepo.findOne({ where: { id }, relations: ['user'] });
   }
 }

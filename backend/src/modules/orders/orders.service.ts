@@ -5,13 +5,14 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, In, IsNull, Repository } from 'typeorm';
+import { DataSource, EntityManager, In, IsNull, Repository } from 'typeorm';
 import {
   OrderEntity,
+  OrderEventEntity,
   OrderStatus,
   OrderType,
   PaymentMethod,
-} from '../../database/entities/order.entity';
+} from '../../database/entities';
 import { OrderItemEntity } from '../../database/entities/order-item.entity';
 import { ProductEntity } from '../../database/entities/product.entity';
 import { WalletEntity } from '../../database/entities/wallet.entity';
@@ -24,9 +25,12 @@ import { DriverProfileEntity } from '../../database/entities/driver-profile.enti
 import { MerchantsService } from '../merchants/merchants.service';
 import { OrderNumberService } from './order-number.service';
 import { GatewayService } from '../gateway/gateway.service';
+import { SOCKET_EVENTS } from '../gateway/events';
 import { OrderNotificationsService } from '../notifications/order-notifications.service';
 import { DriversService } from '../drivers/drivers.service';
 import { PromoService } from '../promo/promo.service';
+import { WalletService } from '../wallet/wallet.service';
+import { DeliveryFeeService } from './delivery-fee.service';
 import type { PlaceOrderDto } from './dto/place-order.dto';
 import type { PlaceCustomOrderDto } from './dto/place-custom-order.dto';
 import type { UpdateDeliveryStatusDto } from './dto/update-delivery-status.dto';
@@ -43,13 +47,15 @@ const ACTIVE_STATUSES = [
   OrderStatus.DELIVERED,
 ];
 
-const COMMISSION_PER_ORDER = 5; // EGP
+const PLATFORM_DRIVER_COMMISSION = 5; // EGP flat fee per delivery for now
 
 @Injectable()
 export class OrdersService {
   constructor(
     @InjectRepository(OrderEntity)
     private readonly orderRepo: Repository<OrderEntity>,
+    @InjectRepository(OrderEventEntity)
+    private readonly eventRepo: Repository<OrderEventEntity>,
     @InjectRepository(OrderItemEntity)
     private readonly itemRepo: Repository<OrderItemEntity>,
     @InjectRepository(WalletEntity)
@@ -67,7 +73,53 @@ export class OrdersService {
     private readonly orderNotifications: OrderNotificationsService,
     private readonly driversService: DriversService,
     private readonly promoService: PromoService,
+    private readonly walletService: WalletService,
+    private readonly deliveryFeeService: DeliveryFeeService,
   ) {}
+
+  async getOrderById(id: string): Promise<OrderEntity> {
+    const order = await this.orderRepo.findOne({
+      where: { id },
+      relations: ['items', 'merchant', 'driver', 'driver.user', 'customer', 'events'],
+    });
+    if (!order) throw new NotFoundException('ORDER_NOT_FOUND');
+    return order;
+  }
+
+  async getDeliveryFeePreview(
+    merchantId: string,
+    customerLat: number,
+    customerLng: number,
+    orderTotal: number,
+  ): Promise<{ fee: number; distanceKm: number; isFree: boolean }> {
+    const merchant = await this.merchantsService.findById(merchantId);
+    return this.deliveryFeeService.calculateFee(
+      merchant.latitude,
+      merchant.longitude,
+      customerLat,
+      customerLng,
+      orderTotal,
+    );
+  }
+
+  private async createOrderEvent(
+    manager: EntityManager,
+    orderId: string,
+    status: OrderStatus,
+    title: string,
+    titleAr: string,
+    metadata?: Record<string, any>,
+  ): Promise<void> {
+    await manager.save(
+      manager.create(OrderEventEntity, {
+        orderId,
+        status,
+        title,
+        titleAr,
+        metadata,
+      }),
+    );
+  }
 
   // ── Customer: place regular order ─────────────────────────────────
   async placeOrder(customerId: string, dto: PlaceOrderDto): Promise<OrderEntity> {
@@ -76,7 +128,6 @@ export class OrdersService {
       throw new BadRequestException('MERCHANT_NOT_ACCEPTING');
     }
 
-    // #10 — Validate product prices from DB (prevent client-side tampering)
     const productIds = dto.items.map((i) => i.productId);
     const products = await this.productRepo.find({
       where: { id: In(productIds), merchantId: dto.merchantId },
@@ -91,7 +142,6 @@ export class OrdersService {
       if (!dbProduct.isAvailable) {
         throw new BadRequestException('PRODUCT_UNAVAILABLE');
       }
-      // Override client-sent price with actual DB price
       item.price = Number(dbProduct.price);
       item.productName = dbProduct.name;
       item.productNameAr = dbProduct.nameAr;
@@ -99,7 +149,15 @@ export class OrdersService {
 
     const subtotal = dto.items.reduce((sum, i) => sum + i.price * i.quantity, 0);
 
-    // #13 — Apply promo code discount
+    // ✅ Calculate delivery fee server-side
+    const { fee: deliveryFee } = this.deliveryFeeService.calculateFee(
+      merchant.latitude,
+      merchant.longitude,
+      dto.deliveryLatitude,
+      dto.deliveryLongitude,
+      subtotal,
+    );
+
     let discount = 0;
     if (dto.promoCode) {
       const promoResult = await this.promoService.validatePromo({
@@ -112,12 +170,11 @@ export class OrdersService {
       discount = promoResult.discountAmount;
     }
 
-    const total = Math.max(subtotal - discount + dto.deliveryFee, 0);
+    const total = Math.max(subtotal - discount + deliveryFee, 0);
 
-    // Validate wallet if payment method is WALLET
-    if (dto.paymentMethod === PaymentMethod.WALLET) {
-      await this.checkWalletBalance(customerId, total);
-    }
+    // Calculate dynamic commissions
+    const merchantCommission = (subtotal * Number(merchant.commissionRate || 0)) / 100;
+    const driverCommission = PLATFORM_DRIVER_COMMISSION;
 
     const orderNumber = await this.orderNumberService.generate();
 
@@ -130,25 +187,34 @@ export class OrdersService {
           type: OrderType.REGULAR,
           status: OrderStatus.PENDING,
           subtotal,
-          deliveryFee: dto.deliveryFee,
+          deliveryFee,
           total,
           discount,
           paymentMethod: dto.paymentMethod,
           isPaid: dto.paymentMethod === PaymentMethod.WALLET,
-          merchantCommission: COMMISSION_PER_ORDER,
-          driverCommission: COMMISSION_PER_ORDER,
+          merchantCommission,
+          driverCommission,
           commissionsDeducted: false,
           deliveryAddress: dto.deliveryAddress,
           deliveryLatitude: dto.deliveryLatitude,
           deliveryLongitude: dto.deliveryLongitude,
           deliveryPhone: dto.deliveryPhone,
           deliveryNotes: dto.deliveryNotes,
-          // #12 — Scheduled orders
           deliverAt: dto.deliverAt ? new Date(dto.deliverAt) : undefined,
         });
         const saved = await manager.save(order);
 
-        // Save order items
+        if (dto.paymentMethod === PaymentMethod.WALLET) {
+          await this.walletService.debitWallet(
+            customerId,
+            total,
+            TransactionReason.ORDER_PAYMENT,
+            `Payment for order ${orderNumber}`,
+            saved.id,
+            manager,
+          );
+        }
+
         const items = dto.items.map((i) =>
           manager.create(OrderItemEntity, {
             orderId: saved.id,
@@ -161,17 +227,7 @@ export class OrdersService {
         );
         await manager.save(items);
 
-        // Deduct from wallet immediately if WALLET payment
-        if (dto.paymentMethod === PaymentMethod.WALLET) {
-          await this.deductWallet(
-            manager,
-            customerId,
-            total,
-            saved.id,
-            'Payment for order ' + orderNumber,
-          );
-          await manager.update(OrderEntity, saved.id, { isPaid: true });
-        }
+        await this.createOrderEvent(manager, saved.id, OrderStatus.PENDING, 'Order Placed', 'تم إنشاء الطلب');
 
         return manager.findOne(OrderEntity, {
           where: { id: saved.id },
@@ -179,13 +235,14 @@ export class OrdersService {
         }) as Promise<OrderEntity>;
       })
       .then((order) => {
-        // Notify merchant of new order (outside transaction)
         if (order.merchantId) {
           this.gatewayService.notifyNewOrder(order.merchantId, order);
-          // FCM push notification for merchant
           void this.orderNotifications.notifyMerchantNewOrder(order).catch(() => {});
         }
-        // Increment promo code usage
+        
+        // Broadcast to all online drivers
+        this.gatewayService.broadcastToDrivers(SOCKET_EVENTS.ORDER_NEW, order);
+        
         if (dto.promoCode) {
           void this.promoService.markUsed(dto.promoCode).catch(() => {});
         }
@@ -195,11 +252,22 @@ export class OrdersService {
 
   // ── Customer: place custom order ───────────────────────────────────
   async placeCustomOrder(customerId: string, dto: PlaceCustomOrderDto): Promise<OrderEntity> {
-    const total = dto.estimatedBudget + dto.deliveryFee;
-
-    if (dto.paymentMethod === PaymentMethod.WALLET) {
-      await this.checkWalletBalance(customerId, total);
+    // If shop coordinates are provided:
+    let deliveryFee = dto.deliveryFee;
+    if (dto.shopLatitude && dto.shopLongitude) {
+      const { fee } = this.deliveryFeeService.calculateFee(
+        dto.shopLatitude,
+        dto.shopLongitude,
+        dto.deliveryLatitude,
+        dto.deliveryLongitude,
+        dto.estimatedBudget,
+      );
+      deliveryFee = fee;
     }
+
+    const total = dto.estimatedBudget + deliveryFee;
+
+    const driverCommission = PLATFORM_DRIVER_COMMISSION;
 
     const orderNumber = await this.orderNumberService.generate();
 
@@ -210,7 +278,7 @@ export class OrdersService {
         type: OrderType.CUSTOM,
         status: OrderStatus.PENDING,
         subtotal: dto.estimatedBudget,
-        deliveryFee: dto.deliveryFee,
+        deliveryFee,
         total,
         discount: 0,
         paymentMethod: dto.paymentMethod,
@@ -224,7 +292,7 @@ export class OrdersService {
         itemsImages: dto.itemsImages,
         estimatedBudget: dto.estimatedBudget,
         merchantCommission: 0,
-        driverCommission: COMMISSION_PER_ORDER,
+        driverCommission,
         commissionsDeducted: false,
         deliveryAddress: dto.deliveryAddress,
         deliveryLatitude: dto.deliveryLatitude,
@@ -235,46 +303,43 @@ export class OrdersService {
       const saved = await manager.save(order);
 
       if (dto.paymentMethod === PaymentMethod.WALLET) {
-        await this.deductWallet(
-          manager,
+        await this.walletService.debitWallet(
           customerId,
           total,
+          TransactionReason.ORDER_PAYMENT,
+          `Custom order ${orderNumber}`,
           saved.id,
-          'Custom order ' + orderNumber,
+          manager,
         );
-        await manager.update(OrderEntity, saved.id, { isPaid: true });
       }
+
+      await this.createOrderEvent(manager, saved.id, OrderStatus.PENDING, 'Custom Order Placed', 'تم إنشاء طلب خاص');
 
       return saved;
     });
   }
 
   // ── Customer: get my orders ────────────────────────────────────────
-  async getCustomerOrders(customerId: string): Promise<OrderEntity[]> {
+  async getCustomerOrders(customerId: string, limit = 50, offset = 0): Promise<OrderEntity[]> {
     return this.orderRepo.find({
       where: { customerId },
       relations: ['items', 'merchant'],
       order: { createdAt: 'DESC' },
+      skip: offset,
+      take: limit,
     });
-  }
-
-  async getOrderById(id: string): Promise<OrderEntity> {
-    const order = await this.orderRepo.findOne({
-      where: { id },
-      relations: ['items', 'merchant', 'driver'],
-    });
-    if (!order) throw new NotFoundException('ORDER_NOT_FOUND');
-    return order;
   }
 
   // ── Merchant: get orders ───────────────────────────────────────────
-  async getMerchantOrders(userId: string): Promise<OrderEntity[]> {
+  async getMerchantOrders(userId: string, limit = 50, offset = 0): Promise<OrderEntity[]> {
     const merchant = await this.merchantsService.findByUserId(userId);
     if (!merchant) throw new ForbiddenException('NOT_A_MERCHANT');
     return this.orderRepo.find({
       where: { merchantId: merchant.id },
       relations: ['items'],
       order: { createdAt: 'DESC' },
+      skip: offset,
+      take: limit,
     });
   }
 
@@ -286,60 +351,67 @@ export class OrdersService {
     if (!merchant || order.merchantId !== merchant.id) {
       throw new ForbiddenException('CANNOT_MANAGE_ORDER');
     }
-    if (order.status !== OrderStatus.PENDING) {
+    if (order.status !== OrderStatus.PENDING && order.status !== OrderStatus.DRIVER_ASSIGNED) {
       throw new BadRequestException('ORDER_NOT_PENDING');
     }
 
-    await this.orderRepo.update(orderId, {
-      status: OrderStatus.ACCEPTED,
-      acceptedAt: new Date(),
-    });
+    return this.dataSource.transaction(async (manager) => {
+      // If driver already assigned, stay as DRIVER_ASSIGNED but mark acceptedAt
+      const nextStatus = order.status === OrderStatus.DRIVER_ASSIGNED ? OrderStatus.DRIVER_ASSIGNED : OrderStatus.ACCEPTED;
+      
+      await manager.update(OrderEntity, orderId, {
+        status: nextStatus,
+        acceptedAt: new Date(),
+      });
 
-    const updated = await this.getOrderById(orderId);
-    // Notify customer of status change
-    if (updated.customerId) {
-      this.gatewayService.notifyOrderStatusChanged(orderId, OrderStatus.ACCEPTED, updated);
-      // FCM push notification for customer
-      void this.orderNotifications
-        .notifyCustomerStatusChange(updated, '✅ قبل المحل طلبك — جاري التحضير')
-        .catch(() => {});
-    }
+      await this.createOrderEvent(manager, orderId, nextStatus, 'Merchant Accepted', 'قبل المحل الطلب');
 
-    // P3-03 · Auto Driver Assignment
-    if (updated.deliveryLatitude && updated.deliveryLongitude) {
-      // Find nearest online driver within 5km from the merchant
-      const searchLat = updated.merchant?.latitude ?? updated.deliveryLatitude;
-      const searchLng = updated.merchant?.longitude ?? updated.deliveryLongitude;
-      const nearestDriver = await this.driversService.findNearestOnlineDriver(
-        searchLat,
-        searchLng,
-        5,
-      );
+      let updated = await manager.findOne(OrderEntity, {
+        where: { id: orderId },
+        relations: ['items', 'merchant', 'driver'],
+      });
 
-      if (nearestDriver) {
-        // Auto-assign
-        await this.orderRepo.update(orderId, {
-          driverId: nearestDriver.userId,
-          status: OrderStatus.DRIVER_ASSIGNED,
-          assignedAt: new Date(),
-        });
-
-        const assignedOrder = await this.getOrderById(orderId);
-
-        // Notify customer
-        this.gatewayService.notifyOrderStatusChanged(
-          orderId,
-          OrderStatus.DRIVER_ASSIGNED,
-          assignedOrder,
+      // Try assigning driver if not already assigned
+      if (!updated?.driverId && updated?.deliveryLatitude && updated?.deliveryLongitude) {
+        const searchLat = updated.merchant?.latitude ?? updated.deliveryLatitude;
+        const searchLng = updated.merchant?.longitude ?? updated.deliveryLongitude;
+        const nearestDriver = await this.driversService.findNearestOnlineDriver(
+          searchLat,
+          searchLng,
+          5,
         );
-        void this.orderNotifications.notifyCustomerDriverAssigned(assignedOrder).catch(() => {});
 
-        // Notify the assigned driver
-        this.gatewayService.notifyDriverAssigned(orderId, updated.customerId, nearestDriver.user);
+        if (nearestDriver) {
+          await manager.update(OrderEntity, orderId, {
+            driverId: nearestDriver.userId,
+            status: OrderStatus.DRIVER_ASSIGNED,
+            assignedAt: new Date(),
+          });
+          
+          await this.createOrderEvent(manager, orderId, OrderStatus.DRIVER_ASSIGNED, 'Driver Assigned', 'تم تعيين سائق');
+
+          updated = await manager.findOne(OrderEntity, {
+            where: { id: orderId },
+            relations: ['items', 'merchant', 'driver'],
+          });
+        }
       }
-    }
 
-    return this.getOrderById(orderId);
+      return updated as OrderEntity;
+    }).then((updated) => {
+      if (updated.customerId) {
+        this.gatewayService.notifyOrderStatusChanged(orderId, updated.status, updated);
+        void this.orderNotifications
+          .notifyCustomerStatusChange(updated, '✅ قبل المحل طلبك — جاري التحضير')
+          .catch(() => {});
+          
+        if (updated.driverId) {
+          void this.orderNotifications.notifyCustomerDriverAssigned(updated).catch(() => {});
+          this.gatewayService.notifyDriverAssigned(orderId, updated.customerId, updated.driver);
+        }
+      }
+      return updated;
+    });
   }
 
   // ── Merchant: reject order ─────────────────────────────────────────
@@ -351,24 +423,36 @@ export class OrdersService {
       throw new ForbiddenException('CANNOT_MANAGE_ORDER');
     }
 
-    // Refund wallet if paid
-    if (order.isPaid && order.paymentMethod === PaymentMethod.WALLET) {
-      await this.refundWallet(order.customerId, order.total, orderId, 'Refund: order rejected');
-    }
+    return this.dataSource.transaction(async (manager) => {
+      if (order.isPaid && order.paymentMethod === PaymentMethod.WALLET) {
+        await this.walletService.creditWallet(
+          order.customerId,
+          order.total,
+          TransactionReason.REFUND,
+          `Refund: order ${order.orderNumber} rejected by merchant`,
+          orderId,
+          manager,
+        );
+      }
 
-    await this.orderRepo.update(orderId, {
-      status: OrderStatus.REJECTED,
-      cancelledAt: new Date(),
+      await manager.update(OrderEntity, orderId, {
+        status: OrderStatus.REJECTED,
+        cancelledAt: new Date(),
+      });
+
+      await this.createOrderEvent(manager, orderId, OrderStatus.REJECTED, 'Merchant Rejected', 'رفض المحل الطلب', { reason });
+
+      return manager.findOne(OrderEntity, {
+        where: { id: orderId },
+        relations: ['items', 'merchant', 'driver'],
+      }) as Promise<OrderEntity>;
+    }).then((updated) => {
+      if (updated.customerId) {
+        this.gatewayService.notifyOrderStatusChanged(orderId, OrderStatus.REJECTED, updated);
+        void this.orderNotifications.notifyCustomerOrderRejected(updated).catch(() => {});
+      }
+      return updated;
     });
-
-    const updated = await this.getOrderById(orderId);
-    // Notify customer of status change
-    if (updated.customerId) {
-      this.gatewayService.notifyOrderStatusChanged(orderId, OrderStatus.REJECTED, updated);
-      // FCM push notification for customer
-      void this.orderNotifications.notifyCustomerOrderRejected(updated).catch(() => {});
-    }
-    return updated;
   }
 
   // ── Merchant: mark ready ───────────────────────────────────────────
@@ -378,23 +462,27 @@ export class OrdersService {
     if (!merchant || order.merchantId !== merchant.id) {
       throw new ForbiddenException('ACCESS_DENIED');
     }
-    if (order.status !== OrderStatus.ACCEPTED && order.status !== OrderStatus.DRIVER_ASSIGNED) {
-      throw new BadRequestException('ORDER_NOT_READY_TO_MARK');
-    }
 
-    // If a driver is already assigned, move to PICKED_UP (ready for pickup)
-    // If no driver yet, keep DRIVER_ASSIGNED so driver list can pick it up
-    const newStatus = order.driverId ? OrderStatus.PICKED_UP : OrderStatus.ACCEPTED;
-    await this.orderRepo.update(orderId, { status: newStatus });
+    const newStatus = OrderStatus.READY;
 
-    const updated = await this.getOrderById(orderId);
-    if (updated.customerId) {
-      this.gatewayService.notifyOrderStatusChanged(orderId, newStatus, updated);
-      void this.orderNotifications
-        .notifyCustomerStatusChange(updated, '✅ طلبك جاهز للاستلام')
-        .catch(() => {});
-    }
-    return updated;
+    return this.dataSource.transaction(async (manager) => {
+       await manager.update(OrderEntity, orderId, { status: newStatus });
+       await this.createOrderEvent(manager, orderId, newStatus, 'Order Ready', 'الطلب جاهز للاستلام');
+
+       return manager.findOne(OrderEntity, {
+         where: { id: orderId },
+         relations: ['items', 'merchant', 'driver'],
+       }) as Promise<OrderEntity>;
+    })
+.then((updated) => {
+      if (updated.customerId) {
+        this.gatewayService.notifyOrderStatusChanged(orderId, newStatus, updated);
+        void this.orderNotifications
+          .notifyCustomerStatusChange(updated, '✅ طلبك جاهز للاستلام')
+          .catch(() => {});
+      }
+      return updated;
+    });
   }
 
   // ── Driver: accept order ───────────────────────────────────────────
@@ -404,20 +492,30 @@ export class OrdersService {
       throw new BadRequestException('ORDER_ALREADY_TAKEN');
     }
 
-    await this.orderRepo.update(orderId, {
-      driverId,
-      status: OrderStatus.DRIVER_ASSIGNED,
-      assignedAt: new Date(),
-    });
+    return this.dataSource.transaction(async (manager) => {
+      // If merchant already accepted, stay in READY or just move to DRIVER_ASSIGNED
+      // For now, move to DRIVER_ASSIGNED as it's the standard active state
+      const nextStatus = OrderStatus.DRIVER_ASSIGNED;
+      
+      await manager.update(OrderEntity, orderId, {
+        driverId,
+        status: nextStatus,
+        assignedAt: new Date(),
+      });
 
-    const updated = await this.getOrderById(orderId);
-    // Notify customer of driver assignment
-    if (order.customerId) {
-      this.gatewayService.notifyOrderStatusChanged(orderId, OrderStatus.DRIVER_ASSIGNED, updated);
-      // FCM push notification for customer
-      void this.orderNotifications.notifyCustomerDriverAssigned(updated).catch(() => {});
-    }
-    return updated;
+      await this.createOrderEvent(manager, orderId, nextStatus, 'Driver Assigned', 'تم تعيين سائق');
+
+      return manager.findOne(OrderEntity, {
+        where: { id: orderId },
+        relations: ['items', 'merchant', 'driver'],
+      }) as Promise<OrderEntity>;
+    }).then((updated) => {
+      if (updated.customerId) {
+        this.gatewayService.notifyOrderStatusChanged(orderId, updated.status, updated);
+        void this.orderNotifications.notifyCustomerDriverAssigned(updated).catch(() => {});
+      }
+      return updated;
+    });
   }
 
   // ── Driver: decline order ──────────────────────────────────────────
@@ -425,27 +523,41 @@ export class OrdersService {
     const order = await this.getOrderById(orderId);
     if (!order) throw new NotFoundException('ORDER_NOT_FOUND');
 
-    // If this driver was assigned, unassign them
     if (order.driverId === driverId) {
+      // 1. Reset order driver association
       await this.orderRepo.update(orderId, {
-        driverId: undefined,
-        status: OrderStatus.ACCEPTED,
-        assignedAt: undefined,
+        driverId: null,
+        status: OrderStatus.READY, // Fallback to ready for assignment
+        assignedAt: null,
       });
 
-      // Try to find the next nearest online driver (exclude this one)
+      // 2. Log audit event
+      await this.createOrderEvent(
+        this.orderRepo.manager,
+        orderId,
+        OrderStatus.READY,
+        'Driver Declined',
+        'رفض السائق الطلب',
+      );
+
+      // 3. Trigger immediate re-assignment attempt
       if (order.merchant?.latitude && order.merchant?.longitude) {
+        const searchLat = order.merchant.latitude;
+        const searchLng = order.merchant.longitude;
+
         const nextDriver = await this.driversService.findNearestOnlineDriver(
-          order.merchant.latitude,
-          order.merchant.longitude,
+          searchLat,
+          searchLng,
           5,
         );
+
         if (nextDriver && nextDriver.userId !== driverId) {
           await this.orderRepo.update(orderId, {
             driverId: nextDriver.userId,
             status: OrderStatus.DRIVER_ASSIGNED,
             assignedAt: new Date(),
           });
+          
           const updated = await this.getOrderById(orderId);
           this.gatewayService.notifyOrderStatusChanged(
             orderId,
@@ -456,6 +568,29 @@ export class OrdersService {
           void this.orderNotifications.notifyCustomerDriverAssigned(updated).catch(() => {});
         }
       }
+    }
+  }
+
+  private validateStatusTransition(current: OrderStatus, next: OrderStatus) {
+    const transitions: Record<OrderStatus, OrderStatus[]> = {
+      [OrderStatus.PENDING]: [OrderStatus.ACCEPTED, OrderStatus.REJECTED, OrderStatus.CANCELLED],
+      [OrderStatus.ACCEPTED]: [OrderStatus.READY, OrderStatus.DRIVER_ASSIGNED, OrderStatus.CANCELLED],
+      [OrderStatus.READY]: [OrderStatus.DRIVER_ASSIGNED, OrderStatus.CANCELLED],
+      [OrderStatus.DRIVER_ASSIGNED]: [OrderStatus.PICKED_UP, OrderStatus.AT_SHOP, OrderStatus.CANCELLED, OrderStatus.READY], // READY if driver unassigned
+      [OrderStatus.AT_SHOP]: [OrderStatus.SHOPPING, OrderStatus.CANCELLED],
+      [OrderStatus.SHOPPING]: [OrderStatus.PURCHASED, OrderStatus.CANCELLED],
+      [OrderStatus.PURCHASED]: [OrderStatus.IN_TRANSIT, OrderStatus.CANCELLED],
+      [OrderStatus.PICKED_UP]: [OrderStatus.IN_TRANSIT, OrderStatus.CANCELLED],
+      [OrderStatus.IN_TRANSIT]: [OrderStatus.DELIVERED, OrderStatus.CANCELLED],
+      [OrderStatus.DELIVERED]: [OrderStatus.COMPLETED],
+      [OrderStatus.COMPLETED]: [],
+      [OrderStatus.REJECTED]: [],
+      [OrderStatus.CANCELLED]: [],
+    };
+
+    const allowed = transitions[current] || [];
+    if (!allowed.includes(next)) {
+      throw new BadRequestException(`INVALID_STATUS_TRANSITION:${current}->${next}`);
     }
   }
 
@@ -471,77 +606,92 @@ export class OrdersService {
       throw new ForbiddenException('NOT_ASSIGNED_TO_ORDER');
     }
 
-    const updateData: Partial<OrderEntity> = { status: dto.status };
-
-    if (dto.status === OrderStatus.PICKED_UP || dto.status === OrderStatus.AT_SHOP) {
-      // no timestamp field for these in entity, handled by updatedAt
-    }
-    if (dto.status === OrderStatus.IN_TRANSIT) {
-      updateData.pickedUpAt = new Date();
-      if (dto.actualAmount !== undefined) updateData.actualAmount = dto.actualAmount;
-      if (dto.receiptImage) updateData.receiptImage = dto.receiptImage;
-    }
-    if (dto.status === OrderStatus.DELIVERED) {
-      updateData.deliveredAt = new Date();
-    }
-    if (dto.status === OrderStatus.COMPLETED) {
-      updateData.completedAt = new Date();
-
-      // Deduct commissions from merchant and driver wallets
-      if (!order.commissionsDeducted) {
-        await this.deductCommissions(order);
-        updateData.commissionsDeducted = true;
-      }
+    if (order.status === dto.status) {
+      return order; // Idempotency
     }
 
-    await this.orderRepo.update(orderId, updateData as any);
-    const updated = await this.getOrderById(orderId);
-    // Notify customer of status change
-    if (order.customerId) {
-      this.gatewayService.notifyOrderStatusChanged(orderId, dto.status, updated);
-      // FCM push notifications for key status changes
+    this.validateStatusTransition(order.status, dto.status);
+
+    return this.dataSource.transaction(async (manager) => {
+      const updateData: Partial<OrderEntity> = { status: dto.status };
+
       if (dto.status === OrderStatus.IN_TRANSIT) {
-        void this.orderNotifications
-          .notifyCustomerStatusChange(updated, '🛵 طلبك في الطريق إليك')
-          .catch(() => {});
+        updateData.pickedUpAt = new Date();
+        if (dto.actualAmount !== undefined) updateData.actualAmount = dto.actualAmount;
+        if (dto.receiptImage) updateData.receiptImage = dto.receiptImage;
       }
+      
+      if (dto.status === OrderStatus.DELIVERED) {
+        updateData.deliveredAt = new Date();
+      }
+      
       if (dto.status === OrderStatus.COMPLETED) {
-        void this.orderNotifications
-          .notifyCustomerStatusChange(updated, '✅ تم توصيل طلبك بنجاح')
-          .catch(() => {});
+        updateData.completedAt = new Date();
+
+        if (!order.commissionsDeducted) {
+          await this.finalizePayments(order, manager);
+          updateData.commissionsDeducted = true;
+        }
       }
-    }
-    return updated;
+
+      await manager.update(OrderEntity, orderId, updateData as any);
+      await this.createOrderEvent(manager, orderId, dto.status, `Status: ${dto.status}`, `الحالة: ${dto.status}`);
+      
+      return manager.findOne(OrderEntity, {
+        where: { id: orderId },
+        relations: ['items', 'merchant', 'driver'],
+      }) as Promise<OrderEntity>;
+    }).then((updated) => {
+      if (updated.customerId) {
+        this.gatewayService.notifyOrderStatusChanged(orderId, dto.status, updated);
+        if (dto.status === OrderStatus.IN_TRANSIT) {
+          void this.orderNotifications.notifyCustomerStatusChange(updated, '🛵 طلبك في الطريق إليك').catch(() => {});
+        }
+        if (dto.status === OrderStatus.COMPLETED) {
+          void this.orderNotifications.notifyCustomerStatusChange(updated, '✅ تم توصيل طلبك بنجاح').catch(() => {});
+        }
+      }
+      return updated;
+    });
   }
 
   // ── Customer: cancel order ──────────────────────────────────────────
-  async customerCancel(orderId: string, customerId: string): Promise<OrderEntity> {
+  async customerCancel(orderId: string, customerId: string, isAdmin = false): Promise<OrderEntity> {
     const order = await this.getOrderById(orderId);
-    if (order.customerId !== customerId) throw new ForbiddenException('NOT_YOUR_ORDER');
-    if (order.status !== OrderStatus.PENDING) {
+    if (!isAdmin && order.customerId !== customerId) throw new ForbiddenException('NOT_YOUR_ORDER');
+    if (order.status !== OrderStatus.PENDING && !isAdmin) {
       throw new BadRequestException('CAN_ONLY_CANCEL_PENDING');
     }
 
-    // Refund wallet if already paid
-    if (order.isPaid && order.paymentMethod === PaymentMethod.WALLET) {
-      await this.refundWallet(
-        order.customerId,
-        order.total,
-        orderId,
-        'Refund: order cancelled by customer',
-      );
-    }
+    return this.dataSource.transaction(async (manager) => {
+      if (order.isPaid && order.paymentMethod === PaymentMethod.WALLET) {
+        await this.walletService.creditWallet(
+          order.customerId,
+          order.total,
+          TransactionReason.REFUND,
+          `Refund: order ${order.orderNumber} cancelled by customer`,
+          orderId,
+          manager,
+        );
+      }
 
-    await this.orderRepo.update(orderId, {
-      status: OrderStatus.CANCELLED,
-      cancelledAt: new Date(),
+      await manager.update(OrderEntity, orderId, {
+        status: OrderStatus.CANCELLED,
+        cancelledAt: new Date(),
+      });
+
+      await this.createOrderEvent(manager, orderId, OrderStatus.CANCELLED, 'Order Cancelled', 'تم إلغاء الطلب');
+
+      return manager.findOne(OrderEntity, {
+        where: { id: orderId },
+        relations: ['items', 'merchant', 'driver'],
+      }) as Promise<OrderEntity>;
+    }).then((updated) => {
+      if (order.merchantId) {
+        this.gatewayService.notifyOrderStatusChanged(orderId, OrderStatus.CANCELLED, updated);
+      }
+      return updated;
     });
-
-    const updated = await this.getOrderById(orderId);
-    if (order.merchantId) {
-      this.gatewayService.notifyOrderStatusChanged(orderId, OrderStatus.CANCELLED, updated);
-    }
-    return updated;
   }
 
   // ── Driver: get available orders ────────────────────────────────────
@@ -556,6 +706,37 @@ export class OrdersService {
     });
   }
 
+  async findAllForAdmin(status?: string, limit = 50, offset = 0): Promise<{ data: OrderEntity[], total: number }> {
+    const query = this.orderRepo.createQueryBuilder('order')
+      .leftJoinAndSelect('order.customer', 'customer')
+      .leftJoinAndSelect('order.merchant', 'merchant')
+      .leftJoinAndSelect('order.driver', 'driver')
+      .leftJoinAndSelect('order.items', 'items');
+
+    if (status === 'active') {
+      query.where('order.status IN (:...statuses)', {
+        statuses: [
+          OrderStatus.PENDING,
+          OrderStatus.ACCEPTED,
+          OrderStatus.DRIVER_ASSIGNED,
+          OrderStatus.AT_SHOP,
+          OrderStatus.SHOPPING,
+          OrderStatus.PURCHASED,
+          OrderStatus.PICKED_UP,
+          OrderStatus.IN_TRANSIT,
+          OrderStatus.DELIVERED,
+        ]
+      });
+    }
+
+    const [data, total] = await query
+      .orderBy('order.createdAt', 'DESC')
+      .skip(offset)
+      .take(limit)
+      .getManyAndCount();
+
+    return { data, total };
+  }
   // ── Driver: get active order ───────────────────────────────────────
   async getDriverActiveOrder(driverId: string): Promise<OrderEntity | null> {
     return this.orderRepo.findOne({
@@ -585,39 +766,27 @@ export class OrdersService {
     }
     if (amount <= 0) throw new BadRequestException('INVALID_TIP_AMOUNT');
 
-    // Make sure they have wallet balance
-    await this.checkWalletBalance(customerId, amount);
-
     await this.dataSource.transaction(async (manager) => {
-      // deduct from customer
-      await this.deductWallet(
-        manager,
+      await this.walletService.debitWallet(
         customerId,
         amount,
-        orderId,
+        TransactionReason.TIP,
         `Tip for order ${order.orderNumber}`,
+        orderId,
+        manager,
+        `TIP_DEBIT_${orderId}_${amount}_${Date.now()}` // Allow multiple tips but prevent strict concurrency dupes
       );
 
-      // add to driver
       if (order.driverId) {
-        const wallet = await manager.findOne(WalletEntity, { where: { userId: order.driverId } });
-        if (wallet) {
-          const balanceBefore = Number(wallet.balance);
-          const balanceAfter = balanceBefore + amount;
-          await manager.update(WalletEntity, wallet.id, { balance: balanceAfter });
-          await manager.save(
-            manager.create(WalletTransactionEntity, {
-              walletId: wallet.id,
-              type: TransactionType.CREDIT,
-              amount,
-              reason: TransactionReason.TIP,
-              orderId,
-              description: `Tip from customer for order ${order.orderNumber}`,
-              balanceBefore,
-              balanceAfter,
-            }),
-          );
-        }
+        await this.walletService.creditWallet(
+          order.driverId,
+          amount,
+          TransactionReason.TIP,
+          `Tip from customer for order ${order.orderNumber}`,
+          orderId,
+          manager,
+          `TIP_CREDIT_${orderId}_${amount}_${Date.now()}`
+        );
       }
 
       const currentTip = Number(order.tipAmount || 0);
@@ -627,110 +796,73 @@ export class OrdersService {
     return this.getOrderById(orderId);
   }
 
-  // ── Private helpers ───────────────────────────────────────────────
-  private async checkWalletBalance(userId: string, amount: number): Promise<void> {
-    const wallet = await this.walletRepo.findOne({ where: { userId } });
-    if (!wallet || Number(wallet.balance) < amount) {
-      throw new BadRequestException('INSUFFICIENT_WALLET_BALANCE');
+  private async finalizePayments(order: OrderEntity, manager: EntityManager): Promise<void> {
+    // 1. Handle Credits (if paid via Wallet)
+    if (order.paymentMethod === PaymentMethod.WALLET && order.isPaid) {
+      if (order.type === OrderType.REGULAR && order.merchantId) {
+        // Regular Order: Subtotal goes to Merchant
+        const merchant = await this.merchantsService.findById(order.merchantId);
+        await this.walletService.creditWallet(
+          merchant.userId,
+          Number(order.subtotal),
+          TransactionReason.ORDER_PAYMENT,
+          `Payment for items in order ${order.orderNumber}`,
+          order.id,
+          manager,
+          `ORDER_PAYMENT_MERCHANT_${order.id}`
+        );
+
+        // Delivery Fee goes to Driver
+        if (order.driverId) {
+          await this.walletService.creditWallet(
+            order.driverId,
+            Number(order.deliveryFee),
+            TransactionReason.DELIVERY_FEE,
+            `Delivery fee for order ${order.orderNumber}`,
+            order.id,
+            manager,
+            `ORDER_DELIVERY_FEE_DRIVER_${order.id}`
+          );
+        }
+      } else if (order.type === OrderType.CUSTOM && order.driverId) {
+        // Custom Order: Total (Budget + Fee) goes to Driver
+        // (Driver is responsible for buying items)
+        await this.walletService.creditWallet(
+          order.driverId,
+          Number(order.total),
+          TransactionReason.ORDER_PAYMENT,
+          `Custom order payment (Budget + Fee) for ${order.orderNumber}`,
+          order.id,
+          manager,
+          `CUSTOM_ORDER_PAYMENT_DRIVER_${order.id}`
+        );
+      }
     }
-  }
 
-  private async deductWallet(
-    manager: any,
-    userId: string,
-    amount: number,
-    orderId: string,
-    description: string,
-  ): Promise<void> {
-    const wallet = await manager.findOne(WalletEntity, { where: { userId } });
-    const balanceBefore = Number(wallet.balance);
-    const balanceAfter = balanceBefore - amount;
-    await manager.update(WalletEntity, wallet.id, { balance: balanceAfter });
-    await manager.save(
-      manager.create(WalletTransactionEntity, {
-        walletId: wallet.id,
-        type: TransactionType.DEBIT,
-        amount,
-        reason: TransactionReason.ORDER_PAYMENT,
-        orderId,
-        description,
-        balanceBefore,
-        balanceAfter,
-      }),
-    );
-  }
-
-  private async refundWallet(
-    userId: string,
-    amount: number,
-    orderId: string,
-    description: string,
-  ): Promise<void> {
-    const wallet = await this.walletRepo.findOne({ where: { userId } });
-    if (!wallet) return;
-    const balanceBefore = Number(wallet.balance);
-    const balanceAfter = balanceBefore + amount;
-    await this.walletRepo.update(wallet.id, { balance: balanceAfter });
-    await this.txRepo.save(
-      this.txRepo.create({
-        walletId: wallet.id,
-        type: TransactionType.CREDIT,
-        amount,
-        reason: TransactionReason.REFUND,
-        orderId,
-        description,
-        balanceBefore,
-        balanceAfter,
-      }),
-    );
-  }
-
-  private async deductCommissions(order: OrderEntity): Promise<void> {
-    // Deduct merchant commission
+    // 2. Handle Debits (Commissions)
     if (order.merchantId && Number(order.merchantCommission) > 0) {
       const merchant = await this.merchantsService.findById(order.merchantId);
-      const wallet = await this.walletRepo.findOne({ where: { userId: merchant.userId } });
-      if (wallet) {
-        const balanceBefore = Number(wallet.balance);
-        const amount = Number(order.merchantCommission);
-        const balanceAfter = balanceBefore - amount;
-        await this.walletRepo.update(wallet.id, { balance: balanceAfter });
-        await this.txRepo.save(
-          this.txRepo.create({
-            walletId: wallet.id,
-            type: TransactionType.DEBIT,
-            amount,
-            reason: TransactionReason.COMMISSION_DEDUCTION,
-            orderId: order.id,
-            description: `Merchant commission for order ${order.orderNumber}`,
-            balanceBefore,
-            balanceAfter,
-          }),
-        );
-      }
+      await this.walletService.debitWallet(
+        merchant.userId,
+        Number(order.merchantCommission),
+        TransactionReason.COMMISSION_DEDUCTION,
+        `Merchant commission for order ${order.orderNumber}`,
+        order.id,
+        manager,
+        `COMMISSION_MERCHANT_${order.id}`
+      );
     }
 
-    // Deduct driver commission
     if (order.driverId && Number(order.driverCommission) > 0) {
-      const wallet = await this.walletRepo.findOne({ where: { userId: order.driverId } });
-      if (wallet) {
-        const balanceBefore = Number(wallet.balance);
-        const amount = Number(order.driverCommission);
-        const balanceAfter = balanceBefore - amount;
-        await this.walletRepo.update(wallet.id, { balance: balanceAfter });
-        await this.txRepo.save(
-          this.txRepo.create({
-            walletId: wallet.id,
-            type: TransactionType.DEBIT,
-            amount,
-            reason: TransactionReason.COMMISSION_DEDUCTION,
-            orderId: order.id,
-            description: `Driver commission for order ${order.orderNumber}`,
-            balanceBefore,
-            balanceAfter,
-          }),
-        );
-      }
+      await this.walletService.debitWallet(
+        order.driverId,
+        Number(order.driverCommission),
+        TransactionReason.COMMISSION_DEDUCTION,
+        `Driver commission for order ${order.orderNumber}`,
+        order.id,
+        manager,
+        `COMMISSION_DRIVER_${order.id}`
+      );
     }
   }
 }

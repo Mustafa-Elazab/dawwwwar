@@ -3,6 +3,7 @@ import { ApiBearerAuth, ApiOperation, ApiTags, ApiProperty } from '@nestjs/swagg
 import { IsNumber, IsPositive, Min } from 'class-validator';
 import { WalletService } from './wallet.service';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { Idempotent } from '../../common/decorators/idempotent.decorator';
 import { UserEntity } from '../../database/entities/user.entity';
 import { PaymobWebhookDto } from './dto/paymob-webhook.dto';
 import { Public } from '../../common/decorators/public.decorator';
@@ -34,6 +35,7 @@ export class WalletController {
   }
 
   @Post('recharge')
+  @Idempotent()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Request manual wallet recharge (Phase 2)' })
   requestRecharge(
@@ -44,6 +46,7 @@ export class WalletController {
   }
 
   @Post('recharge/paymob')
+  @Idempotent()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Request Paymob wallet recharge (Phase 3)' })
   requestPaymobRecharge(

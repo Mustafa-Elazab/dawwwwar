@@ -1,5 +1,7 @@
 import {
   ForbiddenException,
+  forwardRef,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -15,12 +17,23 @@ export class ProductsService {
   constructor(
     @InjectRepository(ProductEntity)
     private readonly repo: Repository<ProductEntity>,
+    @Inject(forwardRef(() => MerchantsService))
     private readonly merchantsService: MerchantsService,
   ) {}
 
-  async findByMerchant(merchantId: string): Promise<ProductEntity[]> {
+  async findByMerchant(merchantId?: string, userId?: string): Promise<ProductEntity[]> {
+    let actualMerchantId = merchantId;
+    if (!actualMerchantId && userId) {
+      const merchant = await this.merchantsService.findByUserId(userId);
+      if (merchant) {
+        actualMerchantId = merchant.id;
+      }
+    }
+    if (!actualMerchantId) {
+      throw new NotFoundException('MERCHANT_NOT_FOUND');
+    }
     return this.repo.find({
-      where: { merchantId },
+      where: { merchantId: actualMerchantId },
       order: { isFeatured: 'DESC', totalOrders: 'DESC', createdAt: 'ASC' },
     });
   }

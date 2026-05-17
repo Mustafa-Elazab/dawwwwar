@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsIn, IsNumber, IsOptional, IsString } from 'class-validator';
 import { OrderStatus } from '../../../database/entities/order.entity';
 
 const DRIVER_ALLOWED_STATUSES = [
@@ -14,7 +14,7 @@ const DRIVER_ALLOWED_STATUSES = [
 
 export class UpdateDeliveryStatusDto {
   @ApiProperty({ enum: DRIVER_ALLOWED_STATUSES })
-  @IsEnum(OrderStatus)
+  @IsIn(DRIVER_ALLOWED_STATUSES)
   status: OrderStatus;
 
   @ApiProperty({ required: false })

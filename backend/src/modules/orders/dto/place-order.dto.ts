@@ -34,6 +34,7 @@ class OrderItemDto {
   @ApiProperty()
   @IsNumber()
   @IsPositive()
+  @Type(() => Number)
   price: number;
 }
 

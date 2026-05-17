@@ -2,6 +2,10 @@ import {
   Body,
   Controller,
   Post,
+  Put,
+  Query,
+  Req,
+  BadRequestException,
   UploadedFile,
   UploadedFiles,
   UseInterceptors,
@@ -51,6 +55,28 @@ export class UploadController {
     return this.uploadService.getPresignedUrl(dto);
   }
 
+  @Put('local-presigned')
+  @ApiOperation({ summary: 'Mock S3 direct PUT upload for local dev' })
+  async localPresignedUpload(@Req() req: any, @Query('key') key: string) {
+    if (!key) throw new BadRequestException('Missing key');
+    // Prevent path traversal
+    const sanitizedKey = require('path').normalize(key).replace(/^(\.\.(\/|\\|$))+/, '');
+    if (sanitizedKey !== key || key.includes('..')) {
+      throw new BadRequestException('Invalid key');
+    }
+    const fullPath = require('path').join(process.cwd(), 'uploads', sanitizedKey);
+    const dir = require('path').dirname(fullPath);
+    if (!require('fs').existsSync(dir)) require('fs').mkdirSync(dir, { recursive: true });
+    
+    const stream = require('fs').createWriteStream(fullPath);
+    req.pipe(stream);
+    
+    return new Promise((resolve, reject) => {
+      stream.on('finish', () => resolve({ success: true }));
+      stream.on('error', reject);
+    });
+  }
+
   /**
    * Direct upload — multipart form, single file.
    * Use for receipts and profile photos (smaller files).
@@ -77,6 +103,9 @@ export class UploadController {
     @UploadedFile() file: Express.Multer.File,
     @Body('folder') folder = 'uploads',
   ) {
+    if (!['products', 'orders', 'receipts', 'voice', 'profiles', 'uploads'].includes(folder)) {
+      throw new BadRequestException('Invalid folder');
+    }
     return this.uploadService.uploadFile(file, folder);
   }
 
@@ -92,6 +121,9 @@ export class UploadController {
     @UploadedFiles() files: Express.Multer.File[],
     @Body('folder') folder = 'uploads',
   ) {
+    if (!['products', 'orders', 'receipts', 'voice', 'profiles', 'uploads'].includes(folder)) {
+      throw new BadRequestException('Invalid folder');
+    }
     const results = await Promise.all(
       (files ?? []).map((file) => this.uploadService.uploadFile(file, folder)),
     );

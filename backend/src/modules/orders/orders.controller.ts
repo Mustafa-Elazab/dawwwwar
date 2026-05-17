@@ -1,8 +1,10 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Public } from '../../common/decorators/public.decorator';
 import { OrdersService } from './orders.service';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
+import { Idempotent } from '../../common/decorators/idempotent.decorator';
 import { UserEntity, UserRole } from '../../database/entities/user.entity';
 import { PlaceOrderDto } from './dto/place-order.dto';
 import { PlaceCustomOrderDto } from './dto/place-custom-order.dto';
@@ -16,15 +18,34 @@ import { UpdateDeliveryStatusDto } from './dto/update-delivery-status.dto';
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
+  @Get('delivery-fee')
+  @Public()
+  @ApiOperation({ summary: 'Calculate delivery fee preview' })
+  getDeliveryFee(
+    @Query('merchantId') merchantId: string,
+    @Query('latitude') lat: string,
+    @Query('longitude') lng: string,
+    @Query('subtotal') subtotal: string,
+  ) {
+    return this.ordersService.getDeliveryFeePreview(
+      merchantId,
+      parseFloat(lat),
+      parseFloat(lng),
+      parseFloat(subtotal),
+    );
+  }
+
   // ── Customer ─────────────────────────────────────────────────────
 
   @Post()
+  @Idempotent()
   @ApiOperation({ summary: 'Place a regular order' })
   placeOrder(@CurrentUser() user: UserEntity, @Body() dto: PlaceOrderDto) {
     return this.ordersService.placeOrder(user.id, dto);
   }
 
   @Post('custom')
+  @Idempotent()
   @ApiOperation({ summary: 'Place a custom order' })
   placeCustomOrder(@CurrentUser() user: UserEntity, @Body() dto: PlaceCustomOrderDto) {
     return this.ordersService.placeCustomOrder(user.id, dto);
@@ -32,8 +53,14 @@ export class OrdersController {
 
   @Get('my')
   @ApiOperation({ summary: 'Get my orders (customer)' })
-  getMyOrders(@CurrentUser() user: UserEntity) {
-    return this.ordersService.getCustomerOrders(user.id);
+  getMyOrders(
+    @CurrentUser() user: UserEntity,
+    @Query('limit') limit?: string,
+    @Query('offset') offset?: string,
+  ) {
+    const limitNum = limit ? parseInt(limit, 10) : 20;
+    const offsetNum = offset ? parseInt(offset, 10) : 0;
+    return this.ordersService.getCustomerOrders(user.id, limitNum, offsetNum);
   }
 
   @Get(':id')
@@ -43,6 +70,7 @@ export class OrdersController {
   }
 
   @Post(':id/tip')
+  @Idempotent()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Add a tip to a completed order' })
   addTip(@Param('id') id: string, @CurrentUser() user: UserEntity, @Body('amount') amount: number) {
@@ -67,6 +95,7 @@ export class OrdersController {
 
   @Post('merchant/:id/accept')
   @Roles(UserRole.MERCHANT)
+  @Idempotent()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Merchant accepts order' })
   merchantAccept(
@@ -115,6 +144,7 @@ export class OrdersController {
 
   @Post('driver/:id/accept')
   @Roles(UserRole.DRIVER)
+  @Idempotent()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Driver accepts order' })
   driverAccept(@Param('id') id: string, @CurrentUser() user: UserEntity) {

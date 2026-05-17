@@ -11,6 +11,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { Public } from '../../common/decorators/public.decorator';
 import { ProductsService } from './products.service';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { UserEntity } from '../../database/entities/user.entity';
@@ -23,6 +24,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
+  @Public()
   @Get('featured')
   @ApiOperation({ summary: 'Get featured products for home screen' })
   findFeatured() {
@@ -30,12 +32,13 @@ export class ProductsController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get products by merchantId' })
-  @ApiQuery({ name: 'merchantId', required: true })
-  findByMerchant(@Query('merchantId') merchantId: string) {
-    return this.productsService.findByMerchant(merchantId);
+  @ApiOperation({ summary: 'Get products by merchantId or for current merchant' })
+  @ApiQuery({ name: 'merchantId', required: false })
+  findByMerchant(@Query('merchantId') merchantId: string, @CurrentUser() user: UserEntity) {
+    return this.productsService.findByMerchant(merchantId, user.id);
   }
 
+  @Public()
   @Get(':id')
   @ApiOperation({ summary: 'Get product by ID' })
   findById(@Param('id') id: string) {
