@@ -4,8 +4,9 @@ import { useMutation } from '@tanstack/react-query';
 import { useTranslation } from '@dawwar/i18n';
 import { useAppDispatch, useAppSelector } from '../../../../store/hooks';
 import { updateUser, selectUser } from '../../../../store/slices/auth.slice';
-import { AUTH_ROUTES } from '../../navigation/route';
+import { AUTH_ROUTES } from '../../../../navigation/routes';
 import { Role } from '@dawwar/types';
+import { useSelectRole } from '@dawwar/api-client';
 import type { RoleScreenNavProp, RoleOption } from './types';
 
 const ROLE_OPTIONS: RoleOption[] = [
@@ -39,27 +40,20 @@ export function useController() {
     null,
   );
 
-  // Phase 1: mock role selection — just update local Redux state
-  const selectRoleMutation = useMutation({
-    mutationFn: async (role: 'CUSTOMER' | 'MERCHANT' | 'DRIVER') => {
-      // Phase 2: call POST /auth/select-role
-      await new Promise((r) => setTimeout(r, 500));
-      return { role };
-    },
-    onSuccess: ({ role }) => {
-      dispatch(updateUser({ role: role as Role }));
-      if (role !== 'DRIVER') {
-        // Customer/Merchant go to pending screen (wrong app for their role)
+  const selectRoleMutation = useSelectRole();
+
+  const handleContinue = useCallback(async () => {
+    if (!selectedRole) return;
+    try {
+      await selectRoleMutation.mutateAsync(selectedRole);
+      dispatch(updateUser({ role: selectedRole as Role }));
+      if (selectedRole !== 'DRIVER') {
         navigation.navigate(AUTH_ROUTES.PENDING as never);
       }
-      // DRIVER: RootNavigator detects isAuthenticated + role = DRIVER → shows DriverTabs
-    },
-  });
-
-  const handleContinue = useCallback(() => {
-    if (!selectedRole) return;
-    selectRoleMutation.mutate(selectedRole);
-  }, [selectedRole, selectRoleMutation]);
+    } catch {
+       // Handled by mutation or interceptor
+    }
+  }, [selectedRole, selectRoleMutation, dispatch, navigation]);
 
   return {
     roleOptions: ROLE_OPTIONS,

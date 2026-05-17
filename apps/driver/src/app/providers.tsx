@@ -1,29 +1,26 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Provider as ReduxProvider } from 'react-redux';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from '@dawwar/theme';
 import { I18nextProvider } from 'react-i18next';
-import { initI18n, getStoredLanguage, i18n } from '@dawwar/i18n';
+import { i18n } from '@dawwar/i18n';
 import Toast from 'react-native-toast-message';
 import { AppErrorBoundary } from '@dawwar/ui';
+import { ApiClientProvider } from '@dawwar/api-client';
 import { store } from '../store';
 import { storage, StorageKeys } from '../core/storage/mmkv';
-import { setThemeMode, setLanguage } from '../store/slices/ui.slice';
+import { setThemeMode } from '../store/slices/ui.slice';
+import { setUser, setLoading } from '../store/slices/auth.slice';
+import { authApi } from '../features/auth/core/api';
+import { api } from '../core/api/client';
 import { ThemeMode } from '@dawwar/types';
-
-// Initialize i18n before the component tree renders
-const storedLang = getStoredLanguage(storage);
-initI18n(storedLang);
 
 // Initialize theme from storage
 const storedMode = storage.getString(StorageKeys.THEME_MODE);
 if (storedMode && Object.values(ThemeMode).includes(storedMode as ThemeMode)) {
   store.dispatch(setThemeMode(storedMode as ThemeMode));
-}
-if (storedLang) {
-  store.dispatch(setLanguage(storedLang));
 }
 
 const queryClient = new QueryClient({
@@ -48,19 +45,45 @@ const queryClient = new QueryClient({
 });
 
 export function AppProviders({ children }: { children: React.ReactNode }) {
+  useEffect(() => {
+    const restoreSession = async () => {
+      const token = storage.getString(StorageKeys.ACCESS_TOKEN);
+
+      if (!token) {
+        store.dispatch(setLoading(false));
+        return;
+      }
+
+      try {
+        const res = await authApi.getMe();
+        if (res.success && res.data) {
+          store.dispatch(setUser(res.data));
+        }
+      } catch (err) {
+        console.error('[AppProviders] restoreSession error:', err);
+      } finally {
+        store.dispatch(setLoading(false));
+      }
+    };
+
+    void restoreSession();
+  }, []);
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <AppErrorBoundary>
         <ReduxProvider store={store}>
           <QueryClientProvider client={queryClient}>
-            <ThemeProvider storage={storage}>
-              <SafeAreaProvider>
-                <I18nextProvider i18n={i18n}>
-                  {children}
-                  <Toast />
-                </I18nextProvider>
-              </SafeAreaProvider>
-            </ThemeProvider>
+            <ApiClientProvider client={api}>
+              <ThemeProvider storage={storage}>
+                <SafeAreaProvider>
+                  <I18nextProvider i18n={i18n}>
+                    {children}
+                    <Toast />
+                  </I18nextProvider>
+                </SafeAreaProvider>
+              </ThemeProvider>
+            </ApiClientProvider>
           </QueryClientProvider>
         </ReduxProvider>
       </AppErrorBoundary>

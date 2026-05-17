@@ -32,63 +32,20 @@ export function ShoppingFlowPanel({
   const isOverBudget = !isNaN(budget) && budget > estimatedBudget * OVERBUDGET_THRESHOLD;
   const canConfirm = !isNaN(budget) && budget > 0 && receiptUri !== null;
 
-  const uploadPhoto = async (
-    asset: { uri?: string; type?: string; fileName?: string | null },
-    folder: 'orders' | 'receipts'
-  ): Promise<string | null> => {
-    if (!asset.uri) return null;
-
-    if (USE_MOCK_API) {
-      return asset.uri;
-    }
-
-    try {
-      const { data: { uploadUrl, fileUrl } } = await apiClient.post('/upload/presign', {
-        filename: asset.fileName ?? 'photo.jpg',
-        mimeType: asset.type ?? 'image/jpeg',
-        folder,
-      });
-
-      const formData = new FormData();
-      formData.append('file', {
-        uri: asset.uri,
-        type: asset.type,
-        name: asset.fileName ?? 'photo.jpg',
-      } as unknown as Blob);
-
-      await fetch(uploadUrl, {
-        method: 'PUT',
-        headers: { 'Content-Type': asset.type ?? 'image/jpeg' },
-        body: formData,
-      });
-
-      return fileUrl;
-    } catch (err) {
-      console.error('Upload failed:', err);
-      return asset.uri;
-    }
-  };
-
   const addPhoto = () => {
-    launchCamera({ mediaType: 'photo', quality: 0.7 }, async (res) => {
-      if (res.assets?.[0]) {
-        const uploadedUrl = await uploadPhoto(res.assets[0], 'orders');
-        if (uploadedUrl) {
-          const newPhotos = [...photos, uploadedUrl];
-          setPhotos(newPhotos);
-          onPhotosCapture(newPhotos);
-        }
+    launchCamera({ mediaType: 'photo', quality: 0.7 }, (res) => {
+      if (res.assets?.[0]?.uri) {
+        const next = [...photos, res.assets[0].uri];
+        setPhotos(next);
+        onPhotosCapture(next);
       }
     });
   };
 
   const captureReceipt = () => {
-    launchCamera({ mediaType: 'photo', quality: 0.8 }, async (res) => {
-      if (res.assets?.[0]) {
-        const uploadedUrl = await uploadPhoto(res.assets[0], 'receipts');
-        if (uploadedUrl) {
-          setReceiptUri(uploadedUrl);
-        }
+    launchCamera({ mediaType: 'photo', quality: 0.8 }, (res) => {
+      if (res.assets?.[0]?.uri) {
+        setReceiptUri(res.assets[0].uri);
       }
     });
   };

@@ -10,11 +10,11 @@ import { VoiceNotePlayer } from '../VoiceNotePlayer';
 import { createStyles } from './styles';
 import type { OrderPreviewCardProps } from './types';
 
-export function OrderPreviewCard({
+export const OrderPreviewCard = React.memo(({
   order, onAccept, onDecline, isAccepting,
-}: OrderPreviewCardProps) {
+}: OrderPreviewCardProps) => {
   const { colors } = useTheme();
-  const styles = createStyles(colors);
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const { t } = useTranslation();
 
   const isCustom = order.type === OrderType.CUSTOM;
@@ -110,17 +110,17 @@ export function OrderPreviewCard({
         )}
 
         {/* Regular order: items list */}
-        {!isCustom && order.items && order.items.length > 0 && (
+        {!isCustom && order.items && (order.items as any[]).length > 0 && (
           <View>
-            <Text style={styles.sectionLabel}>Items ({order.items.length})</Text>
-            {order.items.slice(0, 3).map((item) => (
+            <Text style={styles.sectionLabel}>Items ({(order.items as any[]).length})</Text>
+            {(order.items as any[]).slice(0, 3).map((item) => (
               <Text key={item.id} variant="body2" color={colors.textSecondary}>
                 {item.quantity}× {item.productName}
               </Text>
             ))}
-            {order.items.length > 3 && (
+            {(order.items as any[]).length > 3 && (
               <Text variant="caption" color={colors.textDisabled}>
-                +{order.items.length - 3} more
+                +{(order.items as any[]).length - 3} more
               </Text>
             )}
           </View>
@@ -147,4 +147,4 @@ export function OrderPreviewCard({
       </View>
     </View>
   );
-}
+});

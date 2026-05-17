@@ -6,7 +6,7 @@ export interface DriverLocation {
   heading?: number;
 }
 
-interface DriverState {
+export interface DriverState {
   isOnline: boolean;
   activeOrderId: string | null;
   currentLocation: DriverLocation | null;

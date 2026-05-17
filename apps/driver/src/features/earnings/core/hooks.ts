@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { earningsApi } from './api';
-import { useAppSelector } from '../../../../store/hooks';
-import { selectUser } from '../../../../store/slices/auth.slice';
+import { useAppSelector } from '../../../store/hooks';
+import { selectUser } from '../../../store/slices/auth.slice';
 
 export const EARNINGS_KEYS = {
   summary: (id: string) => ['earnings', 'summary', id] as const,

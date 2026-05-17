@@ -9,6 +9,7 @@ export { PendingApprovalScreen } from '../features/auth/screens/PendingApprovalS
 
 // Driver screens — built in Tasks 20+
 export { AvailableOrdersScreen } from '../features/available-orders/screens/AvailableOrdersScreen';
+export { OrdersHistoryScreen } from '../features/orders/screens/OrdersHistoryScreen';
 export { ActiveDeliveryScreen } from '../features/active-delivery/screens/ActiveDeliveryScreen';
 export { CompletedDeliveryScreen } from '../features/active-delivery/screens/CompletedDeliveryScreen';
 export { EarningsScreen } from '../features/earnings/screens/EarningsScreen';

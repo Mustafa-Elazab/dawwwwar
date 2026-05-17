@@ -47,7 +47,7 @@ export function CashCollectionCard({
         <Text variant="label" color={colors.error}>−{commission} {t('common.egp')}</Text>
       </View>
 
-      <Divider style={{ marginVertical: space[2] }} />
+      <Divider style={{ marginVertical: space.sm }} />
 
       <View style={styles.row}>
         <Text variant="label" color={colors.text}>{t('driver.customer_pays')}</Text>

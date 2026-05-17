@@ -1,7 +1,7 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import type { User, Role } from '@dawwar/types';
 
-interface AuthState {
+export interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -43,10 +43,15 @@ export const authSlice = createSlice({
         state.user = { ...state.user, ...action.payload };
       }
     },
+    setUser: (state, action: PayloadAction<User>) => {
+      state.user = action.payload;
+      state.isApproved = action.payload.isApproved ?? false;
+      state.role = action.payload.role;
+    },
   },
 });
 
-export const { setAuth, logout, setLoading, updateUser } = authSlice.actions;
+export const { setAuth, logout, setLoading, updateUser, setUser } = authSlice.actions;
 
 export const selectUser = (state: { auth: AuthState }) => state.auth.user;
 export const selectIsAuthenticated = (state: { auth: AuthState }) => state.auth.isAuthenticated;

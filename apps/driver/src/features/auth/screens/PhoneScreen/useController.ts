@@ -3,7 +3,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from '@dawwar/i18n';
 import { useSendOtp } from '../../core/hooks';
 import { isValidEgyptianPhone, normalizePhone } from '../../utils/phone';
-import { AUTH_ROUTES } from '../../navigation/route';
+import { AUTH_ROUTES } from '../../../../navigation/routes';
 import type { PhoneScreenNavProp } from './types';
 
 export function useController() {

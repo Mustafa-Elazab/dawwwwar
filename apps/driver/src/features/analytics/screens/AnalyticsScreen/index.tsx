@@ -60,7 +60,7 @@ export function AnalyticsScreen() {
             >
               <Text
                 variant="caption"
-                color={dateRange === range ? colors.white : colors.text}
+                color={dateRange === range ? '#FFFFFF' : colors.text}
               >
                 {t(`common.${range}`)}
               </Text>
@@ -116,6 +116,6 @@ const styles = StyleSheet.create({
     padding: space.md,
     borderRadius: radius.xl,
     alignItems: 'center',
-    gap: space[1],
+    gap: space.xs,
   },
 });

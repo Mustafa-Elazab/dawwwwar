@@ -11,9 +11,9 @@ interface OnlineToggleProps {
   isLoading?: boolean;
 }
 
-export function OnlineToggle({ isOnline, onToggle, isLoading }: OnlineToggleProps) {
+export const OnlineToggle = React.memo(({ isOnline, onToggle, isLoading }: OnlineToggleProps) => {
   const { colors } = useTheme();
-  const styles = createStyles(colors, isOnline);
+  const styles = React.useMemo(() => createStyles(colors, isOnline), [colors, isOnline]);
   const { t } = useTranslation();
 
   return (
@@ -39,4 +39,4 @@ export function OnlineToggle({ isOnline, onToggle, isLoading }: OnlineToggleProp
       </TouchableOpacity>
     </View>
   );
-}
+});

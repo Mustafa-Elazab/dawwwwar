@@ -1,37 +1,37 @@
-import axios from 'axios';
-import { Platform } from 'react-native';
 import Config from 'react-native-config';
+import { Platform } from 'react-native';
+import { createApiClient, setupInterceptors, tokenManager, idempotencyManager } from '@dawwar/api-client';
+import { mmkvTokenStorage } from './token-storage';
+import { mmkvIdempotencyStorage } from './idempotency-storage';
+import { store } from '../../store';
+import { logout } from '../../store/slices/auth.slice';
 
-const API_BASE_URL = Config.API_URL || 'http://10.0.2.2:3000/api';
+const getApiBaseUrl = () => {
+  const envUrl = Config.API_BASE_URL ?? Config.API_URL;
+  if (__DEV__) {
+    const host = Config.LOCAL_IP || (Platform.OS === 'android' ? '10.0.2.2' : 'localhost');
+    if (!envUrl || envUrl.includes('10.0.2.2') || envUrl.includes('localhost') || envUrl.includes('127.0.0.1')) {
+      return `http://${host}:3000/api/v1`;
+    }
+    return envUrl;
+  }
+  return envUrl ?? 'https://api.dawwar.com/api/v1';
+};
 
-const apiClient = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-    'X-Platform': Platform.OS,
+const API_BASE_URL = getApiBaseUrl();
+
+// Initialize managers with app-specific storage
+tokenManager.setStorage(mmkvTokenStorage);
+idempotencyManager.setStorage(mmkvIdempotencyStorage);
+
+export const api = createApiClient(API_BASE_URL);
+
+// Setup interceptors with app-specific handlers
+setupInterceptors(api, {
+  onUnauthorized: () => {
+    store.dispatch(logout());
   },
-  timeout: 30000,
+  debug: __DEV__,
 });
 
-// Request interceptor for adding auth token
-apiClient.interceptors.request.use(
-  (config) => {
-    // Token will be added from Redux store in actual implementation
-    return config;
-  },
-  (error) => Promise.reject(error),
-);
-
-// Response interceptor for handling errors
-apiClient.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    // Handle common errors (401, 403, 500, etc.)
-    return Promise.reject(error);
-  },
-);
-
-export type { AxiosError, AxiosResponse } from 'axios';
-
-export const api = apiClient;
-export default apiClient;
+export default api;

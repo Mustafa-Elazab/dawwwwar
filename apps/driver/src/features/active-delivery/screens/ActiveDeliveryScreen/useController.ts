@@ -1,22 +1,23 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Linking } from 'react-native';
 import { useTranslation } from '@dawwar/i18n';
+import { 
+  useOrderDetails, 
+  useUpdateDeliveryStatus, 
+  SOCKET_EVENTS,
+  useUploadFile,
+} from '@dawwar/api-client';
 import Toast from 'react-native-toast-message';
 import { useAppDispatch, useAppSelector } from '../../../../store/hooks';
 import { setActiveOrder, updateLocation, selectActiveOrderId } from '../../../../store/slices/driver.slice';
-import { useActiveOrder, useUpdateStatus, useSendPhotos } from '../../core/hooks';
 import { OrderStatus, OrderType } from '@dawwar/types';
-import { DRIVER_ROUTES } from '../../../navigation/routes';
+import { DRIVER_ROUTES } from '../../../../navigation/routes';
 import { locationService } from '../../../../core/location/location.service';
-import { USE_MOCK_API } from '../../../../core/api/config';
-import { socket } from '../../../../core/socket/socket';
+import { socketManager } from '../../../../core/socket';
 import type { RouteProp } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { ActiveDeliveryStackParamList } from '../../../../navigation/types';
-
-// Sinbellawin starting position for mock driver location
-const DRIVER_START = { latitude: 30.8704, longitude: 31.4741 };
 
 export function useController() {
   const { t } = useTranslation();
@@ -26,75 +27,92 @@ export function useController() {
   const { orderId } = route.params;
   const activeOrderId = useAppSelector(selectActiveOrderId);
 
-  // Real GPS driver location — Phase 3
-  const [driverLocation, setDriverLocation] = useState(DRIVER_START);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // Real GPS driver location
+  const [driverLocation, setDriverLocation] = useState<{ latitude: number; longitude: number } | null>(null);
 
   useEffect(() => {
-    if (USE_MOCK_API) {
-      // Phase 1/2 fallback: keep the random mock movement
-      const interval = setInterval(() => {
-        setDriverLocation((prev) => {
-          const next = {
-            latitude: prev.latitude + (Math.random() - 0.5) * 0.0006,
-            longitude: prev.longitude + (Math.random() - 0.5) * 0.0006,
-          };
-          dispatch(updateLocation(next));
-          return next;
-        });
-      }, 5000);
-      return () => clearInterval(interval);
-    }
+    // 0. Join order room
+    socketManager.joinRoom(SOCKET_EVENTS.JOIN_ORDER_ROOM, { orderId: activeOrderId || orderId });
 
-    // Phase 3: real GPS watch
     locationService.startWatching(
       (loc) => {
         const next = { latitude: loc.latitude, longitude: loc.longitude };
         setDriverLocation(next);
         dispatch(updateLocation(next));
 
-        // Broadcast to Socket.io (customer tracking map)
-        if (activeOrderId) {
-          socket.emit('driver:location_update', {
+        // 1. Check socket connectivity
+        const isConnected = socketManager.instance?.connected;
+
+        if (isConnected && activeOrderId) {
+          // 2. If connected, send current location
+          socketManager.emit(SOCKET_EVENTS.DRIVER_LOCATION_UPDATE, {
             latitude: loc.latitude,
             longitude: loc.longitude,
             heading: loc.heading ?? undefined,
             orderId: activeOrderId,
           });
+        } else {
+          // 3. If offline, buffer the update
+          locationService.bufferLocation(loc);
         }
       },
-      (err) => {
-        console.warn('GPS error:', err.message);
-      },
-      true, // high accuracy during active delivery
+      (err) => console.warn('GPS error:', err.message),
+      true,
     );
 
-    return () => locationService.stopWatching();
-  }, [activeOrderId, dispatch]);
+    // 4. On socket reconnect, flush and replay buffered locations
+    const handleReconnect = () => {
+      if (activeOrderId) {
+        const buffered = locationService.flushBuffer();
+        if (buffered.length > 0) {
+          console.log(`[Socket] Replaying ${buffered.length} buffered locations...`);
+          buffered.forEach((loc) => {
+            socketManager.emit(SOCKET_EVENTS.DRIVER_LOCATION_UPDATE, {
+              latitude: loc.latitude,
+              longitude: loc.longitude,
+              heading: loc.heading ?? undefined,
+              orderId: activeOrderId,
+              timestamp: loc.timestamp, // include original timestamp
+            });
+          });
+        }
+      }
+    };
 
-  const { data: order, isLoading: orderLoading } = useActiveOrder(orderId);
-  const updateStatusMutation = useUpdateStatus(orderId);
-  const sendPhotosMutation = useSendPhotos(orderId);
+    socketManager.on('reconnect', handleReconnect);
 
-  const [photosSent, setPhotosSent] = useState(false);
+    return () => {
+      locationService.stopWatching();
+      socketManager.off('reconnect', handleReconnect);
+    };
+  }, [activeOrderId, dispatch, orderId]);
+
+  const { data: res, isLoading: orderLoading } = useOrderDetails(orderId);
+  const order = res?.data;
+
+  const updateStatusMutation = useUpdateDeliveryStatus();
+  const uploadFile = useUploadFile();
 
   const handleStatusUpdate = useCallback(
     async (status: OrderStatus, extra?: { actualAmount?: number; receiptImage?: string }) => {
       try {
-        await updateStatusMutation.mutateAsync({ status, extra });
+        await updateStatusMutation.mutateAsync({ 
+          id: orderId, 
+          payload: { status, ...extra } 
+        });
       } catch {
         Toast.show({ type: 'error', text1: t('errors.server') });
       }
     },
-    [updateStatusMutation, t],
+    [updateStatusMutation, orderId, t],
   );
 
   const handleArrived = useCallback(() => {
     if (!order) return;
-    if (order.status === OrderStatus.DRIVER_ASSIGNED) {
+    if (order.status === OrderStatus.DRIVER_ASSIGNED || order.status === OrderStatus.READY) {
       const nextStatus = order.type === OrderType.CUSTOM
         ? OrderStatus.AT_SHOP
-        : ('AT_MERCHANT' as OrderStatus);
+        : OrderStatus.PICKED_UP; // For regular orders, arrived at merchant
       void handleStatusUpdate(nextStatus);
     } else if (order.status === OrderStatus.IN_TRANSIT || order.status === OrderStatus.PURCHASED) {
       void handleStatusUpdate(OrderStatus.DELIVERED);
@@ -105,20 +123,73 @@ export function useController() {
     void handleStatusUpdate(OrderStatus.IN_TRANSIT);
   }, [handleStatusUpdate]);
 
+  // Shopping Flow State
+  const [capturedPhotos, setCapturedPhotos] = useState<string[]>([]);
+  const [photosSent, setPhotosSent] = useState(false);
+
+  const handlePhotosCapture = useCallback((uris: string[]) => {
+    setCapturedPhotos(uris);
+  }, []);
+
   const handleSendPhotos = useCallback(async () => {
-    await sendPhotosMutation.mutateAsync([]);
-    setPhotosSent(true);
-    Toast.show({ type: 'success', text1: 'Photos sent to customer' });
-  }, [sendPhotosMutation]);
+    if (capturedPhotos.length === 0) return;
+    
+    try {
+      // 1. Upload photos
+      const urls = await Promise.all(capturedPhotos.map(async (uri, i) => {
+        const formData = new FormData();
+        formData.append('file', { uri, name: `shop_photo_${i}.jpg`, type: 'image/jpeg' } as any);
+        formData.append('folder', 'orders');
+        const res = await uploadFile.mutateAsync(formData);
+        return res.data.url;
+      }));
+
+      // 2. Send to Chat (Customer can see them)
+      for (const url of urls) {
+         socketManager.emit('CHAT_SEND_MESSAGE', {
+           orderId,
+           type: 'IMAGE',
+           mediaUrl: url,
+           clientMessageId: `img_${Math.random().toString(36).substring(7)}`,
+         });
+      }
+
+      setPhotosSent(true);
+      Toast.show({ type: 'success', text1: t('driver.photos_sent') });
+    } catch {
+      Toast.show({ type: 'error', text1: t('errors.server') });
+    }
+  }, [capturedPhotos, orderId, uploadFile, t]);
 
   const handleShoppingConfirm = useCallback(
-    (actualAmount: number, receiptUri: string) => {
-      void handleStatusUpdate(OrderStatus.IN_TRANSIT, {
-        actualAmount,
-        receiptImage: receiptUri,
-      });
+    async (actualAmount: number, receiptUri: string) => {
+      try {
+        // 1. Upload receipt
+        const formData = new FormData();
+        formData.append('file', { uri: receiptUri, name: 'receipt.jpg', type: 'image/jpeg' } as any);
+        formData.append('folder', 'receipts');
+        const uploadRes = await uploadFile.mutateAsync(formData);
+        
+        // 2. Update status to PURCHASED
+        await handleStatusUpdate(OrderStatus.PURCHASED, {
+          actualAmount,
+          receiptImage: uploadRes.data.url,
+        });
+
+        // 3. Send receipt to chat as well
+        socketManager.emit('CHAT_SEND_MESSAGE', {
+          orderId,
+          type: 'IMAGE',
+          content: 'Receipt uploaded',
+          mediaUrl: uploadRes.data.url,
+          clientMessageId: `rcpt_${Math.random().toString(36).substring(7)}`,
+        });
+
+      } catch {
+        Toast.show({ type: 'error', text1: t('errors.server') });
+      }
     },
-    [handleStatusUpdate],
+    [handleStatusUpdate, orderId, uploadFile, t],
   );
 
   const handleConfirmDelivery = useCallback(() => {
@@ -129,7 +200,6 @@ export function useController() {
         netEarnings: (order?.deliveryFee ?? 12) - 5,
       });
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [handleStatusUpdate, dispatch, navigation, orderId, order]);
 
   const handleNavigate = useCallback(() => {
@@ -145,20 +215,21 @@ export function useController() {
     void Linking.openURL(`tel:${phone}`);
   }, [order]);
 
-  const isLoading = updateStatusMutation.isPending || orderLoading;
+  const isLoading = updateStatusMutation.isPending || orderLoading || uploadFile.isPending;
 
   return {
     order,
     isLoading,
     driverLocation,
-    photosSent,
     handleArrived,
     handleConfirmPickup,
-    handleSendPhotos,
     handleShoppingConfirm,
     handleConfirmDelivery,
     handleNavigate,
     handleCallContact,
+    handleSendPhotos,
+    handlePhotosCapture,
+    photosSent,
     t,
   };
 }

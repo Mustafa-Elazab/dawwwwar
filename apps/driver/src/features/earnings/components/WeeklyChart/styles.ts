@@ -18,7 +18,7 @@ export const createStyles = (colors: AppColors) =>
       gap: space.sm,
       height: 100,
     },
-    barCol: { flex: 1, alignItems: 'center', gap: space[1] },
+    barCol: { flex: 1, alignItems: 'center', gap: space.xs },
     bar: { width: '80%', borderRadius: radius.sm },
     barToday: {},
     dayLabel: { ...typography.caption, color: colors.textSecondary },

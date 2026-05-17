@@ -5,10 +5,10 @@ import { ScreenTemplate, Text, Button } from '@dawwar/ui';
 import { useTheme } from '@dawwar/theme';
 import { space, typography } from '@dawwar/theme';
 import { useTranslation } from '@dawwar/i18n';
-import { TAB_ROUTES } from '../../../navigation/routes';
+import { TAB_ROUTES } from '../../../../navigation/routes';
 import type { RouteProp } from '@react-navigation/native';
 import type { ActiveDeliveryStackParamList } from '../../../../navigation/types';
-import type { DRIVER_ROUTES } from '../../../navigation/routes';
+import type { DRIVER_ROUTES } from '../../../../navigation/routes';
 
 export function CompletedDeliveryScreen() {
   const { colors } = useTheme();

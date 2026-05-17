@@ -7,7 +7,7 @@ import { OrderStatus, OrderType } from '@dawwar/types';
 import { createStyles } from './styles';
 import type { StatusActionPanelProps } from './types';
 
-export function StatusActionPanel({
+export const StatusActionPanel = React.memo(({
   status,
   orderType,
   isLoading,
@@ -16,17 +16,17 @@ export function StatusActionPanel({
   onConfirmPickup,
   onCallContact,
   onConfirmDelivery,
-}: StatusActionPanelProps) {
+}: StatusActionPanelProps) => {
   const { colors } = useTheme();
-  const styles = createStyles(colors);
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const { t } = useTranslation();
   const isCustom = orderType === OrderType.CUSTOM;
 
   return (
     <View style={styles.panel}>
 
-      {/* DRIVER_ASSIGNED → heading to pickup/shop */}
-      {status === OrderStatus.DRIVER_ASSIGNED && (
+      {/* DRIVER_ASSIGNED or READY → heading to pickup/shop */}
+      {(status === OrderStatus.DRIVER_ASSIGNED || status === OrderStatus.READY) && (
         <>
           <View style={styles.row}>
             <Button label={t('driver.navigate')} onPress={onNavigate} variant="outline" style={styles.halfBtn} />
@@ -79,4 +79,4 @@ export function StatusActionPanel({
 
     </View>
   );
-}
+});

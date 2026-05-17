@@ -4,7 +4,7 @@ import { useTranslation } from '@dawwar/i18n';
 import { useAppDispatch, useAppSelector } from '../../../../store/hooks';
 import { logout, selectUser } from '../../../../store/slices/auth.slice';
 import { useDriverWalletBalance } from '../../../earnings/core/hooks';
-import { setAppLanguage } from '@dawwar/i18n';
+import { updateLanguage } from '@dawwar/i18n';
 import { storage } from '../../../../core/storage/mmkv';
 import { Language } from '@dawwar/types';
 import RNRestart from 'react-native-restart';
@@ -45,7 +45,7 @@ export function useController() {
         text: t('language.restart_now'),
         onPress: async () => {
           dispatch(setLanguage(next));
-          await setAppLanguage(next, storage, () => RNRestart.restart());
+          await updateLanguage(next as any);
         },
       },
     ]);

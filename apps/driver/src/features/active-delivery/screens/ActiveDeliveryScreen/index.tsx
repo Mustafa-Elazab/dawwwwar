@@ -12,7 +12,7 @@ import { createStyles } from './styles';
 
 export function ActiveDeliveryScreen() {
   const { colors } = useTheme();
-  const styles = createStyles(colors);
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const ctrl = useController();
 
   if (!ctrl.order) return <LoadingSpinner fullscreen />;
@@ -49,8 +49,8 @@ export function ActiveDeliveryScreen() {
 
         {/* Live map */}
         <DeliveryMap
-          driverLatitude={ctrl.driverLocation.latitude}
-          driverLongitude={ctrl.driverLocation.longitude}
+          driverLatitude={ctrl.driverLocation?.latitude ?? 0}
+          driverLongitude={ctrl.driverLocation?.longitude ?? 0}
           pickupLatitude={ctrl.order.shopLatitude ?? ctrl.order.merchant?.latitude}
           pickupLongitude={ctrl.order.shopLongitude ?? ctrl.order.merchant?.longitude}
           deliveryLatitude={ctrl.order.deliveryLatitude}
@@ -81,7 +81,7 @@ export function ActiveDeliveryScreen() {
         {isCustom && isAtShop && (
           <ShoppingFlowPanel
             estimatedBudget={ctrl.order.estimatedBudget ?? 0}
-            onPhotosCapture={() => {}}
+            onPhotosCapture={ctrl.handlePhotosCapture}
             onSendPhotos={ctrl.handleSendPhotos}
             onActualAmountConfirm={ctrl.handleShoppingConfirm}
             isLoading={ctrl.isLoading}

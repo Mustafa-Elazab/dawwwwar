@@ -8,12 +8,14 @@ export const AUTH_ROUTES = {
 export const TAB_ROUTES = {
   AVAILABLE_ORDERS_TAB: 'AvailableOrdersTab',
   ACTIVE_DELIVERY_TAB: 'ActiveDeliveryTab',
+  ORDERS_TAB: 'OrdersTab',
   EARNINGS_TAB: 'EarningsTab',
   PROFILE_TAB: 'ProfileTab',
 } as const;
 
 export const DRIVER_ROUTES = {
   AVAILABLE_ORDERS: 'AvailableOrdersScreen',
+  ORDERS: 'OrdersHistoryScreen',
   ACTIVE_DELIVERY: 'ActiveDeliveryScreen',
   COMPLETED_DELIVERY: 'CompletedDeliveryScreen',
   EARNINGS: 'EarningsScreen',

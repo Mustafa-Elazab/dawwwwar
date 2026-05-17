@@ -1,12 +1,15 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createStackNavigator } from '@react-navigation/stack';
 import { useTheme } from '@dawwar/theme';
 import { Icon, Text } from '@dawwar/ui';
+import { useTranslation } from '@dawwar/i18n';
 import { TAB_ROUTES, DRIVER_ROUTES } from './routes';
-import type { DriverTabParamList } from './types';
+import type { DriverTabParamList, OrdersStackParamList } from './types';
 import {
   AvailableOrdersScreen,
+  OrdersHistoryScreen,
   ActiveDeliveryScreen,
   EarningsScreen,
   DriverProfileScreen,
@@ -15,9 +18,19 @@ import { useAppSelector } from '../store/hooks';
 import { selectActiveOrderId, selectIsOnline } from '../store/slices/driver.slice';
 
 const Tab = createBottomTabNavigator<DriverTabParamList>();
+const OrdersStack = createStackNavigator<OrdersStackParamList>();
+
+function OrdersStackNav() {
+  return (
+    <OrdersStack.Navigator screenOptions={{ headerShown: false }}>
+      <OrdersStack.Screen name={DRIVER_ROUTES.ORDERS} component={OrdersHistoryScreen} />
+    </OrdersStack.Navigator>
+  );
+}
 
 export function DriverTabs() {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const activeOrderId = useAppSelector(selectActiveOrderId);
   const isOnline = useAppSelector(selectIsOnline);
 
@@ -56,7 +69,7 @@ export function DriverTabs() {
                 )}
               </View>
               <Text variant="caption" color={focused ? colors.primary : colors.tabBarIcon}>
-                Orders
+                {t('driver.tabs.orders', 'Orders')}
               </Text>
             </View>
           ),
@@ -79,11 +92,25 @@ export function DriverTabs() {
                   paddingHorizontal: 4, paddingVertical: 1,
                   backgroundColor: colors.primary, borderRadius: 8,
                 }}>
-                  <Text variant="overline" color="#fff">LIVE</Text>
+                  <Text variant="overline" color="#fff">{t('driver.tabs.live', 'LIVE')}</Text>
                 </View>
               )}
               <Text variant="caption" color={activeOrderId ? colors.primary : colors.tabBarIcon}>
-                Delivery
+                {t('driver.tabs.delivery', 'Delivery')}
+              </Text>
+            </View>
+          ),
+        }}
+      />
+      <Tab.Screen
+        name={TAB_ROUTES.ORDERS_TAB}
+        component={OrdersStackNav}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <View style={{ alignItems: 'center', gap: 2 }}>
+              <Icon name={focused ? 'history' : 'history'} size={24} color={focused ? colors.primary : colors.tabBarIcon} />
+              <Text variant="caption" color={focused ? colors.primary : colors.tabBarIcon}>
+                {t('driver.tabs.history', 'History')}
               </Text>
             </View>
           ),
@@ -96,7 +123,7 @@ export function DriverTabs() {
           tabBarIcon: ({ focused }) => (
             <View style={{ alignItems: 'center', gap: 2 }}>
               <Icon name={focused ? 'wallet' : 'wallet-outline'} size={24} color={focused ? colors.primary : colors.tabBarIcon} />
-              <Text variant="caption" color={focused ? colors.primary : colors.tabBarIcon}>Earnings</Text>
+              <Text variant="caption" color={focused ? colors.primary : colors.tabBarIcon}>{t('driver.tabs.earnings', 'Earnings')}</Text>
             </View>
           ),
         }}
@@ -108,7 +135,7 @@ export function DriverTabs() {
           tabBarIcon: ({ focused }) => (
             <View style={{ alignItems: 'center', gap: 2 }}>
               <Icon name={focused ? 'account' : 'account-outline'} size={24} color={focused ? colors.primary : colors.tabBarIcon} />
-              <Text variant="caption" color={focused ? colors.primary : colors.tabBarIcon}>Profile</Text>
+              <Text variant="caption" color={focused ? colors.primary : colors.tabBarIcon}>{t('driver.tabs.profile', 'Profile')}</Text>
             </View>
           ),
         }}

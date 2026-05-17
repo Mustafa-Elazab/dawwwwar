@@ -12,9 +12,10 @@ export async function requestPushNotificationPermission(): Promise<boolean> {
   try {
     const messaging = await import('@react-native-firebase/messaging');
     const authStatus = await messaging.default().requestPermission();
+    // AuthorizationStatus is an export from the library
     const enabled =
-      authStatus === messaging.default().AuthorizationStatus.AUTHORIZED ||
-      authStatus === messaging.default().AuthorizationStatus.PROVISIONAL;
+      authStatus === (messaging as any).AuthorizationStatus.AUTHORIZED ||
+      authStatus === (messaging as any).AuthorizationStatus.PROVISIONAL;
 
     console.log('[FCM] Push notification permission:', enabled ? 'granted' : 'denied');
     return enabled;
@@ -61,7 +62,7 @@ export function setupForegroundNotifications(): void {
         Alert.alert(title, body, [
           { text: 'Dismiss', style: 'cancel' },
           data?.orderId
-            ? { text: 'View', onPress: () => handleNotificationTap(data) }
+            ? { text: 'View', onPress: () => handleNotificationTap(data as Record<string, string>) }
             : { text: 'OK', style: 'default' },
         ]);
       });
@@ -69,7 +70,7 @@ export function setupForegroundNotifications(): void {
       // Handle notification tap when app was in background
       messaging.default().onNotificationOpenedApp((remoteMessage) => {
         console.log('[FCM] Notification opened app:', remoteMessage);
-        handleNotificationTap(remoteMessage.data);
+        handleNotificationTap(remoteMessage.data as Record<string, string>);
       });
 
       // Check if app was opened from notification (killed state)
@@ -79,7 +80,7 @@ export function setupForegroundNotifications(): void {
         .then((remoteMessage) => {
           if (remoteMessage) {
             console.log('[FCM] App opened from quit state:', remoteMessage);
-            handleNotificationTap(remoteMessage.data);
+            handleNotificationTap(remoteMessage.data as Record<string, string>);
           }
         });
 

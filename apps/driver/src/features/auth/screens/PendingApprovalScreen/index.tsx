@@ -17,6 +17,12 @@ export function PendingApprovalScreen() {
         <Text style={styles.title}>{ctrl.t('auth.pending_title')}</Text>
         <Text style={styles.body}>{ctrl.t('auth.pending_body')}</Text>
         <Button
+          label={ctrl.t('auth.refresh_status')}
+          onPress={ctrl.handleRefreshStatus}
+          loading={ctrl.isRefreshing}
+          style={styles.contactBtn}
+        />
+        <Button
           label={ctrl.t('auth.pending_contact')}
           variant="outline"
           onPress={ctrl.handleContactAdmin}

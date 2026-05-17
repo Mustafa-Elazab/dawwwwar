@@ -15,6 +15,32 @@ export interface DriverLocation {
 
 export class LocationService {
   private watchId: number | null = null;
+  private buffer: DriverLocation[] = [];
+  private readonly MAX_BUFFER_SIZE = 50;
+
+  /**
+   * Adds a location to the local buffer if the app is offline.
+   * Keeps only the last MAX_BUFFER_SIZE locations to prevent memory bloat.
+   */
+  bufferLocation(location: DriverLocation) {
+    this.buffer.push(location);
+    if (this.buffer.length > this.MAX_BUFFER_SIZE) {
+      this.buffer.shift();
+    }
+  }
+
+  /**
+   * Returns all buffered locations and clears the buffer.
+   */
+  flushBuffer(): DriverLocation[] {
+    const locations = [...this.buffer];
+    this.buffer = [];
+    return locations;
+  }
+
+  get bufferSize() {
+    return this.buffer.length;
+  }
 
   /** Request location permission on Android */
   async requestPermission(): Promise<boolean> {
@@ -59,9 +85,20 @@ export class LocationService {
   ): void {
     if (this.watchId !== null) this.stopWatching();
 
+    console.log(`[LocationService] Starting GPS watch (accuracy: ${highAccuracy ? 'HIGH' : 'BALANCED'})`);
+
     this.watchId = Geolocation.watchPosition(
-      (pos: GeoPosition) => onUpdate(this.mapPosition(pos)),
-      (err: GeoError) => onError(new Error(err.message)),
+      (pos: GeoPosition) => {
+        const mapped = this.mapPosition(pos);
+        if (__DEV__) {
+          console.log(`[GPS Update] Lat: ${mapped.latitude.toFixed(5)}, Lng: ${mapped.longitude.toFixed(5)}, Accuracy: ${mapped.accuracy}m`);
+        }
+        onUpdate(mapped);
+      },
+      (err: GeoError) => {
+        console.warn(`[GPS ERROR] ${err.code}: ${err.message}`);
+        onError(new Error(err.message));
+      },
       {
         enableHighAccuracy: highAccuracy,
         distanceFilter: 10,        // emit only when moved 10+ metres

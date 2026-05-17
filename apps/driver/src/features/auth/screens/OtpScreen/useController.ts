@@ -4,7 +4,7 @@ import { Animated } from 'react-native';
 import { useTranslation } from '@dawwar/i18n';
 import { useVerifyOtp, useSendOtp } from '../../core/hooks';
 import { useOtpCountdown } from '../../hooks/useOtpCountdown';
-import { AUTH_ROUTES } from '../../navigation/route';
+import { AUTH_ROUTES } from '../../../../navigation/routes';
 import type { OtpScreenNavProp, OtpScreenRouteProp } from './types';
 
 export function useController() {
