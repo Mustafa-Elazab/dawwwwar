@@ -1,0 +1,18 @@
+import type { User } from '@dawwar/types';
+
+export interface SendOtpResponse {
+  expiresIn: number;   // seconds
+}
+
+export interface VerifyOtpResponse {
+  accessToken: string;
+  refreshToken: string;
+  user: User;
+  isFirstLogin: boolean;
+}
+
+export interface AuthSession {
+  user: User;
+  accessToken: string;
+  refreshToken: string;
+}

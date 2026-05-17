@@ -2,13 +2,13 @@ import { TransactionType, TransactionReason } from '@dawwar/types';
 import type { Wallet, WalletTransaction } from '@dawwar/types';
 
 export const mockWallets: Wallet[] = [
-  { id: 'wallet-c1', userId: 'user-customer-01', balance: 200, currency: 'EGP', isActive: true, createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' },
-  { id: 'wallet-c2', userId: 'user-customer-02', balance: 50, currency: 'EGP', isActive: true, createdAt: '2024-01-02T00:00:00Z', updatedAt: '2024-01-02T00:00:00Z' },
-  { id: 'wallet-m1', userId: 'user-merchant-01', balance: 100, currency: 'EGP', isActive: true, createdAt: '2024-01-03T00:00:00Z', updatedAt: '2024-01-03T00:00:00Z' },
-  { id: 'wallet-m2', userId: 'user-merchant-02', balance: 75, currency: 'EGP', isActive: true, createdAt: '2024-01-04T00:00:00Z', updatedAt: '2024-01-04T00:00:00Z' },
-  { id: 'wallet-m3', userId: 'user-merchant-03', balance: 30, currency: 'EGP', isActive: true, createdAt: '2024-01-05T00:00:00Z', updatedAt: '2024-01-05T00:00:00Z' },
-  { id: 'wallet-d1', userId: 'user-driver-01', balance: 50, currency: 'EGP', isActive: true, createdAt: '2024-01-06T00:00:00Z', updatedAt: '2024-01-06T00:00:00Z' },
-  { id: 'wallet-d2', userId: 'user-driver-02', balance: 20, currency: 'EGP', isActive: true, createdAt: '2024-01-07T00:00:00Z', updatedAt: '2024-01-07T00:00:00Z' },
+  { id: 'wallet-c1', userId: 'user-customer-01', balance: 200, pendingWithdrawal: 0, currency: 'EGP', isActive: true, createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' },
+  { id: 'wallet-c2', userId: 'user-customer-02', balance: 50, pendingWithdrawal: 0, currency: 'EGP', isActive: true, createdAt: '2024-01-02T00:00:00Z', updatedAt: '2024-01-02T00:00:00Z' },
+  { id: 'wallet-m1', userId: 'user-merchant-01', balance: 100, pendingWithdrawal: 0, currency: 'EGP', isActive: true, createdAt: '2024-01-03T00:00:00Z', updatedAt: '2024-01-03T00:00:00Z' },
+  { id: 'wallet-m2', userId: 'user-merchant-02', balance: 75, pendingWithdrawal: 0, currency: 'EGP', isActive: true, createdAt: '2024-01-04T00:00:00Z', updatedAt: '2024-01-04T00:00:00Z' },
+  { id: 'wallet-m3', userId: 'user-merchant-03', balance: 30, pendingWithdrawal: 0, currency: 'EGP', isActive: true, createdAt: '2024-01-05T00:00:00Z', updatedAt: '2024-01-05T00:00:00Z' },
+  { id: 'wallet-d1', userId: 'user-driver-01', balance: 50, pendingWithdrawal: 0, currency: 'EGP', isActive: true, createdAt: '2024-01-06T00:00:00Z', updatedAt: '2024-01-06T00:00:00Z' },
+  { id: 'wallet-d2', userId: 'user-driver-02', balance: 20, pendingWithdrawal: 0, currency: 'EGP', isActive: true, createdAt: '2024-01-07T00:00:00Z', updatedAt: '2024-01-07T00:00:00Z' },
 ];
 
 export const mockTransactions: WalletTransaction[] = [

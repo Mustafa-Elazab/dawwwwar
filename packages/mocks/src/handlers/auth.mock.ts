@@ -1,7 +1,7 @@
 import { delay } from '../utils/delay';
 import { findUserByPhone } from '../db/users';
 import { getWalletByUser } from '../db/wallets';
-import type { ApiResponse, AuthResponse, Wallet } from '@dawwar/types';
+import { ApiResponse, AuthResponse, Wallet, Role } from '@dawwar/types';
 
 const SANDBOX_OTP = '123456';
 
@@ -25,9 +25,18 @@ export const authMock = {
     if (payload.code !== SANDBOX_OTP) {
       throw Object.assign(new Error('INVALID_OTP'), { code: 'INVALID_OTP', remaining: 4 });
     }
-    const user = findUserByPhone(payload.phone);
+    let user = findUserByPhone(payload.phone);
     if (!user) {
-      throw Object.assign(new Error('USER_NOT_FOUND'), { code: 'USER_NOT_FOUND' });
+      // Auto-register new user in mock mode
+      user = {
+        id: `user-${Date.now()}`,
+        phone: payload.phone,
+        name: '', // Empty name triggers Complete Profile screen
+        role: Role.CUSTOMER,
+        isApproved: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
     }
     return {
       success: true,
@@ -35,7 +44,7 @@ export const authMock = {
         accessToken: `mock-access-${user.id}-${Date.now()}`,
         refreshToken: `mock-refresh-${user.id}-${Date.now()}`,
         user,
-        isFirstLogin: false,
+        isFirstLogin: true,
       },
     };
   },

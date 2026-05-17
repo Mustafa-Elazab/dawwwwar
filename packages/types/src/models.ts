@@ -6,6 +6,8 @@ import type {
   PaymentMethod,
   TransactionType,
   TransactionReason,
+  PayoutStatus,
+  PayoutMethod,
 } from './enums';
 
 // ─── USER ────────────────────────────────────────────────────────────────────
@@ -16,6 +18,7 @@ export interface User {
   name: string;
   role: Role;
   profileImage?: string;
+  avatar?: string;
   isApproved: boolean;
   fcmToken?: string;
   createdAt: string;
@@ -42,8 +45,11 @@ export interface OpeningHours {
 export interface Merchant {
   id: string;
   userId: string;
+  user?: User;
   businessName: string;
-  category: string;             // category ID
+  parentCategoryId: string | null;
+  parentCategory?: Category;
+  categories: Category[];       // many-to-many specializations
   address: string;
   latitude: number;
   longitude: number;
@@ -89,8 +95,12 @@ export interface Category {
   name: string;
   nameAr: string;
   icon: string;                 // emoji or icon name
+  slug: string;                 // e.g. "food", "pizza"
   sortOrder: number;
   isActive: boolean;
+  parentId: string | null;
+  parent?: Category;
+  children?: Category[];
 }
 
 // ─── DRIVER ──────────────────────────────────────────────────────────────────
@@ -98,7 +108,7 @@ export interface Category {
 export interface DriverProfile {
   id: string;
   userId: string;
-  user: Pick<User, 'id' | 'name' | 'phone' | 'profileImage'>;
+  user: Pick<User, 'id' | 'name' | 'phone' | 'profileImage' | 'avatar'>;
   vehicleType: VehicleType;
   isOnline: boolean;
   isApproved: boolean;
@@ -107,6 +117,12 @@ export interface DriverProfile {
   currentLatitude?: number;
   currentLongitude?: number;
   lastLocationUpdate?: string;
+  lastSequenceNumber?: number;
+  currentAccuracy?: number;
+  currentSpeed?: number;
+  batteryLevel?: number;
+  lastAppState?: string;
+  isLocationStale?: boolean;
   rating: number;
   totalRatings: number;
   totalDeliveries: number;
@@ -120,6 +136,7 @@ export interface DriverLocation {
   longitude: number;
   heading?: number;
   speed?: number;
+  accuracy?: number;
   timestamp: number;
 }
 
@@ -140,6 +157,7 @@ export interface Order {
   id: string;
   orderNumber: string;          // human readable: "ORD-12345"
   customerId: string;
+  customer?: User;
   merchantId?: string;
   driverId?: string;
   type: OrderType;
@@ -150,7 +168,7 @@ export interface Order {
   discount: number;
   paymentMethod: PaymentMethod;
   isPaid: boolean;
-  tip?: number;
+  tipAmount: number;
   // Custom order only
   shopName?: string;
   shopAddress?: string;
@@ -176,6 +194,7 @@ export interface Order {
   merchant?: Merchant;
   driver?: DriverProfile;
   items?: OrderItem[];
+  events?: OrderEvent[];
   // Timestamps
   acceptedAt?: string;
   assignedAt?: string;
@@ -187,12 +206,23 @@ export interface Order {
   updatedAt: string;
 }
 
+export interface OrderEvent {
+  id: string;
+  orderId: string;
+  status: OrderStatus;
+  title: string;
+  titleAr: string;
+  metadata?: Record<string, any>;
+  createdAt: string;
+}
+
 // ─── WALLET ──────────────────────────────────────────────────────────────────
 
 export interface Wallet {
   id: string;
   userId: string;
   balance: number;
+  pendingWithdrawal: number;
   currency: string;             // always "EGP"
   isActive: boolean;
   createdAt: string;
@@ -211,6 +241,20 @@ export interface WalletTransaction {
   balanceAfter: number;
   metadata?: Record<string, unknown>;
   createdAt: string;
+}
+
+export interface PayoutRequest {
+  id: string;
+  userId: string;
+  user?: User;
+  amount: number;
+  status: PayoutStatus;
+  method: PayoutMethod;
+  externalTransactionId?: string;
+  rejectionReason?: string;
+  paymentDetails?: Record<string, any>;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // ─── ADDRESS ─────────────────────────────────────────────────────────────────
@@ -245,4 +289,24 @@ export interface AppNotification {
   data?: Record<string, string>;
   isRead: boolean;
   createdAt: string;
+}
+
+// ─── SOCKET PAYLOADS ─────────────────────────────────────────────────────────
+
+export interface DriverLocationPayload {
+  orderId: string;
+  latitude: number;
+  longitude: number;
+  heading?: number;
+  speed?: number;
+  accuracy?: number;
+  timestamp: number;
+}
+
+export interface OrderStatusChangedPayload {
+  orderId: string;
+  status: OrderStatus;
+  order: Order;
+  message?: string;
+  messageAr?: string;
 }
