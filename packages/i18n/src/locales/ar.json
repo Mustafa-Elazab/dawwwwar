@@ -31,6 +31,26 @@
     "version": "الإصدار {{version}}"
   },
 
+  "days": {
+    "sunday": "الأحد",
+    "monday": "الاثنين",
+    "tuesday": "الثلاثاء",
+    "wednesday": "الأربعاء",
+    "thursday": "الخميس",
+    "friday": "الجمعة",
+    "saturday": "السبت"
+  },
+
+  "notifications": {
+    "title": "الإشعارات",
+    "empty": "لا توجد إشعارات بعد",
+    "order_delivered": "تم توصيل الطلب",
+    "order_delivered_body": "تم توصيل طلبك #{{orderId}} من {{merchant}} بنجاح. بالهناء والشفاء!",
+    "weekend_sale": "خصم 50% عرض نهاية الأسبوع",
+    "wallet_recharged": "تم شحن المحفظة",
+    "wallet_recharged_body": "تم شحن محفظتك بنجاح بمبلغ {{amount}} جنيه."
+  },
+
   "auth": {
     "auth_selection_title": "مرحباً بك في دور",
     "auth_selection_subtitle": "أسهل طريقة لإعادة التدوير والحصول على مكافآت.",
@@ -68,6 +88,10 @@
     "otp_invalid": "رمز غير صحيح. تبقى {{remaining}} محاولات.",
     "otp_locked": "محاولات كثيرة فاشلة. يرجى طلب رمز جديد.",
     "verifying": "جاري التحقق...",
+    "didnt_receive_code": "لم تستلم الرمز؟",
+    "accept_terms_hint": "يجب قبول الشروط والأحكام للمتابعة",
+    "terms_link": "الشروط والأحكام",
+    "privacy_link": "سياسة الخصوصية",
 
     "choose_role": "كيف ستستخدم دوّار؟",
     "choose_role_subtitle": "يمكنك تغيير ذلك لاحقاً من الإعدادات.",
@@ -87,13 +111,21 @@
     "pending_title": "قيد المراجعة",
     "pending_body": "حسابك قيد المراجعة من فريقنا. سنُعلمك خلال 24 ساعة عند الموافقة.",
     "pending_contact": "تحتاج مساعدة؟ تواصل معنا على واتساب",
-    "logout": "تسجيل الخروج"
+    "logout": "تسجيل الخروج",
+    "complete_profile_title": "خطوة أخيرة",
+    "complete_profile_subtitle": "يرجى إدخال اسمك بالكامل للمتابعة.",
+    "name_placeholder": "مثل: مصطفى محمد",
+    "name_required": "الاسم بالكامل مطلوب",
+    "profile_updated": "تم تحديث الملف الشخصي بنجاح!"
   },
 
   "home": {
+    "deliver_to": "توصيل إلى",
+    "welcome": "مرحباً بك في دوّار",
     "greeting": "أهلاً، {{name}} 👋",
-    "greeting_guest": "مرحباً بك في دوّار 👋",
-    "location": "سنبلاوين",
+    "greeting_guest": "مرحباً 👋",
+    "greeting_user": "مرحباً، {{name}} 👋",
+    "location": "تحديد الموقع...",
     "location_sub": "المنصورة، الدقهلية",
     "search_placeholder": "ابحث عن محلات أو منتجات...",
     "nearby_title": "محلات قريبة منك",
@@ -103,12 +135,32 @@
     "custom_order_sub": "اطلب من أي مكان",
     "no_merchants": "لا توجد محلات قريبة الآن",
     "no_merchants_sub": "تحقق لاحقاً — المزيد من المحلات تنضم كل يوم.",
-    "banner_loading": "جاري تحميل العروض..."
+    "banner_loading": "جاري تحميل العروض...",
+    "location_loading": "جاري التحديد...",
+    "delivering_to_label": "التوصيل إلى",
+    "chooseDeliveryLocation": "اختر عنوان التوصيل",
+    "savedAddresses": "العناوين المحفوظة",
+    "deliverToDifferentLocation": "التوصيل إلى موقع مختلف",
+    "chooseLocationOnMap": "اختر الموقع على الخريطة",
+    "deliverToCurrentLocation": "التوصيل إلى موقعي الحالي",
+    "locationUnavailable": "الموقع غير متاح — اضغط للاختيار"
   },
 
   "categories": {
     "title": "التصنيفات",
     "all": "الكل",
+    "food": "مطاعم",
+    "bakeries": "مخابز",
+    "restaurants": "مطاعم",
+    "supermarket": "سوبر ماركت",
+    "pharmacy": "صيدليات",
+    "vegetables": "خضروات وفواكه",
+    "butcher": "جزارة",
+    "bakery": "مخابز",
+    "home": "منزل",
+    "electronics": "إلكترونيات",
+    "clothes": "ملابس",
+    "other": "أخرى",
     "open_now": "مفتوح الآن",
     "top_rated": "الأعلى تقييماً",
     "nearest": "الأقرب",
@@ -118,7 +170,205 @@
     "sort": "ترتيب حسب"
   },
 
+  "location": {
+    "choose_delivery": "اختر عنوان التوصيل",
+    "saved_locations": "العناوين المحفوظة",
+    "current_location": "التوصيل للموقع الحالي",
+    "choose_map": "اختر موقعاً آخر",
+    "search_placeholder": "ابحث عن منطقة أو شارع...",
+    "selected_location": "الموقع المختار",
+    "locating": "جاري تحديد الموقع...",
+    "confirm": "تأكيد الموقع",
+    "deliver_to": "توصيل إلى"
+  },
+
   "merchant": {
+    "splash": {
+      "loading": "جاري التحميل..."
+    },
+    "auth": {
+      "phone": {
+        "title": "أدخل رقم هاتفك",
+        "subtitle": "سنرسل لك رمز التحقق",
+        "placeholder": "رقم الهاتف",
+        "continue": "متابعة",
+        "invalidPhone": "رقم الهاتف غير صالح"
+      },
+      "otp": {
+        "title": "رمز التحقق",
+        "subtitle": "أدخل الرمز المرسل إلى {{phone}}",
+        "resend": "إعادة الإرسال",
+        "resendIn": "إعادة الإرسال بعد {{seconds}}ث",
+        "invalidOtp": "رمز التحقق غير صحيح"
+      }
+    },
+    "completeProfile": {
+      "title": "أكمل بياناتك",
+      "subtitle": "نحتاج اسمك لإنشاء حسابك",
+      "namePlaceholder": "الاسم بالكامل",
+      "nameError": "يجب إدخال الاسم (حرفان على الأقل)",
+      "submit": "حفظ ومتابعة"
+    },
+    "pendingApproval": {
+      "title": "قيد المراجعة",
+      "subtitle": "حسابك قيد المراجعة من قِبَل الإدارة. سنخطرك عند الموافقة.",
+      "contactSupport": "تواصل مع الدعم"
+    },
+    "createStore": {
+      "title": "أنشئ متجرك",
+      "step1": "بيانات المتجر",
+      "step2": "الموقع",
+      "step3": "تأكيد",
+      "businessName": "اسم المتجر",
+      "businessNamePlaceholder": "مثال: مطعم الشيف أحمد",
+      "businessNameError": "اسم المتجر مطلوب",
+      "category": "نوع المتجر",
+      "categoryPlaceholder": "اختر النوع",
+      "location": "موقع المتجر",
+      "locationSubtitle": "ضع الدبوس على موقع متجرك بدقة",
+      "useGps": "استخدام موقعي الحالي",
+      "confirm": "تأكيد",
+      "submit": "إنشاء المتجر",
+      "success": "تم إنشاء المتجر بنجاح!"
+    },
+    "tabs": {
+      "orders": "الطلبات",
+      "menu": "القائمة",
+      "store": "المتجر",
+      "profile": "الملف",
+      "analytics": "التحليلات"
+    },
+    "orders": {
+      "incoming": {
+        "title": "الطلبات الواردة",
+        "empty": "لا توجد طلبات واردة",
+        "emptySubtitle": "ستظهر الطلبات الجديدة هنا فور استلامها",
+        "accept": "قبول",
+        "reject": "رفض",
+        "prepTime": "وقت التحضير",
+        "prepTimeMinutes": "{{minutes}} دقيقة",
+        "confirmAccept": "تأكيد القبول",
+        "rejectReason": "سبب الرفض (اختياري)",
+        "confirmReject": "تأكيد الرفض",
+        "ago": "منذ {{time}}",
+        "items": "{{count}} عنصر",
+        "paymentCash": "نقدي 💵",
+        "paymentWallet": "محفظة 💳",
+        "paymentOnline": "أونلاين 💳"
+      },
+      "active": {
+        "title": "الطلبات النشطة",
+        "empty": "لا توجد طلبات نشطة",
+        "markReady": "الطلب جاهز ✓",
+        "waitingDriver": "في انتظار السائق...",
+        "driverAssigned": "السائق في الطريق",
+        "driverPickedUp": "السائق أخذ الطلب",
+        "delivered": "تم التسليم"
+      },
+      "status": {
+        "PENDING": "في الانتظار",
+        "ACCEPTED": "مقبول",
+        "READY": "جاهز",
+        "ASSIGNED": "تم تعيين سائق",
+        "PICKED_UP": "في الطريق",
+        "DELIVERED": "تم التوصيل",
+        "COMPLETED": "مكتمل",
+        "CANCELLED": "ملغي",
+        "REJECTED": "مرفوض"
+      },
+      "history": {
+        "title": "سجل الطلبات",
+        "empty": "لا توجد طلبات سابقة"
+      }
+    },
+    "menu": {
+      "title": "قائمة المنتجات",
+      "empty": "لا توجد منتجات بعد",
+      "emptySubtitle": "أضف منتجك الأول لتبدأ البيع",
+      "addProduct": "إضافة منتج",
+      "editProduct": "تعديل المنتج",
+      "productName": "اسم المنتج",
+      "productNamePlaceholder": "مثال: برجر كلاسيك",
+      "productNameError": "اسم المنتج مطلوب",
+      "description": "الوصف",
+      "descriptionPlaceholder": "وصف المنتج (اختياري)",
+      "price": "السعر (ج.م)",
+      "pricePlaceholder": "0.00",
+      "priceError": "يجب إدخال سعر صحيح",
+      "category": "التصنيف",
+      "categoryPlaceholder": "مثال: الوجبات الرئيسية",
+      "addImage": "إضافة صورة",
+      "changeImage": "تغيير الصورة",
+      "available": "متاح للطلب",
+      "unavailable": "غير متاح",
+      "save": "حفظ",
+      "deleteProduct": "حذف المنتج",
+      "deleteConfirm": "هل أنت متأكد من حذف هذا المنتج؟",
+      "deleteCancel": "إلغاء",
+      "deleteConfirmButton": "حذف",
+      "savedSuccess": "تم الحفظ بنجاح"
+    },
+    "store": {
+      "title": "إعدادات المتجر",
+      "isOpen": "المتجر مفتوح",
+      "isClosed": "المتجر مغلق",
+      "openToggleHint": "اضغط لتغيير حالة المتجر",
+      "businessName": "اسم المتجر",
+      "location": "الموقع",
+      "updateLocation": "تحديث الموقع",
+      "saveChanges": "حفظ التغييرات",
+      "savedSuccess": "تم حفظ التغييرات"
+    },
+    "profile": {
+      "title": "الملف الشخصي",
+      "name": "الاسم",
+      "phone": "رقم الهاتف",
+      "wallet": "المحفظة",
+      "transactions": "سجل المعاملات",
+      "logout": "تسجيل الخروج",
+      "logoutConfirm": "هل تريد تسجيل الخروج؟"
+    },
+    "wallet": {
+      "title": "المحفظة",
+      "balance": "الرصيد المتاح",
+      "pendingWithdrawal": "قيد السحب",
+      "requestWithdrawal": "طلب سحب",
+      "withdrawalAmount": "المبلغ المراد سحبه",
+      "withdrawalSuccess": "تم إرسال طلب السحب بنجاح"
+    },
+    "transactions": {
+      "title": "سجل المعاملات",
+      "empty": "لا توجد معاملات بعد",
+      "today": "اليوم",
+      "yesterday": "أمس",
+      "filterAll": "الكل",
+      "filterCredit": "وارد",
+      "filterDebit": "صادر",
+      "reasons": {
+        "ORDER_PAYMENT": "دفع طلب",
+        "WALLET_RECHARGE": "شحن المحفظة",
+        "DELIVERY_FEE": "رسوم توصيل",
+        "TIP": "إكرامية",
+        "WITHDRAWAL": "سحب",
+        "COMMISSION_DEDUCTION": "عمولة المنصة"
+      }
+    },
+    "common": {
+      "loading": "جاري التحميل...",
+      "errorTryAgain": "حدث خطأ، يرجى المحاولة مجدداً",
+      "networkError": "تحقق من اتصالك بالإنترنت",
+      "retry": "إعادة المحاولة",
+      "cancel": "إلغاء",
+      "confirm": "تأكيد",
+      "save": "حفظ",
+      "delete": "حذف",
+      "edit": "تعديل",
+      "back": "رجوع",
+      "next": "التالي",
+      "done": "تم",
+      "currency": "ج.م",
+      "egp": "{{amount}} ج.م"
+    },
     "open": "مفتوح",
     "closed": "مغلق",
     "opens_at": "يفتح الساعة {{time}}",
@@ -267,10 +517,10 @@
     "tab_active": "الجارية",
     "tab_past": "السابقة",
     "empty_active": "لا توجد طلبات جارية",
-    "empty_active_sub": "ستظهر طلباتك الجارية هنا.",
+    "empty_active_sub": "اطلب الآن لتتبع طلبك هنا",
     "empty_past": "لا توجد طلبات سابقة",
-    "empty_past_sub": "سيظهر تاريخ طلباتك هنا.",
-    "order_number": "#{{number}}",
+    "empty_past_sub": "ستظهر طلباتك المكتملة هنا",
+    "order_number": "طلب #{{number}}",
     "regular_order": "طلب عادي",
     "custom_order": "طلب مخصص",
     "track": "تتبع",
@@ -314,6 +564,7 @@
 
   "profile": {
     "title": "الملف الشخصي",
+    "edit_profile": "تعديل الملف الشخصي",
     "section_account": "الحساب",
     "section_preferences": "التفضيلات",
     "section_support": "المساعدة والدعم",
@@ -346,6 +597,10 @@
     "label_home": "المنزل",
     "label_work": "العمل",
     "label_other": "أخرى",
+    "address_labels": {
+      "home": "المنزل",
+      "work": "العمل"
+    },
     "label_label": "التسمية",
     "address_label": "العنوان",
     "map_title": "اختر الموقع",
@@ -378,6 +633,16 @@
     "restart_later": "لاحقاً"
   },
 
+  "terms": {
+    "title": "الشروط والأحكام",
+    "content": "مرحباً بك في دوّار. باستخدامك لهذا التطبيق، فإنك توافق على الشروط والأحكام التالية..."
+  },
+
+  "privacy": {
+    "title": "سياسة الخصوصية",
+    "content": "نحن نهتم بخصوصيتك. توضح هذه السياسة كيفية جمعنا واستخدامنا لبياناتك..."
+  },
+
   "appearance": {
     "title": "المظهر",
     "light": "فاتح",
@@ -394,12 +659,14 @@
     "not_found": "غير موجود.",
     "unauthorized": "انتهت جلستك. يرجى تسجيل الدخول مرة أخرى.",
     "rate_limit": "محاولات كثيرة. يرجى المحاولة بعد {{minutes}} دقيقة.",
-    "invalid_phone": "يرجى إدخال رقم هاتف مصري صحيح.",
+    "invalid_phone": "يرجى إدخل رقم هاتف مصري صحيح.",
     "invalid_otp": "رمز التحقق غير صحيح.",
     "upload_failed": "فشل رفع الملف. يرجى المحاولة مرة أخرى.",
     "location_denied": "تم رفض الوصول للموقع. يرجى تفعيله من الإعدادات.",
     "camera_denied": "تم رفض الوصول للكاميرا. يرجى تفعيله من الإعدادات.",
-    "microphone_denied": "تم رفض الوصول للميكروفون. يرجى تفعيله من الإعدادات."
+    "microphone_denied": "تم رفض الوصول للميكروفون. يرجى تفعيله من الإعدادات.",
+    "no_internet": "لا يوجد اتصال بالإنترنت",
+    "cancel_failed": "تعذّر إلغاء الطلب"
   },
 
   "driver": {
@@ -523,5 +790,11 @@
     "avg_order": "متوسط الطلب",
     "commission_paid": "العمولة المدفوعة",
     "low_balance_warning": "رصيد محفظة منخفض — اشحن قريباً"
+  },
+  "mainTabs": {
+    "home": "الرئيسية",
+    "categories": "التصنيفات",
+    "orders": "الطلبات",
+    "profile": "حسابي"
   }
 }

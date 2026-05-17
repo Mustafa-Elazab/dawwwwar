@@ -31,6 +31,26 @@
     "version": "Version {{version}}"
   },
 
+  "days": {
+    "sunday": "Sunday",
+    "monday": "Monday",
+    "tuesday": "Tuesday",
+    "wednesday": "Wednesday",
+    "thursday": "Thursday",
+    "friday": "Friday",
+    "saturday": "Saturday"
+  },
+
+  "notifications": {
+    "title": "Notifications",
+    "empty": "No notifications yet",
+    "order_delivered": "Order Delivered",
+    "order_delivered_body": "Your order #{{orderId}} from {{merchant}} has been delivered. Enjoy!",
+    "weekend_sale": "50% OFF Weekend Sale",
+    "wallet_recharged": "Wallet Recharged",
+    "wallet_recharged_body": "Your wallet has been successfully recharged with {{amount}} EGP."
+  },
+
   "auth": {
     "auth_selection_title": "Welcome to Dawwar",
     "auth_selection_subtitle": "The easiest way to recycle and earn rewards.",
@@ -68,6 +88,10 @@
     "otp_invalid": "Incorrect code. {{remaining}} attempts left.",
     "otp_locked": "Too many failed attempts. Please request a new code.",
     "verifying": "Verifying...",
+    "didnt_receive_code": "Didn't receive a code?",
+    "accept_terms_hint": "You must accept terms and conditions to continue",
+    "terms_link": "Terms & Conditions",
+    "privacy_link": "Privacy Policy",
 
     "choose_role": "How will you use Dawwar?",
     "choose_role_subtitle": "You can change this later in settings.",
@@ -87,13 +111,21 @@
     "pending_title": "Under Review",
     "pending_body": "Your account is being reviewed by our team. We'll notify you within 24 hours once approved.",
     "pending_contact": "Need help? Contact us on WhatsApp",
-    "logout": "Logout"
+    "logout": "Logout",
+    "complete_profile_title": "One Last Step",
+    "complete_profile_subtitle": "Please enter your full name to continue.",
+    "name_placeholder": "e.g. Mostafa Mohamed",
+    "name_required": "Full name is required",
+    "profile_updated": "Profile updated successfully!"
   },
 
   "home": {
+    "deliver_to": "Deliver to",
+    "welcome": "Welcome to Dawwar",
     "greeting": "Hello, {{name}} 👋",
-    "greeting_guest": "Welcome to Dawwar 👋",
-    "location": "Sinbellawin",
+    "greeting_guest": "Welcome 👋",
+    "greeting_user": "Welcome, {{name}} 👋",
+    "location": "Detecting location...",
     "location_sub": "Mansoura, Dakahlia",
     "search_placeholder": "Search shops or products...",
     "nearby_title": "Nearby Shops",
@@ -103,12 +135,32 @@
     "custom_order_sub": "Order from anywhere",
     "no_merchants": "No shops nearby right now",
     "no_merchants_sub": "Check back soon — more shops are joining every day.",
-    "banner_loading": "Loading promotions..."
+    "banner_loading": "Loading promotions...",
+    "location_loading": "Detecting...",
+    "delivering_to_label": "Delivering to",
+    "chooseDeliveryLocation": "Choose delivery location",
+    "savedAddresses": "Saved addresses",
+    "deliverToDifferentLocation": "Deliver to a different location",
+    "chooseLocationOnMap": "Choose location on map",
+    "deliverToCurrentLocation": "Deliver to current location",
+    "locationUnavailable": "Location unavailable — tap to choose"
   },
 
   "categories": {
     "title": "Categories",
     "all": "All",
+    "food": "Restaurants",
+    "bakeries": "Bakeries",
+    "restaurants": "Restaurants",
+    "supermarket": "Supermarket",
+    "pharmacy": "Pharmacy",
+    "vegetables": "Fruits & Vegetables",
+    "butcher": "Butcher",
+    "bakery": "Bakery",
+    "home": "Home",
+    "electronics": "Electronics",
+    "clothes": "Clothes",
+    "other": "Other",
     "open_now": "Open Now",
     "top_rated": "Top Rated",
     "nearest": "Nearest",
@@ -118,7 +170,205 @@
     "sort": "Sort by"
   },
 
+  "location": {
+    "choose_delivery": "Choose delivery location",
+    "saved_locations": "Saved Locations",
+    "current_location": "Deliver to current location",
+    "choose_map": "Choose different location",
+    "search_placeholder": "Search area or street...",
+    "selected_location": "Selected Location",
+    "locating": "Locating...",
+    "confirm": "Confirm Location",
+    "deliver_to": "Deliver to"
+  },
+
   "merchant": {
+    "splash": {
+      "loading": "Loading..."
+    },
+    "auth": {
+      "phone": {
+        "title": "Enter your phone number",
+        "subtitle": "We will send you a verification code",
+        "placeholder": "Phone Number",
+        "continue": "Continue",
+        "invalidPhone": "Invalid phone number"
+      },
+      "otp": {
+        "title": "Verification Code",
+        "subtitle": "Enter the code sent to {{phone}}",
+        "resend": "Resend",
+        "resendIn": "Resend in {{seconds}}s",
+        "invalidOtp": "Incorrect verification code"
+      }
+    },
+    "completeProfile": {
+      "title": "Complete Your Profile",
+      "subtitle": "We need your name to set up your account",
+      "namePlaceholder": "Full name",
+      "nameError": "Name must be at least 2 characters",
+      "submit": "Save & Continue"
+    },
+    "pendingApproval": {
+      "title": "Under Review",
+      "subtitle": "Your account is being reviewed by admin. We'll notify you once approved.",
+      "contactSupport": "Contact Support"
+    },
+    "createStore": {
+      "title": "Create Your Store",
+      "step1": "Store Info",
+      "step2": "Location",
+      "step3": "Confirm",
+      "businessName": "Store Name",
+      "businessNamePlaceholder": "e.g. Chef Ahmed's Restaurant",
+      "businessNameError": "Store name is required",
+      "category": "Store Category",
+      "categoryPlaceholder": "Select category",
+      "location": "Store Location",
+      "locationSubtitle": "Place the pin accurately on your store location",
+      "useGps": "Use current location",
+      "confirm": "Confirm",
+      "submit": "Create Store",
+      "success": "Store created successfully!"
+    },
+    "tabs": {
+      "orders": "Orders",
+      "menu": "Menu",
+      "store": "Store",
+      "profile": "Profile",
+      "analytics": "Analytics"
+    },
+    "orders": {
+      "incoming": {
+        "title": "Incoming Orders",
+        "empty": "No incoming orders",
+        "emptySubtitle": "New orders will appear here",
+        "accept": "Accept",
+        "reject": "Reject",
+        "prepTime": "Prep Time",
+        "prepTimeMinutes": "{{minutes}} min",
+        "confirmAccept": "Confirm Acceptance",
+        "rejectReason": "Reject Reason (optional)",
+        "confirmReject": "Confirm Rejection",
+        "ago": "{{time}} ago",
+        "items": "{{count}} item",
+        "paymentCash": "Cash 💵",
+        "paymentWallet": "Wallet 💳",
+        "paymentOnline": "Online 💳"
+      },
+      "active": {
+        "title": "Active Orders",
+        "empty": "No active orders",
+        "markReady": "Mark Ready ✓",
+        "waitingDriver": "Waiting for driver...",
+        "driverAssigned": "Driver on the way",
+        "driverPickedUp": "Driver picked up",
+        "delivered": "Delivered"
+      },
+      "status": {
+        "PENDING": "Pending",
+        "ACCEPTED": "Accepted",
+        "READY": "Ready",
+        "ASSIGNED": "Driver Assigned",
+        "PICKED_UP": "In Transit",
+        "DELIVERED": "Delivered",
+        "COMPLETED": "Completed",
+        "CANCELLED": "Cancelled",
+        "REJECTED": "Rejected"
+      },
+      "history": {
+        "title": "Order History",
+        "empty": "No past orders"
+      }
+    },
+    "menu": {
+      "title": "Product Menu",
+      "empty": "No products yet",
+      "emptySubtitle": "Add your first product to start selling",
+      "addProduct": "Add Product",
+      "editProduct": "Edit Product",
+      "productName": "Product Name",
+      "productNamePlaceholder": "e.g. Classic Burger",
+      "productNameError": "Product name is required",
+      "description": "Description",
+      "descriptionPlaceholder": "Product description (optional)",
+      "price": "Price (EGP)",
+      "pricePlaceholder": "0.00",
+      "priceError": "Please enter a valid price",
+      "category": "Category",
+      "categoryPlaceholder": "e.g. Main Courses",
+      "addImage": "Add Image",
+      "changeImage": "Change Image",
+      "available": "Available for order",
+      "unavailable": "Unavailable",
+      "save": "Save",
+      "deleteProduct": "Delete Product",
+      "deleteConfirm": "Are you sure you want to delete this product?",
+      "deleteCancel": "Cancel",
+      "deleteConfirmButton": "Delete",
+      "savedSuccess": "Saved successfully"
+    },
+    "store": {
+      "title": "Store Settings",
+      "isOpen": "Store is Open",
+      "isClosed": "Store is Closed",
+      "openToggleHint": "Tap to change store status",
+      "businessName": "Store Name",
+      "location": "Location",
+      "updateLocation": "Update Location",
+      "saveChanges": "Save Changes",
+      "savedSuccess": "Changes saved"
+    },
+    "profile": {
+      "title": "Profile",
+      "name": "Name",
+      "phone": "Phone Number",
+      "wallet": "Wallet",
+      "transactions": "Transaction History",
+      "logout": "Logout",
+      "logoutConfirm": "Do you want to logout?"
+    },
+    "wallet": {
+      "title": "Wallet",
+      "balance": "Available Balance",
+      "pendingWithdrawal": "Pending Withdrawal",
+      "requestWithdrawal": "Request Withdrawal",
+      "withdrawalAmount": "Amount to withdraw",
+      "withdrawalSuccess": "Withdrawal request submitted successfully"
+    },
+    "transactions": {
+      "title": "Transaction History",
+      "empty": "No transactions yet",
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "filterAll": "All",
+      "filterCredit": "In",
+      "filterDebit": "Out",
+      "reasons": {
+        "ORDER_PAYMENT": "Order Payment",
+        "WALLET_RECHARGE": "Wallet Recharge",
+        "DELIVERY_FEE": "Delivery Fee",
+        "TIP": "Tip",
+        "WITHDRAWAL": "Withdrawal",
+        "COMMISSION_DEDUCTION": "Platform Commission"
+      }
+    },
+    "common": {
+      "loading": "Loading...",
+      "errorTryAgain": "Something went wrong, please try again",
+      "networkError": "Check your internet connection",
+      "retry": "Retry",
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "save": "Save",
+      "delete": "Delete",
+      "edit": "Edit",
+      "back": "Back",
+      "next": "Next",
+      "done": "Done",
+      "currency": "EGP",
+      "egp": "{{amount}} EGP"
+    },
     "open": "Open",
     "closed": "Closed",
     "opens_at": "Opens at {{time}}",
@@ -261,16 +511,17 @@
       "REJECTED": "Order rejected"
     }
   },
-
   "orders": {
     "title": "Orders",
     "tab_active": "Active",
     "tab_past": "Past",
+    "no_past_orders": "No past orders",
+    "no_past_orders_sub": "Your completed orders will appear here",
     "empty_active": "No active orders",
-    "empty_active_sub": "Your active orders will appear here.",
+    "empty_active_sub": "Order now to track it here",
     "empty_past": "No past orders",
-    "empty_past_sub": "Your order history will appear here.",
-    "order_number": "#{{number}}",
+    "empty_past_sub": "Your completed orders will appear here",
+    "order_number": "Order #{{number}}",
     "regular_order": "Regular Order",
     "custom_order": "Custom Order",
     "track": "Track",
@@ -346,6 +597,10 @@
     "label_home": "Home",
     "label_work": "Work",
     "label_other": "Other",
+    "address_labels": {
+      "home": "Home",
+      "work": "Work"
+    },
     "label_label": "Label",
     "address_label": "Address",
     "map_title": "Pick Location",
@@ -378,6 +633,16 @@
     "restart_later": "Later"
   },
 
+  "terms": {
+    "title": "Terms & Conditions",
+    "content": "Welcome to Dawwar. By using this app, you agree to the following terms and conditions..."
+  },
+
+  "privacy": {
+    "title": "Privacy Policy",
+    "content": "We care about your privacy. This policy explains how we collect and use your data..."
+  },
+
   "appearance": {
     "title": "Appearance",
     "light": "Light",
@@ -399,7 +664,9 @@
     "upload_failed": "Failed to upload file. Please try again.",
     "location_denied": "Location access was denied. Please enable it in settings.",
     "camera_denied": "Camera access was denied. Please enable it in settings.",
-    "microphone_denied": "Microphone access was denied. Please enable it in settings."
+    "microphone_denied": "Microphone access was denied. Please enable it in settings.",
+    "no_internet": "No internet connection",
+    "cancel_failed": "Failed to cancel order"
   },
 
   "driver": {
@@ -523,5 +790,11 @@
     "avg_order": "Avg. Order",
     "commission_paid": "Commission Paid",
     "low_balance_warning": "Low wallet balance — recharge soon"
+  },
+  "mainTabs": {
+    "home": "Home",
+    "categories": "Categories",
+    "orders": "Orders",
+    "profile": "Profile"
   }
 }
