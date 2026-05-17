@@ -1,64 +1,84 @@
 import React, { useCallback } from 'react';
 import { View, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { ScrollScreenTemplate, Header, Text, Avatar, ListItem, Icon } from '@dawwar/ui';
-import { useTheme } from '@dawwar/theme';
-import { space, typography, radius, shadows } from '@dawwar/theme';
+import { useTheme, space, radius, AppColors } from '@dawwar/theme';
 import { useTranslation } from '@dawwar/i18n';
+import { useUpdateMerchant, useMyMerchant } from '@dawwar/api-client';
 import { useAppDispatch, useAppSelector } from '../../../../store/hooks';
 import { logout, selectUser } from '../../../../store/slices/auth.slice';
-import { setShopOpen, selectIsShopOpen } from '../../../../store/slices/merchant.slice';
-import { mockMerchants } from '@dawwar/mocks';
+import Toast from 'react-native-toast-message';
 
 export function MerchantProfileScreen() {
   const { colors } = useTheme();
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const user = useAppSelector(selectUser);
-  const isOpen = useAppSelector(selectIsShopOpen);
-  const merchant = mockMerchants.find((m) => m.userId === user?.id);
 
-  const handleToggleOpen = useCallback(() => {
-    dispatch(setShopOpen(!isOpen));
-  }, [isOpen, dispatch]);
+  const { data: merchantRes } = useMyMerchant();
+  const merchant = merchantRes?.data;
+  const updateMerchantMutation = useUpdateMerchant();
+
+  const isOpen = merchant?.isOpen ?? false;
+
+  const handleToggleOpen = useCallback(async () => {
+    if (!merchant) return;
+    try {
+      await updateMerchantMutation.mutateAsync({
+        id: merchant.id,
+        updates: { isOpen: !isOpen },
+      });
+      Toast.show({
+        type: 'success',
+        text1: t('merchant.store.savedSuccess'),
+      });
+    } catch {
+      Toast.show({ type: 'error', text1: t('common.errorTryAgain') });
+    }
+  }, [merchant, isOpen, updateMerchantMutation, t]);
 
   const handleLogout = useCallback(() => {
     Alert.alert(
-      t('profile.logout_confirm_title'),
-      t('profile.logout_confirm_body'),
+      t('merchant.profile.logout'),
+      t('merchant.profile.logoutConfirm'),
       [
         { text: t('common.cancel'), style: 'cancel' },
-        { text: t('profile.logout_confirm_btn'), style: 'destructive', onPress: () => dispatch(logout()) },
+        { text: t('merchant.profile.logout'), style: 'destructive', onPress: () => dispatch(logout()) },
       ],
     );
   }, [dispatch, t]);
 
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
+
   return (
     <ScrollScreenTemplate edges={['top']}>
-      <Header title={t('profile.title')} />
+      <Header title={t('merchant.profile.title')} />
 
       {/* Merchant info */}
       <View style={[styles.infoCard, { backgroundColor: colors.card }]}>
-        <Avatar name={merchant?.businessName} size="lg" />
+        <Avatar name={merchant?.businessName || user?.name || 'Merchant'} size="lg" />
         <View style={{ flex: 1 }}>
-          <Text variant="h4" color={colors.text}>{merchant?.businessName}</Text>
-          <Text variant="caption" color={colors.textSecondary}>{merchant?.category}</Text>
-          <Text variant="caption" color={colors.textSecondary}>★ {merchant?.rating}</Text>
+          <Text variant="h4" color={colors.text}>{merchant?.businessName || user?.name || 'Merchant'}</Text>
+          <Text variant="caption" color={colors.textSecondary}>{user?.phone}</Text>
         </View>
       </View>
 
-      {/* Open/Close toggle — most important element for merchant */}
+      {/* Open/Close toggle */}
       <TouchableOpacity
         style={[
           styles.openToggle,
-          { backgroundColor: isOpen ? colors.successBg : colors.errorBg, borderColor: isOpen ? colors.success : colors.error },
+          { 
+            backgroundColor: isOpen ? colors.success + '10' : colors.error + '10', 
+            borderColor: isOpen ? colors.success : colors.error 
+          },
         ]}
         onPress={handleToggleOpen}
+        disabled={updateMerchantMutation.isPending}
         activeOpacity={0.85}
       >
         <View style={[styles.statusDot, { backgroundColor: isOpen ? colors.success : colors.error }]} />
         <View style={{ flex: 1 }}>
           <Text variant="label" color={isOpen ? colors.success : colors.error} style={{ fontWeight: '700' }}>
-            {t(isOpen ? 'merchant_app.shop_open' : 'merchant_app.shop_closed')}
+            {t(isOpen ? 'merchant.store.isOpen' : 'merchant.store.isClosed')}
           </Text>
         </View>
         <Icon name={isOpen ? 'toggle-switch' : 'toggle-switch-off'} size={32} color={isOpen ? colors.success : colors.error} />
@@ -77,7 +97,7 @@ export function MerchantProfileScreen() {
           showChevron
         />
         <ListItem
-          title={t('profile.logout')}
+          title={t('merchant.profile.logout')}
           leftElement={<Icon name="logout" size={22} color={colors.error} />}
           onPress={handleLogout}
         />
@@ -86,7 +106,7 @@ export function MerchantProfileScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) => StyleSheet.create({
   infoCard: {
     flexDirection: 'row', alignItems: 'center',
     padding: space.base, gap: space.md, marginBottom: space.sm,

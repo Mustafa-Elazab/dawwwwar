@@ -29,6 +29,6 @@ export const createStyles = (colors: AppColors) =>
     },
     swipeActionInner: {
       alignItems: 'center',
-      gap: space[1],
+      gap: space.sm,
     },
   });

@@ -3,16 +3,15 @@ import { View } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useTheme } from '@dawwar/theme';
 import { Icon, Text } from '@dawwar/ui';
+import { useTranslation } from '@dawwar/i18n';
 import { TAB_ROUTES } from './routes';
 import { useAppSelector } from '../store/hooks';
 import { selectNewOrderCount } from '../store/slices/merchant.slice';
-import {
-  MerchantOrdersScreen,
-  ProductsScreen,
-  AddEditProductScreen,
-  AnalyticsScreen,
-  MerchantProfileScreen,
-} from './placeholders';
+import { MerchantOrdersScreen } from '../features/orders/screens/MerchantOrdersScreen';
+import { ProductsScreen } from '../features/products/screens/ProductsScreen';
+import { AddEditProductScreen } from '../features/products/screens/AddEditProductScreen';
+import { AnalyticsScreen } from '../features/analytics/screens/AnalyticsScreen';
+import { MerchantProfileScreen } from '../features/profile/screens/MerchantProfileScreen';
 import { MERCHANT_ROUTES } from './routes';
 import { createStackNavigator } from '@react-navigation/stack';
 
@@ -28,34 +27,61 @@ function ProductsStackNav() {
 
 const Tab = createBottomTabNavigator();
 
+// ─── Icon components — memoized, defined OUTSIDE the navigator ────────────────
+const OrdersIcon = React.memo(({ focused, color, size, badgeCount }: { focused: boolean; color: string; size: number; badgeCount: number }) => (
+  <View>
+    <Icon name={focused ? 'clipboard-list' : 'clipboard-list-outline'} size={size} color={color} />
+    {badgeCount > 0 && (
+      <View style={{ position: 'absolute', top: -4, right: -8, backgroundColor: '#FF3B30', borderRadius: 10, minWidth: 18, height: 18, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 3 }}>
+        <Text variant="overline" color="#fff" style={{ fontSize: 10, fontWeight: '700' }}>{String(badgeCount)}</Text>
+      </View>
+    )}
+  </View>
+));
+
+const ProductsIcon = React.memo(({ focused, color, size }: { focused: boolean; color: string; size: number }) => (
+  <Icon name={focused ? 'tag' : 'tag-outline'} size={size} color={color} />
+));
+
+const AnalyticsIcon = React.memo(({ focused, color, size }: { focused: boolean; color: string; size: number }) => (
+  <Icon name={focused ? 'chart-bar' : 'chart-bar'} size={size} color={color} />
+));
+
+const ProfileIcon = React.memo(({ focused, color, size }: { focused: boolean; color: string; size: number }) => (
+  <Icon name={focused ? 'store' : 'store-outline'} size={size} color={color} />
+));
+
 export function MerchantTabs() {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const newOrderCount = useAppSelector(selectNewOrderCount);
 
   return (
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarStyle: { backgroundColor: colors.tabBar, borderTopColor: colors.tabBarBorder, height: 60, paddingBottom: 8 },
-        tabBarShowLabel: false,
+        tabBarStyle: { 
+          backgroundColor: colors.surface, 
+          borderTopColor: colors.border, 
+          height: 64, 
+          paddingBottom: 8,
+          paddingTop: 8,
+        },
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textSecondary,
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: '600',
+        },
       }}
     >
       <Tab.Screen
         name={TAB_ROUTES.ORDERS_TAB}
         component={MerchantOrdersScreen}
         options={{
-          tabBarIcon: ({ focused }) => (
-            <View style={{ alignItems: 'center', gap: 2 }}>
-              <View>
-                <Icon name={focused ? 'clipboard-list' : 'clipboard-list-outline'} size={24} color={focused ? colors.primary : colors.tabBarIcon} />
-                {newOrderCount > 0 && (
-                  <View style={{ position: 'absolute', top: -4, right: -8, backgroundColor: colors.error, borderRadius: 10, minWidth: 18, height: 18, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 3 }}>
-                    <Text variant="overline" color="#fff">{String(newOrderCount)}</Text>
-                  </View>
-                )}
-              </View>
-              <Text variant="caption" color={focused ? colors.primary : colors.tabBarIcon}>Orders</Text>
-            </View>
+          tabBarLabel: t('merchant.tabs.orders', 'Orders'),
+          tabBarIcon: ({ focused, color, size }) => (
+            <OrdersIcon focused={focused} color={color} size={size} badgeCount={newOrderCount} />
           ),
         }}
       />
@@ -63,11 +89,9 @@ export function MerchantTabs() {
         name={TAB_ROUTES.PRODUCTS_TAB}
         component={ProductsStackNav}
         options={{
-          tabBarIcon: ({ focused }) => (
-            <View style={{ alignItems: 'center', gap: 2 }}>
-              <Icon name={focused ? 'tag' : 'tag-outline'} size={24} color={focused ? colors.primary : colors.tabBarIcon} />
-              <Text variant="caption" color={focused ? colors.primary : colors.tabBarIcon}>Products</Text>
-            </View>
+          tabBarLabel: t('merchant.tabs.products', 'Products'),
+          tabBarIcon: ({ focused, color, size }) => (
+            <ProductsIcon focused={focused} color={color} size={size} />
           ),
         }}
       />
@@ -75,11 +99,9 @@ export function MerchantTabs() {
         name={TAB_ROUTES.ANALYTICS_TAB}
         component={AnalyticsScreen}
         options={{
-          tabBarIcon: ({ focused }) => (
-            <View style={{ alignItems: 'center', gap: 2 }}>
-              <Icon name={focused ? 'chart-bar' : 'chart-bar'} size={24} color={focused ? colors.primary : colors.tabBarIcon} />
-              <Text variant="caption" color={focused ? colors.primary : colors.tabBarIcon}>Analytics</Text>
-            </View>
+          tabBarLabel: t('merchant.tabs.analytics', 'Analytics'),
+          tabBarIcon: ({ focused, color, size }) => (
+            <AnalyticsIcon focused={focused} color={color} size={size} />
           ),
         }}
       />
@@ -87,11 +109,9 @@ export function MerchantTabs() {
         name={TAB_ROUTES.PROFILE_TAB}
         component={MerchantProfileScreen}
         options={{
-          tabBarIcon: ({ focused }) => (
-            <View style={{ alignItems: 'center', gap: 2 }}>
-              <Icon name={focused ? 'store' : 'store-outline'} size={24} color={focused ? colors.primary : colors.tabBarIcon} />
-              <Text variant="caption" color={focused ? colors.primary : colors.tabBarIcon}>Profile</Text>
-            </View>
+          tabBarLabel: t('merchant.tabs.profile', 'Profile'),
+          tabBarIcon: ({ focused, color, size }) => (
+            <ProfileIcon focused={focused} color={color} size={size} />
           ),
         }}
       />

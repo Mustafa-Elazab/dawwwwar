@@ -3,7 +3,7 @@ import { Modal, View, ScrollView, TouchableOpacity } from 'react-native';
 import { useTheme } from '@dawwar/theme';
 import { Text, Button } from '@dawwar/ui';
 import { useTranslation } from '@dawwar/i18n';
-import { useOtpCountdown } from '../../../../../features/auth/hooks/useOtpCountdown';
+import { useOtpCountdown } from '../../../../features/auth/hooks/useOtpCountdown';
 import { createStyles } from './styles';
 import type { NewOrderModalProps } from './types';
 import { space } from '@dawwar/theme';
@@ -11,9 +11,9 @@ import { space } from '@dawwar/theme';
 const PREP_OPTIONS = [10, 15, 20, 30] as const;
 const AUTO_REJECT_SECONDS = 300; // 5 minutes
 
-export function NewOrderModal({ order, onAccept, onReject, isAccepting, visible }: NewOrderModalProps) {
+export const NewOrderModal = React.memo(({ order, onAccept, onReject, isAccepting, visible }: NewOrderModalProps) => {
   const { colors } = useTheme();
-  const styles = createStyles(colors);
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const { t } = useTranslation();
   const [selectedPrep, setSelectedPrep] = useState<number>(15);
   const timer = useOtpCountdown({ initialSeconds: AUTO_REJECT_SECONDS, autoStart: visible });
@@ -99,4 +99,4 @@ export function NewOrderModal({ order, onAccept, onReject, isAccepting, visible 
       </View>
     </Modal>
   );
-}
+});

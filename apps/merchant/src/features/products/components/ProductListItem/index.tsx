@@ -17,15 +17,15 @@ interface ProductListItemProps {
   isTogglingId?: string;
 }
 
-export function ProductListItem({
+export const ProductListItem = React.memo(({
   product,
   onEdit,
   onDelete,
   onToggle,
   isTogglingId,
-}: ProductListItemProps) {
+}: ProductListItemProps) => {
   const { colors } = useTheme();
-  const styles = createStyles(colors);
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const { t } = useTranslation();
   const swipeableRef = useRef<Swipeable>(null);
 
@@ -100,10 +100,10 @@ export function ProductListItem({
         />
 
         {/* Edit icon still visible */}
-        <TouchableOpacity onPress={onEdit} style={{ padding: space[1] }}>
+        <TouchableOpacity onPress={onEdit} style={{ padding: space.sm }}>
           <Icon name="pencil-outline" size={20} color={colors.icon} />
         </TouchableOpacity>
       </View>
     </Swipeable>
   );
-}
+});

@@ -1,16 +1,24 @@
 import React from 'react';
-import { View, TouchableOpacity } from 'react-native';
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { ListScreenTemplate, Header, SearchBar, Icon } from '@dawwar/ui';
-import { useTheme } from '@dawwar/theme';
+import { useTheme, space, shadows } from '@dawwar/theme';
 import { ProductListItem } from '../../components/ProductListItem';
 import { useController } from './useController';
-import { createStyles } from './styles';
 import type { Product } from '@dawwar/types';
 
 export function ProductsScreen() {
   const { colors } = useTheme();
-  const styles = createStyles(colors);
   const ctrl = useController();
+
+  const renderItem = React.useCallback(({ item }: { item: Product }) => (
+    <ProductListItem
+      product={item}
+      onEdit={() => ctrl.handleEdit(item.id)}
+      onDelete={() => ctrl.handleDelete(item.id)}
+      onToggle={(val) => ctrl.handleToggle(item.id, val)}
+      isTogglingId={ctrl.togglingId}
+    />
+  ), [ctrl.handleEdit, ctrl.handleDelete, ctrl.handleToggle, ctrl.togglingId]);
 
   return (
     <>
@@ -18,7 +26,7 @@ export function ProductsScreen() {
         edges={['top']}
         header={
           <>
-            <Header title={ctrl.t('merchant_app.products_title')} />
+            <Header title={ctrl.t('merchant.menu.title')} />
             <View style={{ padding: 8 }}>
               <SearchBar
                 value={ctrl.search}
@@ -30,15 +38,7 @@ export function ProductsScreen() {
           </>
         }
         data={ctrl.products}
-        renderItem={({ item }) => (
-          <ProductListItem
-            product={item}
-            onEdit={() => ctrl.handleEdit(item.id)}
-            onDelete={() => ctrl.handleDelete(item.id)}
-            onToggle={(val) => ctrl.handleToggle(item.id, val)}
-            isTogglingId={ctrl.togglingId}
-          />
-        )}
+        renderItem={renderItem}
         keyExtractor={(item) => item.id}
         isLoading={ctrl.isLoading}
         isError={ctrl.isError}
@@ -46,7 +46,7 @@ export function ProductsScreen() {
         onRefresh={ctrl.refetch}
         refreshing={false}
         emptyIcon="tag-off-outline"
-        emptyTitle={ctrl.t('merchant.no_products')}
+        emptyTitle={ctrl.t('merchant.menu.empty')}
       />
       {/* FAB */}
       <TouchableOpacity style={styles.fab} onPress={ctrl.handleAddNew} activeOpacity={0.85}>
@@ -55,3 +55,19 @@ export function ProductsScreen() {
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  fab: {
+    position: 'absolute',
+    bottom: space.xl,
+    right: space.xl,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#1A73E8', // Explicit primary color for FAB
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...shadows.lg,
+    elevation: 8,
+  },
+});

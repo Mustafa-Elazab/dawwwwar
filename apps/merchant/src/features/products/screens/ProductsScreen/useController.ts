@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from '@dawwar/i18n';
 import { useMerchantProducts, useToggleAvailability, useDeleteProduct } from '../../core/hooks';
-import { MERCHANT_ROUTES } from '../../../navigation/routes';
+import { MERCHANT_ROUTES } from '../../../../navigation/routes';
 
 export function useController() {
   const { t } = useTranslation();
@@ -15,7 +15,7 @@ export function useController() {
   const deleteMutation = useDeleteProduct();
 
   const filtered = (products ?? []).filter(
-    (p) =>
+    (p: any) =>
       search.trim() === '' ||
       p.name.toLowerCase().includes(search.toLowerCase()) ||
       p.nameAr.includes(search),

@@ -1,7 +1,6 @@
 export interface OtpInputProps {
-  value: string[];            // array of 6 single chars
-  onChange: (index: number, char: string) => void;
-  onBackspace: (index: number) => void;
-  hasError: boolean;
+  value: string;               // single string for the full code
+  onChange?: (code: string) => void;
+  hasError?: boolean;
   testID?: string;
 }

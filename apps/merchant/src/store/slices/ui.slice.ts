@@ -1,7 +1,7 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import { ThemeMode, Language } from '@dawwar/types';
 
-interface UIState {
+export interface UIState {
   themeMode: ThemeMode;
   language: Language;
 }

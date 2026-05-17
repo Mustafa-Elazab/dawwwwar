@@ -1,6 +1,4 @@
-import { USE_MOCK_API } from '../../../../core/api/config';
-import api from '../../../../core/api/client';
-import { authMock } from '@dawwar/mocks';
+import api from '../../../core/api/client';
 import type { ApiResponse } from '@dawwar/types';
 import type { SendOtpResponse, VerifyOtpResponse } from './response';
 
@@ -14,12 +12,10 @@ const realAuthApi = {
     const { data } = await api.post('/auth/verify-otp', { phone, code });
     return data;
   },
+  getMe: async (): Promise<ApiResponse<any>> => {
+    const { data } = await api.get('/auth/me');
+    return data;
+  },
 };
 
-const mockAuthApi = {
-  sendOtp: (phone: string) => authMock.sendOtp({ phone }),
-  verifyOtp: (phone: string, code: string) => authMock.verifyOtp(phone, code),
-};
-
-// ── Export: mock when USE_MOCK_API=true, real when false ──────────────
-export const authApi = USE_MOCK_API ? mockAuthApi : realAuthApi;
+export const authApi = realAuthApi;

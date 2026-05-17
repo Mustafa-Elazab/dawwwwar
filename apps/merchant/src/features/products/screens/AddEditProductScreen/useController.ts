@@ -1,26 +1,25 @@
 import { useState, useCallback } from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { useForm } from 'react-hook-form';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { useTranslation } from '@dawwar/i18n';
 import { useSaveProduct } from '../../core/hooks';
-import { mockCategories } from '@dawwar/mocks';
-import { useAppSelector } from '../../../../store/hooks';
-import { selectUser } from '../../../../store/slices/auth.slice';
-import { mockMerchants } from '@dawwar/mocks';
-import { USE_MOCK_API } from '../../../../core/api/config';
-import apiClient from '../../../../core/api/client';
+import { useUploadFile, useCategories } from '@dawwar/api-client';
+import Toast from 'react-native-toast-message';
 
 export function useController() {
   const { t } = useTranslation();
   const navigation = useNavigation<any>();
-  const user = useAppSelector(selectUser);
-  const merchant = mockMerchants.find((m) => m.userId === user?.id);
+  const route = useRoute<any>();
+  const productId = route.params?.productId;
+
+  const { data: categoriesRes } = useCategories();
+  const categories = categoriesRes?.data || [];
 
   const [nameAr, setNameAr] = useState('');
   const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
-  const [categoryId, setCategoryId] = useState(mockCategories[0]?.id ?? '');
+  const [categoryId, setCategoryId] = useState('');
   const [isAvailable, setIsAvailable] = useState(true);
   const [isFeatured, setIsFeatured] = useState(false);
   const [imageUri, setImageUri] = useState(
@@ -28,81 +27,65 @@ export function useController() {
   );
   const [isUploading, setIsUploading] = useState(false);
 
-  const uploadImage = async (asset: { uri?: string; type?: string; fileName?: string | null }): Promise<string | null> => {
-    if (!asset.uri) return null;
-
-    if (USE_MOCK_API) {
-      return asset.uri;
-    }
-
-    setIsUploading(true);
-    try {
-      const { data: { uploadUrl, fileUrl } } = await apiClient.post('/upload/presign', {
-        filename: asset.fileName ?? 'product.jpg',
-        mimeType: asset.type ?? 'image/jpeg',
-        folder: 'products',
-      });
-
-      const formData = new FormData();
-      formData.append('file', {
-        uri: asset.uri,
-        type: asset.type,
-        name: asset.fileName ?? 'product.jpg',
-      } as unknown as Blob);
-
-      await fetch(uploadUrl, {
-        method: 'PUT',
-        headers: { 'Content-Type': asset.type ?? 'image/jpeg' },
-        body: formData,
-      });
-
-      return fileUrl;
-    } catch (err) {
-      console.error('Upload failed:', err);
-      return asset.uri;
-    } finally {
-      setIsUploading(false);
-    }
-  };
+  const uploadMutation = useUploadFile();
 
   const handlePickImage = useCallback(() => {
     launchImageLibrary({ mediaType: 'photo', quality: 0.8 }, async (res) => {
-      if (res.assets?.[0]) {
-        const uploadedUrl = await uploadImage(res.assets[0]);
-        if (uploadedUrl) {
-          setImageUri(uploadedUrl);
+      if (res.assets?.[0]?.uri) {
+        const uri = res.assets[0].uri;
+        setIsUploading(true);
+        try {
+          const formData = new FormData();
+          formData.append('file', { 
+            uri, 
+            name: 'product.jpg', 
+            type: 'image/jpeg' 
+          } as any);
+          formData.append('folder', 'products');
+          
+          const uploadRes = await uploadMutation.mutateAsync(formData);
+          setImageUri(uploadRes.data.url);
+        } catch {
+          Toast.show({ type: 'error', text1: t('errors.upload_failed') });
+        } finally {
+          setIsUploading(false);
         }
       }
     });
-  }, []);
+  }, [uploadMutation, t]);
 
   const saveMutation = useSaveProduct();
 
   const handleSave = useCallback(async () => {
     if (!nameAr.trim() || !price.trim()) return;
-    await saveMutation.mutateAsync({
-      merchantId: merchant?.id ?? '',
-      name: name || nameAr,
-      nameAr,
-      price: parseFloat(price),
-      images: [imageUri],
-      categoryId,
-      isAvailable,
-      isFeatured,
-    });
-    navigation.goBack();
-  }, [nameAr, name, price, categoryId, isAvailable, isFeatured, imageUri, merchant, saveMutation, navigation]);
+    try {
+      await saveMutation.mutateAsync({
+        name: name || nameAr,
+        nameAr,
+        price: parseFloat(price),
+        images: [imageUri],
+        categoryId,
+        isAvailable,
+        isFeatured,
+      });
+      navigation.goBack();
+    } catch {
+      Toast.show({ type: 'error', text1: t('errors.server') });
+    }
+  }, [nameAr, name, price, categoryId, isAvailable, isFeatured, imageUri, saveMutation, navigation, t]);
 
   const isButtonDisabled = !nameAr.trim() || !price.trim() || isNaN(parseFloat(price)) || saveMutation.isPending || isUploading;
 
   return {
+    productId,
     nameAr, setNameAr,
     name, setName,
+    description, setDescription,
     price, setPrice,
     categoryId, setCategoryId,
     isAvailable, setIsAvailable,
     isFeatured, setIsFeatured,
-    categories: mockCategories,
+    categories,
     handleSave,
     isLoading: saveMutation.isPending || isUploading,
     isButtonDisabled,

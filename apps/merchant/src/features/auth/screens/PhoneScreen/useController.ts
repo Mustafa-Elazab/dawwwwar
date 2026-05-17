@@ -3,7 +3,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from '@dawwar/i18n';
 import { useSendOtp } from '../../core/hooks';
 import { isValidEgyptianPhone, normalizePhone } from '../../utils/phone';
-import { AUTH_ROUTES } from '../../navigation/route';
+import { AUTH_ROUTES } from '../../../../navigation/routes';
 import type { PhoneScreenNavProp } from './types';
 
 export function useController() {
@@ -25,6 +25,14 @@ export function useController() {
     if (phoneError) setPhoneError(null);
   }, [phoneError]);
 
+  const handleTermsPress = useCallback(() => {
+    navigation.navigate('Terms' as any);
+  }, [navigation]);
+
+  const handlePrivacyPress = useCallback(() => {
+    navigation.navigate('Privacy' as any);
+  }, [navigation]);
+
   const handleSendOtp = useCallback(async () => {
     const normalized = normalizePhone(phone);
 
@@ -40,7 +48,7 @@ export function useController() {
 
     try {
       await sendOtpMutation.mutateAsync({ phone: normalized });
-      navigation.navigate(AUTH_ROUTES.OTP, { phone: normalized });
+      navigation.navigate('OtpScreen', { phone: normalized });
     } catch (err) {
       const error = err as Error;
       if (error.message === 'INVALID_PHONE') {
@@ -64,6 +72,8 @@ export function useController() {
     // handlers
     handlePhoneChange,
     handleTermsToggle: () => setTermsAccepted((v) => !v),
+    handleTermsPress,
+    handlePrivacyPress,
     handleSendOtp,
     // i18n
     t,

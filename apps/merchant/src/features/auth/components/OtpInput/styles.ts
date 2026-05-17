@@ -1,39 +1,45 @@
 import { StyleSheet } from 'react-native';
 import type { AppColors } from '@dawwar/theme';
-import { space, typography, radius, shadows } from '@dawwar/theme';
+import { space, radius, shadows } from '@dawwar/theme';
 
-export const createStyles = (colors: AppColors, hasError: boolean) =>
+export const createStyles = (colors: AppColors, hasError?: boolean) =>
   StyleSheet.create({
     row: {
       flexDirection: 'row',
-      justifyContent: 'center',
-      gap: space.sm,
+      justifyContent: 'center', // Center boxes
+      alignItems: 'center',
+      gap: space.sm, // Even spacing
+      width: '100%',
     },
     box: {
-      width: 48,
-      height: 56,
-      borderRadius: radius.md,
-      borderWidth: 2,
+      width: 50, // Wider boxes
+      height: 60,
+      borderRadius: radius.lg,
+      borderWidth: 1.5,
       borderColor: hasError ? colors.error : colors.border,
-      backgroundColor: colors.surface,
+      backgroundColor: colors.background,
       alignItems: 'center',
       justifyContent: 'center',
       ...shadows.sm,
     },
     boxFilled: {
-      borderColor: hasError ? colors.error : colors.primary,
-      backgroundColor: hasError ? colors.errorBg : colors.primaryMuted,
+      borderColor: colors.primary,
+    },
+    boxFocused: {
+      borderColor: colors.primary,
+      borderWidth: 2,
+      ...shadows.md, // Elevated shadow on active box
+      elevation: 4,
     },
     digit: {
-      ...typography.h3,
-      color: hasError ? colors.error : colors.text,
-      textAlign: 'center',
+      fontSize: 24,
+      fontWeight: '700',
+      color: colors.text,
     },
-    // Hidden real TextInput layered over each box
     hiddenInput: {
       position: 'absolute',
+      width: 0,
+      height: 0,
       opacity: 0,
-      width: '100%',
-      height: '100%',
     },
   });

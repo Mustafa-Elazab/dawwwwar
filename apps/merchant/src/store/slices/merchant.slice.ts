@@ -1,6 +1,6 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
-interface MerchantState {
+export interface MerchantState {
   isOpen: boolean;         // optimistic UI for shop open/closed toggle
   newOrderCount: number;   // badge counter on Orders tab
 }

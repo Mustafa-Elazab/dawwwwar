@@ -1,4 +1,5 @@
 import { Alert } from 'react-native';
+import messaging from '@react-native-firebase/messaging';
 import { USE_MOCK_API } from '../core/api/config';
 
 /**
@@ -10,11 +11,8 @@ export async function requestPushNotificationPermission(): Promise<boolean> {
   if (USE_MOCK_API) return false;
 
   try {
-    const messaging = await import('@react-native-firebase/messaging');
-    const authStatus = await messaging.default().requestPermission();
-    const enabled =
-      authStatus === messaging.default().AuthorizationStatus.AUTHORIZED ||
-      authStatus === messaging.default().AuthorizationStatus.PROVISIONAL;
+    const authStatus = await messaging().requestPermission();
+    const enabled = authStatus === 1 || authStatus === 2;
 
     console.log('[FCM] Push notification permission:', enabled ? 'granted' : 'denied');
     return enabled;
@@ -32,8 +30,7 @@ export async function getFcmToken(): Promise<string | null> {
   if (USE_MOCK_API) return null;
 
   try {
-    const messaging = await import('@react-native-firebase/messaging');
-    return await messaging.default().getToken();
+    return await messaging().getToken();
   } catch (err) {
     console.warn('[FCM] Get token failed:', err);
     return null;
@@ -47,52 +44,45 @@ export async function getFcmToken(): Promise<string | null> {
 export function setupForegroundNotifications(): void {
   if (USE_MOCK_API) return;
 
-  import('@react-native-firebase/messaging')
-    .then((messaging) => {
-      // Handle foreground messages
-      messaging.default().onMessage(async (remoteMessage) => {
-        console.log('[FCM] Foreground message received:', remoteMessage);
+  // Handle foreground messages
+  messaging().onMessage(async (remoteMessage) => {
+    console.log('[FCM] Foreground message received:', remoteMessage);
 
-        const title = remoteMessage.notification?.title ?? 'New Notification';
-        const body = remoteMessage.notification?.body ?? '';
-        const data = remoteMessage.data;
+    const title = remoteMessage.notification?.title ?? 'New Notification';
+    const body = remoteMessage.notification?.body ?? '';
+    const data = remoteMessage.data;
 
-        // Play alert sound for new orders
-        if (data?.type === 'NEW_ORDER') {
-          playAlertSound();
-        }
+    // Play alert sound for new orders
+    if (data?.type === 'NEW_ORDER') {
+      playAlertSound();
+    }
 
-        // Show in-app alert
-        Alert.alert(title, body, [
-          { text: 'Dismiss', style: 'cancel' },
-          data?.orderId
-            ? { text: 'View', onPress: () => handleNotificationTap(data) }
-            : { text: 'OK', style: 'default' },
-        ]);
-      });
+    // Show in-app alert
+    Alert.alert(title, body, [
+      { text: 'Dismiss', style: 'cancel' },
+      data?.orderId
+        ? { text: 'View', onPress: () => handleNotificationTap(data as Record<string, string>) }
+        : { text: 'OK', style: 'default' },
+    ]);
+  });
 
-      // Handle notification tap when app was in background
-      messaging.default().onNotificationOpenedApp((remoteMessage) => {
-        console.log('[FCM] Notification opened app:', remoteMessage);
-        handleNotificationTap(remoteMessage.data);
-      });
+  // Handle notification tap when app was in background
+  messaging().onNotificationOpenedApp((remoteMessage) => {
+    console.log('[FCM] Notification opened app:', remoteMessage);
+    handleNotificationTap(remoteMessage.data as Record<string, string>);
+  });
 
-      // Check if app was opened from notification (killed state)
-      messaging
-        .default()
-        .getInitialNotification()
-        .then((remoteMessage) => {
-          if (remoteMessage) {
-            console.log('[FCM] App opened from quit state:', remoteMessage);
-            handleNotificationTap(remoteMessage.data);
-          }
-        });
-
-      console.log('[FCM] Foreground notification handler registered');
-    })
-    .catch((err) => {
-      console.warn('[FCM] Setup foreground notifications failed:', err);
+  // Check if app was opened from notification (killed state)
+  messaging()
+    .getInitialNotification()
+    .then((remoteMessage) => {
+      if (remoteMessage) {
+        console.log('[FCM] App opened from quit state:', remoteMessage);
+        handleNotificationTap(remoteMessage.data as Record<string, string>);
+      }
     });
+
+  console.log('[FCM] Foreground notification handler registered');
 }
 
 /**

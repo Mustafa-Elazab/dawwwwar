@@ -1,6 +1,4 @@
-import { USE_MOCK_API } from '../../../../core/api/config';
-import api from '../../../../core/api/client';
-import { delay, mockOrders } from '@dawwar/mocks';
+import api from '../../../core/api/client';
 import { OrderStatus } from '@dawwar/types';
 
 export interface MerchantAnalytics {
@@ -28,44 +26,5 @@ const realAnalyticsApi = {
   },
 };
 
-// ── Phase 1 mock implementation ──────────────────────────────────────
-const mockAnalyticsApi = {
-  getToday: async (merchantId: string): Promise<MerchantAnalytics> => {
-    await delay(400);
-    const orders = mockOrders.filter(
-      (o) => o.merchantId === merchantId &&
-        (o.status === OrderStatus.COMPLETED || o.status === OrderStatus.DELIVERED),
-    );
-    const totalRevenue = orders.reduce((sum, o) => sum + o.total, 0);
-    const commissionPaid = orders.length * 5;
-    return {
-      totalOrders: orders.length,
-      totalRevenue,
-      avgOrderValue: orders.length > 0 ? totalRevenue / orders.length : 0,
-      commissionPaid,
-    };
-  },
-  getRange: async (
-    merchantId: string,
-    _startDate: string,
-    _endDate: string,
-  ): Promise<MerchantAnalytics> => {
-    await delay(400);
-    // Same as today for mock
-    const orders = mockOrders.filter(
-      (o) => o.merchantId === merchantId &&
-        (o.status === OrderStatus.COMPLETED || o.status === OrderStatus.DELIVERED),
-    );
-    const totalRevenue = orders.reduce((sum, o) => sum + o.total, 0);
-    const commissionPaid = orders.length * 5;
-    return {
-      totalOrders: orders.length * 3, // Simulate 3x for range
-      totalRevenue: totalRevenue * 3,
-      avgOrderValue: orders.length > 0 ? totalRevenue / orders.length : 0,
-      commissionPaid: commissionPaid * 3,
-    };
-  },
-};
 
-// ── Export: mock when USE_MOCK_API=true, real when false ──────────────
-export const analyticsApi = USE_MOCK_API ? mockAnalyticsApi : realAnalyticsApi;
+export const analyticsApi = realAnalyticsApi;

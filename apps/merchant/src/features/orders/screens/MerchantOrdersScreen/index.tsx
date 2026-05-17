@@ -8,17 +8,22 @@ import { NewOrderModal } from '../../components/NewOrderModal';
 import { useController } from './useController';
 import type { Order } from '@dawwar/types';
 import type { OrderTab } from './useController';
+import type { AppColors } from '@dawwar/theme';
 
 const TABS: { key: OrderTab; labelKey: string }[] = [
-  { key: 'new', labelKey: 'merchant_app.tab_new' },
-  { key: 'preparing', labelKey: 'merchant_app.tab_preparing' },
-  { key: 'ready', labelKey: 'merchant_app.tab_ready' },
-  { key: 'active', labelKey: 'merchant_app.tab_active' },
-  { key: 'completed', labelKey: 'merchant_app.tab_completed' },
+  { key: 'new', labelKey: 'merchant.orders.status.PENDING' },
+  { key: 'preparing', labelKey: 'merchant.orders.status.ACCEPTED' },
+  { key: 'ready', labelKey: 'merchant.orders.status.READY' },
+  { key: 'active', labelKey: 'merchant.orders.active.title' },
+  { key: 'completed', labelKey: 'merchant.orders.status.COMPLETED' },
 ];
 
-function OrderCard({ order, onMarkReady, t }: { order: Order; onMarkReady: (id: string) => void; t: (key: string) => string }) {
-  const { colors } = useTheme();
+const OrderCard = React.memo(({ order, onMarkReady, t, colors }: { 
+  order: Order; 
+  onMarkReady: (id: string) => void; 
+  t: (key: string, options?: any) => string;
+  colors: AppColors;
+}) => {
   const isPreparing = order.status === OrderStatus.ACCEPTED;
   const isCustom = order.type === OrderType.CUSTOM;
 
@@ -29,35 +34,44 @@ function OrderCard({ order, onMarkReady, t }: { order: Order; onMarkReady: (id: 
         <View style={{ flexDirection: 'row', gap: 6 }}>
           {isCustom && <Badge label={t('orders.custom_order')} variant="warning" size="sm" />}
           <Badge
-            label={order.paymentMethod === 'CASH' ? t('driver.cash_payment') : t('driver.wallet_payment')}
+            label={order.paymentMethod === 'CASH' ? t('merchant.orders.incoming.paymentCash') : t('merchant.orders.incoming.paymentWallet')}
             variant="neutral" size="sm"
           />
         </View>
       </View>
       <Text variant="body2" color={colors.textSecondary}>
-        {order.items?.map((i) => `${i.quantity}× ${i.productName}`).join(', ') ?? order.itemsDescription}
+        {order.items?.map((i: any) => `${i.quantity}× ${i.productName}`).join(', ') ?? order.itemsDescription}
       </Text>
       <View style={styles.cardFooter}>
-        <Text variant="label" color={colors.primary}>{order.total} {t('common.egp')}</Text>
+        <Text variant="label" color={colors.primary}>{order.total} {t('merchant.common.currency')}</Text>
         {isPreparing && (
-          <Button label={t('merchant_app.mark_ready')} onPress={() => onMarkReady(order.id)} size="sm" variant="outline" />
+          <Button label={t('merchant.orders.active.markReady')} onPress={() => onMarkReady(order.id)} size="sm" variant="outline" />
         )}
       </View>
     </View>
   );
-}
+});
 
 export function MerchantOrdersScreen() {
   const { colors } = useTheme();
   const ctrl = useController();
 
+  const renderItem = React.useCallback(({ item }: { item: Order }) => (
+    <OrderCard 
+      order={item} 
+      onMarkReady={ctrl.handleMarkReady} 
+      t={ctrl.t} 
+      colors={colors}
+    />
+  ), [ctrl.handleMarkReady, ctrl.t, colors]);
+
   return (
     <TabScreenTemplate>
-      <Header title={ctrl.t('orders.title')} />
+      <Header title={ctrl.t('merchant.tabs.orders')} />
 
       {/* Tab bar */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.tabBar}>
+        contentContainerStyle={[styles.tabBar, { borderBottomColor: colors.border }]}>
         {TABS.map((tab) => (
           <TouchableOpacity
             key={tab.key}
@@ -74,14 +88,12 @@ export function MerchantOrdersScreen() {
       {/* Order list */}
       <FlatList<Order>
         data={ctrl.orders}
-        renderItem={({ item }) => (
-          <OrderCard order={item} onMarkReady={ctrl.handleMarkReady} t={ctrl.t} />
-        )}
+        renderItem={renderItem}
         keyExtractor={(item) => item.id}
         onRefresh={ctrl.refetch}
         refreshing={false}
-        ListEmptyComponent={<EmptyState icon="clipboard-list-outline" title={ctrl.t('orders.empty_active')} />}
-        contentContainerStyle={{ padding: space[2], flexGrow: 1 }}
+        ListEmptyComponent={<EmptyState icon="clipboard-list-outline" title={ctrl.t('merchant.orders.active.empty')} />}
+        contentContainerStyle={{ paddingBottom: space.xl, flexGrow: 1 }}
         removeClippedSubviews
         windowSize={5}
         maxToRenderPerBatch={8}
@@ -101,10 +113,10 @@ export function MerchantOrdersScreen() {
 }
 
 const styles = StyleSheet.create({
-  tabBar: { paddingHorizontal: space[2], borderBottomWidth: 1 },
+  tabBar: { paddingHorizontal: space.md, borderBottomWidth: 1 },
   tab: { paddingHorizontal: space.md, paddingVertical: space.md },
   card: {
-    margin: space[2], borderWidth: 1,
+    margin: space.md, borderWidth: 1,
     borderRadius: 12, padding: space.md, gap: 8,
   },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },

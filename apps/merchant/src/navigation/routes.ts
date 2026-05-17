@@ -1,6 +1,8 @@
 export const AUTH_ROUTES = {
   PHONE: 'PhoneScreen', OTP: 'OtpScreen',
-  ROLE: 'RoleScreen', PENDING: 'PendingApprovalScreen',
+  PENDING: 'PendingApprovalScreen',
+  REJECTED: 'RejectedScreen',
+  CREATE_STORE: 'CreateStoreScreen',
 } as const;
 
 export const TAB_ROUTES = {
