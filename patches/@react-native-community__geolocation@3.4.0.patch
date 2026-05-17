@@ -1,0 +1,72 @@
+diff --git a/android/build.gradle b/android/build.gradle
+index aab4a31b1f5332d33e5dab720d71ede81d8f16b3..118b79ed8828ac8409ad53833b3839640df063e4 100644
+--- a/android/build.gradle
++++ b/android/build.gradle
+@@ -1,11 +1,16 @@
+-buildscript {
+-  repositories {
+-    google()
+-    mavenCentral()
+-  }
++// Patched for Dawwar / RN 0.84: legacy buildscript AGP 3.5.3 breaks configuration when this
++// library is a subproject. Wrong default react-native path (extra node_modules segment) breaks
++// monorepo hoisting. react-native:+ is replaced with react-android.
+ 
+-  dependencies {
+-    classpath 'com.android.tools.build:gradle:3.5.3'
++buildscript {
++  if (project == rootProject) {
++    repositories {
++      google()
++      mavenCentral()
++    }
++    dependencies {
++      classpath("com.android.tools.build:gradle")
++    }
+   }
+ }
+ 
+@@ -14,11 +19,22 @@ def getExtOrDefault(name) {
+ }
+ 
+ def getExtOrIntegerDefault(name) {
+-  return rootProject.ext.has(name) ? rootProject.ext.get(name) : (project.properties['RNCGeolocation_' + name]).toInteger()
++  if (rootProject.ext.has(name)) {
++    return rootProject.ext.get(name) as Integer
++  }
++  def prop = project.findProperty('RNCGeolocation_' + name)
++  if (prop != null) {
++    return prop.toString().toInteger()
++  }
++  return 35
+ }
+ 
+ def isNewArchitectureEnabled() {
+-  return rootProject.hasProperty("newArchEnabled") &&  rootProject.getProperty("newArchEnabled") == "true"
++  def v = project.findProperty('newArchEnabled')
++  if (v == null && project != rootProject) {
++    v = rootProject.findProperty('newArchEnabled')
++  }
++  return v == 'true' || v == true
+ }
+ 
+ apply plugin: 'com.android.library'
+@@ -78,7 +94,7 @@ repositories {
+   } else {
+     defaultDir = new File(
+       projectDir,
+-      '/../../../node_modules/react-native/android'
++      '../../../react-native/android'
+     )
+   }
+ 
+@@ -136,8 +152,7 @@ repositories {
+ }
+ 
+ dependencies {
+-  //noinspection GradleDynamicVersion
+-  implementation 'com.facebook.react:react-native:+'
++  implementation("com.facebook.react:react-android")
+   implementation 'com.google.android.gms:play-services-location:21.0.1'
+ }
+ 

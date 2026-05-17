@@ -6,6 +6,8 @@ buildscript {
         targetSdkVersion = 36
         ndkVersion = "27.1.12297006"
         kotlinVersion = "2.1.20"
+        newArchEnabled = true
+        hermesEnabled = true
     }
     repositories {
         google()
@@ -21,6 +23,16 @@ buildscript {
 }
 
 apply plugin: "com.facebook.react.rootproject"
+
+allprojects {
+    project.ext.set("newArchEnabled", "true")
+    project.ext.set("hermesEnabled", "true")
+
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
 
 subprojects {
     project.configurations.all {
