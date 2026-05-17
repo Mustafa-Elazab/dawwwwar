@@ -6,6 +6,7 @@ import { MerchantEntity } from './merchant.entity';
 export enum OrderStatus {
   PENDING = 'PENDING',
   ACCEPTED = 'ACCEPTED',
+  READY = 'READY',
   DRIVER_ASSIGNED = 'DRIVER_ASSIGNED',
   AT_SHOP = 'AT_SHOP',
   SHOPPING = 'SHOPPING',
@@ -33,6 +34,7 @@ export enum PaymentMethod {
 @Index(['merchantId'])
 @Index(['driverId'])
 @Index(['status'])
+@Index(['driverId', 'status'])
 export class OrderEntity extends BaseEntity {
   @Column({ name: 'order_number', unique: true })
   orderNumber: string;
@@ -56,7 +58,7 @@ export class OrderEntity extends BaseEntity {
   driver?: UserEntity;
 
   @Column({ name: 'driver_id', nullable: true })
-  driverId?: string;
+  driverId?: string | null;
 
   @Column({ type: 'enum', enum: OrderType, default: OrderType.REGULAR })
   type: OrderType;
@@ -144,7 +146,7 @@ export class OrderEntity extends BaseEntity {
   acceptedAt?: Date;
 
   @Column({ name: 'assigned_at', type: 'timestamptz', nullable: true })
-  assignedAt?: Date;
+  assignedAt?: Date | null;
 
   @Column({ name: 'picked_up_at', type: 'timestamptz', nullable: true })
   pickedUpAt?: Date;

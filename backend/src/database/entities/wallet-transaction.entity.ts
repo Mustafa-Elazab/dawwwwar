@@ -9,9 +9,11 @@ export enum TransactionType {
 
 export enum TransactionReason {
   ORDER_PAYMENT = 'ORDER_PAYMENT',
+  DELIVERY_FEE = 'DELIVERY_FEE',
   COMMISSION_DEDUCTION = 'COMMISSION_DEDUCTION',
   WALLET_RECHARGE = 'WALLET_RECHARGE',
   REFUND = 'REFUND',
+  WITHDRAWAL = 'WITHDRAWAL',
   ADJUSTMENT = 'ADJUSTMENT',
   TIP = 'TIP',
 }
@@ -40,6 +42,9 @@ export class WalletTransactionEntity extends BaseEntity {
 
   @Column({ nullable: true })
   description?: string;
+
+  @Column({ name: 'reference_id', nullable: true, unique: true })
+  referenceId?: string;
 
   @Column({ name: 'balance_before', type: 'decimal', precision: 12, scale: 2 })
   balanceBefore: number;

@@ -1,0 +1,123 @@
+version: '3.9'
+
+services:
+  # ─── Database ──────────────────────────────────────────────────────
+  postgres:
+    image: postgis/postgis:16-3.4-alpine
+    container_name: dawwar_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USERNAME:-dawwar}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_DATABASE:-dawwar_db}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infra/postgres/init:/docker-entrypoint-initdb.d
+    networks:
+      - dawwar_network
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $${DB_USERNAME:-dawwar} -d $${DB_DATABASE:-dawwar_db}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── Redis ─────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: dawwar_redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - dawwar_network
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── NestJS API ────────────────────────────────────────────────────
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: dawwar_api
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      # Database
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: ${DB_USERNAME:-dawwar}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_DATABASE: ${DB_DATABASE:-dawwar_db}
+      # Redis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      # Sockets
+      REDIS_PUB_SUB_ENABLED: 'true'
+      # Other
+      JWT_SECRET: ${JWT_SECRET}
+      API_PREFIX: api/v1
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - dawwar_network
+
+  # ─── BullMQ Worker ─────────────────────────────────────────────────
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: dawwar_worker
+    restart: unless-stopped
+    command: ["node", "dist/main", "--worker"] # We'll handle this flag in main.ts
+    environment:
+      NODE_ENV: production
+      IS_WORKER: 'true'
+      # Database
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: ${DB_USERNAME:-dawwar}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_DATABASE: ${DB_DATABASE:-dawwar_db}
+      # Redis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - dawwar_network
+
+  # ─── Reverse Proxy (Nginx) ─────────────────────────────────────────
+  nginx:
+    image: nginx:alpine
+    container_name: dawwar_nginx
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./infra/nginx/templates:/etc/nginx/templates:ro
+      - ./infra/nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./infra/nginx/certs:/etc/nginx/certs:ro
+    depends_on:
+      - api
+    networks:
+      - dawwar_network
+
+networks:
+  dawwar_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:

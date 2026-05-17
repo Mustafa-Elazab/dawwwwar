@@ -36,6 +36,12 @@ export class MerchantEntity extends BaseEntity {
   @Column({ name: 'business_name' })
   businessName: string;
 
+  @Column({ nullable: true, length: 100 })
+  city: string;
+
+  @Column({ nullable: true, length: 100 })
+  governorate: string;
+
   @Column()
   category: string;
 

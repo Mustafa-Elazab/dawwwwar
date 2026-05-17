@@ -14,6 +14,9 @@ export class WalletEntity extends BaseEntity {
   @Column({ type: 'decimal', precision: 12, scale: 2, default: 0 })
   balance: number;
 
+  @Column({ name: 'pending_withdrawal', type: 'decimal', precision: 12, scale: 2, default: 0 })
+  pendingWithdrawal: number;
+
   @Column({ default: 'EGP' })
   currency: string;
 

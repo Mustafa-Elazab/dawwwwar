@@ -41,6 +41,21 @@ export class DriverProfileEntity extends BaseEntity {
   @Column({ name: 'last_location_update', type: 'timestamptz', nullable: true })
   lastLocationUpdate?: Date;
 
+  @Column({ name: 'last_sequence_number', default: 0 })
+  lastSequenceNumber: number;
+
+  @Column({ name: 'current_accuracy', type: 'decimal', precision: 6, scale: 2, nullable: true })
+  currentAccuracy?: number;
+
+  @Column({ name: 'current_speed', type: 'decimal', precision: 6, scale: 2, nullable: true })
+  currentSpeed?: number;
+
+  @Column({ name: 'battery_level', type: 'decimal', precision: 3, scale: 2, nullable: true })
+  batteryLevel?: number;
+
+  @Column({ name: 'last_app_state', nullable: true })
+  lastAppState?: string;
+
   @Column({ type: 'decimal', precision: 3, scale: 1, default: 0.0 })
   rating: number;
 
