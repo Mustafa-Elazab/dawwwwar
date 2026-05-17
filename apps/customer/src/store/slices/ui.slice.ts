@@ -2,7 +2,7 @@ import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import { storage, StorageKeys } from '../../core/storage/mmkv';
 import { ThemeMode, Language } from '@dawwar/types';
 
-interface UiState {
+export interface UiState {
   themeMode: ThemeMode;
   language: Language;
 }

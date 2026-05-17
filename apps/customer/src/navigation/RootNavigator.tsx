@@ -4,57 +4,50 @@ import { useAppSelector } from '../store/hooks';
 import {
   selectIsAuthenticated,
   selectIsLoading,
-  selectRole,
-  selectIsApproved,
+  selectUser,
 } from '../store/slices/auth.slice';
 import { AuthNavigator } from './AuthNavigator';
 import { CustomerTabs } from './CustomerTabs';
-import { CartModal, CheckoutModal, CustomOrderModal, PendingApprovalScreen } from './placeholders';
+import { CartModal, CheckoutModal, CustomOrderModal } from './placeholders';
 import { MODAL_ROUTES } from './routes';
 import type { RootParamList } from './types';
-import { LoadingSpinner } from '@dawwar/ui';
-import { Role } from '@dawwar/types';
+import { CompleteProfileScreen } from '../features/auth/screens/CompleteProfileScreen';
+import { JS_SplashScreen } from '../features/auth/components/SplashScreen';
 
 const Root = createStackNavigator<RootParamList>();
 
 export function RootNavigator() {
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const isLoading = useAppSelector(selectIsLoading);
-  const role = useAppSelector(selectRole);
-  const isApproved = useAppSelector(selectIsApproved);
+  const user = useAppSelector(selectUser);
+
+  const hasName = !!user?.name;
 
   // Debug logging
   useEffect(() => {
     console.log('[RootNavigator] Auth state:', {
       isAuthenticated,
       isLoading,
-      role,
-      isApproved,
+      hasName,
     });
-  }, [isAuthenticated, isLoading, role, isApproved]);
-
-  console.log('[RootNavigator] Rendering with:', { isAuthenticated, isLoading, role, isApproved });
+  }, [isAuthenticated, isLoading, hasName]);
 
   // Show loading while session is being restored
   if (isLoading) {
-    console.log('[RootNavigator] Showing LoadingSpinner');
-    return <LoadingSpinner fullscreen message="Loading..." />;
+    return <JS_SplashScreen />;
   }
 
-  // Not authenticated → show auth flow
+  // Not authenticated → show auth flow (Phone -> OTP)
   if (!isAuthenticated) {
     return <AuthNavigator />;
   }
 
-  // Authenticated but awaiting approval
-  if (
-    (role === Role.MERCHANT || role === Role.DRIVER) &&
-    !isApproved
-  ) {
-    return <PendingApprovalScreen />;
+  // Authenticated but missing name → Complete Profile
+  if (!hasName) {
+    return <CompleteProfileScreen />;
   }
 
-  // Authenticated and approved (or CUSTOMER role — no approval needed)
+  // Authenticated and has name → Main App
   return (
     <Root.Navigator screenOptions={{ headerShown: false, presentation: 'modal' }}>
       <Root.Screen name="CustomerTabs" component={CustomerTabs} />

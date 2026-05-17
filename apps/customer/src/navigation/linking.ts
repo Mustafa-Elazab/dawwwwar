@@ -1,5 +1,6 @@
 import type { LinkingOptions } from '@react-navigation/native';
 import type { RootParamList } from './types';
+import { MODAL_ROUTES } from './routes';
 
 export const linking: LinkingOptions<RootParamList> = {
   prefixes: ['dawwar://', 'https://dawwar.com'],
@@ -20,6 +21,9 @@ export const linking: LinkingOptions<RootParamList> = {
           },
         },
       },
+      [MODAL_ROUTES.CART]: 'cart',
+      [MODAL_ROUTES.CHECKOUT]: 'checkout',
+      [MODAL_ROUTES.CUSTOM_ORDER]: 'custom-order',
     },
   },
 };

@@ -1,19 +1,20 @@
 import React, { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Provider as ReduxProvider } from 'react-redux';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from '@dawwar/theme';
-import { initI18n, getStoredLanguage } from '@dawwar/i18n';
+import { getStoredLanguage } from '@dawwar/i18n';
 import Toast from 'react-native-toast-message';
 import { AppErrorBoundary } from '@dawwar/ui';
-import { store } from '../store';
+import { ApiClientProvider } from '@dawwar/api-client';
+import { store, persistor } from '../store';
 import { storage, StorageKeys } from '../core/storage/mmkv';
-import { finishLoading } from '../store/slices/auth.slice';
-
-// Initialize i18n before the component tree renders
-const storedLang = getStoredLanguage(storage);
-initI18n(storedLang);
+import { finishLoading, setUser, setGuestMode } from '../store/slices/auth.slice';
+import { api } from '../core/api/client';
+import { authApi } from '../features/auth/core/api';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { PersistGate } from 'redux-persist/integration/react';
+import logger from '../utils/logger';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -43,35 +44,50 @@ interface AppProvidersProps {
 
 export function AppProviders({ children }: AppProvidersProps) {
   useEffect(() => {
-    console.log('[AppProviders] Mounted');
-    // Try to restore session from MMKV on app launch
-    const hasToken = !!storage.getString(StorageKeys.ACCESS_TOKEN);
-    console.log('[AppProviders] Has token:', hasToken);
-    if (!hasToken) {
-      // No token — not authenticated, stop loading
-      console.log('[AppProviders] No token, dispatching finishLoading');
-      store.dispatch(finishLoading());
-    }
-    // If token exists, RootNavigator will handle validation
-    // For Phase 1 (mock): we just trust the token is valid
-    if (hasToken) {
-      console.log('[AppProviders] Has token, dispatching finishLoading');
-      store.dispatch(finishLoading());
-    }
+    logger.log('[AppProviders] Mounted');
+
+    const restoreSession = async () => {
+      const token = storage.getString(StorageKeys.ACCESS_TOKEN);
+      logger.log('[AppProviders] Token exists:', !!token);
+
+      if (!token) {
+        store.dispatch(setGuestMode());
+        return;
+      }
+
+      try {
+        const res = await authApi.getMe();
+        if (res.success && res.data) {
+          store.dispatch(setUser(res.data));
+        } else {
+          store.dispatch(setGuestMode());
+        }
+      } catch (err: unknown) {
+        logger.error('[AppProviders] restoreSession error:', err);
+        // On error (e.g. token expired), fall back to guest mode
+        store.dispatch(setGuestMode());
+      }
+    };
+
+    void restoreSession();
   }, []);
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <AppErrorBoundary>
         <ReduxProvider store={store}>
-          <QueryClientProvider client={queryClient}>
-            <ThemeProvider storage={storage}>
-              <SafeAreaProvider>
-                {children}
-                <Toast />
-              </SafeAreaProvider>
-            </ThemeProvider>
-          </QueryClientProvider>
+          <PersistGate loading={null} persistor={persistor}>
+            <QueryClientProvider client={queryClient}>
+              <ApiClientProvider client={api}>
+                <ThemeProvider storage={storage}>
+                  <SafeAreaProvider>
+                    {children}
+                    <Toast />
+                  </SafeAreaProvider>
+                </ThemeProvider>
+              </ApiClientProvider>
+            </QueryClientProvider>
+          </PersistGate>
         </ReduxProvider>
       </AppErrorBoundary>
     </GestureHandlerRootView>

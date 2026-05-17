@@ -1,15 +1,9 @@
 // ─── Auth Stack ──────────────────────────────────────────
 export const AUTH_ROUTES = {
-  AUTH_SELECTION: 'AuthSelectionScreen',
-  LOGIN: 'LoginScreen',
-  REGISTER: 'RegisterScreen',
-  OTP: 'OtpScreen',
+  SPLASH: 'SplashScreen',
   PHONE: 'PhoneScreen',
-  ROLE: 'RoleScreen',
-  CUSTOMER_ONBOARDING: 'CustomerOnboardingScreen',
-  MERCHANT_ONBOARDING: 'MerchantOnboardingScreen',
-  DRIVER_ONBOARDING: 'DriverOnboardingScreen',
-  PENDING_APPROVAL: 'PendingApprovalScreen',
+  OTP: 'OtpScreen',
+  COMPLETE_PROFILE: 'CompleteProfileScreen',
 } as const;
 
 // ─── Customer Tab Names ───────────────────────────────────
@@ -17,7 +11,6 @@ export const TAB_ROUTES = {
   HOME_TAB: 'HomeTab',
   CATEGORIES_TAB: 'CategoriesTab',
   ORDERS_TAB: 'OrdersTab',
-  WALLET_TAB: 'WalletTab',
   PROFILE_TAB: 'ProfileTab',
 } as const;
 
@@ -27,6 +20,9 @@ export const HOME_ROUTES = {
   SEARCH: 'SearchScreen',
   CATEGORY_MERCHANTS: 'CategoryMerchantsScreen',
   MERCHANT_DETAIL: 'MerchantDetailScreen',
+  LOCATION_PICKER: 'LocationPickerScreen',
+  NEARBY_MERCHANTS: 'NearbyMerchantsScreen',
+  POPULAR_PRODUCTS: 'PopularProductsScreen',
 } as const;
 
 // ─── Orders Stack ─────────────────────────────────────────
@@ -45,10 +41,14 @@ export const WALLET_ROUTES = {
 // ─── Profile Stack ────────────────────────────────────────
 export const PROFILE_ROUTES = {
   PROFILE: 'ProfileScreen',
+  EDIT_PROFILE: 'EditProfileScreen',
   ADDRESSES: 'AddressesScreen',
   ADD_ADDRESS: 'AddAddressScreen',
   LANGUAGE: 'LanguageScreen',
   APPEARANCE: 'AppearanceScreen',
+  TERMS: 'TermsScreen',
+  PRIVACY: 'PrivacyScreen',
+  NOTIFICATIONS: 'NotificationsScreen',
 } as const;
 
 // ─── Modals (presented over tabs) ────────────────────────

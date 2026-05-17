@@ -1,5 +1,8 @@
-import { Alert } from 'react-native';
+import { Alert, Platform } from 'react-native';
 import { USE_MOCK_API } from '../core/api/config';
+import Toast from 'react-native-toast-message';
+import api from '../core/api/client';
+import { navigationRef } from '../navigation/navigationRef';
 
 /**
  * Request push notification permission
@@ -12,9 +15,11 @@ export async function requestPushNotificationPermission(): Promise<boolean> {
   try {
     const messaging = await import('@react-native-firebase/messaging');
     const authStatus = await messaging.default().requestPermission();
+    
+    // AuthorizationStatus is an export from the library
     const enabled =
-      authStatus === messaging.default().AuthorizationStatus.AUTHORIZED ||
-      authStatus === messaging.default().AuthorizationStatus.PROVISIONAL;
+      authStatus === (messaging as any).AuthorizationStatus.AUTHORIZED ||
+      authStatus === (messaging as any).AuthorizationStatus.PROVISIONAL;
 
     console.log('[FCM] Push notification permission:', enabled ? 'granted' : 'denied');
     return enabled;
@@ -41,6 +46,22 @@ export async function getFcmToken(): Promise<string | null> {
 }
 
 /**
+ * Setup token refresh handler
+ */
+export function setupTokenRefresh(): void {
+  if (USE_MOCK_API) return;
+  import('@react-native-firebase/messaging').then((messaging) => {
+    messaging.default().onTokenRefresh(async (newToken) => {
+      try {
+        await api.post('/users/fcm-token', { token: newToken, platform: Platform.OS });
+      } catch (err) {
+        console.warn('Failed to refresh FCM token', err);
+      }
+    });
+  });
+}
+
+/**
  * Setup foreground notification handler
  * Shows in-app alert when notification arrives while app is open
  */
@@ -57,19 +78,20 @@ export function setupForegroundNotifications(): void {
         const body = remoteMessage.notification?.body ?? '';
         const data = remoteMessage.data;
 
-        // Show in-app alert
-        Alert.alert(title, body, [
-          { text: 'Dismiss', style: 'cancel' },
-          data?.orderId
-            ? { text: 'View', onPress: () => handleNotificationTap(data) }
-            : { text: 'OK', style: 'default' },
-        ]);
+        // Show in-app toast
+        Toast.show({
+          type: 'info',
+          text1: title,
+          text2: body,
+          onPress: () => data?.orderId && handleNotificationTap(data as Record<string, string>),
+          visibilityTime: 5000,
+        });
       });
 
       // Handle notification tap when app was in background
       messaging.default().onNotificationOpenedApp((remoteMessage) => {
         console.log('[FCM] Notification opened app:', remoteMessage);
-        handleNotificationTap(remoteMessage.data);
+        handleNotificationTap(remoteMessage.data as Record<string, string>);
       });
 
       // Check if app was opened from notification (killed state)
@@ -79,7 +101,7 @@ export function setupForegroundNotifications(): void {
         .then((remoteMessage) => {
           if (remoteMessage) {
             console.log('[FCM] App opened from quit state:', remoteMessage);
-            handleNotificationTap(remoteMessage.data);
+            handleNotificationTap(remoteMessage.data as Record<string, string>);
           }
         });
 
@@ -94,7 +116,7 @@ export function setupForegroundNotifications(): void {
  * Handle notification tap - navigate to relevant screen
  */
 function handleNotificationTap(data?: Record<string, string>): void {
-  if (!data) return;
+  if (!data || !navigationRef.isReady()) return;
 
   const { type, orderId } = data;
 
@@ -104,9 +126,11 @@ function handleNotificationTap(data?: Record<string, string>): void {
     case 'DRIVER_ASSIGNED':
     case 'ORDER_REJECTED':
       if (orderId) {
-        // Navigate to order details
-        // This will be handled by navigation linking/deep linking
-        console.log('[FCM] Navigate to order:', orderId);
+        // Navigate to order details using tracking screen
+        navigationRef.navigate('CustomerTabs', {
+          screen: 'OrdersTab',
+          params: { screen: 'TrackingScreen', params: { orderId } }
+        });
       }
       break;
     default:
