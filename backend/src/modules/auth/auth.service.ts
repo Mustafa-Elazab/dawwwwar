@@ -53,7 +53,7 @@ export class AuthService {
     // Create user if first time
     let user = await this.userRepo.findOne({ where: { phone } });
     if (!user) {
-      user = this.userRepo.create({ phone, name: phone, role: UserRole.CUSTOMER });
+      user = this.userRepo.create({ phone, name: '', role: UserRole.CUSTOMER });
       user = await this.userRepo.save(user);
 
       // Create wallet for new user

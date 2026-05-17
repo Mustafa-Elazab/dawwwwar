@@ -9,17 +9,13 @@ import {
   WebSocketServer,
   WsException,
 } from '@nestjs/websockets';
-import { Logger, UseGuards } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { Server, Socket } from 'socket.io';
-import { WsJwtGuard } from './ws-jwt.guard';
 import { SOCKET_EVENTS, Rooms } from './events';
 import { GatewayService } from './gateway.service';
-import { ChatService } from '../chat/chat.service';
-import { SenderRole } from '../../database/entities/chat-message.entity';
 import type { JwtPayload } from '../auth/jwt.strategy';
-import { Inject, forwardRef } from '@nestjs/common';
 
 @WebSocketGateway({
   cors: {
@@ -39,8 +35,6 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     private readonly jwtService: JwtService,
     private readonly config: ConfigService,
     private readonly gatewayService: GatewayService,
-    @Inject(forwardRef(() => ChatService))
-    private readonly chatService: ChatService,
   ) {}
 
   afterInit(server: Server) {
@@ -77,6 +71,10 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
 
   handleDisconnect(client: Socket) {
     this.logger.log(`Client disconnected: ${client.id}`);
+    const user = client.data['user'] as JwtPayload | undefined;
+    if (user) {
+      this.driverLocationLastUpdate.delete(user.sub);
+    }
   }
 
   // ── Join/Leave order room ─────────────────────────────────────────
@@ -95,6 +93,8 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     void client.leave(Rooms.order(data.orderId));
     return { left: true };
   }
+
+  private driverLocationLastUpdate = new Map<string, number>();
 
   // ── Join merchant room ────────────────────────────────────────────
   @SubscribeMessage(SOCKET_EVENTS.JOIN_MERCHANT_ROOM)
@@ -116,6 +116,15 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     const user = client.data['user'] as JwtPayload | undefined;
     if (!user) throw new WsException('Not authenticated');
 
+    const now = Date.now();
+    const lastUpdate = this.driverLocationLastUpdate.get(user.sub) || 0;
+    
+    // Throttle location updates to at most once per 2 seconds per driver
+    if (now - lastUpdate < 2000) {
+      return { received: false, reason: 'throttled' };
+    }
+    this.driverLocationLastUpdate.set(user.sub, now);
+
     // Broadcast to the active order room so the customer tracking map updates
     if (data.orderId) {
       this.server.to(Rooms.order(data.orderId)).emit(SOCKET_EVENTS.DRIVER_LOCATION, {
@@ -124,56 +133,13 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
         latitude: data.latitude,
         longitude: data.longitude,
         heading: data.heading,
-        timestamp: Date.now(),
+        timestamp: now,
       });
     }
 
+    // Clean up memory periodically or just let it live (it's small, map of string -> number)
+
     // No ack needed — fire and forget
     return { received: true };
-  }
-
-  // ── Chat messages ─────────────────────────────────────────────────
-  @SubscribeMessage(SOCKET_EVENTS.CHAT_SEND)
-  async handleChatMessage(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() data: { orderId: string; message: string; senderRole: string },
-  ) {
-    const user = client.data['user'] as JwtPayload | undefined;
-    if (!user) throw new WsException('Not authenticated');
-
-    try {
-      const savedMessage = await this.chatService.saveMessage(
-        data.orderId,
-        user.sub,
-        data.senderRole as SenderRole,
-        data.message,
-      );
-
-      // Broadcast to everyone in the order room (including the sender)
-      this.server.to(Rooms.order(data.orderId)).emit(SOCKET_EVENTS.CHAT_MESSAGE, savedMessage);
-
-      return { sent: true };
-    } catch (err: unknown) {
-      this.logger.error(`Failed to send chat message for order ${data.orderId}`, err);
-      throw new WsException('Failed to send message');
-    }
-  }
-
-  // ── Chat mark as read ─────────────────────────────────────────────
-  @SubscribeMessage(SOCKET_EVENTS.CHAT_READ)
-  async handleChatRead(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() data: { orderId: string },
-  ) {
-    const user = client.data['user'] as JwtPayload | undefined;
-    if (!user) throw new WsException('Not authenticated');
-
-    try {
-      await this.chatService.markRead(data.orderId, user.sub);
-      return { read: true };
-    } catch (err: unknown) {
-      this.logger.error(`Failed to mark chat as read for order ${data.orderId}`, err);
-      return { read: false };
-    }
   }
 }

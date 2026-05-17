@@ -28,11 +28,20 @@ export class GatewayService {
       .emit(SOCKET_EVENTS.MERCHANT_ORDER_ALERT, { order });
   }
 
+  /** Notify all online drivers of a new available order */
+  broadcastToDrivers(event: string, data: any) {
+    this.server?.emit(event, data); // For now, broadcast to all. Later, filter by location.
+  }
+
   /** Notify everyone in the order room of a status change */
-  notifyOrderStatusChanged(orderId: string, status: string, order: unknown) {
-    this.server
-      ?.to(Rooms.order(orderId))
-      .emit(SOCKET_EVENTS.ORDER_STATUS_CHANGED, { orderId, status, order });
+  notifyOrderStatusChanged(orderId: string, status: string, order: any) {
+    const orderRoom = Rooms.order(orderId);
+    this.server?.to(orderRoom).emit(SOCKET_EVENTS.ORDER_STATUS_CHANGED, { orderId, status, order });
+
+    // Also notify merchant specifically if available
+    if (order.merchantId) {
+      this.server?.to(Rooms.merchant(order.merchantId)).emit(SOCKET_EVENTS.ORDER_STATUS_CHANGED, { orderId, status, order });
+    }
   }
 
   /** Notify customer that a driver was assigned */

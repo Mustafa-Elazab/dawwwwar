@@ -12,7 +12,8 @@ export class ChatController {
 
   @Get(':orderId')
   @ApiOperation({ summary: 'Get chat history for an order' })
-  getHistory(@Param('orderId') orderId: string, @CurrentUser() user: UserEntity) {
-    return this.chatService.getHistory(orderId, user.id);
+  async getHistory(@Param('orderId') orderId: string, @CurrentUser() user: UserEntity) {
+    const conversation = await this.chatService.getOrCreateConversation(orderId, user);
+    return this.chatService.getMessages(conversation.id);
   }
 }

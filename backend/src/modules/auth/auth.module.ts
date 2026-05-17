@@ -17,6 +17,6 @@ import { WalletEntity } from '../../database/entities/wallet.entity';
   ],
   controllers: [AuthController],
   providers: [AuthService, OtpService, JwtStrategy],
-  exports: [AuthService],
+  exports: [AuthService, JwtModule],
 })
 export class AuthModule {}
