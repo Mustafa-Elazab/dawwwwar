@@ -1,25 +1,26 @@
 import { StyleSheet } from 'react-native';
 import type { AppColors } from '@dawwar/theme';
-import { space, radius, shadows } from '@dawwar/theme';
+import { space, typography, radius, shadows } from '@dawwar/theme';
 
 export const createStyles = (colors: AppColors) =>
   StyleSheet.create({
     fab: {
       position: 'absolute',
-      bottom: space.xl,
+      bottom: space.xl + 65, // Positioned above bottom tab bar
       right: space.base,
       flexDirection: 'row',
       alignItems: 'center',
       backgroundColor: colors.primary,
-      borderRadius: radius.full,
-      paddingHorizontal: space.base,
+      paddingHorizontal: space.lg,
       paddingVertical: space.md,
-      gap: space.sm,
+      borderRadius: radius.full,
       ...shadows.lg,
+      elevation: 6,
+      gap: space.xs,
     },
     label: {
+      ...typography.label,
       color: '#fff',
-      fontWeight: '700',
-      fontSize: 14,
+      fontWeight: '800',
     },
   });

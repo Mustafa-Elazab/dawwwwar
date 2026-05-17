@@ -1,21 +1,45 @@
 import React from 'react';
-import { TouchableOpacity } from 'react-native';
+import { View, TouchableOpacity } from 'react-native';
 import { useTheme } from '@dawwar/theme';
+import { useTranslation } from '@dawwar/i18n';
 import { Text } from '@dawwar/ui';
 import { createStyles } from './styles';
 import type { CategoryCardProps } from './types';
 
-export function CategoryCard({ category, merchantCount, onPress }: CategoryCardProps) {
+const PASTEL_PALETTE = [
+  { bg: '#E8F5E9', border: '#C8E6C9' }, // Green
+  { bg: '#FFF3E0', border: '#FFE0B2' }, // Orange
+  { bg: '#E3F2FD', border: '#BBDEFB' }, // Blue
+  { bg: '#FCE4EC', border: '#F8BBD0' }, // Pink
+  { bg: '#F3E5F5', border: '#E1BEE7' }, // Purple
+  { bg: '#FFFDE7', border: '#FFF9C4' }, // Yellow
+  { bg: '#E0F2F1', border: '#B2DFDB' }, // Teal
+  { bg: '#EFEBE9', border: '#D7CCC8' }, // Brown
+];
+
+export const CategoryCard = React.memo(function CategoryCard({ category, merchantCount, onPress }: CategoryCardProps) {
   const { colors } = useTheme();
-  const styles = createStyles(colors);
+  const { i18n } = useTranslation();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
+
+  const displayName = i18n.language.startsWith('ar')
+    ? category.nameAr || category.name
+    : category.name || category.nameAr;
+  
+  // Use a rotating palette based on the category ID (or just hash it)
+  const colorIndex = parseInt(category.id.replace(/\D/g, '') || '0', 10) % PASTEL_PALETTE.length;
+  const tints = PASTEL_PALETTE[colorIndex] || PASTEL_PALETTE[0];
 
   return (
-    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.85}>
-      <Text style={styles.emoji}>{category.icon}</Text>
-      <Text style={styles.name}>{category.nameAr}</Text>
-      {merchantCount !== undefined && (
-        <Text style={styles.count}>{merchantCount}</Text>
-      )}
+    <TouchableOpacity 
+      style={[styles.card, { backgroundColor: tints.bg, borderColor: tints.border }]} 
+      onPress={onPress} 
+      activeOpacity={0.85}
+    >
+      <View style={styles.iconCircle}>
+        <Text style={styles.emoji}>{category.icon}</Text>
+      </View>
+      <Text style={styles.name} numberOfLines={1}>{displayName}</Text>
     </TouchableOpacity>
   );
-}
+});

@@ -1,42 +1,68 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, I18nManager } from 'react-native';
 import type { AppColors } from '@dawwar/theme';
 import { space, typography, radius, shadows } from '@dawwar/theme';
 
 export const createStyles = (colors: AppColors) =>
   StyleSheet.create({
     card: {
-      width: 180,
-      borderRadius: radius.xl,
-      backgroundColor: colors.card,
-      marginEnd: space.md,
+      borderRadius: 12,
+      backgroundColor: colors.surface,
       overflow: 'hidden',
-      ...shadows.md,
+      borderWidth: 1,
+      borderColor: colors.borderLight,
+      ...shadows.sm,
     },
-    cover: { width: '100%', height: 100 },
-    body: { padding: space.sm },
+    coverContainer: {
+      height: 120,
+      width: '100%',
+      position: 'relative',
+    },
+    cover: {
+      width: '100%',
+      height: '100%',
+      backgroundColor: colors.surfaceVariant,
+    },
+    gradient: {
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      height: '40%',
+      backgroundColor: 'rgba(0,0,0,0.1)',
+    },
+    badgeOverlay: {
+      position: 'absolute',
+      top: 8,
+      start: 8,
+    },
+    body: {
+      padding: space.sm,
+    },
     name: {
-      ...typography.label,
+      ...typography.body1,
+      fontSize: 15,
       color: colors.text,
+      fontWeight: '800',
       marginBottom: 2,
+      textAlign: 'auto',
     },
     metaRow: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 4,
-      flexWrap: 'wrap',
     },
-    metaText: {
-      ...typography.caption,
-      color: colors.textSecondary,
+    ratingRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 2,
     },
     ratingText: {
       ...typography.caption,
       color: colors.warning,
-      fontWeight: '600',
+      fontWeight: '800',
     },
-    badgeWrapper: {
-      position: 'absolute',
-      top: space.sm,
-      end: space.sm,
+    metaText: {
+      ...typography.caption,
+      color: colors.textSecondary,
     },
   });

@@ -18,12 +18,12 @@ export function SectionHeader({ title, onSeeAll }: SectionHeaderProps) {
     <View
       style={[styles.row, { paddingHorizontal: space.base, marginBottom: space.md }]}
     >
-      <Text variant="h4" color={colors.text}>
+      <Text variant="h4" color={colors.text} style={{ textAlign: 'auto' }}>
         {title}
       </Text>
       {onSeeAll != null && (
         <TouchableOpacity onPress={onSeeAll}>
-          <Text variant="label" color={colors.primary}>
+          <Text variant="label" color={colors.primary} style={{ textAlign: 'auto' }}>
             {t('home.see_all')}
           </Text>
         </TouchableOpacity>

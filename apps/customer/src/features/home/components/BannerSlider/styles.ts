@@ -26,5 +26,8 @@ export const createStyles = (colors: AppColors) =>
       borderRadius: 3,
       backgroundColor: colors.border,
     },
-    dotActive: { width: 18, backgroundColor: colors.primary },
+    dotActive: { 
+      width: 20, // 20px wide pill
+      backgroundColor: colors.primary,
+    },
   });

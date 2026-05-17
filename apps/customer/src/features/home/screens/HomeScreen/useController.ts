@@ -1,27 +1,43 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from '@dawwar/i18n';
 import { useAppDispatch, useAppSelector } from '../../../../store/hooks';
 import { addItem } from '../../../../store/slices/cart.slice';
 import { selectUser } from '../../../../store/slices/auth.slice';
-import { useNearbyMerchants, useFeaturedProducts } from '../../core/hooks';
-import { mockMerchants } from '@dawwar/mocks';
-import { HOME_ROUTES, MODAL_ROUTES } from '../../../../navigation/routes';
+import { selectLocation } from '../../../../store/slices/location.slice';
+import { useNearbyMerchants, useFeaturedProducts, useHomeCategories } from '../../core/hooks';
+import { useHomeDeliveryLocation } from '../../../location/hooks/useHomeDeliveryLocation';
+import { HOME_ROUTES, MODAL_ROUTES, PROFILE_ROUTES } from '../../../../navigation/routes';
 import type { HomeScreenNavProp } from './types';
-import type { Product } from '@dawwar/types';
+import type { Category, Product } from '@dawwar/types';
 
 export function useController() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigation = useNavigation<HomeScreenNavProp>();
   const dispatch = useAppDispatch();
   const user = useAppSelector(selectUser);
+  const location = useAppSelector(selectLocation);
+
+  const delivery = useHomeDeliveryLocation();
+  const [discoveryMode, setDiscoveryMode] = useState<'nearby' | 'allEgypt'>('nearby');
 
   const {
     data: merchants,
     isLoading: merchantsLoading,
-    refetch,
-  } = useNearbyMerchants();
-  const { data: products } = useFeaturedProducts();
+    refetch: refetchMerchants,
+  } = useNearbyMerchants(
+    discoveryMode === 'nearby' ? delivery.merchantLat : undefined,
+    discoveryMode === 'nearby' ? delivery.merchantLng : undefined,
+    discoveryMode === 'allEgypt',
+  );
+  const { data: products } = useFeaturedProducts(delivery.merchantLat, delivery.merchantLng);
+  const {
+    data: categories = [],
+    isLoading: categoriesLoading,
+    refetch: refetchCategories,
+  } = useHomeCategories();
+
+  const [sheetGpsBusy, setSheetGpsBusy] = useState(false);
 
   const handleMerchantPress = useCallback(
     (merchantId: string) => {
@@ -30,29 +46,49 @@ export function useController() {
     [navigation],
   );
 
+  const cartMerchantId = useAppSelector((state: any) => state.cart.merchantId);
+
   const handleProductAdd = useCallback(
     (product: Product) => {
-      const merchant = mockMerchants.find((m) => m.id === product.merchantId);
-      if (!merchant) return;
-      dispatch(
-        addItem({
-          productId: product.id,
-          name: product.name,
-          nameAr: product.nameAr,
-          price: product.price,
-          quantity: 1,
-          image: product.images[0] ?? '',
-          merchantId: merchant.id,
-          merchantName: merchant.businessName,
-        }),
-      );
+      const doAdd = () => {
+        dispatch(
+          addItem({
+            productId: product.id,
+            name: product.name,
+            nameAr: product.nameAr,
+            price: product.price,
+            quantity: 1,
+            image: product.images[0] ?? 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=1000',
+            merchantId: product.merchantId,
+            merchantName: 'Dawwar Merchant', // UI Fallback
+          }),
+        );
+      };
+
+      if (cartMerchantId && cartMerchantId !== product.merchantId) {
+        import('react-native').then(({ Alert }) => {
+          Alert.alert(
+            t('cart.conflict_title', 'Replace Cart?'),
+            t('cart.conflict_body', 'Your cart contains items from another store. Do you want to clear it and add this item?'),
+            [
+              { text: t('common.cancel', 'Cancel'), style: 'cancel' },
+              {
+                text: t('cart.clear_and_add', 'Clear & Add'),
+                style: 'destructive',
+                onPress: doAdd,
+              },
+            ],
+          );
+        });
+        return;
+      }
+
+      doAdd();
     },
-    [dispatch],
+    [dispatch, cartMerchantId, t],
   );
 
   const handleCustomOrder = useCallback(() => {
-    // Navigate to the modal — cast to any because MODAL_ROUTES is in RootParamList
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     navigation.navigate(MODAL_ROUTES.CUSTOM_ORDER as never);
   }, [navigation]);
 
@@ -60,27 +96,73 @@ export function useController() {
     navigation.navigate(HOME_ROUTES.SEARCH, {});
   }, [navigation]);
 
+  const categoryDisplayName = useCallback(
+    (c: Category) => (i18n.language.startsWith('ar') ? c.nameAr || c.name : c.name || c.nameAr),
+    [i18n.language],
+  );
+
   const handleCategoryPress = useCallback(
-    (categoryId: string) => {
+    (categoryId: string, categoryName: string) => {
       navigation.navigate(HOME_ROUTES.CATEGORY_MERCHANTS, {
         categoryId,
-        categoryName: categoryId,
+        categoryName,
       });
     },
     [navigation],
   );
 
+  const handleNotificationsPress = useCallback(() => {
+    navigation.navigate(PROFILE_ROUTES.NOTIFICATIONS);
+  }, [navigation]);
+
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    await Promise.all([refetchMerchants(), refetchCategories()]);
+    setIsRefreshing(false);
+  }, [refetchMerchants, refetchCategories]);
+
+  const openLocationPicker = useCallback(() => {
+    navigation.navigate(HOME_ROUTES.LOCATION_PICKER);
+  }, [navigation]);
+
+  const runSheetCurrentLocation = useCallback(async () => {
+    setSheetGpsBusy(true);
+    try {
+      await delivery.deliverCurrentLocationAsync();
+    } finally {
+      setSheetGpsBusy(false);
+    }
+  }, [delivery]);
+
   return {
     user,
+    location,
+    delivery,
+    categories,
+    categoriesLoading,
+    categoryDisplayName,
+    headerLocationText: delivery.headerLocationText,
+    isLocationLoading: delivery.isLocationLoading || location.isLoading,
+    navigate: navigation.navigate as (name: string, params?: object) => void,
     merchants: merchants ?? [],
     products: products ?? [],
     isLoading: merchantsLoading,
-    refetch,
+    isRefreshing,
+    handleRefresh,
     handleMerchantPress,
     handleProductAdd,
     handleCustomOrder,
     handleSearchPress,
     handleCategoryPress,
+    handleNotificationsPress,
+    openLocationPicker,
+    selectSavedAddress: delivery.selectSavedAddress,
+    runSheetCurrentLocation,
+    sheetGpsBusy,
+    discoveryMode,
+    setDiscoveryMode,
     t,
   };
 }

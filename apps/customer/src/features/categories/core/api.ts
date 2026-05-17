@@ -1,6 +1,4 @@
-import { USE_MOCK_API } from '../../../../core/api/config';
-import api from '../../../../core/api/client';
-import { merchantsMock, mockCategories, delay } from '@dawwar/mocks';
+import api from '../../../core/api/client';
 import type { ApiResponse, Category, Merchant } from '@dawwar/types';
 
 // ── Phase 2 real implementations ─────────────────────────────────────
@@ -9,22 +7,13 @@ const realCategoriesApi = {
     const { data } = await api.get('/categories');
     return data;
   },
-  getMerchantsByCategory: async (categoryId: string): Promise<ApiResponse<Merchant[]>> => {
-    const { data } = await api.get(`/merchants?categoryId=${categoryId}`);
+  getMerchantsByCategory: async (categoryId: string, lat?: number, lng?: number): Promise<ApiResponse<Merchant[]>> => {
+    let url = `/merchants?categoryId=${categoryId}`;
+    if (lat && lng) url += `&lat=${lat}&lng=${lng}`;
+    const { data } = await api.get(url);
     return data;
   },
 };
 
-const mockCategoriesApi = {
-  getAll: async (): Promise<ApiResponse<Category[]>> => {
-    await delay(400);
-    return { success: true, data: mockCategories.filter((c) => c.isActive) };
-  },
-  getMerchantsByCategory: async (categoryId: string): Promise<ApiResponse<Merchant[]>> => {
-    const all = await merchantsMock.getNearby();
-    return { success: true, data: all.data.filter((m) => m.category === categoryId) };
-  },
-};
 
-// ── Export: mock when USE_MOCK_API=true, real when false ──────────────
-export const categoriesApi = USE_MOCK_API ? mockCategoriesApi : realCategoriesApi;
+export const categoriesApi = realCategoriesApi;

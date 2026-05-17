@@ -1,11 +1,11 @@
-import { StyleSheet, I18nManager } from 'react-native';
+import { StyleSheet } from 'react-native';
 import type { AppColors } from '@dawwar/theme';
 import { space, typography, radius } from '@dawwar/theme';
 
 export const createStyles = (colors: AppColors) =>
   StyleSheet.create({
     searchRow: {
-      flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
+      flexDirection: 'row',
       alignItems: 'center',
       gap: space.sm,
       padding: space.sm,
@@ -26,6 +26,7 @@ export const createStyles = (colors: AppColors) =>
       paddingTop: space.base,
       paddingBottom: space.sm,
       backgroundColor: colors.surface,
+      textAlign: 'left',
     },
     loadingRow: {
       alignItems: 'center',
@@ -40,10 +41,12 @@ export const createStyles = (colors: AppColors) =>
     emptyText: {
       ...typography.body1,
       color: colors.textSecondary,
+      textAlign: 'center',
     },
     emptySubText: {
       ...typography.body2,
       color: colors.textDisabled,
+      textAlign: 'center',
     },
     // Category chip row
     categoryRow: {
@@ -69,7 +72,7 @@ export const createStyles = (colors: AppColors) =>
     },
     // Merchant result row
     merchantRow: {
-      flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
+      flexDirection: 'row',
       alignItems: 'center',
       gap: space.md,
       paddingHorizontal: space.base,
@@ -78,12 +81,45 @@ export const createStyles = (colors: AppColors) =>
       borderBottomColor: colors.borderLight,
     },
     merchantLogo: { width: 48, height: 48, borderRadius: radius.md },
-    merchantInfo: { flex: 1 },
-    merchantName: { ...typography.label, color: colors.text },
-    merchantMeta: { ...typography.caption, color: colors.textSecondary },
+    merchantInfo: { 
+      flex: 1,
+      alignItems: 'flex-start',
+    },
+    merchantName: { 
+      ...typography.label, 
+      color: colors.text,
+      textAlign: 'left',
+    },
+    merchantMeta: { 
+      ...typography.caption, 
+      color: colors.textSecondary,
+      textAlign: 'left',
+    },
+    searchContainer: {
+      padding: space.base,
+      backgroundColor: colors.surface,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    searchBar: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.surfaceVariant,
+      borderRadius: radius.md,
+      paddingHorizontal: space.md,
+      height: 44,
+      gap: space.sm,
+    },
+    input: {
+      flex: 1,
+      ...typography.body2,
+      color: colors.text,
+      paddingVertical: 0,
+      textAlign: 'left',
+    },
     // Product result row
     productRow: {
-      flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
+      flexDirection: 'row',
       alignItems: 'center',
       gap: space.md,
       paddingHorizontal: space.base,
@@ -92,9 +128,21 @@ export const createStyles = (colors: AppColors) =>
       borderBottomColor: colors.borderLight,
     },
     productImage: { width: 56, height: 56, borderRadius: radius.md },
-    productInfo: { flex: 1 },
-    productName: { ...typography.label, color: colors.text },
-    productPrice: { ...typography.body2, color: colors.primary, marginTop: 2 },
+    productInfo: { 
+      flex: 1,
+      alignItems: 'flex-start',
+    },
+    productName: { 
+      ...typography.label, 
+      color: colors.text,
+      textAlign: 'left',
+    },
+    productPrice: { 
+      ...typography.body2, 
+      color: colors.primary, 
+      marginTop: 2,
+      textAlign: 'left',
+    },
     addBtn: {
       width: 32,
       height: 32,

@@ -1,12 +1,16 @@
-import React from 'react';
+import React, { useRef, useCallback } from 'react';
 import {
   View,
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
+  TextInput,
+  I18nManager,
 } from 'react-native';
 import FastImage from 'react-native-fast-image';
-import { ScreenTemplate, Text, Icon, SearchBar, Badge } from '@dawwar/ui';
+import { useFocusEffect } from '@react-navigation/native';
+import { useTranslation } from '@dawwar/i18n';
+import { ScreenTemplate, Text, Icon, Badge } from '@dawwar/ui';
 import { useTheme } from '@dawwar/theme';
 import { useController } from './useController';
 import { createStyles } from './styles';
@@ -53,7 +57,7 @@ function MerchantResult({
       <View style={styles.merchantInfo}>
         <Text style={styles.merchantName}>{merchant.businessName}</Text>
         <Text style={styles.merchantMeta}>
-          ★ {merchant.rating.toFixed(1)} · {merchant.deliveryTimeMin}–{merchant.deliveryTimeMax} {t('common.min')}
+          ★ {Number(merchant.rating || 0).toFixed(1)} · {merchant.deliveryTimeMin}–{merchant.deliveryTimeMax} {t('common.min')}
         </Text>
       </View>
       <Badge
@@ -99,25 +103,46 @@ function ProductResult({
 // ── Main Screen ────────────────────────────────────────────────────────
 
 export function SearchScreen() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
-  const styles = createStyles(colors);
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const ctrl = useController();
+  const inputRef = useRef<TextInput>(null);
+
+  useFocusEffect(
+    useCallback(() => {
+      const timer = setTimeout(() => {
+        inputRef.current?.focus();
+      }, 300);
+      return () => clearTimeout(timer);
+    }, [])
+  );
 
   return (
-    <ScreenTemplate edges={['top', 'bottom']}>
-      {/* Search input row — auto-focused on mount */}
-      <View style={styles.searchRow}>
-        <TouchableOpacity style={styles.backBtn} onPress={ctrl.handleBack}>
-          <Icon name="arrow-left" size={24} color={colors.text} />
-        </TouchableOpacity>
-        <View style={styles.searchBarWrapper}>
-          <SearchBar
-            value={ctrl.query}
+    <ScreenTemplate 
+      headerProps={{
+        onBackPress: ctrl.handleBack,
+      }}
+    >
+      <View style={styles.searchContainer}>
+        <View style={styles.searchBar}>
+          <Icon name="magnify" size={20} color={colors.textSecondary} />
+          <TextInput
+            ref={inputRef}
+            style={styles.input}
+            placeholder={t('home.search_placeholder')}
+            placeholderTextColor={colors.textSecondary}
+            textAlign={I18nManager.isRTL ? 'right' : 'left'}
+            returnKeyType="search"
             onChangeText={ctrl.setQuery}
-            onClear={() => ctrl.setQuery('')}
-            placeholder={ctrl.t('home.search_placeholder')}
-            autoFocus
+            value={ctrl.query}
+            inputAccessoryViewID={undefined}
           />
+          {ctrl.query.length > 0 && (
+            <TouchableOpacity onPress={() => ctrl.setQuery('')}>
+              <Icon name="close-circle" size={18} color={colors.textSecondary} />
+            </TouchableOpacity>
+          )}
         </View>
       </View>
 
@@ -133,7 +158,7 @@ export function SearchScreen() {
         <View style={styles.emptyContainer}>
           <Icon name="magnify-close" size={48} color={colors.textDisabled} />
           <Text style={styles.emptyText}>
-            {ctrl.t('categories.no_results')}
+            {t('categories.no_results')}
           </Text>
           <Text style={styles.emptySubText}>
             "{ctrl.query}"
@@ -148,7 +173,7 @@ export function SearchScreen() {
           {/* Categories */}
           {ctrl.results!.categories.length > 0 && (
             <>
-              <Text style={styles.sectionHeader}>{ctrl.t('categories.title')}</Text>
+              <Text style={styles.sectionHeader}>{t('categories.title')}</Text>
               <View style={styles.categoryRow}>
                 {ctrl.results!.categories.map((cat) => (
                   <CategoryChip
@@ -165,14 +190,14 @@ export function SearchScreen() {
           {/* Merchants */}
           {ctrl.results!.merchants.length > 0 && (
             <>
-              <Text style={styles.sectionHeader}>{ctrl.t('home.nearby_title')}</Text>
+              <Text style={styles.sectionHeader}>{t('home.nearby_title')}</Text>
               {ctrl.results!.merchants.map((m) => (
                 <MerchantResult
                   key={m.id}
                   merchant={m}
                   onPress={() => ctrl.handleMerchantPress(m.id)}
                   styles={styles}
-                  t={ctrl.t}
+                  t={t}
                 />
               ))}
             </>
@@ -181,14 +206,14 @@ export function SearchScreen() {
           {/* Products */}
           {ctrl.results!.products.length > 0 && (
             <>
-              <Text style={styles.sectionHeader}>{ctrl.t('home.popular_title')}</Text>
+              <Text style={styles.sectionHeader}>{t('home.popular_title')}</Text>
               {ctrl.results!.products.map((p) => (
                 <ProductResult
                   key={p.id}
                   product={p}
                   onAdd={() => ctrl.handleProductAdd(p)}
                   styles={styles}
-                  t={ctrl.t}
+                  t={t}
                 />
               ))}
             </>
@@ -201,7 +226,7 @@ export function SearchScreen() {
       {!ctrl.query.trim() && !ctrl.isLoading && (
         <View style={styles.emptyContainer}>
           <Icon name="magnify" size={56} color={colors.textDisabled} />
-          <Text style={styles.emptySubText}>{ctrl.t('home.search_placeholder')}</Text>
+          <Text style={styles.emptySubText}>{t('home.search_placeholder')}</Text>
         </View>
       )}
     </ScreenTemplate>

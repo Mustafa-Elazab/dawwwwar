@@ -1,44 +1,82 @@
-import React from 'react';
-import { View, TouchableOpacity, Image } from 'react-native';
+import React, { useRef } from 'react';
+import { View, TouchableOpacity, ViewStyle } from 'react-native';
+import FastImage from 'react-native-fast-image';
 import { useTheme } from '@dawwar/theme';
 import { Text, Icon } from '@dawwar/ui';
 import { useTranslation } from '@dawwar/i18n';
 import { createStyles } from './styles';
 import type { ProductCardProps } from './types';
 
-export function ProductCard({ product, merchantName, onAdd }: ProductCardProps) {
+export const ProductCard = React.memo(function ProductCard({ product, merchantName, onAdd, style }: ProductCardProps & { style?: ViewStyle }) {
   const { colors } = useTheme();
-  const styles = createStyles(colors);
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const { t } = useTranslation();
 
+  const handleAdd = () => {
+    if (product.isAvailable) onAdd();
+  };
+
+  // Derive badges (assuming comparePrice exists on product, fallback to false if not typed)
+  const comparePrice = (product as any).comparePrice;
+  const hasDiscount = comparePrice && comparePrice > product.price;
+  const isFeatured = (product as any).isFeatured;
+
   return (
-    <View style={[styles.card, !product.isAvailable && styles.unavailable]}>
-      <Image
-        source={{ uri: product.images[0] }}
-        style={styles.image}
-        resizeMode="cover"
-      />
+    <View style={[styles.card, !product.isAvailable && styles.unavailable, style]}>
+      <View style={styles.imageContainer}>
+        <FastImage
+          source={{ uri: product.images?.[0] || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=1000' }}
+          style={styles.image}
+          resizeMode={FastImage.resizeMode.cover}
+        />
+        {/* Badges overlay */}
+        <View style={styles.badges}>
+          {hasDiscount && (
+            <View style={[styles.badge, styles.badgeDiscount]}>
+              <Text style={styles.badgeText}>Sale</Text>
+            </View>
+          )}
+          {isFeatured && (
+            <View style={[styles.badge, styles.badgePopular]}>
+              <Text style={styles.badgeText}>Popular</Text>
+            </View>
+          )}
+        </View>
+      </View>
+
       <View style={styles.body}>
-        <Text style={styles.name} numberOfLines={2}>
-          {product.nameAr}
-        </Text>
-        {merchantName != null && (
-          <Text style={styles.merchantName} numberOfLines={1}>
-            {merchantName}
+        <View>
+          <Text style={styles.name} numberOfLines={2}>
+            {product.nameAr}
           </Text>
-        )}
-        <View style={styles.priceRow}>
-          <Text style={styles.price}>
-            {product.price} {t('common.egp')}
-          </Text>
-          <TouchableOpacity
-            style={styles.addBtn}
-            onPress={onAdd}
+          {merchantName != null && (
+            <Text style={styles.merchantName} numberOfLines={1}>
+              {merchantName}
+            </Text>
+          )}
+        </View>
+        
+        <View style={[styles.footer, { zIndex: 10 }]}>
+          <View style={styles.priceContainer}>
+            {hasDiscount && (
+              <Text style={styles.comparePrice}>
+                {comparePrice} {t('common.egp')}
+              </Text>
+            )}
+            <Text style={styles.price}>
+              {product.price} {t('common.egp')}
+            </Text>
+          </View>
+          
+          <TouchableOpacity 
+            onPress={handleAdd}
             disabled={!product.isAvailable}
+            activeOpacity={0.7}
+            style={styles.addBtn}
           >
             <Icon
               name={product.isAvailable ? 'plus' : 'close'}
-              size={18}
+              size={22}
               color="#fff"
             />
           </TouchableOpacity>
@@ -46,4 +84,4 @@ export function ProductCard({ product, merchantName, onAdd }: ProductCardProps) 
       </View>
     </View>
   );
-}
+});
