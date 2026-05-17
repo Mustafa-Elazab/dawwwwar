@@ -9,7 +9,7 @@
 module.exports = {
   project: {
     android: {
-      packageName: 'com.dawwarcustomer',
+      packageName: 'com.dawwar.driver',
       sourceDir: './android',
     },
   },
@@ -21,8 +21,6 @@ module.exports = {
     'react-native-maps': { platforms: { android: null, ios: null } },
 
     // Phase 2 — Firebase push notifications
-    '@react-native-firebase/app': { platforms: { android: null, ios: null } },
-    '@react-native-firebase/messaging': { platforms: { android: null, ios: null } },
 
     // Phase 2 — optimised image loading
     'react-native-fast-image': { platforms: { android: null, ios: null } },

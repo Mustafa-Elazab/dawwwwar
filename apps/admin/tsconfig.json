@@ -15,7 +15,11 @@
     "incremental": true,
     "plugins": [{ "name": "next" }],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@dawwar/api-client": ["../../packages/api-client/src"],
+      "@dawwar/api-client/*": ["../../packages/api-client/src/*"],
+      "@dawwar/types": ["../../packages/types/src"],
+      "@dawwar/types/*": ["../../packages/types/src/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

@@ -1,5 +1,5 @@
 {
-  "extends": "@react-native/typescript-config/tsconfig.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "strict": true,
     "esModuleInterop": true,
@@ -17,7 +17,9 @@
       "@dawwar/mocks": ["../../packages/mocks/src"],
       "@dawwar/mocks/*": ["../../packages/mocks/src/*"],
       "@dawwar/ui": ["../../packages/ui/src"],
-      "@dawwar/ui/*": ["../../packages/ui/src/*"]
+      "@dawwar/ui/*": ["../../packages/ui/src/*"],
+      "@dawwar/api-client": ["../../packages/api-client/src"],
+      "@dawwar/api-client/*": ["../../packages/api-client/src/*"]
     }
   },
   "include": ["src", "index.js"]

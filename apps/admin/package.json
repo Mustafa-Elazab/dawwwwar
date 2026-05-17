@@ -21,7 +21,9 @@
     "clsx": "^2.1.0",
     "tailwind-merge": "^2.5.0",
     "date-fns": "^4.1.0",
-    "@dawwar/types": "workspace:*"
+    "@dawwar/types": "workspace:*",
+    "@dawwar/api-client": "workspace:*",
+    "@dawwar/i18n": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

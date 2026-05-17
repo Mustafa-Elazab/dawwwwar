@@ -9,11 +9,12 @@
     "type-check": "turbo type-check",
     "clean": "turbo clean",
     "clean:all": "turbo clean && rm -rf node_modules apps/*/node_modules packages/*/node_modules pnpm-lock.yaml",
-    "customer:android": "pnpm --filter @dawwar/customer android",
-    "customer:driver": "pnpm --filter @dawwar/driver android",
-    "customer:merchant": "pnpm --filter @dawwar/merchant android",
+    "dawwar:customer": "pnpm --filter @dawwar/customer android",
+    "dawwar:driver": "pnpm --filter @dawwar/driver android",
+    "dawwar:merchant": "pnpm --filter @dawwar/merchant android",
     "customer:ios": "pnpm --filter @dawwar/customer ios",
     "customer:start": "pnpm --filter @dawwar/customer start",
+    "customer:start-cache": "pnpm --filter @dawwar/customer start --reset-cache",
     "customer:clean": "pnpm --filter @dawwar/customer android:clean && pnpm --filter @dawwar/customer ios:clean",
     "android": "pnpm --filter @dawwar/customer android",
     "ios": "pnpm --filter @dawwar/customer ios",
@@ -21,19 +22,25 @@
     "admin:build": "pnpm --filter @dawwar/admin build"
   },
   "devDependencies": {
-    "turbo": "^2.5.0",
-    "typescript": "^5.7.0",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.0.0",
     "eslint": "^9.0.0",
-    "prettier": "^3.4.0"
+    "prettier": "^3.4.0",
+    "turbo": "^2.5.0",
+    "typescript": "^5.7.0"
   },
   "pnpm": {
     "overrides": {
       "react": "19.2.3",
+      "react-dom": "19.2.3",
       "react-native": "0.84.0",
-      "react-native-reanimated": "3.19.5",
-      "@types/react": "18.3.0"
+      "react-native-reanimated": "4.3.1",
+      "react-native-worklets": "0.8.3",
+      "@types/react": "19.2.14",
+      "react-native-safe-area-context": "5.7.0"
+    },
+    "patchedDependencies": {
+      "@react-native-community/geolocation@3.4.0": "patches/@react-native-community__geolocation@3.4.0.patch"
     }
   }
 }
