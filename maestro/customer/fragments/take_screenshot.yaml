@@ -1,0 +1,3 @@
+appId: com.dawwar.customer
+---
+- takeScreenshot: ${SCREENSHOT_DIR}/${NAME}.png

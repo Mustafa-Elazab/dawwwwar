@@ -1,0 +1,5 @@
+appId: com.dawwar.customer
+env:
+  PHONE_NUMBER: "01011111111"
+  OTP_CODE: "123456"
+  SCREENSHOT_DIR: "../screenshots"

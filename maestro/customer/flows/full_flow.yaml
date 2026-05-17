@@ -1,0 +1,20 @@
+appId: com.dawwar.customer
+---
+- runFlow:
+    file: 01_splash.yaml
+- runFlow:
+    file: 02_auth.yaml
+- runFlow:
+    file: 03_home.yaml
+- runFlow:
+    file: 04_merchant.yaml
+- runFlow:
+    file: 05_cart.yaml
+- runFlow:
+    file: 06_checkout.yaml
+- runFlow:
+    file: 07_tracking.yaml
+- runFlow:
+    file: 08_chat.yaml
+- runFlow:
+    file: 09_profile.yaml

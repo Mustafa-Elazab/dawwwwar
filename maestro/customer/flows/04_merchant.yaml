@@ -1,0 +1,45 @@
+appId: com.dawwar.customer
+---
+- launchApp
+- runFlow:
+    file: ../fragments/login.yaml
+
+# Open Merchant Details
+- extendedWaitUntil:
+    visible: "Nearby"
+    timeout: 10000
+- tapOn:
+    point: 50%, 60% # Tapping the first merchant card (adjust based on actual layout)
+- extendedWaitUntil:
+    visible: "Menu"
+    timeout: 10000
+
+- runFlow:
+    file: ../fragments/take_screenshot.yaml
+    env:
+      NAME: "merchant-details"
+
+# Interact with product
+- swipe:
+    direction: UP
+- tapOn:
+    id: "add_product_btn" # Wait for the + button on ProductCard
+    optional: true
+- tapOn:
+    text: "Add"
+    optional: true
+
+# Check Cart Bar Appearance
+- assertVisible: "View Cart"
+- runFlow:
+    file: ../fragments/take_screenshot.yaml
+    env:
+      NAME: "product-added"
+
+# Info Tab
+- tapOn: "Info"
+- assertVisible: "Opening Hours"
+- runFlow:
+    file: ../fragments/take_screenshot.yaml
+    env:
+      NAME: "merchant-info"

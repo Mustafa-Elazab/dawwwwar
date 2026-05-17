@@ -1,0 +1,35 @@
+appId: com.dawwar.customer
+---
+- launchApp
+- runFlow:
+    file: ../fragments/login.yaml
+
+- tapOn: "Orders" # Bottom tab
+- extendedWaitUntil:
+    visible: "Active" # orders.tab_active
+    timeout: 10000
+
+# Open Tracking
+- tapOn:
+    text: "Track" # orders.track
+    optional: true
+- tapOn:
+    point: 50%, 25% # Tap first active order if button missing
+    optional: true
+
+- extendedWaitUntil:
+    visible: "Order #" # orders.order_number prefix
+    timeout: 10000
+
+- runFlow:
+    file: ../fragments/take_screenshot.yaml
+    env:
+      NAME: "tracking"
+
+# Socket reconnect validation (Simulate backgrounding)
+- pressKey: Home
+- launchApp:
+    stopApp: false
+- extendedWaitUntil:
+    visible: "Order #" # Should reconnect cleanly
+    timeout: 10000

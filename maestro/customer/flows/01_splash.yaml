@@ -1,0 +1,25 @@
+appId: com.dawwar.customer
+---
+- clearState
+- launchApp
+- runFlow:
+    file: ../fragments/take_screenshot.yaml
+    env:
+      NAME: "splash"
+
+# Wait for animation to finish
+- extendedWaitUntil:
+    notVisible: "Dawwar"
+    timeout: 30000
+
+- waitForAnimationToEnd:
+    timeout: 12000
+
+# Assert that we ended up on Phone Auth (because we cleared state)
+- extendedWaitUntil:
+    visible: "01X XXXX XXXX" # Phone placeholder is language-neutral
+    timeout: 30000
+- runFlow:
+    file: ../fragments/take_screenshot.yaml
+    env:
+      NAME: "splash-resolved-to-auth"

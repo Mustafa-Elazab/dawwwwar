@@ -1,0 +1,41 @@
+appId: com.dawwar.customer
+---
+- clearState
+- launchApp
+
+# Disconnect internet
+- stopApp
+- runScript:
+    script: "adb shell svc wifi disable && adb shell svc data disable"
+
+- launchApp
+- extendedWaitUntil:
+    visible: "Network Error" # Adjust based on actual UI
+    timeout: 10000
+    optional: true
+
+- runFlow:
+    file: ../fragments/take_screenshot.yaml
+    env:
+      NAME: "offline-error"
+
+# Reconnect internet
+- runScript:
+    script: "adb shell svc wifi enable && adb shell svc data enable"
+
+- stopApp
+- launchApp
+- runFlow:
+    file: ../fragments/login.yaml
+
+# Test empty notifications
+- tapOn: "Home"
+- tapOn:
+    point: 90%, 8%
+- assertVisible:
+    text: "No notifications"
+    optional: true
+- runFlow:
+    file: ../fragments/take_screenshot.yaml
+    env:
+      NAME: "empty-notifications"

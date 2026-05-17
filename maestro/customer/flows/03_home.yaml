@@ -1,0 +1,53 @@
+appId: com.dawwar.customer
+---
+- launchApp
+- runFlow:
+    file: ../fragments/login.yaml
+
+# Wait for Home to load
+- extendedWaitUntil:
+    visible: "Nearby Shops"
+    timeout: 10000
+    
+- runFlow:
+    file: ../fragments/take_screenshot.yaml
+    env:
+      NAME: "home"
+
+# Search Flow
+- tapOn: "Search shops or products..." # Search bar placeholder
+- extendedWaitUntil:
+    visible: "Search shops or products..." # Inside SearchScreen
+    timeout: 5000
+- runFlow:
+    file: ../fragments/take_screenshot.yaml
+    env:
+      NAME: "search"
+- inputText: "NonExistentMerchant999"
+- hideKeyboard
+- extendedWaitUntil:
+    visible: "No shops in this category"
+    timeout: 5000
+- runFlow:
+    file: ../fragments/take_screenshot.yaml
+    env:
+      NAME: "empty-search"
+- tapOn: "Back" # Or left arrow icon
+
+# Categories
+- tapOn: "Categories" # Bottom tab
+- extendedWaitUntil:
+    visible: "Categories"
+    timeout: 5000
+- tapOn: "Food" # Example category name
+- extendedWaitUntil:
+    visible: "Food" # Should be inside CategoryMerchantsScreen
+    timeout: 5000
+
+# Pull to refresh home
+- tapOn: "Home"
+- swipe:
+    direction: DOWN
+- extendedWaitUntil:
+    visible: "Nearby Shops"
+    timeout: 5000

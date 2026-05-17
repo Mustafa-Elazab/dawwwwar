@@ -1,0 +1,33 @@
+appId: com.dawwar.customer
+---
+- tapOn:
+    text: "01X XXXX XXXX" # Wait for auth to appear if logged out
+    optional: true
+- extendedWaitUntil:
+    visible: "01X XXXX XXXX"
+    optional: true
+    timeout: 30000
+- runFlow:
+    when:
+      visible: "01X XXXX XXXX"
+    commands:
+      - inputText: ${PHONE_NUMBER}
+      
+      # Accept Terms and Continue
+      - tapOn:
+          id: "terms-checkbox"
+      - tapOn: "Send Verification Code"
+      
+      - extendedWaitUntil:
+          visible: "Enter the Code"
+          timeout: 20000
+      - tapOn:
+          point: 50%, 50% # Area for OTP input
+      - inputText: ${OTP_CODE}
+      - extendedWaitUntil:
+          notVisible: "Enter the Code"
+          timeout: 10000
+      - extendedWaitUntil:
+          visible:
+            text: "Dawwar" # Part of Home screen greeting
+          timeout: 10000

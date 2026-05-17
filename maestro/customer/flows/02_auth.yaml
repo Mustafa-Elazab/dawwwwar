@@ -1,0 +1,66 @@
+appId: com.dawwar.customer
+---
+- clearState
+- launchApp
+- extendedWaitUntil:
+    visible: "01X XXXX XXXX"
+    timeout: 30000
+
+- runFlow:
+    file: ../fragments/take_screenshot.yaml
+    env:
+      NAME: "login"
+
+# Test Invalid OTP
+- tapOn: "01X XXXX XXXX"
+- inputText: "01011111111"
+
+# Try to continue without accepting (should be disabled or show error)
+- tapOn: "Send Verification Code"
+- assertVisible: "01X XXXX XXXX" # Should still be on this screen
+
+# Accept and Continue
+- tapOn:
+    id: "terms-checkbox"
+- tapOn: "Send Verification Code"
+- extendedWaitUntil:
+    visible: "Enter the Code"
+    timeout: 10000
+
+- tapOn:
+    point: 50%, 50% # Tap area for OTP input
+- inputText: "000000"
+- extendedWaitUntil:
+    visible: "Incorrect code" # Match errors.invalid_otp or actual UI error
+    optional: true
+    timeout: 5000
+- runFlow:
+    file: ../fragments/take_screenshot.yaml
+    env:
+      NAME: "invalid-otp"
+
+# Test Valid OTP
+- clearState
+- launchApp
+- runFlow:
+    file: ../fragments/login.yaml
+    env:
+      PHONE_NUMBER: "01011111111"
+      OTP_CODE: "123456"
+
+# Verify Session Persistence
+- stopApp
+- launchApp
+- extendedWaitUntil:
+    visible: "Dawwar" # Part of Home screen greeting
+    timeout: 10000
+
+# Test Logout
+- tapOn: "Profile" # Bottom tab
+- swipe:
+    direction: UP
+- tapOn: "Logout"
+- tapOn: "Yes" # Confirmation dialog
+- extendedWaitUntil:
+    visible: "01X XXXX XXXX"
+    timeout: 10000

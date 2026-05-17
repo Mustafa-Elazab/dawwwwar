@@ -1,0 +1,33 @@
+appId: com.dawwar.customer
+---
+- launchApp
+- runFlow:
+    file: ../fragments/login.yaml
+
+- tapOn: "Orders"
+- tapOn:
+    text: "Track Order"
+    optional: true
+- tapOn:
+    point: 50%, 25%
+    optional: true
+
+- extendedWaitUntil:
+    visible: "Order Status"
+    timeout: 10000
+
+# Open Chat
+- swipe:
+    direction: UP
+- tapOn: "Chat with Driver"
+
+- assertVisible: "Chat"
+- runFlow:
+    file: ../fragments/take_screenshot.yaml
+    env:
+      NAME: "chat"
+
+- tapOn: "Type a message..."
+- inputText: "Hello, where are you?"
+- tapOn: "Send" # Icon or text
+- assertVisible: "Hello, where are you?"

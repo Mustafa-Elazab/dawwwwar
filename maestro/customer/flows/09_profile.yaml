@@ -1,0 +1,64 @@
+appId: com.dawwar.customer
+---
+- launchApp
+- runFlow:
+    file: ../fragments/login.yaml
+
+- tapOn: "Profile"
+- assertVisible: "Account"
+
+- runFlow:
+    file: ../fragments/take_screenshot.yaml
+    env:
+      NAME: "profile"
+
+# Edit Profile
+- tapOn: "Edit Profile"
+- assertVisible: "Name"
+- tapOn: "Name"
+- eraseText: 50
+- inputText: "Test User"
+- tapOn: "Save"
+
+# Wallet
+- tapOn: "Wallet"
+- assertVisible: "Balance"
+- runFlow:
+    file: ../fragments/take_screenshot.yaml
+    env:
+      NAME: "wallet"
+- tapOn: "Back"
+
+# Notifications (Via Bell Icon on Home)
+- tapOn: "Home"
+- tapOn:
+    text: "bell-outline" # Accessibility label or ID ideally
+    optional: true
+- tapOn:
+    point: 90%, 8% # Fallback to top right
+    optional: true
+- assertVisible: "Notifications"
+- runFlow:
+    file: ../fragments/take_screenshot.yaml
+    env:
+      NAME: "notifications"
+- tapOn: "Back"
+
+# Legal Pages
+- tapOn: "Profile"
+- swipe:
+    direction: UP
+- tapOn: "Terms"
+- assertVisible: "Usage Rules"
+- runFlow:
+    file: ../fragments/take_screenshot.yaml
+    env:
+      NAME: "terms"
+- tapOn: "Back"
+
+- tapOn: "Privacy Policy"
+- assertVisible: "Privacy Policy"
+- runFlow:
+    file: ../fragments/take_screenshot.yaml
+    env:
+      NAME: "privacy"

@@ -1,0 +1,60 @@
+appId: com.dawwar.customer
+---
+- launchApp
+- runFlow:
+    file: ../fragments/login.yaml
+
+# Ensure item in cart
+- extendedWaitUntil:
+    visible: "Nearby"
+    timeout: 10000
+- tapOn:
+    point: 50%, 60%
+- extendedWaitUntil:
+    visible: "Menu"
+    timeout: 10000
+- tapOn:
+    id: "add_product_btn"
+    optional: true
+- tapOn:
+    text: "Add"
+    optional: true
+
+# Proceed to Checkout
+- tapOn: "View Cart"
+- tapOn: "Checkout"
+- assertVisible: "Delivery Address"
+
+- runFlow:
+    file: ../fragments/take_screenshot.yaml
+    env:
+      NAME: "checkout"
+
+# Address Selection & Map Crash Test
+- tapOn: "Change"
+- tapOn: "Add New Address"
+- assertVisible: "Add Address"
+
+# The crash test
+- tapOn: "Pick on Map"
+- runFlow:
+    file: ../fragments/take_screenshot.yaml
+    env:
+      NAME: "map-picker"
+- extendedWaitUntil:
+    visible: "Confirm Location"
+    timeout: 5000
+- tapOn: "Confirm Location"
+
+# Finish address
+- inputText: "Test Address 123"
+- tapOn: "Save Address"
+- assertVisible: "Delivery Address"
+
+- tapOn: "Cash on Delivery"
+- tapOn: "Place Order"
+
+# Wait for order success and tracking redirect
+- extendedWaitUntil:
+    visible: "Tracking"
+    timeout: 15000

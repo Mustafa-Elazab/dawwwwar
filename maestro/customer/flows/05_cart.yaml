@@ -1,0 +1,50 @@
+appId: com.dawwar.customer
+---
+- launchApp
+- runFlow:
+    file: ../fragments/login.yaml
+
+# Clear cart if needed (optional)
+- tapOn:
+    text: "View Cart"
+    optional: true
+- tapOn:
+    text: "Clear"
+    optional: true
+
+# Go to a merchant and add an item
+- extendedWaitUntil:
+    visible: "Nearby"
+    timeout: 10000
+- tapOn:
+    point: 50%, 60%
+- extendedWaitUntil:
+    visible: "Menu"
+    timeout: 10000
+- tapOn:
+    id: "add_product_btn"
+    optional: true
+- tapOn:
+    text: "Add"
+    optional: true
+
+# Open Cart from Global Button
+- tapOn: "View Cart"
+- assertVisible: "Your Cart"
+
+- runFlow:
+    file: ../fragments/take_screenshot.yaml
+    env:
+      NAME: "cart"
+
+# Quantity Controls
+- tapOn: "+"
+- assertVisible: "2" # Quantity should update
+- tapOn: "-"
+- tapOn: "-" # Should remove item
+- assertVisible: "Your cart is empty"
+
+- runFlow:
+    file: ../fragments/take_screenshot.yaml
+    env:
+      NAME: "empty-cart"
