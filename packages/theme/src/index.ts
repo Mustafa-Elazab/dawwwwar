@@ -14,6 +14,10 @@ export type { SpacingKey } from './spacing';
 export { shadows } from './shadows';
 export type { ShadowKey } from './shadows';
 
+// Animations
+export { springs, transitions } from './animations';
+export type { SpringKey } from './animations';
+
 // Theme context and provider
 export { ThemeProvider, ThemeContext } from './ThemeContext';
 export type { ThemeContextValue } from './ThemeContext';
