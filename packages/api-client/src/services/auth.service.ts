@@ -15,8 +15,23 @@ export class AuthService {
     return data;
   }
 
-  async verifyOtp(phone: string, code: string): Promise<ApiResponse<VerifyOtpResponse>> {
-    const { data } = await this.client.post('/auth/verify-otp', { phone, code });
+  async verifyCustomerOtp(phone: string, code: string): Promise<ApiResponse<VerifyOtpResponse>> {
+    const { data } = await this.client.post('/auth/customer/verify-otp', { phone, code });
+    return data;
+  }
+
+  async verifyMerchantOtp(phone: string, code: string): Promise<ApiResponse<VerifyOtpResponse>> {
+    const { data } = await this.client.post('/auth/merchant/verify-otp', { phone, code });
+    return data;
+  }
+
+  async verifyDriverOtp(phone: string, code: string): Promise<ApiResponse<VerifyOtpResponse>> {
+    const { data } = await this.client.post('/auth/driver/verify-otp', { phone, code });
+    return data;
+  }
+
+  async verifyAdminOtp(phone: string, code: string): Promise<ApiResponse<VerifyOtpResponse>> {
+    const { data } = await this.client.post('/auth/admin/verify-otp', { phone, code });
     return data;
   }
 
@@ -27,11 +42,6 @@ export class AuthService {
 
   async logout(): Promise<ApiResponse<void>> {
     const { data } = await this.client.post('/auth/logout');
-    return data;
-  }
-
-  async selectRole(role: string): Promise<ApiResponse<any>> {
-    const { data } = await this.client.post('/auth/select-role', { role });
     return data;
   }
 }

@@ -1,14 +1,18 @@
 export interface CreateMerchantDto {
   businessName: string;
-  category: string;
+  parentCategoryId: string;
+  categoryIds?: string[];
   address: string;
   latitude: number;
   longitude: number;
+  city?: string;
+  governorate?: string;
 }
 
 export interface UpdateMerchantDto {
   businessName?: string;
-  category?: string;
+  parentCategoryId?: string;
+  categoryIds?: string[];
   address?: string;
   latitude?: number;
   longitude?: number;

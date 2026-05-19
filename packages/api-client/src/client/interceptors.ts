@@ -68,6 +68,20 @@ export const setupInterceptors = (
       if (options?.debug) {
         console.log(`[API Response] ${response.config.method?.toUpperCase()} ${response.config.url} [${response.status}]`, response.data);
       }
+
+      // 3. Automatically unwrap { success, data } responses
+      if (
+        response.data &&
+        typeof response.data === 'object' &&
+        'success' in response.data &&
+        'data' in response.data
+      ) {
+        return {
+          ...response,
+          data: response.data.data,
+        };
+      }
+
       return response;
     },
     async (error) => {

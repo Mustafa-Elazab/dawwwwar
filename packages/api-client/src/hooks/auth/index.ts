@@ -17,11 +17,35 @@ export function useSendOtp() {
   });
 }
 
-export function useVerifyOtp() {
+export function useVerifyCustomerOtp() {
   const { auth } = useApiClient();
   return useMutation({
     mutationFn: ({ phone, code }: { phone: string; code: string }) =>
-      auth.verifyOtp(phone, code),
+      auth.verifyCustomerOtp(phone, code),
+  });
+}
+
+export function useVerifyMerchantOtp() {
+  const { auth } = useApiClient();
+  return useMutation({
+    mutationFn: ({ phone, code }: { phone: string; code: string }) =>
+      auth.verifyMerchantOtp(phone, code),
+  });
+}
+
+export function useVerifyDriverOtp() {
+  const { auth } = useApiClient();
+  return useMutation({
+    mutationFn: ({ phone, code }: { phone: string; code: string }) =>
+      auth.verifyDriverOtp(phone, code),
+  });
+}
+
+export function useVerifyAdminOtp() {
+  const { auth } = useApiClient();
+  return useMutation({
+    mutationFn: ({ phone, code }: { phone: string; code: string }) =>
+      auth.verifyAdminOtp(phone, code),
   });
 }
 
@@ -29,12 +53,5 @@ export function useLogout() {
   const { auth } = useApiClient();
   return useMutation({
     mutationFn: () => auth.logout(),
-  });
-}
-
-export function useSelectRole() {
-  const { auth } = useApiClient();
-  return useMutation({
-    mutationFn: (role: string) => auth.selectRole(role),
   });
 }
