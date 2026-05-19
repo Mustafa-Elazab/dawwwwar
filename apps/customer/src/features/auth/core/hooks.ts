@@ -1,4 +1,4 @@
-import { useSendOtp as useBaseSendOtp, useVerifyOtp as useBaseVerifyOtp } from '@dawwar/api-client';
+import { useSendOtp as useBaseSendOtp, useVerifyCustomerOtp as useBaseVerifyOtp } from '@dawwar/api-client';
 import { useAppDispatch } from '../../../store/hooks';
 import { setAuth } from '../../../store/slices/auth.slice';
 import { USE_MOCK_API } from '../../../core/api/config';
@@ -19,9 +19,9 @@ export function useVerifyOtp() {
       
       dispatch(
         setAuth({
-          user: res.data.user,
-          accessToken: res.data.accessToken,
-          refreshToken: res.data.refreshToken,
+          user: res.user,
+          accessToken: res.accessToken,
+          refreshToken: res.refreshToken,
         }),
       );
 

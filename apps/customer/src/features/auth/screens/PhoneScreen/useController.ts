@@ -1,13 +1,15 @@
 import { useState, useCallback } from 'react';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { useTranslation } from '@dawwar/i18n';
 import { useSendOtp } from '../../core/hooks';
 import { AUTH_ROUTES, PROFILE_ROUTES } from '../../../../navigation/routes';
-import type { PhoneScreenNavProp } from './types';
+import type { PhoneScreenNavProp, PhoneScreenRouteProp } from './types';
 
 export function useController() {
   const { t } = useTranslation();
   const navigation = useNavigation<PhoneScreenNavProp>();
+  const route = useRoute<PhoneScreenRouteProp>();
+  const returnTo = route.params?.returnTo;
 
   const [phone, setPhone] = useState('');
   const [phoneError, setPhoneError] = useState<string | null>(null);
@@ -44,7 +46,7 @@ export function useController() {
 
     try {
       await sendOtpMutation.mutateAsync(phone);
-      navigation.navigate(AUTH_ROUTES.OTP, { phone });
+      navigation.navigate(AUTH_ROUTES.OTP, { phone, returnTo });
     } catch (err) {
       console.error('[PhoneScreen] sendOtp error:', err);
       setPhoneError(t('errors.server'));

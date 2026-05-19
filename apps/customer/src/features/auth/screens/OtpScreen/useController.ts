@@ -11,7 +11,7 @@ export function useController() {
   const { t } = useTranslation();
   const navigation = useNavigation<OtpScreenNavProp>();
   const route = useRoute<OtpScreenRouteProp>();
-  const { phone } = route.params;
+  const { phone, returnTo } = route.params;
 
   // OTP string
   const [digits, setDigits] = useState('');
@@ -46,25 +46,50 @@ const submitOtp = useCallback(
 
     setOtpError(null);
     try {
-      await verifyMutation.mutateAsync({ phone, code });
-      // verifyOtp onSuccess dispatches setAuth → RootNavigator re-renders
-    } catch (err) {
-      console.error('[OtpScreen] verifyOtp error:', err);
-      const error = err as Error;
-      triggerShake();
-        if (error.message === 'INVALID_OTP') {
-          setOtpError(t('auth.otp_invalid'));
-        } else if (error.message === 'OTP_EXPIRED') {
-          setOtpError(t('auth.otp_expired'));
-        } else {
-          setOtpError(t('errors.server'));
-        }
-        // Clear digits on error
-        setDigits('');
+      const res = await verifyMutation.mutateAsync({ phone, code });
+      
+      if (res.isNewUser) {
+        navigation.replace(AUTH_ROUTES.COMPLETE_PROFILE, { returnTo });
+        return;
       }
-    },
-    [phone, verifyMutation, navigation, triggerShake, t],
-  );
+
+      if (returnTo) {
+        navigation.reset({
+          index: 1,
+          routes: [
+            { name: 'CustomerTabs' },
+            { name: returnTo as any },
+          ],
+        });
+      } else {
+        // Fallback if no returnTo: just go to tabs (RootNavigator will handle showing tabs)
+        // Since setAuth was called in the hook, RootNavigator will swap to Main App
+        // But if we are already in the "Auth" stack which is a screen in Root, 
+        // we might want to pop or reset.
+        navigation.reset({ index: 0, routes: [{ name: 'CustomerTabs' }] });
+      }
+    } catch (err: any) {
+      console.error('[OtpScreen] verifyOtp error:', err);
+      triggerShake();
+      
+      const status = err?.response?.status;
+      const message = err?.response?.data?.message;
+
+      if (status === 403) {
+        setOtpError(message ?? t('errors.roleMismatch.merchantInCustomer'));
+      } else if (err.message === 'INVALID_OTP') {
+        setOtpError(t('auth.otp_invalid'));
+      } else if (err.message === 'OTP_EXPIRED') {
+        setOtpError(t('auth.otp_expired'));
+      } else {
+        setOtpError(t('errors.server'));
+      }
+      // Clear digits on error
+      setDigits('');
+    }
+  },
+  [phone, returnTo, verifyMutation, navigation, triggerShake, t],
+);
 
   const handleOtpChange = useCallback(
     (code: string) => {
