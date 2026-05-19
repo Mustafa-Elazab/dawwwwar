@@ -28,6 +28,55 @@ function OrdersStackNav() {
   );
 }
 
+// ─── Icon components — memoized, defined OUTSIDE the navigator ────────────────
+const HomeIcon = React.memo(({ focused, color, size, isOnline }: { focused: boolean; color: string; size: number; isOnline: boolean }) => (
+  <View style={{ position: 'relative' }}>
+    <Icon
+      name={focused ? 'bell' : 'bell-outline'}
+      size={size}
+      color={color}
+    />
+    {isOnline && (
+      <View style={{
+        position: 'absolute', top: -2, right: -2,
+        width: 8, height: 8, borderRadius: 4,
+        backgroundColor: '#1DB954',
+      }} />
+    )}
+  </View>
+));
+
+const DeliveryIcon = React.memo(({ focused, color, size, hasActive }: { focused: boolean; color: string; size: number; hasActive: boolean }) => (
+  <View style={{ position: 'relative' }}>
+    <Icon
+      name={focused ? 'motorbike' : 'motorbike'}
+      size={size}
+      color={hasActive ? color : '#9CA3AF'}
+    />
+    {hasActive && (
+      <View style={{
+        position: 'absolute', top: -2, right: -4,
+        paddingHorizontal: 4, paddingVertical: 1,
+        backgroundColor: '#1DB954', borderRadius: 8,
+      }}>
+        <Text variant="overline" color="#fff" style={{ fontSize: 8 }}>LIVE</Text>
+      </View>
+    )}
+  </View>
+));
+
+const HistoryIcon = React.memo(({ focused, color, size }: { focused: boolean; color: string; size: number }) => (
+  <Icon name="history" size={size} color={color} />
+));
+
+const WalletIcon = React.memo(({ focused, color, size }: { focused: boolean; color: string; size: number }) => (
+  <Icon name={focused ? 'wallet' : 'wallet-outline'} size={size} color={color} />
+));
+
+const ProfileIcon = React.memo(({ focused, color, size }: { focused: boolean; color: string; size: number }) => (
+  <Icon name={focused ? 'account' : 'account-outline'} size={size} color={color} />
+));
+
 export function DriverTabs() {
   const { colors } = useTheme();
   const { t } = useTranslation();
@@ -39,39 +88,28 @@ export function DriverTabs() {
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: colors.tabBar,
-          borderTopColor: colors.tabBarBorder,
+          backgroundColor: colors.surface,
+          borderTopColor: colors.border,
           borderTopWidth: 1,
-          height: 60,
+          height: 64,
           paddingBottom: 8,
+          paddingTop: 8,
         },
-        tabBarShowLabel: false,
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textSecondary,
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: '600',
+        },
       }}
     >
       <Tab.Screen
         name={TAB_ROUTES.AVAILABLE_ORDERS_TAB}
         component={AvailableOrdersScreen}
         options={{
-          tabBarIcon: ({ focused }) => (
-            <View style={{ alignItems: 'center', gap: 2 }}>
-              <View style={{ position: 'relative' }}>
-                <Icon
-                  name={focused ? 'bell' : 'bell-outline'}
-                  size={24}
-                  color={focused ? colors.primary : colors.tabBarIcon}
-                />
-                {isOnline && (
-                  <View style={{
-                    position: 'absolute', top: -2, right: -2,
-                    width: 8, height: 8, borderRadius: 4,
-                    backgroundColor: colors.success,
-                  }} />
-                )}
-              </View>
-              <Text variant="caption" color={focused ? colors.primary : colors.tabBarIcon}>
-                {t('driver.tabs.orders', 'Orders')}
-              </Text>
-            </View>
+          tabBarLabel: t('tabs.home'),
+          tabBarIcon: ({ focused, color, size }) => (
+            <HomeIcon focused={focused} color={color} size={size} isOnline={isOnline} />
           ),
         }}
       />
@@ -79,26 +117,9 @@ export function DriverTabs() {
         name={TAB_ROUTES.ACTIVE_DELIVERY_TAB}
         component={activeOrderId ? ActiveDeliveryScreen : AvailableOrdersScreen}
         options={{
-          tabBarIcon: ({ focused }) => (
-            <View style={{ alignItems: 'center', gap: 2 }}>
-              <Icon
-                name={focused ? 'motorbike' : 'motorbike'}
-                size={24}
-                color={activeOrderId ? colors.primary : colors.tabBarIcon}
-              />
-              {activeOrderId && (
-                <View style={{
-                  position: 'absolute', top: -2, right: -4,
-                  paddingHorizontal: 4, paddingVertical: 1,
-                  backgroundColor: colors.primary, borderRadius: 8,
-                }}>
-                  <Text variant="overline" color="#fff">{t('driver.tabs.live', 'LIVE')}</Text>
-                </View>
-              )}
-              <Text variant="caption" color={activeOrderId ? colors.primary : colors.tabBarIcon}>
-                {t('driver.tabs.delivery', 'Delivery')}
-              </Text>
-            </View>
+          tabBarLabel: t('driver.tabs.delivery', 'Delivery'),
+          tabBarIcon: ({ focused, color, size }) => (
+            <DeliveryIcon focused={focused} color={color} size={size} hasActive={!!activeOrderId} />
           ),
         }}
       />
@@ -106,13 +127,9 @@ export function DriverTabs() {
         name={TAB_ROUTES.ORDERS_TAB}
         component={OrdersStackNav}
         options={{
-          tabBarIcon: ({ focused }) => (
-            <View style={{ alignItems: 'center', gap: 2 }}>
-              <Icon name={focused ? 'history' : 'history'} size={24} color={focused ? colors.primary : colors.tabBarIcon} />
-              <Text variant="caption" color={focused ? colors.primary : colors.tabBarIcon}>
-                {t('driver.tabs.history', 'History')}
-              </Text>
-            </View>
+          tabBarLabel: t('tabs.history'),
+          tabBarIcon: ({ focused, color, size }) => (
+            <HistoryIcon focused={focused} color={color} size={size} />
           ),
         }}
       />
@@ -120,11 +137,9 @@ export function DriverTabs() {
         name={TAB_ROUTES.EARNINGS_TAB}
         component={EarningsScreen}
         options={{
-          tabBarIcon: ({ focused }) => (
-            <View style={{ alignItems: 'center', gap: 2 }}>
-              <Icon name={focused ? 'wallet' : 'wallet-outline'} size={24} color={focused ? colors.primary : colors.tabBarIcon} />
-              <Text variant="caption" color={focused ? colors.primary : colors.tabBarIcon}>{t('driver.tabs.earnings', 'Earnings')}</Text>
-            </View>
+          tabBarLabel: t('driver.tabs.earnings', 'Earnings'),
+          tabBarIcon: ({ focused, color, size }) => (
+            <WalletIcon focused={focused} color={color} size={size} />
           ),
         }}
       />
@@ -132,11 +147,9 @@ export function DriverTabs() {
         name={TAB_ROUTES.PROFILE_TAB}
         component={DriverProfileScreen}
         options={{
-          tabBarIcon: ({ focused }) => (
-            <View style={{ alignItems: 'center', gap: 2 }}>
-              <Icon name={focused ? 'account' : 'account-outline'} size={24} color={focused ? colors.primary : colors.tabBarIcon} />
-              <Text variant="caption" color={focused ? colors.primary : colors.tabBarIcon}>{t('driver.tabs.profile', 'Profile')}</Text>
-            </View>
+          tabBarLabel: t('tabs.profile'),
+          tabBarIcon: ({ focused, color, size }) => (
+            <ProfileIcon focused={focused} color={color} size={size} />
           ),
         }}
       />

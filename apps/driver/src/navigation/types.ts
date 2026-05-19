@@ -1,15 +1,13 @@
 import type { NavigatorScreenParams } from '@react-navigation/native';
-import type { AUTH_ROUTES, TAB_ROUTES, DRIVER_ROUTES } from './routes';
+import type { StackNavigationProp } from '@react-navigation/stack';
+import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import { AUTH_ROUTES, TAB_ROUTES, DRIVER_ROUTES } from './routes';
 
 export type AuthStackParamList = {
   [AUTH_ROUTES.PHONE]: undefined;
   [AUTH_ROUTES.OTP]: { phone: string };
   [AUTH_ROUTES.ROLE]: undefined;
   [AUTH_ROUTES.PENDING]: undefined;
-};
-
-export type AvailableOrdersStackParamList = {
-  [DRIVER_ROUTES.AVAILABLE_ORDERS]: undefined;
 };
 
 export type OrdersStackParamList = {
@@ -22,9 +20,18 @@ export type ActiveDeliveryStackParamList = {
 };
 
 export type DriverTabParamList = {
-  [TAB_ROUTES.AVAILABLE_ORDERS_TAB]: NavigatorScreenParams<AvailableOrdersStackParamList>;
+  [TAB_ROUTES.AVAILABLE_ORDERS_TAB]: undefined;
   [TAB_ROUTES.ACTIVE_DELIVERY_TAB]: NavigatorScreenParams<ActiveDeliveryStackParamList>;
   [TAB_ROUTES.ORDERS_TAB]: NavigatorScreenParams<OrdersStackParamList>;
   [TAB_ROUTES.EARNINGS_TAB]: undefined;
   [TAB_ROUTES.PROFILE_TAB]: undefined;
 };
+
+export type DriverRootStackParamList = {
+  Splash: undefined;
+  Auth: NavigatorScreenParams<AuthStackParamList>;
+  DriverTabs: NavigatorScreenParams<DriverTabParamList>;
+};
+
+export type DriverRootNavProp = StackNavigationProp<DriverRootStackParamList>;
+export type DriverTabNavProp = BottomTabNavigationProp<DriverTabParamList>;

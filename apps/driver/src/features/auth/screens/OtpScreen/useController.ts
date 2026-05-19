@@ -50,16 +50,22 @@ export function useController() {
       try {
         const res = await verifyMutation.mutateAsync({ phone, code });
         // verifyOtp onSuccess dispatches setAuth → RootNavigator re-renders
-        if (res.data.isFirstLogin) {
+        if (res.isNewUser) {
           navigation.navigate(AUTH_ROUTES.ROLE);
         }
         // If not first login: RootNavigator auth guard handles redirect automatically
-      } catch (err) {
-        const error = err as Error;
+      } catch (err: any) {
+        console.error('[OtpScreen] verifyOtp error:', err);
         triggerShake();
-        if (error.message === 'INVALID_OTP') {
+
+        const status = err?.response?.status;
+        const message = err?.response?.data?.message;
+
+        if (status === 403) {
+          setOtpError(message ?? t('errors.roleMismatch.customerInDriver'));
+        } else if (err.message === 'INVALID_OTP') {
           setOtpError(t('auth.otp_invalid'));
-        } else if (error.message === 'OTP_EXPIRED') {
+        } else if (err.message === 'OTP_EXPIRED') {
           setOtpError(t('auth.otp_expired'));
         } else {
           setOtpError(t('errors.server'));
