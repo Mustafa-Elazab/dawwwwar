@@ -59,7 +59,7 @@ export function JS_SplashScreen() {
         ]}
       >
         <View style={styles.iconContainer}>
-          <Icon name="store-front" size={80} color={colors.primary} />
+          <Icon name="storefront" size={80} color={colors.primary} />
         </View>
         <Text style={styles.brandName}>Dawwar</Text>
         <Text style={styles.tagline}>Merchant Platform</Text>

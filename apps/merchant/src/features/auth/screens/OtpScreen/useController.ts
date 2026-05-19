@@ -46,21 +46,30 @@ export function useController() {
 
       setOtpError(null);
       try {
-        await verifyMutation.mutateAsync({ phone, code });
+        const res = await verifyMutation.mutateAsync({ phone, code });
         
-        navigation.dispatch(
-          CommonActions.reset({
-            index: 0,
-            routes: [{ name: 'CreateStoreScreen' }],
-          })
-        );
-      } catch (err) {
+        if (res.isNewUser) {
+          navigation.dispatch(
+            CommonActions.reset({
+              index: 0,
+              routes: [{ name: 'CreateStoreScreen' }],
+            })
+          );
+        } else {
+          // Returning merchant - RootNavigator will handle redirect to MerchantTabs
+        }
+      } catch (err: any) {
         console.error('[OtpScreen] verifyOtp error:', err);
-        const error = err as Error;
         triggerShake();
-        if (error.message === 'INVALID_OTP') {
+
+        const status = err?.response?.status;
+        const message = err?.response?.data?.message;
+
+        if (status === 403) {
+          setOtpError(message ?? t('errors.roleMismatch.customerInMerchant'));
+        } else if (err.message === 'INVALID_OTP') {
           setOtpError(t('auth.otp_invalid'));
-        } else if (error.message === 'OTP_EXPIRED') {
+        } else if (err.message === 'OTP_EXPIRED') {
           setOtpError(t('auth.otp_expired'));
         } else {
           setOtpError(t('errors.server'));

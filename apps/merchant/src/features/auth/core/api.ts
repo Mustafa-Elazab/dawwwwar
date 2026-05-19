@@ -9,7 +9,7 @@ const realAuthApi = {
     return data;
   },
   verifyOtp: async (phone: string, code: string): Promise<ApiResponse<VerifyOtpResponse>> => {
-    const { data } = await api.post('/auth/verify-otp', { phone, code });
+    const { data } = await api.post('/auth/merchant/verify-otp', { phone, code });
     return data;
   },
   getMe: async (): Promise<ApiResponse<any>> => {

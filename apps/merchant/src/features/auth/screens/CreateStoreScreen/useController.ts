@@ -50,7 +50,7 @@ export function useController() {
         governorate,
         latitude,
         longitude,
-      } as any);
+      });
       dispatch(setHasStore(true));
     } catch (err) {
       Toast.show({ type: 'error', text1: t('errors.server') });

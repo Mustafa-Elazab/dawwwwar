@@ -20,8 +20,8 @@ export function useVerifyOtp() {
     onSuccess: async (res) => {
       dispatch(
         setAuth({
-          user: res.data.user,
-          token: res.data.accessToken,
+          user: res.user,
+          token: res.accessToken,
         }),
       );
 
