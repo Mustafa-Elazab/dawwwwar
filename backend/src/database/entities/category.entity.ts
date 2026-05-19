@@ -1,9 +1,11 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { BaseEntity } from './base.entity';
 
 @Entity('categories')
+@Index(['name', 'parentId'], { unique: true })
+@Index(['slug', 'parentId'], { unique: true })
 export class CategoryEntity extends BaseEntity {
-  @Column({ unique: true })
+  @Column()
   name: string;
 
   @Column({ name: 'name_ar' })
@@ -12,7 +14,7 @@ export class CategoryEntity extends BaseEntity {
   @Column({ nullable: true })
   icon: string;
 
-  @Column({ unique: true, nullable: true })
+  @Column({ nullable: true })
   slug: string;
 
   @Column({ name: 'sort_order', default: 0 })

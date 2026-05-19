@@ -50,17 +50,6 @@ export class AuthService {
       throw new BadRequestException('INVALID_PHONE');
     }
 
-    // Create user if first time
-    let user = await this.userRepo.findOne({ where: { phone } });
-    if (!user) {
-      user = this.userRepo.create({ phone, name: '', role: UserRole.CUSTOMER });
-      user = await this.userRepo.save(user);
-
-      // Create wallet for new user
-      const wallet = this.walletRepo.create({ userId: user.id, balance: 0, currency: 'EGP' });
-      await this.walletRepo.save(wallet);
-    }
-
     return this.otpService.sendOtp(phone);
   }
 
@@ -68,11 +57,12 @@ export class AuthService {
   async verifyOtp(
     rawPhone: string,
     code: string,
+    requiredRole: UserRole,
   ): Promise<{
     accessToken: string;
     refreshToken: string;
-    user: UserEntity;
-    isFirstLogin: boolean;
+    user: Partial<UserEntity>;
+    isNewUser: boolean;
   }> {
     const phone = this.normalizePhone(rawPhone);
     const { valid, remaining } = await this.otpService.verifyOtp(phone, code);
@@ -82,14 +72,34 @@ export class AuthService {
       throw new BadRequestException(`INVALID_OTP:${remaining}`);
     }
 
-    const user = await this.userRepo.findOne({ where: { phone } });
-    if (!user) throw new UnauthorizedException('USER_NOT_FOUND');
+    let user = await this.userRepo.findOne({ where: { phone } });
 
-    const isFirstLogin = !user.isApproved && user.role === UserRole.CUSTOMER;
+    if (!user) {
+      // New user — create with the role of the app they registered through
+      user = this.userRepo.create({
+        phone,
+        name: '',
+        role: requiredRole,
+        isApproved: requiredRole === UserRole.CUSTOMER, // customers auto-approved
+      });
+      user = await this.userRepo.save(user);
 
-    // Auto-approve customers
+      // Create wallet for this new user
+      const wallet = this.walletRepo.create({ userId: user.id, balance: 0, currency: 'EGP' });
+      await this.walletRepo.save(wallet);
+    } else {
+      // Existing user — ROLE CHECK
+      if (user.role !== requiredRole) {
+        throw new ForbiddenException(this.getRoleMismatchMessage(user.role, requiredRole));
+      }
+    }
+
+    const isNewUser = !user.name;
+
+    // Auto-approve customers if not already
     if (user.role === UserRole.CUSTOMER && !user.isApproved) {
       user.isApproved = true;
+      await this.userRepo.save(user);
     }
 
     const tokens = await this.generateTokens(user);
@@ -98,7 +108,37 @@ export class AuthService {
     user.refreshToken = await bcrypt.hash(tokens.refreshToken, 10);
     await this.userRepo.save(user);
 
-    return { ...tokens, user, isFirstLogin };
+    return {
+      ...tokens,
+      user: this.sanitizeUser(user),
+      isNewUser,
+    };
+  }
+
+  // ── Human-readable error messages ────────────────────────────────────────
+  private getRoleMismatchMessage(actualRole: UserRole, requiredRole: UserRole): string {
+    const messages: Record<string, string> = {
+      [`${UserRole.CUSTOMER}_into_${UserRole.MERCHANT}`]:
+        'This number is registered as a customer account. To register as a merchant, please contact us.',
+      [`${UserRole.CUSTOMER}_into_${UserRole.DRIVER}`]:
+        'This number is registered as a customer account. To register as a driver, please contact us.',
+      [`${UserRole.MERCHANT}_into_${UserRole.CUSTOMER}`]:
+        'This number is registered as a merchant account. Please use the Dawwar Partner app.',
+      [`${UserRole.MERCHANT}_into_${UserRole.DRIVER}`]:
+        'This number is registered as a merchant. You cannot also be a driver.',
+      [`${UserRole.DRIVER}_into_${UserRole.CUSTOMER}`]:
+        'This number is registered as a driver. Please use the Dawwar Driver app.',
+      [`${UserRole.DRIVER}_into_${UserRole.MERCHANT}`]:
+        'This number is registered as a driver. You cannot also be a merchant.',
+    };
+
+    const key = `${actualRole}_into_${requiredRole}`;
+    return messages[key] ?? `This account has role ${actualRole}, not ${requiredRole}.`;
+  }
+
+  private sanitizeUser(user: UserEntity): Partial<UserEntity> {
+    const { refreshToken, ...sanitized } = user;
+    return sanitized;
   }
 
   // ── Refresh tokens ────────────────────────────────────────────────
@@ -128,19 +168,6 @@ export class AuthService {
   // ── Logout ────────────────────────────────────────────────────────
   async logout(userId: string): Promise<void> {
     await this.userRepo.update(userId, { refreshToken: undefined });
-  }
-
-  // ── Select role (first login) ─────────────────────────────────────
-  async selectRole(userId: string, role: UserRole): Promise<UserEntity> {
-    if (role === UserRole.ADMIN) throw new ForbiddenException('CANNOT_ASSIGN_ADMIN');
-
-    const user = await this.userRepo.findOneOrFail({ where: { id: userId } });
-    user.role = role;
-
-    // Merchants and drivers need approval
-    user.isApproved = role === UserRole.CUSTOMER;
-
-    return this.userRepo.save(user);
   }
 
   // ── Private helpers ───────────────────────────────────────────────

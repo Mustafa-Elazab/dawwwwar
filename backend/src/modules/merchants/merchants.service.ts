@@ -1,7 +1,8 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource } from 'typeorm';
+import { Repository, DataSource, In } from 'typeorm';
 import { MerchantEntity } from '../../database/entities/merchant.entity';
+import { CategoryEntity } from '../../database/entities/category.entity';
 import type { NearbyFilterDto } from './dto/nearby-filter.dto';
 import { CreateMerchantDto } from './dto/create-merchant.dto';
 import { UpdateMerchantDto } from './dto/update-merchant.dto';
@@ -11,6 +12,8 @@ export class MerchantsService {
   constructor(
     @InjectRepository(MerchantEntity)
     private readonly repo: Repository<MerchantEntity>,
+    @InjectRepository(CategoryEntity)
+    private readonly categoryRepo: Repository<CategoryEntity>,
     private readonly dataSource: DataSource,
   ) {}
 
@@ -68,7 +71,7 @@ export class MerchantsService {
     }
     
     if (categoryId) {
-      query = query.andWhere('merchant.category = :categoryId', { categoryId });
+      query = query.andWhere('merchant.parentCategoryId = :categoryId', { categoryId });
     }
 
     if (search) {
@@ -94,8 +97,10 @@ export class MerchantsService {
     const existing = await this.findByUserId(userId);
     if (existing) throw new ConflictException('MERCHANT_ALREADY_EXISTS');
 
+    const { categoryIds, ...rest } = dto;
+
     const merchant = this.repo.create({
-      ...dto,
+      ...rest,
       userId,
       isOpen: false,
       isApproved: true, 
@@ -103,6 +108,12 @@ export class MerchantsService {
       rating: 0,
       totalRatings: 0,
     });
+
+    if (categoryIds && categoryIds.length > 0) {
+      merchant.categories = await this.categoryRepo.find({
+        where: { id: In(categoryIds) },
+      });
+    }
 
     const saved = await this.repo.save(merchant);
     

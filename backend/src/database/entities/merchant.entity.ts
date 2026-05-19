@@ -1,13 +1,17 @@
 import {
   Column,
   Entity,
+  Index,
   JoinColumn,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   OneToOne,
 } from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { UserEntity } from './user.entity';
+import { CategoryEntity } from './category.entity';
 
 export interface DayHours {
   open: string;
@@ -42,8 +46,20 @@ export class MerchantEntity extends BaseEntity {
   @Column({ nullable: true, length: 100 })
   governorate: string;
 
-  @Column()
-  category: string;
+  @Column({ name: 'parent_category_id' })
+  parentCategoryId: string;
+
+  @ManyToOne(() => CategoryEntity)
+  @JoinColumn({ name: 'parent_category_id' })
+  parentCategory: CategoryEntity;
+
+  @ManyToMany(() => CategoryEntity)
+  @JoinTable({
+    name: 'merchant_categories',
+    joinColumn: { name: 'merchant_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'category_id', referencedColumnName: 'id' },
+  })
+  categories: CategoryEntity[];
 
   @Column()
   address: string;

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsString, IsNotEmpty, IsOptional } from 'class-validator';
+import { IsNumber, IsString, IsNotEmpty, IsOptional, IsUUID, IsArray } from 'class-validator';
 
 export class CreateMerchantDto {
   @ApiProperty()
@@ -7,10 +7,16 @@ export class CreateMerchantDto {
   @IsNotEmpty()
   businessName: string;
 
-  @ApiProperty()
-  @IsString()
+  @ApiProperty({ description: 'Parent category ID' })
+  @IsUUID()
   @IsNotEmpty()
-  category: string;
+  parentCategoryId: string;
+
+  @ApiProperty({ type: [String], required: false, description: 'Child category IDs' })
+  @IsOptional()
+  @IsArray()
+  @IsUUID('4', { each: true })
+  categoryIds?: string[];
 
   @ApiProperty()
   @IsString()

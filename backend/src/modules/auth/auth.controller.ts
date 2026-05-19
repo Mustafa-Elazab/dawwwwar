@@ -4,10 +4,9 @@ import { AuthService } from './auth.service';
 import { Public } from '../../common/decorators/public.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { UserEntity } from '../../database/entities/user.entity';
+import { UserEntity, UserRole } from '../../database/entities/user.entity';
 import { SendOtpDto } from './dto/send-otp.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
-import { SelectRoleDto } from './dto/select-role.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { ThrottlerGuard } from '@nestjs/throttler';
 
@@ -25,12 +24,36 @@ export class AuthController {
     return this.authService.sendOtp(dto.phone);
   }
 
-  @Post('verify-otp')
+  @Post('customer/verify-otp')
   @Public()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Verify OTP and receive JWT tokens' })
-  verifyOtp(@Body() dto: VerifyOtpDto) {
-    return this.authService.verifyOtp(dto.phone, dto.code);
+  @ApiOperation({ summary: 'Verify OTP and receive JWT tokens (Customer)' })
+  verifyCustomer(@Body() dto: VerifyOtpDto) {
+    return this.authService.verifyOtp(dto.phone, dto.code, UserRole.CUSTOMER);
+  }
+
+  @Post('merchant/verify-otp')
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Verify OTP and receive JWT tokens (Merchant)' })
+  verifyMerchant(@Body() dto: VerifyOtpDto) {
+    return this.authService.verifyOtp(dto.phone, dto.code, UserRole.MERCHANT);
+  }
+
+  @Post('driver/verify-otp')
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Verify OTP and receive JWT tokens (Driver)' })
+  verifyDriver(@Body() dto: VerifyOtpDto) {
+    return this.authService.verifyOtp(dto.phone, dto.code, UserRole.DRIVER);
+  }
+
+  @Post('admin/verify-otp')
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Verify OTP and receive JWT tokens (Admin)' })
+  verifyAdmin(@Body() dto: VerifyOtpDto) {
+    return this.authService.verifyOtp(dto.phone, dto.code, UserRole.ADMIN);
   }
 
   @Post('refresh')
@@ -47,13 +70,5 @@ export class AuthController {
   @ApiOperation({ summary: 'Logout and invalidate refresh token' })
   logout(@CurrentUser() user: UserEntity) {
     return this.authService.logout(user.id);
-  }
-
-  @Post('select-role')
-  @HttpCode(HttpStatus.OK)
-  @ApiBearerAuth('access-token')
-  @ApiOperation({ summary: 'Select role on first login' })
-  selectRole(@CurrentUser() user: UserEntity, @Body() dto: SelectRoleDto) {
-    return this.authService.selectRole(user.id, dto.role);
   }
 }
