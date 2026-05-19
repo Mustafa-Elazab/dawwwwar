@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "130477076853",
+    "project_id": "bellacity-c73bb",
+    "storage_bucket": "bellacity-c73bb.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:130477076853:android:b19af70449b2520805e33c",
+        "android_client_info": {
+          "package_name": "com.bellacity"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAZNfU6B5bWNx3V8XZoBCErUpyNly2htJk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:130477076853:android:5f5ebf2745d067a205e33c",
+        "android_client_info": {
+          "package_name": "com.dawwar.customer"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAZNfU6B5bWNx3V8XZoBCErUpyNly2htJk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
