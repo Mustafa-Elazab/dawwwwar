@@ -119,6 +119,23 @@
     "profile_updated": "Profile updated successfully!"
   },
 
+  "gate": {
+    "checkoutTitle": "Sign in to complete your order",
+    "checkoutSubtitle": "We need your account details to deliver your order safely.",
+    "loginToOrder": "Sign In and Complete Order",
+    "ordersTitle": "Track your orders",
+    "ordersSubtitle": "Sign in to view your current and past orders.",
+    "loginToViewOrders": "Sign In to View Orders",
+    "walletTitle": "Your digital wallet",
+    "walletSubtitle": "Sign in to access your balance and transactions.",
+    "loginToWallet": "Sign In to Wallet",
+    "addressTitle": "Delivery addresses",
+    "addressSubtitle": "Sign in to save and manage your addresses.",
+    "loginToAddress": "Sign In to Add Address",
+    "itemsSaved": "items saved in your cart",
+    "continueBrowsing": "Continue Browsing"
+  },
+
   "home": {
     "deliver_to": "Deliver to",
     "welcome": "Welcome to Dawwar",
@@ -666,7 +683,15 @@
     "camera_denied": "Camera access was denied. Please enable it in settings.",
     "microphone_denied": "Microphone access was denied. Please enable it in settings.",
     "no_internet": "No internet connection",
-    "cancel_failed": "Failed to cancel order"
+    "cancel_failed": "Failed to cancel order",
+    "roleMismatch": {
+      "customerInMerchant": "This number is registered as a customer account. To register as a merchant, please contact us.",
+      "customerInDriver": "This number is registered as a customer account. To register as a driver, please contact us.",
+      "merchantInCustomer": "This number is registered as a merchant account. Please use the Dawwar Partner app.",
+      "merchantInDriver": "This number is registered as a merchant. You cannot also be a driver.",
+      "driverInCustomer": "This number is registered as a driver account. Please use the Dawwar Driver app.",
+      "driverInMerchant": "This number is registered as a driver. You cannot also be a merchant."
+    }
   },
 
   "driver": {
