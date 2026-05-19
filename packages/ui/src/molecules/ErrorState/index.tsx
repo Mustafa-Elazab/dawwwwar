@@ -1,6 +1,10 @@
-import React from 'react';
-import { View } from 'react-native';
-import { useTheme } from '@dawwar/theme';
+import React, { useEffect } from 'react';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from 'react-native-reanimated';
+import { useTheme, springs } from '@dawwar/theme';
 import { Text, Icon, Button } from '../../atoms';
 import { createStyles } from './styles';
 import type { ErrorStateProps } from './types';
@@ -13,13 +17,34 @@ export function ErrorState({
   const { colors } = useTheme();
   const styles = createStyles(colors);
 
+  // ─── Animations ───────────────────────────────────────────────────
+  const opacity = useSharedValue(0);
+  const translateY = useSharedValue(10);
+
+  useEffect(() => {
+    opacity.value = withSpring(1, springs.soft);
+    translateY.value = withSpring(0, springs.soft);
+  }, [opacity, translateY]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ translateY: translateY.value }],
+  }));
+
   return (
-    <View style={styles.container} testID={testID}>
-      <Icon name="alert-circle-outline" size={56} color={colors.error} />
-      <Text style={styles.message}>{message}</Text>
+    <Animated.View style={[styles.container, animatedStyle]} testID={testID}>
+      <Icon name="alert-circle-outline" size={64} color={colors.error} />
+      <Text variant="h3" style={styles.message}>
+        {message}
+      </Text>
       {onRetry && (
-        <Button label="Try Again" onPress={onRetry} variant="outline" />
+        <Button
+          label="Try Again"
+          onPress={onRetry}
+          variant="outline"
+          style={{ marginTop: 16 }}
+        />
       )}
-    </View>
+    </Animated.View>
   );
 }

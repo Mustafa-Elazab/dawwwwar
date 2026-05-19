@@ -7,7 +7,12 @@ export const createStyles = (colors: AppColors) =>
     base: {
       borderRadius: radius.lg,
       backgroundColor: colors.card,
-      overflow: 'hidden',
+      // On iOS, overflow: 'hidden' clips shadows. 
+      // We need to keep it visible for premium feel.
+    },
+    pressable: {
+      width: '100%',
+      // If content needs rounding, apply it to the children or use a wrapper.
     },
     elevated: { ...shadows.md },
     flat: { backgroundColor: colors.surface },

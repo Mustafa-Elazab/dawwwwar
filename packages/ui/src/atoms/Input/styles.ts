@@ -4,11 +4,17 @@ import { space, radius, typography } from '@dawwar/theme';
 
 export const createStyles = (colors: AppColors, isFocused: boolean, hasError: boolean) =>
   StyleSheet.create({
-    container: { gap: space.xs },
-    label: {
-      ...typography.label,
-      color: colors.textSecondary,
-      textAlign:"auto"
+    container: {
+      gap: space.xs,
+    },
+    inputWrapper: {
+      marginTop: space.md, // Make space for floating label
+    },
+    labelFloating: {
+      position: 'absolute',
+      left: space.md,
+      top: space.md,
+      zIndex: 1,
     },
     inputRow: {
       flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
@@ -17,11 +23,6 @@ export const createStyles = (colors: AppColors, isFocused: boolean, hasError: bo
       borderRadius: radius.md,
       paddingHorizontal: space.md,
       backgroundColor: colors.surface,
-      borderColor: hasError
-        ? colors.error
-        : isFocused
-        ? colors.borderFocus
-        : colors.border,
     },
     input: {
       flex: 1,
@@ -36,11 +37,13 @@ export const createStyles = (colors: AppColors, isFocused: boolean, hasError: bo
       ...typography.caption,
       color: colors.error,
       textAlign: I18nManager.isRTL ? 'right' : 'left',
+      marginTop: space.xxs,
     },
     hint: {
       ...typography.caption,
       color: colors.textSecondary,
       textAlign: I18nManager.isRTL ? 'right' : 'left',
+      marginTop: space.xxs,
     },
     multiline: { minHeight: 100, textAlignVertical: 'top' },
     disabled: { opacity: 0.6, backgroundColor: colors.surfaceVariant },

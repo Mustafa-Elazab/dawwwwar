@@ -1,6 +1,11 @@
 import React from 'react';
-import { TouchableOpacity, View } from 'react-native';
-import { useTheme } from '@dawwar/theme';
+import { Pressable, View } from 'react-native';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from 'react-native-reanimated';
+import { useTheme, springs } from '@dawwar/theme';
 import { createStyles } from './styles';
 import type { CardProps } from './types';
 
@@ -14,20 +19,54 @@ export function Card({
 }: CardProps) {
   const { colors } = useTheme();
   const styles = createStyles(colors);
-  const containerStyle = [styles.base, styles[variant], disabled && styles.disabled, style];
+
+  // ─── Animations ───────────────────────────────────────────────────
+  const scale = useSharedValue(1);
+  const opacity = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+    opacity: opacity.value,
+  }));
+
+  const handlePressIn = () => {
+    if (onPress && !disabled) {
+      scale.value = withSpring(0.98, springs.stiff);
+      opacity.value = withSpring(0.92, springs.soft);
+    }
+  };
+
+  const handlePressOut = () => {
+    scale.value = withSpring(1, springs.bouncy);
+    opacity.value = withSpring(1, springs.soft);
+  };
+
+  const containerStyle = [
+    styles.base,
+    styles[variant],
+    disabled && styles.disabled,
+  ];
 
   if (onPress) {
     return (
-      <TouchableOpacity
-        style={containerStyle}
-        onPress={onPress}
-        activeOpacity={0.8}
-        disabled={disabled}
-        testID={testID}
-      >
-        {children}
-      </TouchableOpacity>
+      <Animated.View style={[containerStyle, animatedStyle, style]}>
+        <Pressable
+          onPress={onPress}
+          onPressIn={handlePressIn}
+          onPressOut={handlePressOut}
+          disabled={disabled}
+          testID={testID}
+          style={styles.pressable}
+        >
+          {children}
+        </Pressable>
+      </Animated.View>
     );
   }
-  return <View style={containerStyle} testID={testID}>{children}</View>;
+
+  return (
+    <View style={[containerStyle, style]} testID={testID}>
+      {children}
+    </View>
+  );
 }

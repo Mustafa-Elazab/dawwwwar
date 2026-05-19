@@ -1,6 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Image } from 'react-native';
-import { useTheme } from '@dawwar/theme';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from 'react-native-reanimated';
+import { useTheme, springs } from '@dawwar/theme';
 import { Text, Icon, Button } from '../../atoms';
 import { createStyles } from './styles';
 import type { EmptyStateProps } from './types';
@@ -17,22 +22,46 @@ export function EmptyState({
   const { colors } = useTheme();
   const styles = createStyles(colors);
 
+  // ─── Animations ───────────────────────────────────────────────────
+  const opacity = useSharedValue(0);
+  const scale = useSharedValue(0.9);
+
+  useEffect(() => {
+    opacity.value = withSpring(1, springs.soft);
+    scale.value = withSpring(1, springs.bouncy);
+  }, [opacity, scale]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ scale: scale.value }],
+  }));
+
   const renderVisual = () => {
-    if (illustration) return <View style={styles.visualContainer}>{illustration}</View>;
-    if (image) return <Image source={image} style={styles.image} resizeMode="contain" />;
-    
+    if (illustration)
+      return <View style={styles.visualContainer}>{illustration}</View>;
+    if (image)
+      return (
+        <Image source={image} style={styles.image} resizeMode="contain" />
+      );
+
     return (
       <View style={styles.iconContainer}>
-        <Icon name={icon} size={64} color={colors.primary} />
+        <Icon name={icon} size={80} color={colors.primary} />
       </View>
     );
   };
 
   return (
-    <View style={styles.container} testID={testID}>
+    <Animated.View style={[styles.container, animatedStyle]} testID={testID}>
       {renderVisual()}
-      <Text style={styles.title}>{title}</Text>
-      {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
+      <Text variant="h3" style={styles.title}>
+        {title}
+      </Text>
+      {subtitle && (
+        <Text variant="body1" style={styles.subtitle}>
+          {subtitle}
+        </Text>
+      )}
       {action && (
         <Button
           label={action.label}
@@ -41,6 +70,6 @@ export function EmptyState({
           style={styles.actionButton}
         />
       )}
-    </View>
+    </Animated.View>
   );
 }

@@ -1,4 +1,3 @@
-export { Header } from './Header';
 export { Card } from './Card';
 export { ListItem } from './ListItem';
 export { EmptyState } from './EmptyState';
@@ -9,7 +8,6 @@ export { SearchBar } from './SearchBar';
 export { StepIndicator } from './StepIndicator';
 export { DeviceGuidance } from './DeviceGuidance';
 
-export type { HeaderProps } from './Header/types';
 export type { CardProps, CardVariant } from './Card/types';
 export type { ListItemProps } from './ListItem/types';
 export type { EmptyStateProps } from './EmptyState/types';
