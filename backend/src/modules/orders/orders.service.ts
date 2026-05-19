@@ -31,6 +31,7 @@ import { DriversService } from '../drivers/drivers.service';
 import { PromoService } from '../promo/promo.service';
 import { WalletService } from '../wallet/wallet.service';
 import { DeliveryFeeService } from './delivery-fee.service';
+import { validateOrderTransition, FINAL_STATUSES } from './orders.state-machine';
 import type { PlaceOrderDto } from './dto/place-order.dto';
 import type { PlaceCustomOrderDto } from './dto/place-custom-order.dto';
 import type { UpdateDeliveryStatusDto } from './dto/update-delivery-status.dto';
@@ -345,177 +346,110 @@ export class OrdersService {
 
   // ── Merchant: accept order ─────────────────────────────────────────
   async merchantAccept(orderId: string, userId: string, prepMinutes: number): Promise<OrderEntity> {
-    const order = await this.getOrderById(orderId);
     const merchant = await this.merchantsService.findByUserId(userId);
+    if (!merchant) throw new ForbiddenException('NOT_A_MERCHANT');
 
-    if (!merchant || order.merchantId !== merchant.id) {
+    const order = await this.getOrderById(orderId);
+    if (order.merchantId !== merchant.id) {
       throw new ForbiddenException('CANNOT_MANAGE_ORDER');
     }
-    if (order.status !== OrderStatus.PENDING && order.status !== OrderStatus.DRIVER_ASSIGNED) {
-      throw new BadRequestException('ORDER_NOT_PENDING');
+
+    // Determine target status
+    const targetStatus = order.status === OrderStatus.DRIVER_ASSIGNED 
+      ? OrderStatus.DRIVER_ASSIGNED 
+      : OrderStatus.ACCEPTED;
+
+    const updated = await this.transitionTo(orderId, targetStatus, userId);
+
+    // Side effect: Try assigning driver if not already assigned
+    if (!updated.driverId && updated.deliveryLatitude && updated.deliveryLongitude) {
+      const searchLat = updated.merchant?.latitude ?? updated.deliveryLatitude;
+      const searchLng = updated.merchant?.longitude ?? updated.deliveryLongitude;
+      const nearestDriver = await this.driversService.findNearestOnlineDriver(
+        searchLat,
+        searchLng,
+        5,
+      );
+
+      if (nearestDriver) {
+        return this.transitionTo(orderId, OrderStatus.DRIVER_ASSIGNED, 'SYSTEM', {
+          driverId: nearestDriver.userId,
+        });
+      }
     }
 
-    return this.dataSource.transaction(async (manager) => {
-      // If driver already assigned, stay as DRIVER_ASSIGNED but mark acceptedAt
-      const nextStatus = order.status === OrderStatus.DRIVER_ASSIGNED ? OrderStatus.DRIVER_ASSIGNED : OrderStatus.ACCEPTED;
-      
-      await manager.update(OrderEntity, orderId, {
-        status: nextStatus,
-        acceptedAt: new Date(),
-      });
-
-      await this.createOrderEvent(manager, orderId, nextStatus, 'Merchant Accepted', 'قبل المحل الطلب');
-
-      let updated = await manager.findOne(OrderEntity, {
-        where: { id: orderId },
-        relations: ['items', 'merchant', 'driver'],
-      });
-
-      // Try assigning driver if not already assigned
-      if (!updated?.driverId && updated?.deliveryLatitude && updated?.deliveryLongitude) {
-        const searchLat = updated.merchant?.latitude ?? updated.deliveryLatitude;
-        const searchLng = updated.merchant?.longitude ?? updated.deliveryLongitude;
-        const nearestDriver = await this.driversService.findNearestOnlineDriver(
-          searchLat,
-          searchLng,
-          5,
-        );
-
-        if (nearestDriver) {
-          await manager.update(OrderEntity, orderId, {
-            driverId: nearestDriver.userId,
-            status: OrderStatus.DRIVER_ASSIGNED,
-            assignedAt: new Date(),
-          });
-          
-          await this.createOrderEvent(manager, orderId, OrderStatus.DRIVER_ASSIGNED, 'Driver Assigned', 'تم تعيين سائق');
-
-          updated = await manager.findOne(OrderEntity, {
-            where: { id: orderId },
-            relations: ['items', 'merchant', 'driver'],
-          });
-        }
+    if (updated.customerId) {
+      this.gatewayService.notifyOrderStatusChanged(orderId, updated.status, updated);
+      void this.orderNotifications
+        .notifyCustomerStatusChange(updated, '✅ قبل المحل طلبك — جاري التحضير')
+        .catch(() => {});
+        
+      if (updated.driverId) {
+        void this.orderNotifications.notifyCustomerDriverAssigned(updated).catch(() => {});
+        this.gatewayService.notifyDriverAssigned(orderId, updated.customerId, updated.driver);
       }
+    }
 
-      return updated as OrderEntity;
-    }).then((updated) => {
-      if (updated.customerId) {
-        this.gatewayService.notifyOrderStatusChanged(orderId, updated.status, updated);
-        void this.orderNotifications
-          .notifyCustomerStatusChange(updated, '✅ قبل المحل طلبك — جاري التحضير')
-          .catch(() => {});
-          
-        if (updated.driverId) {
-          void this.orderNotifications.notifyCustomerDriverAssigned(updated).catch(() => {});
-          this.gatewayService.notifyDriverAssigned(orderId, updated.customerId, updated.driver);
-        }
-      }
-      return updated;
-    });
+    return updated;
   }
 
   // ── Merchant: reject order ─────────────────────────────────────────
   async merchantReject(orderId: string, userId: string, reason: string): Promise<OrderEntity> {
-    const order = await this.getOrderById(orderId);
     const merchant = await this.merchantsService.findByUserId(userId);
+    if (!merchant) throw new ForbiddenException('NOT_A_MERCHANT');
 
-    if (!merchant || order.merchantId !== merchant.id) {
+    const order = await this.getOrderById(orderId);
+    if (order.merchantId !== merchant.id) {
       throw new ForbiddenException('CANNOT_MANAGE_ORDER');
     }
 
-    return this.dataSource.transaction(async (manager) => {
-      if (order.isPaid && order.paymentMethod === PaymentMethod.WALLET) {
-        await this.walletService.creditWallet(
-          order.customerId,
-          order.total,
-          TransactionReason.REFUND,
-          `Refund: order ${order.orderNumber} rejected by merchant`,
-          orderId,
-          manager,
-        );
-      }
+    const updated = await this.transitionTo(orderId, OrderStatus.REJECTED, userId, {}, { reason });
 
-      await manager.update(OrderEntity, orderId, {
-        status: OrderStatus.REJECTED,
-        cancelledAt: new Date(),
-      });
-
-      await this.createOrderEvent(manager, orderId, OrderStatus.REJECTED, 'Merchant Rejected', 'رفض المحل الطلب', { reason });
-
-      return manager.findOne(OrderEntity, {
-        where: { id: orderId },
-        relations: ['items', 'merchant', 'driver'],
-      }) as Promise<OrderEntity>;
-    }).then((updated) => {
-      if (updated.customerId) {
-        this.gatewayService.notifyOrderStatusChanged(orderId, OrderStatus.REJECTED, updated);
-        void this.orderNotifications.notifyCustomerOrderRejected(updated).catch(() => {});
-      }
-      return updated;
-    });
+    if (updated.customerId) {
+      this.gatewayService.notifyOrderStatusChanged(orderId, OrderStatus.REJECTED, updated);
+      void this.orderNotifications.notifyCustomerOrderRejected(updated).catch(() => {});
+    }
+    return updated;
   }
 
   // ── Merchant: mark ready ───────────────────────────────────────────
   async merchantMarkReady(orderId: string, userId: string): Promise<OrderEntity> {
-    const order = await this.getOrderById(orderId);
     const merchant = await this.merchantsService.findByUserId(userId);
-    if (!merchant || order.merchantId !== merchant.id) {
+    if (!merchant) throw new ForbiddenException('NOT_A_MERCHANT');
+
+    const order = await this.getOrderById(orderId);
+    if (order.merchantId !== merchant.id) {
       throw new ForbiddenException('ACCESS_DENIED');
     }
 
-    const newStatus = OrderStatus.READY;
+    const updated = await this.transitionTo(orderId, OrderStatus.READY, userId);
 
-    return this.dataSource.transaction(async (manager) => {
-       await manager.update(OrderEntity, orderId, { status: newStatus });
-       await this.createOrderEvent(manager, orderId, newStatus, 'Order Ready', 'الطلب جاهز للاستلام');
-
-       return manager.findOne(OrderEntity, {
-         where: { id: orderId },
-         relations: ['items', 'merchant', 'driver'],
-       }) as Promise<OrderEntity>;
-    })
-.then((updated) => {
-      if (updated.customerId) {
-        this.gatewayService.notifyOrderStatusChanged(orderId, newStatus, updated);
-        void this.orderNotifications
-          .notifyCustomerStatusChange(updated, '✅ طلبك جاهز للاستلام')
-          .catch(() => {});
-      }
-      return updated;
-    });
+    if (updated.customerId) {
+      this.gatewayService.notifyOrderStatusChanged(orderId, OrderStatus.READY, updated);
+      void this.orderNotifications
+        .notifyCustomerStatusChange(updated, '✅ طلبك جاهز للاستلام')
+        .catch(() => {});
+    }
+    return updated;
   }
 
   // ── Driver: accept order ───────────────────────────────────────────
   async driverAccept(orderId: string, driverId: string): Promise<OrderEntity> {
+    // If order already has a driver, throw
     const order = await this.getOrderById(orderId);
-    if (order.status !== OrderStatus.PENDING && order.status !== OrderStatus.ACCEPTED) {
+    if (order.driverId) {
       throw new BadRequestException('ORDER_ALREADY_TAKEN');
     }
 
-    return this.dataSource.transaction(async (manager) => {
-      // If merchant already accepted, stay in READY or just move to DRIVER_ASSIGNED
-      // For now, move to DRIVER_ASSIGNED as it's the standard active state
-      const nextStatus = OrderStatus.DRIVER_ASSIGNED;
-      
-      await manager.update(OrderEntity, orderId, {
-        driverId,
-        status: nextStatus,
-        assignedAt: new Date(),
-      });
-
-      await this.createOrderEvent(manager, orderId, nextStatus, 'Driver Assigned', 'تم تعيين سائق');
-
-      return manager.findOne(OrderEntity, {
-        where: { id: orderId },
-        relations: ['items', 'merchant', 'driver'],
-      }) as Promise<OrderEntity>;
-    }).then((updated) => {
-      if (updated.customerId) {
-        this.gatewayService.notifyOrderStatusChanged(orderId, updated.status, updated);
-        void this.orderNotifications.notifyCustomerDriverAssigned(updated).catch(() => {});
-      }
-      return updated;
+    const updated = await this.transitionTo(orderId, OrderStatus.DRIVER_ASSIGNED, driverId, {
+      driverId,
     });
+
+    if (updated.customerId) {
+      this.gatewayService.notifyOrderStatusChanged(orderId, updated.status, updated);
+      void this.orderNotifications.notifyCustomerDriverAssigned(updated).catch(() => {});
+    }
+    return updated;
   }
 
   // ── Driver: decline order ──────────────────────────────────────────
@@ -571,27 +505,108 @@ export class OrdersService {
     }
   }
 
-  private validateStatusTransition(current: OrderStatus, next: OrderStatus) {
-    const transitions: Record<OrderStatus, OrderStatus[]> = {
-      [OrderStatus.PENDING]: [OrderStatus.ACCEPTED, OrderStatus.REJECTED, OrderStatus.CANCELLED],
-      [OrderStatus.ACCEPTED]: [OrderStatus.READY, OrderStatus.DRIVER_ASSIGNED, OrderStatus.CANCELLED],
-      [OrderStatus.READY]: [OrderStatus.DRIVER_ASSIGNED, OrderStatus.CANCELLED],
-      [OrderStatus.DRIVER_ASSIGNED]: [OrderStatus.PICKED_UP, OrderStatus.AT_SHOP, OrderStatus.CANCELLED, OrderStatus.READY], // READY if driver unassigned
-      [OrderStatus.AT_SHOP]: [OrderStatus.SHOPPING, OrderStatus.CANCELLED],
-      [OrderStatus.SHOPPING]: [OrderStatus.PURCHASED, OrderStatus.CANCELLED],
-      [OrderStatus.PURCHASED]: [OrderStatus.IN_TRANSIT, OrderStatus.CANCELLED],
-      [OrderStatus.PICKED_UP]: [OrderStatus.IN_TRANSIT, OrderStatus.CANCELLED],
-      [OrderStatus.IN_TRANSIT]: [OrderStatus.DELIVERED, OrderStatus.CANCELLED],
-      [OrderStatus.DELIVERED]: [OrderStatus.COMPLETED],
-      [OrderStatus.COMPLETED]: [],
-      [OrderStatus.REJECTED]: [],
-      [OrderStatus.CANCELLED]: [],
-    };
+  /**
+   * Centralized state machine execution.
+   * Performs locking, validation, side-effects, and persistence atomically.
+   */
+  async transitionTo(
+    orderId: string,
+    nextStatus: OrderStatus,
+    actorId?: string, // user performing the action
+    additionalData: Partial<OrderEntity> = {},
+    metadata: Record<string, any> = {},
+  ): Promise<OrderEntity> {
+    return this.dataSource.transaction(async (manager) => {
+      // 1. Fetch order with PESSIMISTIC_WRITE lock
+      // This prevents multiple actors (e.g. two drivers) from changing status concurrently
+      const order = await manager.findOne(OrderEntity, {
+        where: { id: orderId },
+        lock: { mode: 'pessimistic_write' },
+        relations: ['merchant', 'customer', 'driver'],
+      });
 
-    const allowed = transitions[current] || [];
-    if (!allowed.includes(next)) {
-      throw new BadRequestException(`INVALID_STATUS_TRANSITION:${current}->${next}`);
-    }
+      if (!order) throw new NotFoundException('ORDER_NOT_FOUND');
+
+      // 2. Validate transition
+      validateOrderTransition(order.status, nextStatus);
+
+      // Race condition check: Ensure driver isn't already assigned to someone else
+      if (nextStatus === OrderStatus.DRIVER_ASSIGNED && order.driverId && order.driverId !== actorId) {
+        throw new BadRequestException('ORDER_ALREADY_ASSIGNED');
+      }
+
+      // 3. Status-specific side effects
+      const updateData: Partial<OrderEntity> = { status: nextStatus, ...additionalData };
+
+      // REJECTED or CANCELLED -> Handle Refunds
+      if ((nextStatus === OrderStatus.REJECTED || nextStatus === OrderStatus.CANCELLED) && order.isPaid) {
+        // Refund if paid via wallet
+        if (order.paymentMethod === PaymentMethod.WALLET) {
+          await this.walletService.creditWallet(
+            order.customerId,
+            Number(order.total),
+            TransactionReason.REFUND,
+            `Refund: Order ${order.orderNumber} ${nextStatus.toLowerCase()}`,
+            order.id,
+            manager,
+            `REFUND_${order.id}_${nextStatus}`
+          );
+        }
+        updateData.cancelledAt = new Date();
+      }
+
+      // ACCEPTED
+      if (nextStatus === OrderStatus.ACCEPTED) {
+        updateData.acceptedAt = new Date();
+      }
+
+      // DRIVER_ASSIGNED
+      if (nextStatus === OrderStatus.DRIVER_ASSIGNED) {
+        updateData.assignedAt = new Date();
+      }
+
+      // IN_TRANSIT (Picked up)
+      if (nextStatus === OrderStatus.IN_TRANSIT && !order.pickedUpAt) {
+        updateData.pickedUpAt = new Date();
+      }
+
+      // DELIVERED
+      if (nextStatus === OrderStatus.DELIVERED) {
+        updateData.deliveredAt = new Date();
+      }
+
+      // COMPLETED -> Finalize Payments
+      if (nextStatus === OrderStatus.COMPLETED) {
+        updateData.completedAt = new Date();
+        if (!order.commissionsDeducted) {
+          await this.finalizePayments(order, manager);
+          updateData.commissionsDeducted = true;
+        }
+      }
+
+      // 4. Persistence
+      await manager.update(OrderEntity, orderId, updateData as any);
+      
+      // 5. Audit Trail
+      await this.createOrderEvent(
+        manager,
+        orderId,
+        nextStatus,
+        `Status change to ${nextStatus}`,
+        `تغيير الحالة إلى ${nextStatus}`,
+        { ...metadata, actorId }
+      );
+
+      return manager.findOne(OrderEntity, {
+        where: { id: orderId },
+        relations: ['items', 'merchant', 'driver', 'driver.user', 'customer'],
+      }) as Promise<OrderEntity>;
+    });
+  }
+
+  private validateStatusTransition(current: OrderStatus, next: OrderStatus) {
+    // Deprecated in favor of orders.state-machine.ts
+    validateOrderTransition(current, next);
   }
 
   // ── Driver: update status ──────────────────────────────────────────
@@ -610,88 +625,42 @@ export class OrdersService {
       return order; // Idempotency
     }
 
-    this.validateStatusTransition(order.status, dto.status);
+    const additionalData: Partial<OrderEntity> = {};
+    if (dto.status === OrderStatus.IN_TRANSIT) {
+      if (dto.actualAmount !== undefined) additionalData.actualAmount = dto.actualAmount;
+      if (dto.receiptImage) additionalData.receiptImage = dto.receiptImage;
+    }
 
-    return this.dataSource.transaction(async (manager) => {
-      const updateData: Partial<OrderEntity> = { status: dto.status };
+    const updated = await this.transitionTo(orderId, dto.status, driverId, additionalData);
 
+    if (updated.customerId) {
+      this.gatewayService.notifyOrderStatusChanged(orderId, dto.status, updated);
       if (dto.status === OrderStatus.IN_TRANSIT) {
-        updateData.pickedUpAt = new Date();
-        if (dto.actualAmount !== undefined) updateData.actualAmount = dto.actualAmount;
-        if (dto.receiptImage) updateData.receiptImage = dto.receiptImage;
+        void this.orderNotifications.notifyCustomerStatusChange(updated, '🛵 طلبك في الطريق إليك').catch(() => {});
       }
-      
-      if (dto.status === OrderStatus.DELIVERED) {
-        updateData.deliveredAt = new Date();
-      }
-      
       if (dto.status === OrderStatus.COMPLETED) {
-        updateData.completedAt = new Date();
-
-        if (!order.commissionsDeducted) {
-          await this.finalizePayments(order, manager);
-          updateData.commissionsDeducted = true;
-        }
+        void this.orderNotifications.notifyCustomerStatusChange(updated, '✅ تم توصيل طلبك بنجاح').catch(() => {});
       }
-
-      await manager.update(OrderEntity, orderId, updateData as any);
-      await this.createOrderEvent(manager, orderId, dto.status, `Status: ${dto.status}`, `الحالة: ${dto.status}`);
-      
-      return manager.findOne(OrderEntity, {
-        where: { id: orderId },
-        relations: ['items', 'merchant', 'driver'],
-      }) as Promise<OrderEntity>;
-    }).then((updated) => {
-      if (updated.customerId) {
-        this.gatewayService.notifyOrderStatusChanged(orderId, dto.status, updated);
-        if (dto.status === OrderStatus.IN_TRANSIT) {
-          void this.orderNotifications.notifyCustomerStatusChange(updated, '🛵 طلبك في الطريق إليك').catch(() => {});
-        }
-        if (dto.status === OrderStatus.COMPLETED) {
-          void this.orderNotifications.notifyCustomerStatusChange(updated, '✅ تم توصيل طلبك بنجاح').catch(() => {});
-        }
-      }
-      return updated;
-    });
+    }
+    return updated;
   }
 
   // ── Customer: cancel order ──────────────────────────────────────────
   async customerCancel(orderId: string, customerId: string, isAdmin = false): Promise<OrderEntity> {
     const order = await this.getOrderById(orderId);
     if (!isAdmin && order.customerId !== customerId) throw new ForbiddenException('NOT_YOUR_ORDER');
+    
+    // Policy: Customers can only cancel while PENDING
     if (order.status !== OrderStatus.PENDING && !isAdmin) {
       throw new BadRequestException('CAN_ONLY_CANCEL_PENDING');
     }
 
-    return this.dataSource.transaction(async (manager) => {
-      if (order.isPaid && order.paymentMethod === PaymentMethod.WALLET) {
-        await this.walletService.creditWallet(
-          order.customerId,
-          order.total,
-          TransactionReason.REFUND,
-          `Refund: order ${order.orderNumber} cancelled by customer`,
-          orderId,
-          manager,
-        );
-      }
+    const updated = await this.transitionTo(orderId, OrderStatus.CANCELLED, customerId);
 
-      await manager.update(OrderEntity, orderId, {
-        status: OrderStatus.CANCELLED,
-        cancelledAt: new Date(),
-      });
-
-      await this.createOrderEvent(manager, orderId, OrderStatus.CANCELLED, 'Order Cancelled', 'تم إلغاء الطلب');
-
-      return manager.findOne(OrderEntity, {
-        where: { id: orderId },
-        relations: ['items', 'merchant', 'driver'],
-      }) as Promise<OrderEntity>;
-    }).then((updated) => {
-      if (order.merchantId) {
-        this.gatewayService.notifyOrderStatusChanged(orderId, OrderStatus.CANCELLED, updated);
-      }
-      return updated;
-    });
+    if (order.merchantId) {
+      this.gatewayService.notifyOrderStatusChanged(orderId, OrderStatus.CANCELLED, updated);
+    }
+    return updated;
   }
 
   // ── Driver: get available orders ────────────────────────────────────
