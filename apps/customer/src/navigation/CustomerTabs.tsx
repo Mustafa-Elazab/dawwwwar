@@ -27,8 +27,12 @@ import { HomeStack } from './stacks/HomeStack';
 import { OrdersStack } from './stacks/OrdersStack';
 import { ProfileStack } from './stacks/ProfileStack';
 import { CategoriesScreen } from './placeholders';
+import { GuestProfileScreen } from '../features/profile/screens/GuestProfileScreen';
+import { GuestLoginPromptScreen } from '../features/orders/screens/GuestLoginPromptScreen';
 
 import { GlobalCartToast } from '../features/cart/components/GlobalCartToast';
+import { useAppSelector } from '../store/hooks';
+import { selectAuthStatus } from '../store/slices/auth.slice';
 
 import { useTranslation } from 'react-i18next';
 
@@ -191,6 +195,8 @@ function CustomTabBar({
 
 export function CustomerTabs() {
   const { colors } = useTheme();
+  const authStatus = useAppSelector(selectAuthStatus);
+  const isGuest = authStatus === 'guest';
 
   return (
     <>
@@ -216,12 +222,12 @@ export function CustomerTabs() {
 
         <Tab.Screen
           name={TAB_ROUTES.ORDERS_TAB}
-          component={OrdersStack}
+          component={isGuest ? GuestLoginPromptScreen : OrdersStack}
         />
 
         <Tab.Screen
           name={TAB_ROUTES.PROFILE_TAB}
-          component={ProfileStack}
+          component={isGuest ? GuestProfileScreen : ProfileStack}
         />
       </Tab.Navigator>
 

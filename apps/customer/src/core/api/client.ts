@@ -26,13 +26,19 @@ tokenManager.setStorage(mmkvTokenStorage);
 idempotencyManager.setStorage(mmkvIdempotencyStorage);
 
 export const api = createApiClient(API_BASE_URL);
+export const publicApi = createApiClient(API_BASE_URL);
 
-// Setup interceptors with app-specific handlers
+// Setup interceptors for authenticated API (includes token management)
 setupInterceptors(api, {
   onUnauthorized: () => {
     store.dispatch(logout());
     store.dispatch(resetLocationState());
   },
+  debug: __DEV__,
+});
+
+// Setup interceptors for public API (basic error normalization only)
+setupInterceptors(publicApi, {
   debug: __DEV__,
 });
 

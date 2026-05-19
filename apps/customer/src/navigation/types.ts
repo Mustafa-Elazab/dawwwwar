@@ -12,9 +12,9 @@ import type {
 // ─── Auth Stack ──────────────────────────────────────────
 export type AuthStackParamList = {
   [AUTH_ROUTES.SPLASH]: undefined;
-  [AUTH_ROUTES.PHONE]: undefined;
-  [AUTH_ROUTES.OTP]: { phone: string };
-  [AUTH_ROUTES.COMPLETE_PROFILE]: undefined;
+  [AUTH_ROUTES.PHONE]: { returnTo?: string };
+  [AUTH_ROUTES.OTP]: { phone: string; returnTo?: string };
+  [AUTH_ROUTES.COMPLETE_PROFILE]: { returnTo?: string };
   [PROFILE_ROUTES.TERMS]: undefined;
   [PROFILE_ROUTES.PRIVACY]: undefined;
 };
@@ -70,6 +70,7 @@ export type CustomerTabParamList = {
 // ─── Root (tabs + modals) ────────────────────────────────
 export type RootParamList = {
   CustomerTabs: NavigatorScreenParams<CustomerTabParamList>;
+  Auth: NavigatorScreenParams<AuthStackParamList>;
   [MODAL_ROUTES.CART]: undefined;
   [MODAL_ROUTES.CHECKOUT]: undefined;
   [MODAL_ROUTES.CUSTOM_ORDER]: undefined;

@@ -37,20 +37,15 @@ export function RootNavigator() {
     return <JS_SplashScreen />;
   }
 
-  // Not authenticated → show auth flow (Phone -> OTP)
-  if (!isAuthenticated) {
-    return <AuthNavigator />;
-  }
-
-  // Authenticated but missing name → Complete Profile
-  if (!hasName) {
-    return <CompleteProfileScreen />;
-  }
-
-  // Authenticated and has name → Main App
+  // Main App (Guest or Authenticated)
   return (
-    <Root.Navigator screenOptions={{ headerShown: false, presentation: 'modal' }}>
+    <Root.Navigator 
+      screenOptions={{ headerShown: false, presentation: 'modal' }}
+      initialRouteName={(isAuthenticated && !hasName) ? 'CompleteProfile' : 'CustomerTabs'}
+    >
       <Root.Screen name="CustomerTabs" component={CustomerTabs} />
+      <Root.Screen name="Auth" component={AuthNavigator} />
+      <Root.Screen name="CompleteProfile" component={CompleteProfileScreen} />
       <Root.Screen name={MODAL_ROUTES.CART} component={CartModal} />
       <Root.Screen name={MODAL_ROUTES.CHECKOUT} component={CheckoutModal} />
       <Root.Screen name={MODAL_ROUTES.CUSTOM_ORDER} component={CustomOrderModal} />

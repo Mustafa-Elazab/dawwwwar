@@ -10,7 +10,7 @@ import { ApiClientProvider } from '@dawwar/api-client';
 import { store, persistor } from '../store';
 import { storage, StorageKeys } from '../core/storage/mmkv';
 import { finishLoading, setUser, setGuestMode } from '../store/slices/auth.slice';
-import { api } from '../core/api/client';
+import { api, publicApi } from '../core/api/client';
 import { authApi } from '../features/auth/core/api';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { PersistGate } from 'redux-persist/integration/react';
@@ -78,7 +78,7 @@ export function AppProviders({ children }: AppProvidersProps) {
         <ReduxProvider store={store}>
           <PersistGate loading={null} persistor={persistor}>
             <QueryClientProvider client={queryClient}>
-              <ApiClientProvider client={api}>
+              <ApiClientProvider client={api} publicClient={publicApi}>
                 <ThemeProvider storage={storage}>
                   <SafeAreaProvider>
                     {children}
