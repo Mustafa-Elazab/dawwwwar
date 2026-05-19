@@ -5,22 +5,23 @@ import { space, typography, radius, shadows } from '@dawwar/theme';
 export const createStyles = (colors: AppColors) =>
   StyleSheet.create({
     section: {
-      padding: space.base,
+      paddingHorizontal: space.base,
+      paddingVertical: space.md,
       backgroundColor: colors.surface,
       marginBottom: space.sm,
+      ...shadows.xs,
     },
     sectionHeader: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
       marginBottom: space.md,
-      
     },
     sectionTitle: {
-      ...typography.body1,
-      color: colors.text,
-      fontWeight: '900',
-      alignSelf:"flex-start"
+      ...typography.overline,
+      color: colors.textSecondary,
+      fontWeight: '800',
+      letterSpacing: 1,
     },
     
     // ── Address ────────────────────────────────────────
@@ -30,21 +31,24 @@ export const createStyles = (colors: AppColors) =>
       gap: space.md,
     },
     iconCircle: {
-      width: 44,
-      height: 44,
-      borderRadius: 22,
-      backgroundColor: colors.primaryMuted,
+      width: 48,
+      height: 48,
+      borderRadius: radius.full,
+      backgroundColor: colors.surfaceVariant,
       alignItems: 'center',
       justifyContent: 'center',
+      borderWidth: 1,
+      borderColor: colors.borderLight,
     },
     addressLabel: {
       ...typography.body1,
       color: colors.text,
       fontWeight: '800',
       textAlign: 'auto',
+      marginBottom: 2,
     },
     addressText: {
-      ...typography.caption,
+      ...typography.body2,
       color: colors.textSecondary,
       textAlign: 'auto',
     },
@@ -53,18 +57,33 @@ export const createStyles = (colors: AppColors) =>
     paymentOption: {
       flexDirection: 'row',
       alignItems: 'center',
-      paddingVertical: space.md,
+      padding: space.md,
+      borderRadius: radius.lg,
+      borderWidth: 1.5,
+      borderColor: colors.borderLight,
+      marginBottom: space.sm,
       gap: space.md,
-      borderBottomWidth: 1,
-      borderBottomColor: colors.borderLight,
+    },
+    paymentOptionSelected: {
+      borderColor: colors.primary,
+      backgroundColor: colors.primary + '10',
+    },
+    paymentIconWrap: {
+      width: 44,
+      height: 44,
+      borderRadius: radius.md,
+      backgroundColor: colors.surfaceVariant,
+      alignItems: 'center',
+      justifyContent: 'center',
     },
     paymentInfo: {
+      flex: 1,
       alignItems: 'flex-start',
     },
     radio: {
-      width: 22,
-      height: 22,
-      borderRadius: 11,
+      width: 24,
+      height: 24,
+      borderRadius: 12,
       borderWidth: 2,
       borderColor: colors.border,
       alignItems: 'center',
@@ -74,9 +93,9 @@ export const createStyles = (colors: AppColors) =>
       borderColor: colors.primary,
     },
     radioDot: {
-      width: 10,
-      height: 10,
-      borderRadius: 5,
+      width: 12,
+      height: 12,
+      borderRadius: 6,
       backgroundColor: colors.primary,
     },
     paymentLabel: {
@@ -91,7 +110,8 @@ export const createStyles = (colors: AppColors) =>
     paymentError: {
       ...typography.caption,
       color: colors.error,
-      marginTop: 2,
+      marginTop: 4,
+      fontWeight: '600',
     },
 
     // ── Notes ──────────────────────────────────────────
@@ -103,7 +123,7 @@ export const createStyles = (colors: AppColors) =>
     },
     charCount: {
       ...typography.caption,
-      color: colors.textSecondary,
+      color: colors.textTertiary,
     },
 
     // ── Summary ────────────────────────────────────────
@@ -111,10 +131,10 @@ export const createStyles = (colors: AppColors) =>
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      marginVertical: 4,
+      marginVertical: space['2xl'],
     },
     summaryLabel: {
-      ...typography.body2,
+      ...typography.body1,
       color: colors.textSecondary,
     },
     summaryValue: {
@@ -123,9 +143,9 @@ export const createStyles = (colors: AppColors) =>
       fontWeight: '600',
     },
     totalLabel: {
-      ...typography.body1,
+      ...typography.h3,
       color: colors.text,
-      fontWeight: '900',
+      fontWeight: '800',
     },
     totalValue: {
       ...typography.h3,
@@ -139,10 +159,10 @@ export const createStyles = (colors: AppColors) =>
       backgroundColor: colors.surface,
       borderTopWidth: 1,
       borderTopColor: colors.borderLight,
+      ...shadows.lg,
     },
     placeOrderBtn: {
       height: 56,
-      borderRadius: radius.lg,
-      ...shadows.md,
+      borderRadius: radius.xl,
     },
   });

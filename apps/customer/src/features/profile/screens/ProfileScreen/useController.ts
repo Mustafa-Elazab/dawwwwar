@@ -3,11 +3,11 @@ import { useNavigation } from '@react-navigation/native';
 import { Alert } from 'react-native';
 import { useTranslation } from '@dawwar/i18n';
 import { useAppDispatch, useAppSelector } from '../../../../store/hooks';
-import { logout, selectUser, updateUser } from '../../../../store/slices/auth.slice';
+import { logout, selectUser, selectIsAuthenticated, updateUser } from '../../../../store/slices/auth.slice';
 import { resetLocationState } from '../../../../store/slices/location.slice';
-import { PROFILE_ROUTES } from '../../../../navigation/routes';
+import { PROFILE_ROUTES, AUTH_ROUTES } from '../../../../navigation/routes';
 import type { StackNavigationProp } from '@react-navigation/stack';
-import type { ProfileStackParamList } from '../../../../navigation/types';
+import type { RootParamList } from '../../../../navigation/types';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { useUpdateProfile, useUploadFile } from '@dawwar/api-client';
 import Toast from 'react-native-toast-message';
@@ -21,12 +21,17 @@ interface ReactNativeFile {
 
 export function useController() {
   const { t } = useTranslation();
-  const navigation = useNavigation<StackNavigationProp<ProfileStackParamList>>();
+  const navigation = useNavigation<StackNavigationProp<any>>();
   const dispatch = useAppDispatch();
   const user = useAppSelector(selectUser);
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
 
   const updateProfileMutation = useUpdateProfile();
   const uploadFileMutation = useUploadFile();
+
+  const handleLogin = useCallback(() => {
+    navigation.navigate('Auth', { screen: AUTH_ROUTES.LOGIN });
+  }, [navigation]);
 
   const handleLogout = useCallback(() => {
     Alert.alert(
@@ -89,7 +94,9 @@ export function useController() {
 
   return {
     user,
+    isAuthenticated,
     navigate: navigation.navigate,
+    handleLogin,
     handleLogout,
     handlePickImage,
     isUploading: uploadFileMutation.isPending || updateProfileMutation.isPending,

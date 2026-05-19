@@ -10,6 +10,7 @@ import { createStyles } from './styles';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { RootParamList } from '../../../../navigation/types';
 import type { TFunction } from 'i18next';
+import { LoginGateModal } from '../../../../components/LoginGateModal';
 
 const getLocalizedLabel = (label: string, t: TFunction) => {
   const map: Record<string, string> = {
@@ -80,9 +81,20 @@ export function CheckoutScreen() {
 
         {/* Cash */}
         <TouchableOpacity
-          style={styles.paymentOption}
+          style={[
+            styles.paymentOption,
+            ctrl.paymentMethod === PaymentMethod.CASH && styles.paymentOptionSelected,
+          ]}
           onPress={() => ctrl.setPaymentMethod(PaymentMethod.CASH)}
+          activeOpacity={0.8}
         >
+          <View style={styles.paymentIconWrap}>
+            <Icon name="cash" size={24} color={colors.textSecondary} />
+          </View>
+          <View style={styles.paymentInfo}>
+            <Text style={styles.paymentLabel}>{t('checkout.cash')}</Text>
+            <Text style={styles.paymentSub}>{t('checkout.cash_sub')}</Text>
+          </View>
           <View
             style={[
               styles.radio,
@@ -91,24 +103,19 @@ export function CheckoutScreen() {
           >
             {ctrl.paymentMethod === PaymentMethod.CASH && <View style={styles.radioDot} />}
           </View>
-          <View style={styles.paymentInfo}>
-            <Text style={styles.paymentLabel}>{t('checkout.cash')}</Text>
-            <Text style={styles.paymentSub}>{t('checkout.cash_sub')}</Text>
-          </View>
         </TouchableOpacity>
 
         {/* Wallet */}
         <TouchableOpacity
-          style={styles.paymentOption}
+          style={[
+            styles.paymentOption,
+            ctrl.paymentMethod === PaymentMethod.WALLET && styles.paymentOptionSelected,
+          ]}
           onPress={() => ctrl.setPaymentMethod(PaymentMethod.WALLET)}
+          activeOpacity={0.8}
         >
-          <View
-            style={[
-              styles.radio,
-              ctrl.paymentMethod === PaymentMethod.WALLET && styles.radioSelected,
-            ]}
-          >
-            {ctrl.paymentMethod === PaymentMethod.WALLET && <View style={styles.radioDot} />}
+          <View style={styles.paymentIconWrap}>
+            <Icon name="wallet-outline" size={24} color={colors.textSecondary} />
           </View>
           <View style={[styles.paymentInfo, { flex: 1 }]}>
             <Text style={styles.paymentLabel}>{t('checkout.wallet')}</Text>
@@ -122,6 +129,14 @@ export function CheckoutScreen() {
                 })}
               </Text>
             )}
+          </View>
+          <View
+            style={[
+              styles.radio,
+              ctrl.paymentMethod === PaymentMethod.WALLET && styles.radioSelected,
+            ]}
+          >
+            {ctrl.paymentMethod === PaymentMethod.WALLET && <View style={styles.radioDot} />}
           </View>
         </TouchableOpacity>
       </View>
@@ -177,6 +192,12 @@ export function CheckoutScreen() {
           </Text>
         </View>
       </View>
+
+      <LoginGateModal
+        visible={ctrl.showLoginGate}
+        onClose={() => ctrl.setShowLoginGate(false)}
+        reason="checkout"
+      />
     </ScrollScreenTemplate>
   );
 }

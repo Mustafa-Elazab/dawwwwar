@@ -8,10 +8,10 @@ export const HOME_KEYS = {
   categories: ['home', 'categories'] as const,
 };
 
-export function useNearbyMerchants(lat?: number, lng?: number, allEgypt?: boolean) {
+export function useNearbyMerchants(lat?: number, lng?: number) {
   return useQuery({
-    queryKey: [...HOME_KEYS.nearbyMerchants, lat, lng, allEgypt],
-    queryFn: () => homeApi.getNearbyMerchants(lat, lng, allEgypt),
+    queryKey: [...HOME_KEYS.nearbyMerchants, lat, lng],
+    queryFn: () => homeApi.getNearbyMerchants(lat, lng),
     staleTime: 60_000,
     select: (res) => res.data,
   });

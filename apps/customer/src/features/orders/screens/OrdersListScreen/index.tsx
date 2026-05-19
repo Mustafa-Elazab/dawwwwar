@@ -50,7 +50,15 @@ export function OrdersListScreen() {
         ))}
       </View>
 
-      {ctrl.isLoading ? (
+      {!ctrl.isAuthenticated ? (
+        <EmptyState
+          icon="account-lock-outline"
+          title={t('gate.ordersTitle')}
+          subtitle={t('gate.ordersSubtitle')}
+          actionLabel={t('gate.loginToViewOrders')}
+          onAction={ctrl.handleLogin}
+        />
+      ) : ctrl.isLoading ? (
         <View style={{ gap: 12, paddingTop: 8 }}>
           {[1, 2, 3].map((i) => (
             <Skeleton key={i} width="92%" height={120} style={{ alignSelf: 'center', borderRadius: 16 }} />

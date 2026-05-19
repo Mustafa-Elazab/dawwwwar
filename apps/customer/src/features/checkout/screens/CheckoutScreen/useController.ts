@@ -9,7 +9,7 @@ import {
   selectCartMerchantId,
   clearCart,
 } from '../../../../store/slices/cart.slice';
-import { selectUser } from '../../../../store/slices/auth.slice';
+import { selectUser, selectIsAuthenticated } from '../../../../store/slices/auth.slice';
 import { selectLocation } from '../../../../store/slices/location.slice';
 import { 
   usePlaceOrder, 
@@ -35,11 +35,14 @@ export function useController() {
   const subtotal = useAppSelector(selectCartTotal);
   const merchantId = useAppSelector(selectCartMerchantId);
   const user = useAppSelector(selectUser);
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const location = useAppSelector(selectLocation);
 
+  const [showLoginGate, setShowLoginGate] = useState(false);
+
   // Real Data Hooks
-  const { data: addressesRes } = useAddresses(user?.id);
-  const { data: walletRes } = useWallet();
+  const { data: addressesRes } = useAddresses(user?.id, { enabled: isAuthenticated });
+  const { data: walletRes } = useWallet({ enabled: isAuthenticated });
   
   const addresses = addressesRes?.data || [];
   const wallet = walletRes?.data;
@@ -47,12 +50,13 @@ export function useController() {
 
   // Match global selected location, or fallback to default
   const selectedAddress = useMemo(() => {
+    if (!isAuthenticated) return null;
     if (location.selectedAddressId) {
       const match = addresses.find(a => a.id === location.selectedAddressId);
       if (match) return match;
     }
     return addresses.find(a => a.isDefault) || addresses[0] || null;
-  }, [addresses, location.selectedAddressId]);
+  }, [isAuthenticated, addresses, location.selectedAddressId]);
 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(PaymentMethod.CASH);
   const [notes, setNotes] = useState('');
@@ -75,11 +79,16 @@ export function useController() {
   const deliveryFee = feeRes?.fee ?? 0;
   const total = subtotal + deliveryFee;
   const isWalletInsufficient =
-    paymentMethod === PaymentMethod.WALLET && walletBalance < total;
+    isAuthenticated && paymentMethod === PaymentMethod.WALLET && walletBalance < total;
 
   const placeOrderMutation = usePlaceOrder();
 
   const handlePlaceOrder = useCallback(async () => {
+    if (!isAuthenticated) {
+      setShowLoginGate(true);
+      return;
+    }
+
     // Determine delivery coordinates safely
     const deliveryLat = selectedAddress ? Number(selectedAddress.latitude) : location.latitude;
     const deliveryLng = selectedAddress ? Number(selectedAddress.longitude) : location.longitude;
@@ -112,13 +121,13 @@ export function useController() {
         screen: 'OrdersTab',
         params: { 
           screen: 'TrackingScreen',
-          params: { orderId: res.data.id }
+          params: { orderId: res.id }
         }
       });
     } catch {
       // Error handled by mutation or global interceptor
     }
-  }, [selectedAddress, location, user, merchantId, paymentMethod, subtotal, deliveryFee, notes, items, placeOrderMutation, dispatch, queryClient, navigation]);
+  }, [isAuthenticated, selectedAddress, location, user, merchantId, paymentMethod, subtotal, deliveryFee, notes, items, placeOrderMutation, dispatch, queryClient, navigation]);
 
   const isButtonDisabled =
     items.length === 0 || (!selectedAddress && !location.latitude) || isWalletInsufficient || placeOrderMutation.isPending;
@@ -142,6 +151,8 @@ export function useController() {
     isButtonDisabled,
     handlePlaceOrder,
     handleBack: () => navigation.goBack(),
+    showLoginGate,
+    setShowLoginGate,
     t,
   };
 }

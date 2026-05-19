@@ -14,6 +14,7 @@ export function CategoriesScreen() {
 
   const categories = ctrl.categories ?? [];
   const paddedData = [...categories];
+  console.log('CategoriesScreen - categories:', categories);
   while (paddedData.length % 3 !== 0) {
     paddedData.push({
       id: `__empty_${paddedData.length}`,
@@ -45,7 +46,6 @@ export function CategoriesScreen() {
 
   return (
       <ListScreenTemplate<Category>
-      edges={['top']}
       headerProps={{ 
         title: t('categories.title'),
         type: 'none'

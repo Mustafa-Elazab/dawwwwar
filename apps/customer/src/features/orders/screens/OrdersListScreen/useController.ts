@@ -1,6 +1,8 @@
 import { useState, useCallback } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from '@dawwar/i18n';
+import { useAppSelector } from '../../../../store/hooks';
+import { selectIsAuthenticated } from '../../../../store/slices/auth.slice';
 import { useActiveOrders, usePastOrders } from '../../core/hooks';
 import { ORDER_ROUTES } from '../../../../navigation/routes';
 import type { StackNavigationProp } from '@react-navigation/stack';
@@ -12,9 +14,10 @@ export function useController() {
   const { t } = useTranslation();
   const navigation = useNavigation<StackNavigationProp<OrdersStackParamList>>();
   const [activeTab, setActiveTab] = useState<OrderTab>('active');
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
 
-  const { data: activeOrders, isLoading: activeLoading, refetch: refetchActive } = useActiveOrders();
-  const { data: pastOrders, isLoading: pastLoading, refetch: refetchPast } = usePastOrders();
+  const { data: activeOrders, isLoading: activeLoading, refetch: refetchActive } = useActiveOrders({ enabled: isAuthenticated });
+  const { data: pastOrders, isLoading: pastLoading, refetch: refetchPast } = usePastOrders({ enabled: isAuthenticated });
 
   const handleTrack = useCallback(
     (orderId: string) => navigation.navigate(ORDER_ROUTES.TRACKING, { orderId }),
@@ -32,10 +35,12 @@ export function useController() {
   return {
     activeTab, setActiveTab,
     orders: currentOrders,
-    isLoading,
+    isLoading: isAuthenticated ? isLoading : false,
     handleTrack,
     handleDetail,
     refetch,
+    isAuthenticated,
+    handleLogin: () => navigation.navigate('Auth' as any),
     t,
   };
 }

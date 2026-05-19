@@ -7,10 +7,11 @@ import { SettingsRow } from '../../components/SettingsRow';
 import { useController } from './useController';
 import { createStyles } from './styles';
 import { PROFILE_ROUTES } from '../../../../navigation/routes';
+import { Button } from '@dawwar/ui';
 
 export function ProfileScreen() {
   const { t } = useTranslation();
-  const { colors } = useTheme();
+  const { colors, spacing } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
   const ctrl = useController();
 
@@ -23,45 +24,65 @@ export function ProfileScreen() {
       }}
       contentStyle={{ paddingBottom: 40 }}
     >
-      {/* User info card */}
-      <View style={styles.userCard}>
-        <TouchableOpacity 
-          style={styles.avatarContainer} 
-          onPress={ctrl.handlePickImage}
-          disabled={ctrl.isUploading}
-        >
-          <Avatar uri={ctrl.user?.avatar} name={ctrl.user?.name} size="xl" />
-          <View style={styles.editIconContainer}>
-            {ctrl.isUploading ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <Icon name="camera-outline" size={16} color="#fff" />
-            )}
+      {/* User info card or Login prompt */}
+      {ctrl.isAuthenticated ? (
+        <View style={styles.userCard}>
+          <TouchableOpacity 
+            style={styles.avatarContainer} 
+            onPress={ctrl.handlePickImage}
+            disabled={ctrl.isUploading}
+          >
+            <Avatar uri={ctrl.user?.avatar} name={ctrl.user?.name} size="xl" />
+            <View style={styles.editIconContainer}>
+              {ctrl.isUploading ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Icon name="camera-outline" size={16} color="#fff" />
+              )}
+            </View>
+          </TouchableOpacity>
+          <Text style={styles.userName}>{ctrl.user?.name}</Text>
+          <Text style={styles.userPhone}>{ctrl.user?.phone}</Text>
+        </View>
+      ) : (
+        <View style={[styles.userCard, { paddingVertical: spacing.xl }]}>
+          <View style={[styles.avatarContainer, { backgroundColor: colors.border }]}>
+            <Icon name="account-outline" size={40} color={colors.textSecondary} />
           </View>
-        </TouchableOpacity>
-        <Text style={styles.userName}>{ctrl.user?.name}</Text>
-        <Text style={styles.userPhone}>{ctrl.user?.phone}</Text>
-      </View>
+          <Text style={[styles.userName, { marginBottom: spacing.m }]}>{t('home.greeting_guest')}</Text>
+          <Button 
+            label={t('auth.login_btn')} 
+            onPress={ctrl.handleLogin}
+            variant="primary"
+            size="small"
+            style={{ minWidth: 120 }}
+          />
+        </View>
+      )}
 
-      {/* Account section */}
-      <Text style={styles.sectionLabel}>{t('profile.section_account')}</Text>
-      <View style={styles.sectionCard}>
-        <SettingsRow
-          icon="account-edit-outline"
-          title={t('profile.edit_profile')}
-          onPress={() => ctrl.navigate(PROFILE_ROUTES.EDIT_PROFILE)}
-        />
-        <SettingsRow
-          icon="wallet-outline"
-          title={t('wallet.title')}
-          onPress={() => ctrl.navigate('WalletScreen' as any)}
-        />
-        <SettingsRow
-          icon="map-marker-outline"
-          title={t('profile.addresses')}
-          onPress={() => ctrl.navigate(PROFILE_ROUTES.ADDRESSES)}
-        />
-      </View>
+      {/* Account section - only for authenticated */}
+      {ctrl.isAuthenticated && (
+        <>
+          <Text style={styles.sectionLabel}>{t('profile.section_account')}</Text>
+          <View style={styles.sectionCard}>
+            <SettingsRow
+              icon="account-edit-outline"
+              title={t('profile.edit_profile')}
+              onPress={() => ctrl.navigate(PROFILE_ROUTES.EDIT_PROFILE)}
+            />
+            <SettingsRow
+              icon="wallet-outline"
+              title={t('wallet.title')}
+              onPress={() => ctrl.navigate('WalletScreen' as any)}
+            />
+            <SettingsRow
+              icon="map-marker-outline"
+              title={t('profile.addresses')}
+              onPress={() => ctrl.navigate(PROFILE_ROUTES.ADDRESSES)}
+            />
+          </View>
+        </>
+      )}
 
       {/* Preferences section */}
       <Text style={styles.sectionLabel}>{t('profile.section_preferences')}</Text>
@@ -97,14 +118,16 @@ export function ProfileScreen() {
       </View>
 
       {/* Logout */}
-      <View style={styles.logoutRow}>
-        <SettingsRow
-          icon="logout"
-          iconColor={colors.error}
-          title={t('profile.logout')}
-          onPress={ctrl.handleLogout}
-        />
-      </View>
+      {ctrl.isAuthenticated && (
+        <View style={styles.logoutRow}>
+          <SettingsRow
+            icon="logout"
+            iconColor={colors.error}
+            title={t('profile.logout')}
+            onPress={ctrl.handleLogout}
+          />
+        </View>
+      )}
 
       <Text style={styles.versionText}>{t('profile.version', { version: '1.0.0' })}</Text>
     </ScrollScreenTemplate>

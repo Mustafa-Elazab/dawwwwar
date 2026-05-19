@@ -89,7 +89,7 @@ export function useController() {
         const formData = new FormData();
         formData.append('file', { uri: voiceUri, name: 'voice.m4a', type: 'audio/m4a' } as any);
         const res = await uploadFile.mutateAsync(formData);
-        uploadedVoiceUrl = res.data.url;
+        uploadedVoiceUrl = res.url;
       }
 
       // 2. Upload photos if exist
@@ -100,7 +100,7 @@ export function useController() {
            const fd = new FormData();
            fd.append('file', { uri, name: `photo_${i}.jpg`, type: 'image/jpeg' } as any);
            const r = await uploadFile.mutateAsync(fd);
-           return r.data.url;
+           return r.url;
         }));
         uploadedPhotoUrls = urls;
       }
@@ -124,7 +124,7 @@ export function useController() {
       });
 
       Toast.show({ type: 'success', text1: t('custom_order.success') });
-      navigation.navigate(ORDER_ROUTES.TRACKING, { orderId: res.data.id });
+      navigation.navigate(ORDER_ROUTES.TRACKING, { orderId: res.id });
     } catch (err) {
       Toast.show({ type: 'error', text1: t('errors.server') });
     } finally {

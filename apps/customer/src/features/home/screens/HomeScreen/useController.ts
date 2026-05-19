@@ -28,7 +28,6 @@ export function useController() {
   } = useNearbyMerchants(
     discoveryMode === 'nearby' ? delivery.merchantLat : undefined,
     discoveryMode === 'nearby' ? delivery.merchantLng : undefined,
-    discoveryMode === 'allEgypt',
   );
   const { data: products } = useFeaturedProducts(delivery.merchantLat, delivery.merchantLng);
   const {
