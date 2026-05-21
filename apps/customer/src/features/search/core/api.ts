@@ -14,5 +14,4 @@ const realSearchApi = {
     searchService.search(query, lat, lng),
 };
 
-
 export const searchApi = realSearchApi;

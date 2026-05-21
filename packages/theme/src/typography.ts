@@ -141,7 +141,10 @@ export const typography = {
 
 export type TypographyVariant = keyof typeof typography;
 
-const variantGroups: Record<TypographyVariant, 'display' | 'heading' | 'title' | 'body' | 'label' | 'caption'> = {
+const variantGroups: Record<
+  TypographyVariant,
+  'display' | 'heading' | 'title' | 'body' | 'label' | 'caption'
+> = {
   display: 'display',
   heading: 'heading',
   title: 'title',

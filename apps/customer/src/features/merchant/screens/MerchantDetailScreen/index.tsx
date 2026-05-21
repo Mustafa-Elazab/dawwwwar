@@ -21,13 +21,13 @@ export function MerchantDetailScreen() {
   const styles = React.useMemo(() => createStyles(colors), [colors]);
   const ctrl = useController();
   const insets = useSafeAreaInsets();
-  
+
   const scrollY = useRef(new Animated.Value(0)).current;
   const sectionListRef = useRef<SectionList>(null);
   const flatListRef = useRef<FlatList>(null);
-  
+
   const [activeCategoryId, setActiveCategoryId] = useState('');
-  
+
   useEffect(() => {
     if (ctrl.groupedProducts.length > 0 && !activeCategoryId) {
       setActiveCategoryId(ctrl.groupedProducts[0].categoryId);
@@ -37,10 +37,10 @@ export function MerchantDetailScreen() {
   const HEADER_HEIGHT = 260;
   const TAB_BAR_HEIGHT = 56;
   const CATEGORIES_HEIGHT = 60;
-  
+
   const TOP_OFFSET = insets.top + 56;
   const SCROLL_THRESHOLD = Math.max(0, HEADER_HEIGHT + TAB_BAR_HEIGHT - TOP_OFFSET);
-  
+
   const headerOpacity = scrollY.interpolate({
     inputRange: [0, Math.max(0, SCROLL_THRESHOLD - 20), SCROLL_THRESHOLD],
     outputRange: [0, 0, 1],
@@ -59,7 +59,7 @@ export function MerchantDetailScreen() {
       const topSection = viewableItems[0].section;
       if (topSection?.categoryId && topSection.categoryId !== activeCategoryId) {
         setActiveCategoryId(topSection.categoryId);
-        const idx = ctrl.groupedProducts.findIndex((g) => g.categoryId === topSection.categoryId);
+        const idx = ctrl.groupedProducts.findIndex(g => g.categoryId === topSection.categoryId);
         if (idx >= 0 && flatListRef.current) {
           flatListRef.current.scrollToIndex({ index: idx, animated: true, viewPosition: 0.5 });
         }
@@ -67,20 +67,23 @@ export function MerchantDetailScreen() {
     }
   }).current;
 
-  const handleCategoryPress = useCallback((idx: number, categoryId: string) => {
-    setActiveCategoryId(categoryId);
-    if (sectionListRef.current) {
-      sectionListRef.current.scrollToLocation({
-        sectionIndex: idx,
-        itemIndex: 0,
-        viewPosition: 0,
-        animated: true,
-      });
-    }
-    if (flatListRef.current) {
-      flatListRef.current.scrollToIndex({ index: idx, animated: true, viewPosition: 0.5 });
-    }
-  }, [activeCategoryId, ctrl.groupedProducts]);
+  const handleCategoryPress = useCallback(
+    (idx: number, categoryId: string) => {
+      setActiveCategoryId(categoryId);
+      if (sectionListRef.current) {
+        sectionListRef.current.scrollToLocation({
+          sectionIndex: idx,
+          itemIndex: 0,
+          viewPosition: 0,
+          animated: true,
+        });
+      }
+      if (flatListRef.current) {
+        flatListRef.current.scrollToIndex({ index: idx, animated: true, viewPosition: 0.5 });
+      }
+    },
+    [activeCategoryId, ctrl.groupedProducts],
+  );
 
   const renderProductRow = React.useCallback(
     ({ item }: any) => (
@@ -91,33 +94,36 @@ export function MerchantDetailScreen() {
         onRemove={() => ctrl.handleRemoveProduct(item.id)}
       />
     ),
-    [ctrl.getProductQuantity, ctrl.handleAddProduct, ctrl.handleRemoveProduct]
+    [ctrl.getProductQuantity, ctrl.handleAddProduct, ctrl.handleRemoveProduct],
   );
 
   const renderCategoryChip = React.useCallback(
-    ({ item, index }: { item: any, index: number }) => {
+    ({ item, index }: { item: any; index: number }) => {
       const isSelected = item.categoryId === activeCategoryId;
       return (
         <AnimatedPressable
           onPress={() => handleCategoryPress(index, item.categoryId)}
           style={[
             styles.categoryChip,
-            isSelected && { backgroundColor: colors.primary, borderColor: colors.primary }
+            isSelected && { backgroundColor: colors.primary, borderColor: colors.primary },
           ]}
           pressScale={microInteractions.pressScale}
           pressOpacity={microInteractions.pressOpacity}
           pressTranslateY={1}
         >
-          <Text style={[
-            styles.categoryChipText,
-            isSelected && { color: '#fff' }
-          ]}>
+          <Text style={[styles.categoryChipText, isSelected && { color: '#fff' }]}>
             {item.categoryName}
           </Text>
         </AnimatedPressable>
       );
     },
-    [activeCategoryId, handleCategoryPress, styles.categoryChip, styles.categoryChipText, colors.primary]
+    [
+      activeCategoryId,
+      handleCategoryPress,
+      styles.categoryChip,
+      styles.categoryChipText,
+      colors.primary,
+    ],
   );
 
   if (ctrl.isError) {
@@ -150,7 +156,9 @@ export function MerchantDetailScreen() {
       return (
         <Animated.ScrollView
           style={{ flex: 1, backgroundColor: colors.background }}
-          onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: true })}
+          onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], {
+            useNativeDriver: true,
+          })}
           scrollEventThrottle={16}
         >
           {renderHeader()}
@@ -162,7 +170,7 @@ export function MerchantDetailScreen() {
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>{t('merchant.hours')}</Text>
               <View style={styles.hoursTable}>
-                {ALL_DAYS.map((day) => {
+                {ALL_DAYS.map(day => {
                   const h = ctrl.merchant?.openingHours[day as keyof OpeningHours] ?? null;
                   return (
                     <View key={day} style={styles.hoursRow}>
@@ -182,7 +190,9 @@ export function MerchantDetailScreen() {
       return (
         <Animated.ScrollView
           style={{ flex: 1, backgroundColor: colors.background }}
-          onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: true })}
+          onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], {
+            useNativeDriver: true,
+          })}
           scrollEventThrottle={16}
         >
           {renderHeader()}
@@ -208,10 +218,9 @@ export function MerchantDetailScreen() {
           keyExtractor={(item: any) => item.id}
           ListHeaderComponent={renderHeader}
           stickySectionHeadersEnabled={false}
-          onScroll={Animated.event(
-            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-            { useNativeDriver: true }
-          )}
+          onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], {
+            useNativeDriver: true,
+          })}
           scrollEventThrottle={16}
           onViewableItemsChanged={onViewableItemsChanged}
           viewabilityConfig={{ itemVisiblePercentThreshold: 10, minimumViewTime: 100 }}
@@ -239,7 +248,7 @@ export function MerchantDetailScreen() {
             style={[
               styles.stickyCategoriesWrapper,
               { top: TOP_OFFSET },
-              { transform: [{ translateY: categoriesTranslateY }] }
+              { transform: [{ translateY: categoriesTranslateY }] },
             ]}
           >
             <FlatList
@@ -249,7 +258,7 @@ export function MerchantDetailScreen() {
               contentContainerStyle={styles.categoryChipsContainer}
               inverted={I18nManager.isRTL}
               data={ctrl.groupedProducts}
-              keyExtractor={(item) => item.categoryId}
+              keyExtractor={item => item.categoryId}
               renderItem={renderCategoryChip}
             />
           </Animated.View>
@@ -264,10 +273,19 @@ export function MerchantDetailScreen() {
 
       {/* Header Overlay (Back Button & Title Fade) */}
       <View style={[styles.headerOverlay, { paddingTop: insets.top, height: TOP_OFFSET }]}>
-        <Animated.View style={[styles.headerBackground, { opacity: headerOpacity, backgroundColor: colors.surface }]} />
+        <Animated.View
+          style={[
+            styles.headerBackground,
+            { opacity: headerOpacity, backgroundColor: colors.surface },
+          ]}
+        />
         <View style={styles.headerContentWrapper}>
           <TouchableOpacity style={styles.headerButton} onPress={ctrl.handleBack}>
-            <Icon name={I18nManager.isRTL ? 'chevron-right' : 'chevron-left'} size={24} color={colors.text} />
+            <Icon
+              name={I18nManager.isRTL ? 'chevron-right' : 'chevron-left'}
+              size={24}
+              color={colors.text}
+            />
           </TouchableOpacity>
           <Animated.Text style={[styles.headerTitle, { opacity: headerOpacity }]} numberOfLines={1}>
             {ctrl.merchant?.businessName}
@@ -275,8 +293,6 @@ export function MerchantDetailScreen() {
           <View style={styles.headerButtonPlaceholder} />
         </View>
       </View>
-
-    
     </View>
   );
 }

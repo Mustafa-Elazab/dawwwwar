@@ -1,10 +1,6 @@
 import React, { useCallback } from 'react';
 import { View } from 'react-native';
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-} from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { useTheme, springs, microInteractions } from '@dawwar/theme';
 import { createStyles } from './styles';
@@ -42,18 +38,11 @@ export function Card({
     opacity.value = withSpring(1, springs.bouncy);
   }, [scale, opacity]);
 
-  const containerStyle = [
-    styles.base,
-    styles[variant],
-    disabled && styles.disabled,
-  ];
+  const containerStyle = [styles.base, styles[variant], disabled && styles.disabled];
 
   if (onPress) {
     return (
-      <Animated.View
-        style={[containerStyle, animatedStyle, style]}
-        testID={testID}
-      >
+      <Animated.View style={[containerStyle, animatedStyle, style]} testID={testID}>
         <Animated.View
           onTouchStart={handlePressIn}
           onTouchEnd={handlePressOut}

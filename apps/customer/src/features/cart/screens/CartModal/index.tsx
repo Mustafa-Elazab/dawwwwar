@@ -14,7 +14,7 @@ export function CartModal() {
   const ctrl = useController();
 
   return (
-    <ScreenTemplate 
+    <ScreenTemplate
       backgroundColor={colors.card}
       headerProps={{
         title: t('cart.title'),
@@ -24,12 +24,12 @@ export function CartModal() {
       footer={
         !ctrl.isEmpty && (
           <View style={styles.footer}>
-             <Button
-                label={`${t('cart.checkout')} · ${ctrl.total} ${t('common.egp')}`}
-                onPress={ctrl.handleCheckout}
-                fullWidth
-                style={styles.checkoutBtn}
-              />
+            <Button
+              label={`${t('cart.checkout')} · ${ctrl.total} ${t('common.egp')}`}
+              onPress={ctrl.handleCheckout}
+              fullWidth
+              style={styles.checkoutBtn}
+            />
           </View>
         )
       }
@@ -44,14 +44,14 @@ export function CartModal() {
           action={{ label: t('cart.continue_shopping'), onPress: ctrl.handleClose }}
         />
       ) : (
-        <ScrollView 
-          style={{ flex: 1 }} 
+        <ScrollView
+          style={{ flex: 1 }}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
           {/* Items List */}
           <View style={styles.list}>
-            {ctrl.items.map((item) => (
+            {ctrl.items.map(item => (
               <CartItemRow
                 key={item.productId}
                 item={item}
@@ -64,7 +64,7 @@ export function CartModal() {
           {/* Promo Code Input */}
           <View style={styles.promoWrapper}>
             <Icon name="tag-outline" size={20} color={colors.primary} />
-            <TextInput 
+            <TextInput
               style={styles.promoInput}
               placeholder={t('cart.promo_placeholder')}
               placeholderTextColor={colors.placeholder}

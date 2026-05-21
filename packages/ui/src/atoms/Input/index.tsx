@@ -74,28 +74,22 @@ export function Input({
     borderColor: interpolateColor(
       focusAnim.value,
       [0, 1],
-      [
-        error ? colors.error : colors.border,
-        error ? colors.error : colors.borderFocus,
-      ],
+      [error ? colors.error : colors.border, error ? colors.error : colors.borderFocus],
     ),
   }));
 
   const animatedLabelStyle = useAnimatedStyle(() => {
     const translateY = interpolate(labelAnim.value, [0, 1], [0, -28]);
     const scale = interpolate(labelAnim.value, [0, 1], [1, 0.85]);
-    const translateX = interpolate(
-      labelAnim.value,
-      [0, 1],
-      [0, I18nManager.isRTL ? 4 : -4],
-    );
+    const translateX = interpolate(labelAnim.value, [0, 1], [0, I18nManager.isRTL ? 4 : -4]);
 
     return {
       transform: [{ translateY }, { scale }, { translateX }],
-      color: interpolateColor(focusAnim.value, [0, 1], [
-        error ? colors.error : colors.textSecondary,
-        error ? colors.error : colors.primary,
-      ]),
+      color: interpolateColor(
+        focusAnim.value,
+        [0, 1],
+        [error ? colors.error : colors.textSecondary, error ? colors.error : colors.primary],
+      ),
     };
   });
 
@@ -122,11 +116,7 @@ export function Input({
         )}
 
         <Animated.View
-          style={[
-            styles.inputRow,
-            !editable && styles.disabled,
-            animatedInputRowStyle,
-          ]}
+          style={[styles.inputRow, !editable && styles.disabled, animatedInputRowStyle]}
         >
           {leftIcon && <View style={styles.iconContainer}>{leftIcon}</View>}
           <TextInput

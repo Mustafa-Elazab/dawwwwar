@@ -4,7 +4,13 @@ import { useTheme } from '@dawwar/theme';
 import type { SettingsRowProps } from './types';
 
 export const SettingsRow = React.memo(function SettingsRow({
-  icon, iconColor, title, subtitle, onPress, rightElement, testID,
+  icon,
+  iconColor,
+  title,
+  subtitle,
+  onPress,
+  rightElement,
+  testID,
 }: SettingsRowProps) {
   const { colors } = useTheme();
   return (

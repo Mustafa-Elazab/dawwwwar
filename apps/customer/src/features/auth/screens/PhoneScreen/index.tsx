@@ -1,6 +1,11 @@
 import React, { useEffect } from 'react';
 import { View, StatusBar, I18nManager } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+} from 'react-native-reanimated';
 import { useTranslation } from '@dawwar/i18n';
 import { ScreenTemplate, Text, Button, Icon, AnimatedPressable } from '@dawwar/ui';
 import { easings, microInteractions, motion, useTheme } from '@dawwar/theme';
@@ -40,7 +45,7 @@ export function PhoneScreen() {
   return (
     <ScreenTemplate backgroundColor={colors.background}>
       <StatusBar barStyle="light-content" backgroundColor={colors.background} />
-      
+
       <View style={styles.container}>
         <Animated.View style={[styles.atmosphere, heroStyle]}>
           <View style={styles.orbPrimary} />
@@ -95,9 +100,7 @@ export function PhoneScreen() {
           </View>
 
           {/* Inline error */}
-          {ctrl.phoneError != null && (
-            <Text style={styles.errorText}>{ctrl.phoneError}</Text>
-          )}
+          {ctrl.phoneError != null && <Text style={styles.errorText}>{ctrl.phoneError}</Text>}
 
           {/* T&C checkbox */}
           <View style={styles.termsRow}>
@@ -110,17 +113,19 @@ export function PhoneScreen() {
               testID="terms-checkbox"
             >
               <View style={[styles.checkbox, ctrl.termsAccepted && styles.checkboxChecked]}>
-                {ctrl.termsAccepted && (
-                  <Icon name="check" size={14} color="#fff" />
-                )}
+                {ctrl.termsAccepted && <Icon name="check" size={14} color="#fff" />}
               </View>
             </AnimatedPressable>
-            
+
             <Text style={styles.termsText}>
               {t('auth.terms_prefix')}
-              <Text style={styles.termsLink} onPress={ctrl.handleTermsPress}>{t('auth.terms_link')}</Text>
+              <Text style={styles.termsLink} onPress={ctrl.handleTermsPress}>
+                {t('auth.terms_link')}
+              </Text>
               {t('auth.terms_suffix')}
-              <Text style={styles.termsLink} onPress={ctrl.handlePrivacyPress}>{t('auth.privacy_link')}</Text>
+              <Text style={styles.termsLink} onPress={ctrl.handlePrivacyPress}>
+                {t('auth.privacy_link')}
+              </Text>
             </Text>
           </View>
 
@@ -138,9 +143,7 @@ export function PhoneScreen() {
 
           {/* Terms acceptance hint */}
           {!ctrl.termsAccepted && (
-            <Text style={styles.termsHint}>
-              {t('auth.accept_terms_hint')}
-            </Text>
+            <Text style={styles.termsHint}>{t('auth.accept_terms_hint')}</Text>
           )}
 
           {/* Sandbox hint */}

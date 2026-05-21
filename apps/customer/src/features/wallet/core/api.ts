@@ -3,7 +3,8 @@ import { walletApi as walletService } from '../../../core/api/services';
 
 // ── Phase 2 real implementations ─────────────────────────────────────
 const realWalletApi = {
-  getWallet: async (userId: string): Promise<ApiResponse<Wallet>> => walletService.getWallet(userId),
+  getWallet: async (userId: string): Promise<ApiResponse<Wallet>> =>
+    walletService.getWallet(userId),
   getTransactions: async (userId: string): Promise<ApiResponse<WalletTransaction[]>> =>
     walletService.getTransactions(userId),
   requestRecharge: async (userId: string, amount: number) =>

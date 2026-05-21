@@ -5,7 +5,13 @@ import { easings, motion } from '@dawwar/theme';
 import { useTranslation } from '@dawwar/i18n';
 import { useVerifyOtp, useSendOtp } from '../../core/hooks';
 import { useOtpCountdown } from '../../hooks/useOtpCountdown';
-import { AUTH_ROUTES, MODAL_ROUTES, PROFILE_ROUTES, TAB_ROUTES, WALLET_ROUTES } from '../../../../navigation/routes';
+import {
+  AUTH_ROUTES,
+  MODAL_ROUTES,
+  PROFILE_ROUTES,
+  TAB_ROUTES,
+  WALLET_ROUTES,
+} from '../../../../navigation/routes';
 import type { RootParamList } from '../../../../navigation/types';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { OtpScreenNavProp, OtpScreenRouteProp } from './types';
@@ -46,98 +52,102 @@ export function useController() {
 
   const verifyMutation = useVerifyOtp();
   const sendOtpMutation = useSendOtp();
-const submitOtp = useCallback(
-  async (code: string) => {
-    if (code.length < 6) return;
+  const submitOtp = useCallback(
+    async (code: string) => {
+      if (code.length < 6) return;
 
-    setOtpError(null);
-    try {
-      const res = await verifyMutation.mutateAsync({ phone, code });
-      
-      if (res.isFirstLogin) {
-        navigation.replace(AUTH_ROUTES.COMPLETE_PROFILE, { returnTo });
-        return;
-      }
+      setOtpError(null);
+      try {
+        const res = await verifyMutation.mutateAsync({ phone, code });
 
-      const rootNavigation = navigation.getParent<StackNavigationProp<RootParamList>>();
-
-      if (returnTo) {
-        if (rootNavigation) {
-          if (returnTo === 'checkout') {
-            rootNavigation.reset({
-              index: 1,
-              routes: [{ name: 'CustomerTabs' }, { name: MODAL_ROUTES.CHECKOUT }],
-            });
-            return;
-          }
-
-          if (returnTo === 'orders') {
-            rootNavigation.reset({
-              index: 0,
-              routes: [{ name: 'CustomerTabs', params: { screen: TAB_ROUTES.ORDERS_TAB } }],
-            });
-            return;
-          }
-
-          if (returnTo === 'wallet') {
-            rootNavigation.reset({
-              index: 0,
-              routes: [{
-                name: 'CustomerTabs',
-                params: {
-                  screen: TAB_ROUTES.PROFILE_TAB,
-                  params: { screen: WALLET_ROUTES.WALLET },
-                },
-              }],
-            });
-            return;
-          }
-
-          if (returnTo === 'address') {
-            rootNavigation.reset({
-              index: 0,
-              routes: [{
-                name: 'CustomerTabs',
-                params: {
-                  screen: TAB_ROUTES.PROFILE_TAB,
-                  params: { screen: PROFILE_ROUTES.ADDRESSES },
-                },
-              }],
-            });
-            return;
-          }
+        if (res.isFirstLogin) {
+          navigation.replace(AUTH_ROUTES.COMPLETE_PROFILE, { returnTo });
+          return;
         }
 
-        rootNavigation?.reset({ index: 0, routes: [{ name: 'CustomerTabs' }] });
-      } else {
-        rootNavigation?.reset({ index: 0, routes: [{ name: 'CustomerTabs' }] });
-      }
-    } catch (err: unknown) {
-      console.error('[OtpScreen] verifyOtp error:', err);
-      triggerShake();
+        const rootNavigation = navigation.getParent<StackNavigationProp<RootParamList>>();
 
-      const maybeErr = err as {
-        response?: { status?: number; data?: { message?: string } };
-        message?: string;
-      };
-      const status = maybeErr.response?.status;
-      const message = maybeErr.response?.data?.message;
+        if (returnTo) {
+          if (rootNavigation) {
+            if (returnTo === 'checkout') {
+              rootNavigation.reset({
+                index: 1,
+                routes: [{ name: 'CustomerTabs' }, { name: MODAL_ROUTES.CHECKOUT }],
+              });
+              return;
+            }
 
-      if (status === 403) {
-        setOtpError(message ?? t('errors.roleMismatch.merchantInCustomer'));
-      } else if (maybeErr.message === 'INVALID_OTP') {
-        setOtpError(t('auth.otp_invalid'));
-      } else if (maybeErr.message === 'OTP_EXPIRED') {
-        setOtpError(t('auth.otp_expired'));
-      } else {
-        setOtpError(t('errors.server'));
+            if (returnTo === 'orders') {
+              rootNavigation.reset({
+                index: 0,
+                routes: [{ name: 'CustomerTabs', params: { screen: TAB_ROUTES.ORDERS_TAB } }],
+              });
+              return;
+            }
+
+            if (returnTo === 'wallet') {
+              rootNavigation.reset({
+                index: 0,
+                routes: [
+                  {
+                    name: 'CustomerTabs',
+                    params: {
+                      screen: TAB_ROUTES.PROFILE_TAB,
+                      params: { screen: WALLET_ROUTES.WALLET },
+                    },
+                  },
+                ],
+              });
+              return;
+            }
+
+            if (returnTo === 'address') {
+              rootNavigation.reset({
+                index: 0,
+                routes: [
+                  {
+                    name: 'CustomerTabs',
+                    params: {
+                      screen: TAB_ROUTES.PROFILE_TAB,
+                      params: { screen: PROFILE_ROUTES.ADDRESSES },
+                    },
+                  },
+                ],
+              });
+              return;
+            }
+          }
+
+          rootNavigation?.reset({ index: 0, routes: [{ name: 'CustomerTabs' }] });
+        } else {
+          rootNavigation?.reset({ index: 0, routes: [{ name: 'CustomerTabs' }] });
+        }
+      } catch (err: unknown) {
+        console.error('[OtpScreen] verifyOtp error:', err);
+        triggerShake();
+
+        const maybeErr = err as {
+          response?: { status?: number; data?: { message?: string } };
+          message?: string;
+        };
+        const status = maybeErr.response?.status;
+        const message = maybeErr.response?.data?.message;
+
+        if (status === 403) {
+          setOtpError(message ?? t('errors.roleMismatch.merchantInCustomer'));
+        } else if (maybeErr.message === 'INVALID_OTP') {
+          setOtpError(t('auth.otp_invalid'));
+        } else if (maybeErr.message === 'OTP_EXPIRED') {
+          setOtpError(t('auth.otp_expired'));
+        } else {
+          setOtpError(t('errors.server'));
+        }
+        // Clear digits on error
+        setDigits('');
       }
-      // Clear digits on error
-      setDigits('');
-    }
-  },
-  [phone, returnTo, verifyMutation, navigation, triggerShake, t],
-);
+    },
+    [phone, returnTo, verifyMutation, navigation, triggerShake, t],
+  );
 
   const handleOtpChange = useCallback(
     (code: string) => {

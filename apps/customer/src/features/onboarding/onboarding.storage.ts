@@ -7,7 +7,8 @@ export const getOnboardingState = (): OnboardingState => {
   const completed = storage.getBoolean(StorageKeys.ONBOARDING_COMPLETED) ?? false;
   const version = storage.getNumber(StorageKeys.ONBOARDING_VERSION) ?? DEFAULT_ONBOARDING_VERSION;
   const completedAt = storage.getNumber(`${StorageKeys.ONBOARDING_COMPLETED}_at`) ?? undefined;
-  const skippedAt = storage.getNumber(`${StorageKeys.ONBOARDING_COMPLETED}_skipped_at`) ?? undefined;
+  const skippedAt =
+    storage.getNumber(`${StorageKeys.ONBOARDING_COMPLETED}_skipped_at`) ?? undefined;
 
   return {
     completed,
@@ -21,7 +22,8 @@ export const setOnboardingState = (state: OnboardingState) => {
   storage.set(StorageKeys.ONBOARDING_COMPLETED, state.completed);
   storage.set(StorageKeys.ONBOARDING_VERSION, state.version);
   if (state.completedAt) storage.set(`${StorageKeys.ONBOARDING_COMPLETED}_at`, state.completedAt);
-  if (state.skippedAt) storage.set(`${StorageKeys.ONBOARDING_COMPLETED}_skipped_at`, state.skippedAt);
+  if (state.skippedAt)
+    storage.set(`${StorageKeys.ONBOARDING_COMPLETED}_skipped_at`, state.skippedAt);
 };
 
 export const markOnboardingCompleted = (version: number) => {

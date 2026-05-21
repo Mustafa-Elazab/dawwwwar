@@ -8,7 +8,10 @@ import { RootNavigator } from '../navigation/RootNavigator';
 import { linking } from '../navigation/linking';
 import { navigationRef } from '../navigation/navigationRef';
 import { SafeAreaProviderCompat } from '@react-navigation/elements';
-import { requestPushNotificationPermission, setupForegroundNotifications } from '../utils/notifications';
+import {
+  requestPushNotificationPermission,
+  setupForegroundNotifications,
+} from '../utils/notifications';
 import { USE_MOCK_API } from '../core/api/config';
 console.log('Nav Elements loaded check:', !!SafeAreaProviderCompat);
 import '../utils/reactotron'; // Initialize Reactotron
@@ -17,7 +20,7 @@ import { NetworkStatusBanner } from '../components/NetworkStatusBanner';
 
 import logger from '../utils/logger';
 
-enableScreens(false);  // false = disable layout animations; prevents duplicate Animated node IDs under RN 0.84 New Architecture
+enableScreens(false); // false = disable layout animations; prevents duplicate Animated node IDs under RN 0.84 New Architecture
 
 export function App() {
   const isI18nReady = useLocalizationInitialization();
@@ -41,10 +44,10 @@ export function App() {
   return (
     <AppProviders>
       <NetworkStatusBanner />
-      <NavigationContainer 
+      <NavigationContainer
         ref={navigationRef}
-        linking={linking} 
-        onStateChange={(state) => {
+        linking={linking}
+        onStateChange={state => {
           logger.log('[NavigationContainer] State changed:', state);
         }}
         onReady={() => {

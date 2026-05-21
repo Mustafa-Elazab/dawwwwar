@@ -29,14 +29,14 @@ export function OnboardingSlideView({ slide, progress, index, width }: Onboardin
   }, [index, width]);
 
   return (
-    <View style={[styles.slide, { width }]}> 
+    <View style={[styles.slide, { width }]}>
       <Animated.View style={[styles.visualWrap, animatedStyle]}>
         <View style={styles.illustrationCanvas}>
           <View style={styles.glowCircle} />
           <View style={styles.iconShell}>
-          {visual.type === 'icon' && (
+            {visual.type === 'icon' && (
               <Icon name={visual.iconName ?? 'sparkles'} size={70} color={Colors.primary} />
-          )}
+            )}
           </View>
         </View>
       </Animated.View>

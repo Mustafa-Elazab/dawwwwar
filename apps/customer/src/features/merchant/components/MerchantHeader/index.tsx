@@ -25,8 +25,7 @@ export function MerchantHeader({ merchant, onBack }: MerchantHeaderProps) {
       <View style={styles.overlay} />
       <View style={styles.gradient} />
 
-      <View style={[styles.topControls, { paddingTop: insets.top + 6 }]}
-      >
+      <View style={[styles.topControls, { paddingTop: insets.top + 6 }]}>
         <AnimatedPressable
           onPress={onBack}
           pressScale={microInteractions.pressScale}
@@ -34,7 +33,11 @@ export function MerchantHeader({ merchant, onBack }: MerchantHeaderProps) {
           pressTranslateY={1}
           style={styles.controlButton}
         >
-          <Icon name={I18nManager.isRTL ? 'chevron-right' : 'chevron-left'} size={22} color="#FFFFFF" />
+          <Icon
+            name={I18nManager.isRTL ? 'chevron-right' : 'chevron-left'}
+            size={22}
+            color="#FFFFFF"
+          />
         </AnimatedPressable>
       </View>
 
@@ -44,9 +47,7 @@ export function MerchantHeader({ merchant, onBack }: MerchantHeaderProps) {
         <View style={styles.metaRow}>
           <View style={styles.ratingRow}>
             <Icon name="star" size={16} color={colors.warning} />
-            <Text style={styles.ratingText}>
-              {Number(merchant.rating || 0).toFixed(1)}
-            </Text>
+            <Text style={styles.ratingText}>{Number(merchant.rating || 0).toFixed(1)}</Text>
           </View>
           <Text style={styles.metaText}>{'·'}</Text>
           <Text style={styles.metaText}>

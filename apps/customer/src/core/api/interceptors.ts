@@ -2,7 +2,7 @@ import type { AxiosInstance, AxiosRequestConfig, AxiosError } from 'axios';
 import { NETWORK_DEFAULTS } from '../constants/network';
 import { getNetworkStatus } from '../network/network-monitor';
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 const isIdempotent = (method?: string) => {
   const m = (method || 'get').toLowerCase();
@@ -16,7 +16,7 @@ const isNetworkError = (error: AxiosError) => {
 export const attachLogging = (instance: AxiosInstance, enabled: boolean) => {
   if (!enabled) return;
 
-  instance.interceptors.request.use((config) => {
+  instance.interceptors.request.use(config => {
     (config as any).metadata = { start: Date.now() };
     const url = `${config.baseURL ?? ''}${config.url ?? ''}`;
     console.log(`[API] -> ${config.method?.toUpperCase()} ${url}`);
@@ -24,18 +24,20 @@ export const attachLogging = (instance: AxiosInstance, enabled: boolean) => {
   });
 
   instance.interceptors.response.use(
-    (response) => {
+    response => {
       const start = (response.config as any).metadata?.start;
       const elapsed = start ? `${Date.now() - start}ms` : 'n/a';
       const url = `${response.config.baseURL ?? ''}${response.config.url ?? ''}`;
-      console.log(`[API] <- ${response.status} ${response.config.method?.toUpperCase()} ${url} (${elapsed})`);
+      console.log(
+        `[API] <- ${response.status} ${response.config.method?.toUpperCase()} ${url} (${elapsed})`,
+      );
       return response;
     },
     (error: AxiosError) => {
       const url = `${error.config?.baseURL ?? ''}${error.config?.url ?? ''}`;
       console.log(`[API] !! ${error.config?.method?.toUpperCase()} ${url} (${error.message})`);
       return Promise.reject(error);
-    }
+    },
   );
 };
 
@@ -43,7 +45,7 @@ const createTraceId = () => `${Date.now().toString(36)}-${Math.random().toString
 
 export const attachTracing = (instance: AxiosInstance, enabled: boolean) => {
   if (!enabled) return;
-  instance.interceptors.request.use((config) => {
+  instance.interceptors.request.use(config => {
     if (!config.headers) config.headers = {} as any;
     if (!('x-trace-id' in config.headers)) {
       (config.headers as any)['x-trace-id'] = createTraceId();
@@ -54,7 +56,7 @@ export const attachTracing = (instance: AxiosInstance, enabled: boolean) => {
 
 export const attachRetry = (
   instance: AxiosInstance,
-  options?: { retries?: number; backoffMs?: number }
+  options?: { retries?: number; backoffMs?: number },
 ) => {
   const retries = options?.retries ?? NETWORK_DEFAULTS.retryCount;
   const backoffMs = options?.backoffMs ?? NETWORK_DEFAULTS.retryBackoffMs;

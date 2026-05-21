@@ -30,8 +30,8 @@ const queryClient = new QueryClient({
         }
         return failureCount < 2;
       },
-      staleTime: 5 * 60_000,   // 5 minutes
-      gcTime: 10 * 60_000,     // 10 minutes
+      staleTime: 5 * 60_000, // 5 minutes
+      gcTime: 10 * 60_000, // 10 minutes
     },
     mutations: {
       retry: 0,

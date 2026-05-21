@@ -9,15 +9,16 @@ import { createStyles } from './styles';
 import type { MerchantCardProps } from './types';
 import type { StyleProp, ViewStyle } from 'react-native';
 
-export const MerchantCard = React.memo(function MerchantCard({ merchant, onPress, style }: MerchantCardProps & { style?: StyleProp<ViewStyle> }) {
+export const MerchantCard = React.memo(function MerchantCard({
+  merchant,
+  onPress,
+  style,
+}: MerchantCardProps & { style?: StyleProp<ViewStyle> }) {
   const { colors } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
   const { t } = useTranslation();
 
-  const distanceKm = getDistanceKm(
-    Number(merchant.latitude),
-    Number(merchant.longitude),
-  );
+  const distanceKm = getDistanceKm(Number(merchant.latitude), Number(merchant.longitude));
 
   return (
     <AnimatedPressable
@@ -30,7 +31,10 @@ export const MerchantCard = React.memo(function MerchantCard({ merchant, onPress
       <View style={styles.coverContainer}>
         <FastImage
           source={{
-            uri: merchant.coverImage ?? merchant.logo ?? 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=1000',
+            uri:
+              merchant.coverImage ??
+              merchant.logo ??
+              'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=1000',
             priority: FastImage.priority.normal,
           }}
           style={styles.cover}
@@ -41,8 +45,12 @@ export const MerchantCard = React.memo(function MerchantCard({ merchant, onPress
         <View style={styles.scrimBottom} />
 
         {/* Status badge */}
-        <View style={[styles.badgeOverlay, merchant.isOpen ? styles.openBadge : styles.closedBadge]}>
-          <Text style={styles.statusLabel}>{merchant.isOpen ? t('merchant.open') : t('merchant.closed')}</Text>
+        <View
+          style={[styles.badgeOverlay, merchant.isOpen ? styles.openBadge : styles.closedBadge]}
+        >
+          <Text style={styles.statusLabel}>
+            {merchant.isOpen ? t('merchant.open') : t('merchant.closed')}
+          </Text>
         </View>
 
         {/* Delivery time pill */}
@@ -61,9 +69,7 @@ export const MerchantCard = React.memo(function MerchantCard({ merchant, onPress
           </Text>
           <View style={styles.ratingChip}>
             <Icon name="star" size={12} color={colors.warning} />
-            <Text style={styles.ratingText}>
-              {Number(merchant.rating || 0).toFixed(1)}
-            </Text>
+            <Text style={styles.ratingText}>{Number(merchant.rating || 0).toFixed(1)}</Text>
           </View>
         </View>
 

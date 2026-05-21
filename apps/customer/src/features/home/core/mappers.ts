@@ -49,9 +49,7 @@ export function mapProductToCard(p: Product): ProductCardVM {
     imageUri: p.images?.[0] ?? FALLBACK_IMAGE,
     price: p.price,
     comparePrice: hasDiscount ? comparePrice : undefined,
-    discountPercent: hasDiscount
-      ? Math.round(((comparePrice - p.price) / comparePrice) * 100)
-      : 0,
+    discountPercent: hasDiscount ? Math.round(((comparePrice - p.price) / comparePrice) * 100) : 0,
     isAvailable: p.isAvailable !== false,
     isFeatured: !!(p as any).isFeatured,
     merchantId: p.merchantId,

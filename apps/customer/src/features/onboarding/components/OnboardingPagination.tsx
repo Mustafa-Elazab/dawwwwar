@@ -20,7 +20,11 @@ function Dot({ index, count, progress, width }: DotProps) {
 
   const style = useAnimatedStyle(() => {
     const input = Array.from({ length: count }, (_, i) => i * width);
-    const dotWidth = interpolate(progress.value, input, input.map((_, i) => (i === index ? 24 : 8)));
+    const dotWidth = interpolate(
+      progress.value,
+      input,
+      input.map((_, i) => (i === index ? 24 : 8)),
+    );
     const backgroundColor = interpolateColor(
       progress.value,
       input,
@@ -36,7 +40,15 @@ function Dot({ index, count, progress, width }: DotProps) {
   return <Animated.View style={[styles.dot, style]} />;
 }
 
-export function OnboardingPagination({ count, progress, width }: { count: number; progress: SharedValue<number>; width: number }) {
+export function OnboardingPagination({
+  count,
+  progress,
+  width,
+}: {
+  count: number;
+  progress: SharedValue<number>;
+  width: number;
+}) {
   return (
     <View style={styles.row}>
       {Array.from({ length: count }).map((_, index) => (

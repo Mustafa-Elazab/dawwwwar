@@ -24,10 +24,7 @@ export function useController() {
     data: merchants,
     isLoading: merchantsLoading,
     refetch: refetchMerchants,
-  } = useNearbyMerchants(
-    delivery.merchantLat,
-    delivery.merchantLng,
-  );
+  } = useNearbyMerchants(delivery.merchantLat, delivery.merchantLng);
   const { data: products } = useFeaturedProducts(delivery.merchantLat, delivery.merchantLng);
   const {
     data: categories = [],
@@ -56,7 +53,9 @@ export function useController() {
             nameAr: product.nameAr,
             price: product.price,
             quantity: 1,
-            image: product.images[0] ?? 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=1000',
+            image:
+              product.images[0] ??
+              'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=1000',
             merchantId: product.merchantId,
             merchantName: 'Dawwar Merchant', // UI Fallback
           }),
@@ -67,7 +66,10 @@ export function useController() {
         import('react-native').then(({ Alert }) => {
           Alert.alert(
             t('cart.conflict_title', 'Replace Cart?'),
-            t('cart.conflict_body', 'Your cart contains items from another store. Do you want to clear it and add this item?'),
+            t(
+              'cart.conflict_body',
+              'Your cart contains items from another store. Do you want to clear it and add this item?',
+            ),
             [
               { text: t('common.cancel', 'Cancel'), style: 'cancel' },
               {
@@ -162,7 +164,10 @@ export function useController() {
     areaName: useMemo(() => {
       // Extract the first meaningful segment from the address as area name
       const addr = location.currentAddress || '';
-      const parts = addr.split(',').map((s: string) => s.trim()).filter(Boolean);
+      const parts = addr
+        .split(',')
+        .map((s: string) => s.trim())
+        .filter(Boolean);
       return parts[0] || '';
     }, [location.currentAddress]),
     t,

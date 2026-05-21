@@ -1,11 +1,7 @@
 import React, { useEffect } from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useAppSelector } from '../store/hooks';
-import {
-  selectIsAuthenticated,
-  selectIsLoading,
-  selectUser,
-} from '../store/slices/auth.slice';
+import { selectIsAuthenticated, selectIsLoading, selectUser } from '../store/slices/auth.slice';
 import { AuthNavigator } from './AuthNavigator';
 import { CustomerTabs } from './CustomerTabs';
 import { CartModal, CheckoutModal, CustomOrderModal } from './placeholders';
@@ -51,7 +47,7 @@ export function RootNavigator() {
         : 'CustomerTabs';
 
   return (
-    <Root.Navigator 
+    <Root.Navigator
       screenOptions={{ headerShown: false, presentation: 'modal' }}
       initialRouteName={initialRoute}
       key={initialRoute}

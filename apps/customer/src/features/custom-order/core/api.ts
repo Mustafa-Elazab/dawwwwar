@@ -5,5 +5,4 @@ const realCustomOrderApi = {
   place: async (payload: object) => customOrderService.place(payload),
 };
 
-
 export const customOrderApi = realCustomOrderApi;

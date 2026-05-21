@@ -5,11 +5,7 @@ import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Icon, Text, AnimatedPressable } from '@dawwar/ui';
-import {
-  microInteractions,
-  space,
-  useTheme,
-} from '@dawwar/theme';
+import { microInteractions, space, useTheme } from '@dawwar/theme';
 import { useTranslation } from '@dawwar/i18n';
 
 import { CategoriesScreen } from './placeholders';
@@ -88,57 +84,56 @@ type TabButtonProps = {
   badgeCount?: number;
 };
 
-const TabButton = memo(function TabButton({
-  isFocused,
-  routeName,
-  onPress,
-  label,
-  badgeCount,
-}: TabButtonProps) {
-  const { colors } = useTheme();
-  const config = TAB_CONFIG[routeName];
-  const iconColor = isFocused ? '#1DB954' : '#606060';
+const TabButton = memo(
+  function TabButton({ isFocused, routeName, onPress, label, badgeCount }: TabButtonProps) {
+    const { colors } = useTheme();
+    const config = TAB_CONFIG[routeName];
+    const iconColor = isFocused ? '#1DB954' : '#606060';
 
-  return (
-    <AnimatedPressable
-      onPress={onPress}
-      pressScale={microInteractions.pressScale}
-      pressOpacity={microInteractions.pressOpacity}
-      pressTranslateY={1}
-      style={styles.tabButton}
-    >
-      <View style={styles.activeContainer}>
-        <View style={styles.iconWrap}>
-          <Icon
-            name={isFocused ? config.activeIcon : config.inactiveIcon}
-            size={TAB_METRICS.iconSize}
-            color={iconColor}
-          />
-          {badgeCount != null && badgeCount > 0 ? (
-            <View style={[styles.badge, { backgroundColor: colors.error }]}> 
-              <Text style={styles.badgeText}>{badgeCount > 99 ? '99+' : `${badgeCount}`}</Text>
-            </View>
+    return (
+      <AnimatedPressable
+        onPress={onPress}
+        pressScale={microInteractions.pressScale}
+        pressOpacity={microInteractions.pressOpacity}
+        pressTranslateY={1}
+        style={styles.tabButton}
+      >
+        <View style={styles.activeContainer}>
+          <View style={styles.iconWrap}>
+            <Icon
+              name={isFocused ? config.activeIcon : config.inactiveIcon}
+              size={TAB_METRICS.iconSize}
+              color={iconColor}
+            />
+            {badgeCount != null && badgeCount > 0 ? (
+              <View style={[styles.badge, { backgroundColor: colors.error }]}>
+                <Text style={styles.badgeText}>{badgeCount > 99 ? '99+' : `${badgeCount}`}</Text>
+              </View>
+            ) : null}
+          </View>
+
+          {isFocused ? (
+            <>
+              <Text style={styles.activeLabel} numberOfLines={1}>
+                {label}
+              </Text>
+              <View style={styles.activeDot} />
+            </>
           ) : null}
         </View>
-
-        {isFocused ? (
-          <>
-            <Text style={styles.activeLabel} numberOfLines={1}>{label}</Text>
-            <View style={styles.activeDot} />
-          </>
-        ) : null}
-      </View>
-    </AnimatedPressable>
-  );
-}, (prev, next) => {
-  return (
-    prev.isFocused === next.isFocused
-    && prev.routeName === next.routeName
-    && prev.label === next.label
-    && prev.badgeCount === next.badgeCount
-    && prev.onPress === next.onPress
-  );
-});
+      </AnimatedPressable>
+    );
+  },
+  (prev, next) => {
+    return (
+      prev.isFocused === next.isFocused &&
+      prev.routeName === next.routeName &&
+      prev.label === next.label &&
+      prev.badgeCount === next.badgeCount &&
+      prev.onPress === next.onPress
+    );
+  },
+);
 
 function CustomTabBar({ state, navigation }: BottomTabBarProps) {
   const { t } = useTranslation();
@@ -155,24 +150,26 @@ function CustomTabBar({ state, navigation }: BottomTabBarProps) {
 
   const bottomPadding = Math.max(insets.bottom, TAB_METRICS.minBottomPadding);
 
-  const handleTabPress = useCallback((routeKey: string, routeName: string, isFocused: boolean, analyticsId: string) => {
-    const event = navigation.emit({
-      type: 'tabPress',
-      target: routeKey,
-      canPreventDefault: true,
-    });
+  const handleTabPress = useCallback(
+    (routeKey: string, routeName: string, isFocused: boolean, analyticsId: string) => {
+      const event = navigation.emit({
+        type: 'tabPress',
+        target: routeKey,
+        canPreventDefault: true,
+      });
 
-    if (!isFocused && !event.defaultPrevented) {
-      trackTabPress(analyticsId);
-      navigation.navigate(routeName as never);
-    }
-  }, [navigation]);
+      if (!isFocused && !event.defaultPrevented) {
+        trackTabPress(analyticsId);
+        navigation.navigate(routeName as never);
+      }
+    },
+    [navigation],
+  );
 
   return (
     <View style={[styles.wrapper, { paddingBottom: bottomPadding }]}>
       <View style={styles.container}>
-
-        {orderedRoutes.map((route) => {
+        {orderedRoutes.map(route => {
           const routeName = route.name as TabRouteName;
           const config = TAB_CONFIG[routeName];
           const isFocused = activeRoute.key === route.key;
@@ -203,7 +200,7 @@ export function CustomerTabs() {
   return (
     <>
       <Tab.Navigator
-        tabBar={(props) => <CustomTabBar {...props} />}
+        tabBar={props => <CustomTabBar {...props} />}
         screenOptions={{
           headerShown: false,
           tabBarHideOnKeyboard: true,

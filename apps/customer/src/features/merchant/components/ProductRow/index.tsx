@@ -7,7 +7,12 @@ import FastImage from 'react-native-fast-image';
 import { createStyles } from './styles';
 import type { ProductRowProps } from './types';
 
-export const ProductRow = React.memo(function ProductRow({ product, quantity = 0, onAdd, onRemove }: ProductRowProps) {
+export const ProductRow = React.memo(function ProductRow({
+  product,
+  quantity = 0,
+  onAdd,
+  onRemove,
+}: ProductRowProps) {
   const { colors } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
   const { t } = useTranslation();
@@ -15,7 +20,12 @@ export const ProductRow = React.memo(function ProductRow({ product, quantity = 0
   return (
     <View style={[styles.row, !product.isAvailable && styles.unavailableBadge && { opacity: 0.5 }]}>
       <FastImage
-        source={{ uri: product.images[0] || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=1000', priority: FastImage.priority.normal }}
+        source={{
+          uri:
+            product.images[0] ||
+            'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=1000',
+          priority: FastImage.priority.normal,
+        }}
         style={styles.image}
         resizeMode={FastImage.resizeMode.cover}
       />

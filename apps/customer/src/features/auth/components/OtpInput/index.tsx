@@ -40,11 +40,11 @@ export function OtpInput({
         return (
           <TextInput
             key={idx}
-            ref={(r) => {
+            ref={r => {
               inputRefs.current[idx] = r;
             }}
             value={char}
-            onChangeText={(text) => handleDigitChange(idx, text)}
+            onChangeText={text => handleDigitChange(idx, text)}
             onKeyPress={({ nativeEvent }) => {
               if (nativeEvent.key !== 'Backspace') return;
               if (char) {

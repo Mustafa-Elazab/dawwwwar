@@ -71,7 +71,15 @@ import {
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env.production', '.env.development', '.env'],
-      load: [databaseConfig, redisConfig, jwtConfig, appConfig, uploadConfig, firebaseConfig, paymobConfig],
+      load: [
+        databaseConfig,
+        redisConfig,
+        jwtConfig,
+        appConfig,
+        uploadConfig,
+        firebaseConfig,
+        paymobConfig,
+      ],
       validate: validateEnv,
     }),
     BullModule.forRootAsync({
@@ -97,10 +105,12 @@ import {
         return { store };
       },
     }),
-    ThrottlerModule.forRoot([{
-      ttl: 600000, // 10 minutes
-      limit: 3,
-    }]),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 600000, // 10 minutes
+        limit: 3,
+      },
+    ]),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({

@@ -11,12 +11,7 @@ import {
 } from '../../../../store/slices/cart.slice';
 import { selectUser, selectIsAuthenticated } from '../../../../store/slices/auth.slice';
 import { selectLocation } from '../../../../store/slices/location.slice';
-import { 
-  usePlaceOrder, 
-  useAddresses, 
-  useWallet, 
-  QUERY_KEYS 
-} from '@dawwar/api-client';
+import { usePlaceOrder, useAddresses, useWallet, QUERY_KEYS } from '@dawwar/api-client';
 import { ORDER_ROUTES } from '../../../../navigation/routes';
 import { PaymentMethod } from '@dawwar/types';
 import api from '../../../../core/api/client';
@@ -43,7 +38,7 @@ export function useController() {
   // Real Data Hooks
   const { data: addressesRes } = useAddresses(isAuthenticated ? user?.id : undefined);
   const { data: walletRes } = useWallet();
-  
+
   const addresses = addressesRes?.data || [];
   const wallet = walletRes?.data;
   const walletBalance = Number(wallet?.balance || 0);
@@ -63,7 +58,15 @@ export function useController() {
 
   // Fetch delivery fee dynamically
   const { data: feeRes } = useQuery({
-    queryKey: ['deliveryFee', merchantId, selectedAddress?.latitude, selectedAddress?.longitude, location.latitude, location.longitude, subtotal],
+    queryKey: [
+      'deliveryFee',
+      merchantId,
+      selectedAddress?.latitude,
+      selectedAddress?.longitude,
+      location.latitude,
+      location.longitude,
+      subtotal,
+    ],
     queryFn: async () => {
       const lat = selectedAddress?.latitude ?? location.latitude;
       const lng = selectedAddress?.longitude ?? location.longitude;
@@ -106,7 +109,7 @@ export function useController() {
         deliveryPhone: selectedAddress?.phone ?? user?.phone ?? '',
         deliveryFee,
         deliveryNotes: notes,
-        items: items.map((i) => ({
+        items: items.map(i => ({
           productId: i.productId,
           productName: i.nameAr || i.name,
           quantity: i.quantity,
@@ -117,20 +120,38 @@ export function useController() {
       dispatch(clearCart());
       // Invalidate orders list
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.orders.list('all') });
-      navigation.navigate('CustomerTabs', { 
+      navigation.navigate('CustomerTabs', {
         screen: 'OrdersTab',
-        params: { 
+        params: {
           screen: 'TrackingScreen',
-          params: { orderId: res.data.id }
-        }
+          params: { orderId: res.data.id },
+        },
       });
     } catch {
       // Error handled by mutation or global interceptor
     }
-  }, [isAuthenticated, selectedAddress, location, user, merchantId, paymentMethod, subtotal, deliveryFee, notes, items, placeOrderMutation, dispatch, queryClient, navigation]);
+  }, [
+    isAuthenticated,
+    selectedAddress,
+    location,
+    user,
+    merchantId,
+    paymentMethod,
+    subtotal,
+    deliveryFee,
+    notes,
+    items,
+    placeOrderMutation,
+    dispatch,
+    queryClient,
+    navigation,
+  ]);
 
   const isButtonDisabled =
-    items.length === 0 || (!selectedAddress && !location.latitude) || isWalletInsufficient || placeOrderMutation.isPending;
+    items.length === 0 ||
+    (!selectedAddress && !location.latitude) ||
+    isWalletInsufficient ||
+    placeOrderMutation.isPending;
 
   return {
     items,
@@ -145,7 +166,10 @@ export function useController() {
     setNotes,
     walletBalance,
     isWalletInsufficient,
-    address: selectedAddress || { label: 'map', address: location.currentAddress || t('checkout.add_address_hint') },
+    address: selectedAddress || {
+      label: 'map',
+      address: location.currentAddress || t('checkout.add_address_hint'),
+    },
     isLoading: placeOrderMutation.isPending,
     isError: placeOrderMutation.isError,
     isButtonDisabled,

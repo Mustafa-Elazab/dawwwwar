@@ -22,10 +22,13 @@ const buildVariantStyles = (rtl: boolean) => {
     'overline',
   ];
 
-  return variants.reduce<Record<TypographyVariant, ReturnType<typeof getTypographyStyle>>>((acc, variant) => {
-    acc[variant] = getTypographyStyle(variant, rtl);
-    return acc;
-  }, {} as Record<TypographyVariant, ReturnType<typeof getTypographyStyle>>);
+  return variants.reduce<Record<TypographyVariant, ReturnType<typeof getTypographyStyle>>>(
+    (acc, variant) => {
+      acc[variant] = getTypographyStyle(variant, rtl);
+      return acc;
+    },
+    {} as Record<TypographyVariant, ReturnType<typeof getTypographyStyle>>,
+  );
 };
 
 export const createStyles = (colors: AppColors) => {

@@ -38,9 +38,17 @@ export function CompleteProfileScreen() {
     >
       <View style={styles.container}>
         <View style={styles.form}>
-          <AnimatedPressable style={styles.avatarWrap} onPress={handlePickAvatar} pressTranslateY={1}>
+          <AnimatedPressable
+            style={styles.avatarWrap}
+            onPress={handlePickAvatar}
+            pressTranslateY={1}
+          >
             {avatarUri ? (
-              <FastImage source={{ uri: avatarUri }} style={styles.avatarImage} resizeMode={FastImage.resizeMode.cover} />
+              <FastImage
+                source={{ uri: avatarUri }}
+                style={styles.avatarImage}
+                resizeMode={FastImage.resizeMode.cover}
+              />
             ) : (
               <Icon name="camera" size={28} color="#1DB954" />
             )}

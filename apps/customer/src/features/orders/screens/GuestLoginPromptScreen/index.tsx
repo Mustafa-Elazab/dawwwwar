@@ -22,16 +22,15 @@ export function GuestLoginPromptScreen() {
           <Text style={{ fontSize: 60 }}>🛒</Text>
         </View>
 
-        <Text variant="h2" style={styles.title}>{t('guest.loginRequired')}</Text>
-        <Text variant="body1" style={styles.subtitle}>{t('guest.loginToViewOrders')}</Text>
+        <Text variant="h2" style={styles.title}>
+          {t('guest.loginRequired')}
+        </Text>
+        <Text variant="body1" style={styles.subtitle}>
+          {t('guest.loginToViewOrders')}
+        </Text>
 
-        <Button
-          label={t('guest.login')}
-          onPress={handleLogin}
-          style={styles.button}
-          fullWidth
-        />
-        
+        <Button label={t('guest.login')} onPress={handleLogin} style={styles.button} fullWidth />
+
         <View style={[styles.cartInfo, { backgroundColor: colors.success + '15' }]}>
           <Text style={[styles.cartText, { color: colors.success }]}>
             {t('guest.cartPreserved')}

@@ -14,26 +14,18 @@ export function AddressesScreen() {
   const ctrl = useController();
 
   const handleMenuPress = (item: Address) => {
-    Alert.alert(
-      item.label,
-      '',
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        { text: t('addresses.edit'), onPress: () => ctrl.handleEdit(item.id) },
-        { text: t('addresses.delete'), style: 'destructive', onPress: () => confirmDelete(item.id) },
-      ],
-    );
+    Alert.alert(item.label, '', [
+      { text: t('common.cancel'), style: 'cancel' },
+      { text: t('addresses.edit'), onPress: () => ctrl.handleEdit(item.id) },
+      { text: t('addresses.delete'), style: 'destructive', onPress: () => confirmDelete(item.id) },
+    ]);
   };
 
   const confirmDelete = (id: string) => {
-    Alert.alert(
-      t('addresses.delete_confirm_title'),
-      t('addresses.delete_confirm_body'),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        { text: t('addresses.delete'), style: 'destructive', onPress: () => ctrl.handleDelete(id) },
-      ],
-    );
+    Alert.alert(t('addresses.delete_confirm_title'), t('addresses.delete_confirm_body'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      { text: t('addresses.delete'), style: 'destructive', onPress: () => ctrl.handleDelete(id) },
+    ]);
   };
 
   const isHomeLabel = (label?: string) => {
@@ -41,32 +33,48 @@ export function AddressesScreen() {
     return l === 'home' || l === 'المنزل' || l.includes('home');
   };
 
-  const renderItem = React.useCallback(({ item }: { item: Address }) => (
-    <View style={styles.card}>
-      {item.isDefault && (
-        <View style={styles.defaultBadge}>
-          <Text style={styles.defaultText}>{t('addresses.default')}</Text>
+  const renderItem = React.useCallback(
+    ({ item }: { item: Address }) => (
+      <View style={styles.card}>
+        {item.isDefault && (
+          <View style={styles.defaultBadge}>
+            <Text style={styles.defaultText}>{t('addresses.default')}</Text>
+          </View>
+        )}
+
+        <View
+          style={[
+            styles.iconCircle,
+            {
+              backgroundColor: isHomeLabel(item.label) ? `${colors.primary}20` : `${colors.info}15`,
+            },
+          ]}
+        >
+          <Icon
+            name={isHomeLabel(item.label) ? 'home-variant' : 'briefcase-variant'}
+            size={22}
+            color={isHomeLabel(item.label) ? colors.primary : colors.info}
+          />
         </View>
-      )}
-      
-      <View style={[styles.iconCircle, { backgroundColor: isHomeLabel(item.label) ? `${colors.primary}20` : `${colors.info}15` }]}>
-        <Icon 
-          name={isHomeLabel(item.label) ? 'home-variant' : 'briefcase-variant'} 
-          size={22} 
-          color={isHomeLabel(item.label) ? colors.primary : colors.info} 
-        />
-      </View>
 
-      <View style={styles.info}>
-        <Text style={styles.label}>{t(`address_labels.${(item.label || 'other').toLowerCase()}`, { defaultValue: item.label || t('addresses.other') })}</Text>
-        <Text style={styles.street} numberOfLines={1}>{item.address}</Text>
-      </View>
+        <View style={styles.info}>
+          <Text style={styles.label}>
+            {t(`address_labels.${(item.label || 'other').toLowerCase()}`, {
+              defaultValue: item.label || t('addresses.other'),
+            })}
+          </Text>
+          <Text style={styles.street} numberOfLines={1}>
+            {item.address}
+          </Text>
+        </View>
 
-      <TouchableOpacity style={styles.menuBtn} onPress={() => handleMenuPress(item)}>
-        <Icon name="dots-vertical" size={22} color={colors.textSecondary} />
-      </TouchableOpacity>
-    </View>
-  ), [colors.primary, colors.textSecondary, handleMenuPress, styles, t]);
+        <TouchableOpacity style={styles.menuBtn} onPress={() => handleMenuPress(item)}>
+          <Icon name="dots-vertical" size={22} color={colors.textSecondary} />
+        </TouchableOpacity>
+      </View>
+    ),
+    [colors.primary, colors.textSecondary, handleMenuPress, styles, t],
+  );
 
   return (
     <ListScreenTemplate<Address>
@@ -82,7 +90,7 @@ export function AddressesScreen() {
       }
       data={ctrl.addresses}
       renderItem={renderItem}
-      keyExtractor={(item) => item.id}
+      keyExtractor={item => item.id}
       isLoading={ctrl.isLoading}
       isError={ctrl.isError}
       onRetry={ctrl.refetch}

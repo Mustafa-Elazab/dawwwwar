@@ -1,12 +1,5 @@
 import React, { useRef, useCallback, useMemo } from 'react';
-import {
-  View,
-  FlatList,
-  ScrollView,
-  I18nManager,
-  Dimensions,
-  RefreshControl,
-} from 'react-native';
+import { View, FlatList, ScrollView, I18nManager, Dimensions, RefreshControl } from 'react-native';
 import { useTranslation } from '@dawwar/i18n';
 import { ScreenTemplate, Text, Icon, Skeleton, AnimatedPressable, Button } from '@dawwar/ui';
 import { useTheme, microInteractions } from '@dawwar/theme';
@@ -112,7 +105,9 @@ export function HomeScreen() {
           pressOpacity={microInteractions.pressOpacity}
           pressTranslateY={1}
         >
-          <Text style={[styles.discoveryText, discoveryMode === 'nearby' && styles.discoveryTextActive]}>
+          <Text
+            style={[styles.discoveryText, discoveryMode === 'nearby' && styles.discoveryTextActive]}
+          >
             {t('home.discovery_nearby')}
           </Text>
         </AnimatedPressable>
@@ -123,7 +118,12 @@ export function HomeScreen() {
           pressOpacity={microInteractions.pressOpacity}
           pressTranslateY={1}
         >
-          <Text style={[styles.discoveryText, discoveryMode === 'country' && styles.discoveryTextActive]}>
+          <Text
+            style={[
+              styles.discoveryText,
+              discoveryMode === 'country' && styles.discoveryTextActive,
+            ]}
+          >
             {t('home.discovery_country')}
           </Text>
         </AnimatedPressable>
@@ -132,7 +132,7 @@ export function HomeScreen() {
       <FlatList
         horizontal
         data={ctrl.categories}
-        keyExtractor={(item) => item.id}
+        keyExtractor={item => item.id}
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.chipsRow}
         inverted={I18nManager.isRTL}
@@ -145,7 +145,9 @@ export function HomeScreen() {
             pressTranslateY={1}
           >
             <Text style={styles.categoryEmoji}>{item.icon || '🍽️'}</Text>
-            <Text numberOfLines={1} style={styles.categoryLabel}>{ctrl.categoryDisplayName(item)}</Text>
+            <Text numberOfLines={1} style={styles.categoryLabel}>
+              {ctrl.categoryDisplayName(item)}
+            </Text>
           </AnimatedPressable>
         )}
       />
@@ -167,8 +169,10 @@ export function HomeScreen() {
     const merchants = ctrl.merchants;
     const products = ctrl.products;
 
-    const byDelivery = [...merchants].sort((a, b) => (a.deliveryTimeMin ?? 99) - (b.deliveryTimeMin ?? 99));
-    const byRating = [...merchants].sort((a, b) => (Number(b.rating || 0) - Number(a.rating || 0)));
+    const byDelivery = [...merchants].sort(
+      (a, b) => (a.deliveryTimeMin ?? 99) - (b.deliveryTimeMin ?? 99),
+    );
+    const byRating = [...merchants].sort((a, b) => Number(b.rating || 0) - Number(a.rating || 0));
 
     return [
       {
@@ -241,13 +245,13 @@ export function HomeScreen() {
             />
           </View>
 
-          {sections.map((section) => (
+          {sections.map(section => (
             <View key={section.id} style={styles.sectionBlock}>
               <SectionHeader title={section.title} onSeeAll={section.onSeeAll} />
 
               {ctrl.isLoading ? (
                 <View style={styles.skeletonRow}>
-                  {[1, 2].map((i) => (
+                  {[1, 2].map(i => (
                     <Skeleton
                       key={`${section.id}-${i}`}
                       width={SCREEN_WIDTH * 0.7}
@@ -260,7 +264,7 @@ export function HomeScreen() {
                 <FlatList<Merchant>
                   data={section.data as Merchant[]}
                   renderItem={renderMerchant}
-                  keyExtractor={(item) => item.id}
+                  keyExtractor={item => item.id}
                   horizontal
                   showsHorizontalScrollIndicator={false}
                   contentContainerStyle={styles.merchantsList}
@@ -271,7 +275,7 @@ export function HomeScreen() {
                 />
               ) : (
                 <View style={styles.productsGrid}>
-                  {(section.data as Product[]).slice(0, 4).map((product) => (
+                  {(section.data as Product[]).slice(0, 4).map(product => (
                     <View key={product.id} style={styles.productGridItem}>
                       <ProductCard product={product} onAdd={() => ctrl.handleProductAdd(product)} />
                     </View>
@@ -284,7 +288,11 @@ export function HomeScreen() {
       </ScreenTemplate>
 
       {cartCount > 0 ? (
-        <Animated.View entering={SlideInDown.duration(200)} exiting={SlideOutDown.duration(150)} style={styles.cartBarWrap}>
+        <Animated.View
+          entering={SlideInDown.duration(200)}
+          exiting={SlideOutDown.duration(150)}
+          style={styles.cartBarWrap}
+        >
           <AnimatedPressable
             style={styles.cartBar}
             onPress={() => {
@@ -298,7 +306,9 @@ export function HomeScreen() {
             pressOpacity={microInteractions.pressOpacity}
             pressTranslateY={1}
           >
-            <View style={styles.cartCountBubble}><Text style={styles.cartCountText}>{`${cartCount}`}</Text></View>
+            <View style={styles.cartCountBubble}>
+              <Text style={styles.cartCountText}>{`${cartCount}`}</Text>
+            </View>
             <Text style={styles.cartCta}>{t('cart.open_cart')}</Text>
             <Text style={styles.cartTotal}>{`${cartTotal} ${t('common.egp')}`}</Text>
           </AnimatedPressable>
@@ -315,7 +325,7 @@ export function HomeScreen() {
         addresses={ctrl.delivery.addresses}
         addressesLoading={!!ctrl.user?.id && ctrl.delivery.addressesFetching}
         selectedAddressId={ctrl.delivery.selectedAddressId}
-        onSelectAddress={(a) => {
+        onSelectAddress={a => {
           ctrl.selectSavedAddress(a);
           closeLocationModal();
         }}

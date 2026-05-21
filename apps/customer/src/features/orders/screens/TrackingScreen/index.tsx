@@ -2,14 +2,7 @@ import React, { useMemo } from 'react';
 import { View } from 'react-native';
 import { useTranslation } from '@dawwar/i18n';
 import MapView, { Marker } from 'react-native-maps';
-import {
-  ScrollScreenTemplate,
-  Text,
-  Button,
-  LoadingSpinner,
-  ErrorState,
-  Icon,
-} from '@dawwar/ui';
+import { ScrollScreenTemplate, Text, Button, LoadingSpinner, ErrorState, Icon } from '@dawwar/ui';
 import { useTheme } from '@dawwar/theme';
 import { StatusTimeline } from '../../components/StatusTimeline';
 import { useController } from './useController';
@@ -38,9 +31,7 @@ export function TrackingScreen() {
       {/* Status timeline */}
       <View style={styles.timelineContainer}>
         <StatusTimeline status={ctrl.order.status} orderType={ctrl.order.type} />
-        <Text style={styles.statusLabel}>
-          {t(`tracking.status.${ctrl.order.status}`)}
-        </Text>
+        <Text style={styles.statusLabel}>{t(`tracking.status.${ctrl.order.status}`)}</Text>
       </View>
 
       {/* Map implementation */}
@@ -56,10 +47,7 @@ export function TrackingScreen() {
           scrollEnabled={false}
           zoomEnabled={false}
         >
-          <Marker
-            coordinate={ctrl.driverLocation}
-            title={t('driver.on_the_way')}
-          >
+          <Marker coordinate={ctrl.driverLocation} title={t('driver.on_the_way')}>
             <Icon name="motorbike" size={28} color={colors.primary} />
           </Marker>
         </MapView>
@@ -71,9 +59,7 @@ export function TrackingScreen() {
           <Icon name="account-circle-outline" size={44} color={colors.primary} />
           <View style={styles.driverInfo}>
             <Text style={styles.driverName}>{t('driver.on_the_way')}</Text>
-            <Text style={styles.driverMeta}>
-              {ctrl.order.orderNumber}
-            </Text>
+            <Text style={styles.driverMeta}>{ctrl.order.orderNumber}</Text>
           </View>
           <View style={styles.callBtn}>
             <Icon name="phone" size={20} color={colors.primary} />

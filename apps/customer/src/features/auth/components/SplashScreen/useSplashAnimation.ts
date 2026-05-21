@@ -83,9 +83,7 @@ export const useSplashAnimation = ({ isExiting = false }: SplashAnimationConfig)
 
   const logoStyle = useAnimatedStyle(() => ({
     opacity: intro.value,
-    transform: [
-      { translateY: (1 - intro.value) * 10 },
-    ],
+    transform: [{ translateY: (1 - intro.value) * 10 }],
   }));
 
   const ring1Style = useAnimatedStyle(() => ({

@@ -7,7 +7,7 @@ export const createStyles = (colors: AppColors) =>
     listContent: {
       padding: layout.screenPaddingH,
     },
-    
+
     // ── Add New Card ────────────────────────────────────
     addCard: {
       flexDirection: 'row',
@@ -68,7 +68,7 @@ export const createStyles = (colors: AppColors) =>
       ...typography.caption,
       color: colors.textSecondary,
     },
-    
+
     defaultBadge: {
       position: 'absolute',
       top: -8,
@@ -83,7 +83,7 @@ export const createStyles = (colors: AppColors) =>
       color: '#fff',
       fontWeight: '700',
     },
-    
+
     menuBtn: {
       padding: space.xs,
     },

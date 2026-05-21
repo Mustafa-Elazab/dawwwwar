@@ -22,7 +22,7 @@ export const createStyles = (colors: AppColors) =>
       fontWeight: '700',
       letterSpacing: 1,
     },
-    
+
     // ── Address ────────────────────────────────────────
     addressRow: {
       flexDirection: 'row',

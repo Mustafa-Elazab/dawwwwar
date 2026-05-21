@@ -17,10 +17,7 @@ export function TermsScreen() {
   );
 
   return (
-    <ScrollScreenTemplate
-      headerProps={{ title: t('terms.title') }}
-      contentStyle={styles.content}
-    >
+    <ScrollScreenTemplate headerProps={{ title: t('terms.title') }} contentStyle={styles.content}>
       <View style={styles.header}>
         <Text style={styles.title}>{t('terms.title')}</Text>
         <Text style={[styles.lastUpdated, dynamicStyles.lastUpdated]}>{t('common.today')}</Text>
@@ -29,9 +26,7 @@ export function TermsScreen() {
       <Divider />
 
       <View style={styles.section}>
-        <Text style={[styles.paragraph, dynamicStyles.paragraph]}>
-          {t('terms.content')}
-        </Text>
+        <Text style={[styles.paragraph, dynamicStyles.paragraph]}>{t('terms.content')}</Text>
       </View>
     </ScrollScreenTemplate>
   );
@@ -43,16 +38,15 @@ const styles = StyleSheet.create({
   },
   header: {
     marginBottom: space.lg,
-    
   },
   title: {
     ...typography.h2,
     marginBottom: space.xs,
-    alignSelf:"flex-start"
+    alignSelf: 'flex-start',
   },
   lastUpdated: {
     ...typography.caption,
-    alignSelf:"flex-start"
+    alignSelf: 'flex-start',
   },
   section: {
     marginVertical: space.md,
@@ -64,7 +58,7 @@ const styles = StyleSheet.create({
   paragraph: {
     ...typography.body1,
     lineHeight: 24,
-    alignSelf:"flex-start",
-    textAlign:"auto",
+    alignSelf: 'flex-start',
+    textAlign: 'auto',
   },
 });

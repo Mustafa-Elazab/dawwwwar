@@ -18,17 +18,17 @@ export function ProfileScreen() {
   return (
     <ScrollScreenTemplate
       edges={['top']}
-      headerProps={{ 
+      headerProps={{
         title: t('profile.title'),
-        type: 'none'
+        type: 'none',
       }}
       contentStyle={{ paddingBottom: 40 }}
     >
       {/* User info card or Login prompt */}
       {ctrl.isAuthenticated ? (
         <View style={styles.userCard}>
-          <TouchableOpacity 
-            style={styles.avatarContainer} 
+          <TouchableOpacity
+            style={styles.avatarContainer}
             onPress={ctrl.handlePickImage}
             disabled={ctrl.isUploading}
           >
@@ -45,13 +45,15 @@ export function ProfileScreen() {
           <Text style={styles.userPhone}>{ctrl.user?.phone}</Text>
         </View>
       ) : (
-        <View style={[styles.userCard, { paddingVertical: space.xl }]}> 
+        <View style={[styles.userCard, { paddingVertical: space.xl }]}>
           <View style={[styles.avatarContainer, { backgroundColor: colors.border }]}>
             <Icon name="account-outline" size={40} color={colors.textSecondary} />
           </View>
-          <Text style={[styles.userName, { marginBottom: space.md }]}>{t('home.greeting_guest')}</Text>
-          <Button 
-            label={t('auth.login_btn')} 
+          <Text style={[styles.userName, { marginBottom: space.md }]}>
+            {t('home.greeting_guest')}
+          </Text>
+          <Button
+            label={t('auth.login_btn')}
             onPress={ctrl.handleLogin}
             variant="primary"
             size="sm"
@@ -102,17 +104,20 @@ export function ProfileScreen() {
       {/* Support section */}
       <Text style={styles.sectionLabel}>{t('profile.section_support')}</Text>
       <View style={styles.sectionCard}>
-        <SettingsRow icon="whatsapp" title={t('profile.contact_whatsapp')} iconColor="#25D366" 
-              onPress={() =>{}}
+        <SettingsRow
+          icon="whatsapp"
+          title={t('profile.contact_whatsapp')}
+          iconColor="#25D366"
+          onPress={() => {}}
         />
-        <SettingsRow 
-          icon="file-document-outline" 
-          title={t('profile.terms')} 
+        <SettingsRow
+          icon="file-document-outline"
+          title={t('profile.terms')}
           onPress={() => ctrl.navigate(PROFILE_ROUTES.TERMS)}
         />
-        <SettingsRow 
-          icon="shield-outline" 
-          title={t('profile.privacy')} 
+        <SettingsRow
+          icon="shield-outline"
+          title={t('profile.privacy')}
           onPress={() => ctrl.navigate(PROFILE_ROUTES.PRIVACY)}
         />
       </View>

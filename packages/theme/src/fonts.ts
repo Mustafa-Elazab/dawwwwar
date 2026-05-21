@@ -41,7 +41,10 @@ export const getFontFamily = (weight?: FontWeight, rtl = I18nManager.isRTL) => {
   return group[key] ?? group.regular;
 };
 
-export const getArabicLineHeight = (lineHeight?: number, variant: 'display' | 'heading' | 'title' | 'body' | 'label' | 'caption' = 'body') => {
+export const getArabicLineHeight = (
+  lineHeight?: number,
+  variant: 'display' | 'heading' | 'title' | 'body' | 'label' | 'caption' = 'body',
+) => {
   if (!lineHeight) return lineHeight;
   const multipliers: Record<typeof variant, number> = {
     display: 1.05,

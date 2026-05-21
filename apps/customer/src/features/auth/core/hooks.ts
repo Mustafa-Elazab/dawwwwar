@@ -1,4 +1,7 @@
-import { useSendOtp as useBaseSendOtp, useVerifyCustomerOtp as useBaseVerifyOtp } from '@dawwar/api-client';
+import {
+  useSendOtp as useBaseSendOtp,
+  useVerifyCustomerOtp as useBaseVerifyOtp,
+} from '@dawwar/api-client';
 import { useAppDispatch } from '../../../store/hooks';
 import { setAuth } from '../../../store/slices/auth.slice';
 import { USE_MOCK_API } from '../../../core/api/config';
@@ -17,7 +20,7 @@ export function useVerifyOtp() {
     mutateAsync: async (params: { phone: string; code: string }) => {
       const res = await mutation.mutateAsync(params);
       const payload = res.data;
-      
+
       dispatch(
         setAuth({
           user: payload.user,
@@ -36,8 +39,8 @@ export function useVerifyOtp() {
           // FCM not configured — not a blocking error
         }
       }
-      
+
       return payload;
-    }
+    },
   };
 }

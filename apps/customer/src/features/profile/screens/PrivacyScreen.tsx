@@ -17,10 +17,7 @@ export function PrivacyScreen() {
   );
 
   return (
-    <ScrollScreenTemplate
-      headerProps={{ title: t('privacy.title') }}
-      contentStyle={styles.content}
-    >
+    <ScrollScreenTemplate headerProps={{ title: t('privacy.title') }} contentStyle={styles.content}>
       <View style={styles.header}>
         <Text style={styles.title}>{t('privacy.title')}</Text>
         <Text style={[styles.lastUpdated, dynamicStyles.lastUpdated]}>{t('common.today')}</Text>
@@ -29,9 +26,7 @@ export function PrivacyScreen() {
       <Divider />
 
       <View style={styles.section}>
-        <Text style={[styles.paragraph, dynamicStyles.paragraph]}>
-          {t('privacy.content')}
-        </Text>
+        <Text style={[styles.paragraph, dynamicStyles.paragraph]}>{t('privacy.content')}</Text>
       </View>
     </ScrollScreenTemplate>
   );
@@ -47,12 +42,12 @@ const styles = StyleSheet.create({
   title: {
     ...typography.h2,
     marginBottom: space.xs,
-    alignSelf:"flex-start",
-    textAlign:"auto",
+    alignSelf: 'flex-start',
+    textAlign: 'auto',
   },
   lastUpdated: {
     ...typography.caption,
-    alignSelf:"flex-start"
+    alignSelf: 'flex-start',
   },
   section: {
     marginVertical: space.md,
@@ -64,8 +59,8 @@ const styles = StyleSheet.create({
   paragraph: {
     ...typography.body1,
     lineHeight: 24,
-    alignSelf:"flex-start",
-    textAlign:"auto",
+    alignSelf: 'flex-start',
+    textAlign: 'auto',
   },
   bold: {
     fontWeight: '700',

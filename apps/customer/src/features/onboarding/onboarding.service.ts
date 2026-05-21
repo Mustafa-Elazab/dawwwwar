@@ -21,13 +21,15 @@ const emitEvent = (event: Omit<OnboardingEvent, 'timestamp'>) => {
 
 const notifyStateChange = () => {
   const snapshot = getOnboardingState();
-  stateListeners.forEach((listener) => listener(snapshot));
+  stateListeners.forEach(listener => listener(snapshot));
 };
 
 export const getOnboardingSnapshot = (): OnboardingState => getOnboardingState();
 
-export const shouldShowOnboarding = (state: OnboardingState, version = DEFAULT_ONBOARDING_VERSION) =>
-  !state.completed || state.version < version;
+export const shouldShowOnboarding = (
+  state: OnboardingState,
+  version = DEFAULT_ONBOARDING_VERSION,
+) => !state.completed || state.version < version;
 
 export const completeOnboarding = (version = DEFAULT_ONBOARDING_VERSION) => {
   markOnboardingCompleted(version);

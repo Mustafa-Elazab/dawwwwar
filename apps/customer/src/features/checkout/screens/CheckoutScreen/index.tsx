@@ -2,7 +2,15 @@ import React from 'react';
 import { View, I18nManager } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from '@dawwar/i18n';
-import { ScrollScreenTemplate, Text, Input, Button, Divider, Icon, AnimatedPressable } from '@dawwar/ui';
+import {
+  ScrollScreenTemplate,
+  Text,
+  Input,
+  Button,
+  Divider,
+  Icon,
+  AnimatedPressable,
+} from '@dawwar/ui';
 import { useTheme, microInteractions } from '@dawwar/theme';
 import { PaymentMethod } from '@dawwar/types';
 import { useController } from './useController';
@@ -28,11 +36,13 @@ export function CheckoutScreen() {
   const styles = React.useMemo(() => createStyles(colors), [colors]);
   const ctrl = useController();
 
-  const displayLabel = ctrl.address ? getLocalizedLabel(ctrl.address.label ?? '', t) : t('checkout.no_address');
+  const displayLabel = ctrl.address
+    ? getLocalizedLabel(ctrl.address.label ?? '', t)
+    : t('checkout.no_address');
 
   return (
     <ScrollScreenTemplate
-      headerProps={{ 
+      headerProps={{
         title: t('checkout.title'),
         onBackPress: ctrl.handleBack,
       }}
@@ -56,7 +66,7 @@ export function CheckoutScreen() {
       {/* Delivery Address */}
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>{t('checkout.delivery_title')}</Text>
+          <Text style={styles.sectionTitle}>{t('checkout.delivery_title')}</Text>
 
           {/* <TouchableOpacity onPress={() => navigation.navigate('CustomerTabs', { screen: 'ProfileTab', params: { screen: 'AddAddressScreen', params: {} } })}>
             <Text variant="label" color={colors.primary} style={{ fontWeight: '800' }}>
@@ -66,11 +76,17 @@ export function CheckoutScreen() {
         </View>
         <View style={styles.addressRow}>
           <View style={styles.iconCircle}>
-            <Icon name={ctrl.address?.label?.toLowerCase() === 'home' ? 'home' : 'map-marker'} size={22} color={colors.primary} />
+            <Icon
+              name={ctrl.address?.label?.toLowerCase() === 'home' ? 'home' : 'map-marker'}
+              size={22}
+              color={colors.primary}
+            />
           </View>
           <View style={{ flex: 1 }}>
             <Text style={styles.addressLabel}>{displayLabel}</Text>
-            <Text style={styles.addressText} numberOfLines={2}>{ctrl.address?.address ?? t('checkout.add_address_hint')}</Text>
+            <Text style={styles.addressText} numberOfLines={2}>
+              {ctrl.address?.address ?? t('checkout.add_address_hint')}
+            </Text>
           </View>
         </View>
       </View>
@@ -148,13 +164,13 @@ export function CheckoutScreen() {
       {/* Order notes with character counter */}
       <View style={styles.section}>
         <View style={styles.notesHeader}>
-        <Text style={styles.sectionTitle}>{t('checkout.notes_label')}</Text>
+          <Text style={styles.sectionTitle}>{t('checkout.notes_label')}</Text>
 
           <Text style={styles.charCount}>{ctrl.notes.length}/200</Text>
         </View>
         <Input
           value={ctrl.notes}
-          onChangeText={(text) => text.length <= 200 && ctrl.setNotes(text)}
+          onChangeText={text => text.length <= 200 && ctrl.setNotes(text)}
           placeholder={t('checkout.notes_placeholder')}
           multiline
           numberOfLines={3}

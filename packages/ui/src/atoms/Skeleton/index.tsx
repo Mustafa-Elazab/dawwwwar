@@ -24,11 +24,8 @@ export function Skeleton({
 }: SkeletonProps) {
   const { colors } = useTheme();
 
-  const resolvedRadius = variant === 'circular'
-    ? themeRadius.full
-    : variant === 'text'
-      ? themeRadius.sm
-      : borderRadius;
+  const resolvedRadius =
+    variant === 'circular' ? themeRadius.full : variant === 'text' ? themeRadius.sm : borderRadius;
 
   // ─── Shimmer animation ────────────────────────────────────────
   const shimmer = useSharedValue(0);

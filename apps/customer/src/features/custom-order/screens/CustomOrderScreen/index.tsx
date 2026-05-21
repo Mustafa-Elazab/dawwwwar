@@ -10,16 +10,16 @@ import { MapPickerModal } from '../../components/MapPickerModal';
 import { useController } from './useController';
 import { createStyles } from './styles';
 
-function Section({ 
-  icon, 
-  title, 
-  subtitle, 
-  children 
-}: { 
-  icon: string, 
-  title: string, 
-  subtitle?: string, 
-  children: React.ReactNode 
+function Section({
+  icon,
+  title,
+  subtitle,
+  children,
+}: {
+  icon: string;
+  title: string;
+  subtitle?: string;
+  children: React.ReactNode;
 }) {
   const { colors } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
@@ -37,18 +37,18 @@ function Section({
   );
 }
 
-function StyledInput({ 
-  icon, 
-  placeholder, 
-  value, 
-  onChangeText, 
-  error 
-}: { 
-  icon: string, 
-  placeholder: string, 
-  value: string, 
-  onChangeText: (t: string) => void,
-  error?: string
+function StyledInput({
+  icon,
+  placeholder,
+  value,
+  onChangeText,
+  error,
+}: {
+  icon: string;
+  placeholder: string;
+  value: string;
+  onChangeText: (t: string) => void;
+  error?: string;
 }) {
   const { colors } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
@@ -62,7 +62,7 @@ function StyledInput({
           placeholder={placeholder}
           placeholderTextColor={colors.placeholder}
         />
-        <Icon name={icon} size={20} color={colors.textDisabled}  />
+        <Icon name={icon} size={20} color={colors.textDisabled} />
       </View>
       {error && <Text style={styles.errorText}>{error}</Text>}
     </View>
@@ -83,12 +83,39 @@ export function CustomOrderScreen() {
           <View style={styles.stickyFooter}>
             <View style={styles.summaryRow}>
               <View style={styles.summaryItem}>
-                <Icon name={ctrl.shopAddress ? "check-circle" : "circle-outline"} size={16} color={ctrl.shopAddress ? colors.success : colors.textDisabled} />
-                <Text style={[styles.summaryText, { color: ctrl.shopAddress ? colors.text : colors.textDisabled }]}>{t('custom_order.shop_address_summary')}</Text>
+                <Icon
+                  name={ctrl.shopAddress ? 'check-circle' : 'circle-outline'}
+                  size={16}
+                  color={ctrl.shopAddress ? colors.success : colors.textDisabled}
+                />
+                <Text
+                  style={[
+                    styles.summaryText,
+                    { color: ctrl.shopAddress ? colors.text : colors.textDisabled },
+                  ]}
+                >
+                  {t('custom_order.shop_address_summary')}
+                </Text>
               </View>
               <View style={styles.summaryItem}>
-                <Icon name={(ctrl.textDescription || ctrl.voiceUri) ? "check-circle" : "circle-outline"} size={16} color={(ctrl.textDescription || ctrl.voiceUri) ? colors.success : colors.textDisabled} />
-                <Text style={[styles.summaryText, { color: (ctrl.textDescription || ctrl.voiceUri) ? colors.text : colors.textDisabled }]}>{t('custom_order.items_summary')}</Text>
+                <Icon
+                  name={ctrl.textDescription || ctrl.voiceUri ? 'check-circle' : 'circle-outline'}
+                  size={16}
+                  color={
+                    ctrl.textDescription || ctrl.voiceUri ? colors.success : colors.textDisabled
+                  }
+                />
+                <Text
+                  style={[
+                    styles.summaryText,
+                    {
+                      color:
+                        ctrl.textDescription || ctrl.voiceUri ? colors.text : colors.textDisabled,
+                    },
+                  ]}
+                >
+                  {t('custom_order.items_summary')}
+                </Text>
               </View>
             </View>
             <Button
@@ -101,7 +128,7 @@ export function CustomOrderScreen() {
           </View>
         }
       >
-        <ScrollView 
+        <ScrollView
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
@@ -121,8 +148,8 @@ export function CustomOrderScreen() {
               onChangeText={ctrl.setShopAddress}
               error={ctrl.errors.shopAddress}
             />
-            <TouchableOpacity 
-              style={styles.mapPickerBtn} 
+            <TouchableOpacity
+              style={styles.mapPickerBtn}
               onPress={() => ctrl.setShowMapPicker(true)}
               activeOpacity={0.8}
             >
@@ -132,8 +159,8 @@ export function CustomOrderScreen() {
           </Section>
 
           {/* Section 2: What to Buy */}
-          <Section 
-            icon="clipboard-list-outline" 
+          <Section
+            icon="clipboard-list-outline"
             title={t('custom_order.items_section')}
             subtitle={t('custom_order.items_hint')}
           >
@@ -189,14 +216,16 @@ export function CustomOrderScreen() {
 
             {/* Payment method */}
             <View style={{ marginTop: space.sm }}>
-              {(['CASH', 'WALLET'] as const).map((method) => (
+              {(['CASH', 'WALLET'] as const).map(method => (
                 <TouchableOpacity
                   key={method}
                   style={styles.paymentRow}
                   onPress={() => ctrl.setPaymentMethod(method)}
                   activeOpacity={0.7}
                 >
-                  <View style={[styles.radio, ctrl.paymentMethod === method && styles.radioSelected]}>
+                  <View
+                    style={[styles.radio, ctrl.paymentMethod === method && styles.radioSelected]}
+                  >
                     {ctrl.paymentMethod === method && <View style={styles.radioDot} />}
                   </View>
                   <Text variant="label" color={colors.text}>
@@ -206,7 +235,6 @@ export function CustomOrderScreen() {
               ))}
             </View>
           </Section>
-
         </ScrollView>
       </ScreenTemplate>
 

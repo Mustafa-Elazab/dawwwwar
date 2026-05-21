@@ -73,7 +73,7 @@ export function OnboardingScreen() {
   }, [navigation]);
 
   const scrollHandler = useAnimatedScrollHandler({
-    onScroll: (event) => {
+    onScroll: event => {
       scrollX.value = event.contentOffset.x;
     },
   });
@@ -111,7 +111,11 @@ export function OnboardingScreen() {
 
   const handleCta = () => {
     const slide = onboardingSlides[activeIndex];
-    trackOnboardingEvent({ name: 'onboarding_cta_press', analyticsId: slide.analyticsId, slideId: slide.id });
+    trackOnboardingEvent({
+      name: 'onboarding_cta_press',
+      analyticsId: slide.analyticsId,
+      slideId: slide.id,
+    });
 
     if (slide.cta.action === 'next') {
       const nextIndex = Math.min(activeIndex + 1, onboardingSlides.length - 1);
@@ -130,20 +134,31 @@ export function OnboardingScreen() {
     if (index === activeIndex) return;
     setActiveIndex(index);
     const slide = onboardingSlides[index];
-    trackOnboardingEvent({ name: 'onboarding_slide_change', analyticsId: slide.analyticsId, slideId: slide.id });
-    trackOnboardingEvent({ name: 'onboarding_impression', analyticsId: slide.analyticsId, slideId: slide.id });
+    trackOnboardingEvent({
+      name: 'onboarding_slide_change',
+      analyticsId: slide.analyticsId,
+      slideId: slide.id,
+    });
+    trackOnboardingEvent({
+      name: 'onboarding_impression',
+      analyticsId: slide.analyticsId,
+      slideId: slide.id,
+    });
   };
 
   const viewabilityConfig = useRef({ viewAreaCoveragePercentThreshold: 55 }).current;
-  const onViewableItemsChanged = useRef(({ viewableItems }: { viewableItems: Array<{ index: number | null }> }) => {
-    const nextIndex = viewableItems?.[0]?.index ?? 0;
-    handleSlideChange(nextIndex);
-  }).current;
+  const onViewableItemsChanged = useRef(
+    ({ viewableItems }: { viewableItems: Array<{ index: number | null }> }) => {
+      const nextIndex = viewableItems?.[0]?.index ?? 0;
+      handleSlideChange(nextIndex);
+    },
+  ).current;
 
   const activeSlide = onboardingSlides[activeIndex];
-  const ctaLabel = activeIndex === onboardingSlides.length - 1
-    ? t('onboarding.getStarted')
-    : t(activeSlide.cta.labelKey);
+  const ctaLabel =
+    activeIndex === onboardingSlides.length - 1
+      ? t('onboarding.getStarted')
+      : t(activeSlide.cta.labelKey);
 
   return (
     <Animated.View style={[styles.container, screenStyle]}>
@@ -165,14 +180,9 @@ export function OnboardingScreen() {
           horizontal
           pagingEnabled
           showsHorizontalScrollIndicator={false}
-          keyExtractor={(item) => item.id}
+          keyExtractor={item => item.id}
           renderItem={({ item, index }) => (
-            <OnboardingSlideView
-              slide={item}
-              progress={scrollX}
-              index={index}
-              width={width}
-            />
+            <OnboardingSlideView slide={item} progress={scrollX} index={index} width={width} />
           )}
           onScroll={scrollHandler}
           scrollEventThrottle={16}
@@ -197,7 +207,14 @@ export function OnboardingScreen() {
   );
 }
 
-const createStyles = (colors: { background: string; text: string; textSecondary: string; borderLight: string; primary: string; surface: string }) =>
+const createStyles = (colors: {
+  background: string;
+  text: string;
+  textSecondary: string;
+  borderLight: string;
+  primary: string;
+  surface: string;
+}) =>
   StyleSheet.create({
     container: {
       flex: 1,

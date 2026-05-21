@@ -1,7 +1,12 @@
 import { useState, useCallback, useMemo } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from '@dawwar/i18n';
-import { usePlaceCustomOrder, useUploadFile, useUploadFiles, useAddresses } from '@dawwar/api-client';
+import {
+  usePlaceCustomOrder,
+  useUploadFile,
+  useUploadFiles,
+  useAddresses,
+} from '@dawwar/api-client';
 import { launchImageLibrary } from 'react-native-image-picker';
 import Toast from 'react-native-toast-message';
 import { useAppSelector } from '../../../../store/hooks';
@@ -48,7 +53,11 @@ export function useController() {
   }, []);
 
   const handleAddPhoto = useCallback(async () => {
-    const result = await launchImageLibrary({ mediaType: 'photo', quality: 0.7, selectionLimit: 5 });
+    const result = await launchImageLibrary({
+      mediaType: 'photo',
+      quality: 0.7,
+      selectionLimit: 5,
+    });
     if (result.assets) {
       const uris = result.assets.map(a => a.uri).filter(Boolean) as string[];
       setPhotos(prev => [...prev, ...uris]);
@@ -56,7 +65,7 @@ export function useController() {
   }, []);
 
   const handleRemovePhoto = useCallback((index: number) => {
-    setPhotos((prev) => prev.filter((_, i) => i !== index));
+    setPhotos(prev => prev.filter((_, i) => i !== index));
   }, []);
 
   const handleMapConfirm = useCallback((lat: number, lng: number, address: string) => {
@@ -68,10 +77,17 @@ export function useController() {
 
   const handleSubmit = useCallback(async () => {
     const draft = {
-      shopAddress, shopLatitude: shopLat, shopLongitude: shopLng, shopName,
-      textDescription, voiceUri, photos, estimatedBudget: budget, paymentMethod,
+      shopAddress,
+      shopLatitude: shopLat,
+      shopLongitude: shopLng,
+      shopName,
+      textDescription,
+      voiceUri,
+      photos,
+      estimatedBudget: budget,
+      paymentMethod,
     };
-    
+
     const validationErrors = validateCustomOrder(draft, t);
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors as Record<string, string>);
@@ -96,12 +112,14 @@ export function useController() {
       const localPhotos = photos.filter(p => !p.startsWith('http'));
       if (localPhotos.length > 0) {
         // We'll upload each photo individually to match the current backend logic
-        const urls = await Promise.all(localPhotos.map(async (uri, i) => {
-           const fd = new FormData();
-           fd.append('file', { uri, name: `photo_${i}.jpg`, type: 'image/jpeg' } as any);
-           const r = await uploadFile.mutateAsync(fd);
-           return r.data.url;
-        }));
+        const urls = await Promise.all(
+          localPhotos.map(async (uri, i) => {
+            const fd = new FormData();
+            fd.append('file', { uri, name: `photo_${i}.jpg`, type: 'image/jpeg' } as any);
+            const r = await uploadFile.mutateAsync(fd);
+            return r.data.url;
+          }),
+        );
         uploadedPhotoUrls = urls;
       }
 
@@ -130,18 +148,39 @@ export function useController() {
     } finally {
       setIsUploading(false);
     }
-  }, [shopAddress, shopLat, shopLng, shopName, textDescription, voiceUri, photos, budget, paymentMethod, t, user, uploadFile, placeMutation, navigation]);
+  }, [
+    shopAddress,
+    shopLat,
+    shopLng,
+    shopName,
+    textDescription,
+    voiceUri,
+    photos,
+    budget,
+    paymentMethod,
+    t,
+    user,
+    uploadFile,
+    placeMutation,
+    navigation,
+  ]);
 
   return {
-    shopName, setShopName,
-    shopAddress, setShopAddress,
-    textDescription, setTextDescription,
+    shopName,
+    setShopName,
+    shopAddress,
+    setShopAddress,
+    textDescription,
+    setTextDescription,
     voiceUri,
     voiceDuration,
     photos,
-    budget, setBudget,
-    paymentMethod, setPaymentMethod,
-    showMapPicker, setShowMapPicker,
+    budget,
+    setBudget,
+    paymentMethod,
+    setPaymentMethod,
+    showMapPicker,
+    setShowMapPicker,
     errors,
     isBudgetOverLimit: parseFloat(budget) > CASH_LIMIT && paymentMethod === 'CASH',
     isLoading: placeMutation.isPending || isUploading,

@@ -60,7 +60,18 @@ export const usePressAnimation = ({
       }
       onPressIn?.(e);
     },
-    [disabled, onHaptic, onPressIn, pressScale, pressOpacity, pressTranslateY, spring, scale, opacity, translateY],
+    [
+      disabled,
+      onHaptic,
+      onPressIn,
+      pressScale,
+      pressOpacity,
+      pressTranslateY,
+      spring,
+      scale,
+      opacity,
+      translateY,
+    ],
   );
 
   const handlePressOut = useCallback(

@@ -17,7 +17,7 @@ export const createStyles = (colors: AppColors) =>
       paddingBottom: 40,
     },
     list: { flexGrow: 0 }, // Prevent list from expanding too much if few items
-    
+
     // ── Promo Code ──────────────────────────────────────
     promoWrapper: {
       flexDirection: 'row',
@@ -65,26 +65,26 @@ export const createStyles = (colors: AppColors) =>
     totalRow: {
       marginTop: space.xs,
     },
-    totalLabel: { 
-      ...typography.body1, 
-      color: colors.text, 
+    totalLabel: {
+      ...typography.body1,
+      color: colors.text,
       fontWeight: '800',
-      fontSize: 18, 
+      fontSize: 18,
     },
-    totalValue: { 
-      ...typography.h3, 
-      color: colors.primary, 
+    totalValue: {
+      ...typography.h3,
+      color: colors.primary,
       fontWeight: '900',
       fontSize: 22,
     },
-    
+
     // ── Bottom Action ───────────────────────────────────
     footer: {
       paddingHorizontal: space.xl,
       paddingBottom: space.xl,
       backgroundColor: colors.surface,
     },
-    checkoutBtn: { 
+    checkoutBtn: {
       minHeight: 52,
       borderRadius: radius.xl,
     },

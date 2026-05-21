@@ -52,7 +52,7 @@ export function NotificationsScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const navigation = useNavigation<any>(); // Generic for cross-stack routing
-  
+
   const [notifications, setNotifications] = useState(DUMMY_NOTIFICATIONS);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -62,41 +62,47 @@ export function NotificationsScreen() {
     setTimeout(() => setIsRefreshing(false), 800);
   }, []);
 
-  const handleNotificationPress = useCallback((item: AppNotification) => {
-    // 1. Optimistic mark as read
-    setNotifications((prev) => 
-      prev.map(n => n.id === item.id ? { ...n, isRead: true } : n)
-    );
+  const handleNotificationPress = useCallback(
+    (item: AppNotification) => {
+      // 1. Optimistic mark as read
+      setNotifications(prev => prev.map(n => (n.id === item.id ? { ...n, isRead: true } : n)));
 
-    // 2. Payload-based navigation
-    try {
-      if (item.type === 'order' && item.payload?.orderId) {
-        // We must navigate to the Orders Stack, then the Tracking screen
-        // In a real app, nested cross-stack navigation is handled by the RootNavigator mapping
-        navigation.navigate(ORDER_ROUTES.TRACKING, { orderId: item.payload.orderId });
-      } else if (item.type === 'wallet') {
-        navigation.navigate(WALLET_ROUTES.WALLET);
-      } else if (item.type === 'chat' && item.payload?.orderId) {
-        // Example: navigation.navigate('ChatScreen', { orderId: item.payload.orderId });
+      // 2. Payload-based navigation
+      try {
+        if (item.type === 'order' && item.payload?.orderId) {
+          // We must navigate to the Orders Stack, then the Tracking screen
+          // In a real app, nested cross-stack navigation is handled by the RootNavigator mapping
+          navigation.navigate(ORDER_ROUTES.TRACKING, { orderId: item.payload.orderId });
+        } else if (item.type === 'wallet') {
+          navigation.navigate(WALLET_ROUTES.WALLET);
+        } else if (item.type === 'chat' && item.payload?.orderId) {
+          // Example: navigation.navigate('ChatScreen', { orderId: item.payload.orderId });
+        }
+      } catch (err) {
+        console.warn('Navigation failed for notification', item, err);
       }
-    } catch (err) {
-      console.warn('Navigation failed for notification', item, err);
-    }
-  }, [navigation]);
+    },
+    [navigation],
+  );
 
   const getIcon = (type: string) => {
     switch (type) {
-      case 'order': return { name: 'moped', color: colors.primary };
-      case 'promo': return { name: 'ticket-percent', color: colors.warning };
-      case 'wallet': return { name: 'wallet', color: colors.success };
-      case 'chat': return { name: 'chat-processing', color: colors.info };
-      default: return { name: 'bell-outline', color: colors.textSecondary };
+      case 'order':
+        return { name: 'moped', color: colors.primary };
+      case 'promo':
+        return { name: 'ticket-percent', color: colors.warning };
+      case 'wallet':
+        return { name: 'wallet', color: colors.success };
+      case 'chat':
+        return { name: 'chat-processing', color: colors.info };
+      default:
+        return { name: 'bell-outline', color: colors.textSecondary };
     }
   };
 
   const renderItem = ({ item }: { item: AppNotification }) => {
     const iconData = getIcon(item.type);
-    
+
     // Attempt local translation if type matches our predefined keys
     let displayTitle = item.title;
     let displayBody = item.body;
@@ -104,8 +110,8 @@ export function NotificationsScreen() {
     if (item.type === 'order') {
       const merchantFromBody = item.body.includes('KFC') ? 'KFC' : '';
       displayTitle = t('notifications.order_delivered');
-      displayBody = t('notifications.order_delivered_body', { 
-        orderId: item.payload?.orderId?.replace('ORD-', '') || '123', 
+      displayBody = t('notifications.order_delivered_body', {
+        orderId: item.payload?.orderId?.replace('ORD-', '') || '123',
         merchant: merchantFromBody,
       });
     } else if (item.type === 'promo') {
@@ -116,7 +122,7 @@ export function NotificationsScreen() {
     }
 
     return (
-      <TouchableOpacity 
+      <TouchableOpacity
         style={{
           flexDirection: 'row',
           padding: space.base,
@@ -127,27 +133,60 @@ export function NotificationsScreen() {
         onPress={() => handleNotificationPress(item)}
         activeOpacity={0.7}
       >
-        <View style={{
-          width: 48,
-          height: 48,
-          borderRadius: 24,
-          backgroundColor: `${iconData.color}15`,
-          alignItems: 'center',
-          justifyContent: 'center',
-          marginEnd: space.md,
-        }}>
+        <View
+          style={{
+            width: 48,
+            height: 48,
+            borderRadius: 24,
+            backgroundColor: `${iconData.color}15`,
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginEnd: space.md,
+          }}
+        >
           <Icon name={iconData.name} size={24} color={iconData.color} />
         </View>
         <View style={{ flex: 1 }}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4, alignItems: 'center' }}>
-            <Text variant="label" style={{ color: colors.text, flex: 1, fontWeight: item.isRead ? '500' : '700', textAlign: 'auto' }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              marginBottom: 4,
+              alignItems: 'center',
+            }}
+          >
+            <Text
+              variant="label"
+              style={{
+                color: colors.text,
+                flex: 1,
+                fontWeight: item.isRead ? '500' : '700',
+                textAlign: 'auto',
+              }}
+            >
               {displayTitle}
             </Text>
             {!item.isRead && (
-              <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: colors.primary, marginStart: 8 }} />
+              <View
+                style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: 4,
+                  backgroundColor: colors.primary,
+                  marginStart: 8,
+                }}
+              />
             )}
           </View>
-          <Text variant="body2" style={{ color: colors.textSecondary, marginBottom: 8, lineHeight: 20, textAlign: 'auto' }}>
+          <Text
+            variant="body2"
+            style={{
+              color: colors.textSecondary,
+              marginBottom: 8,
+              lineHeight: 20,
+              textAlign: 'auto',
+            }}
+          >
             {displayBody}
           </Text>
           <Text variant="caption" style={{ color: colors.textDisabled, textAlign: 'left' }}>
@@ -159,13 +198,11 @@ export function NotificationsScreen() {
   };
 
   return (
-    <ScreenTemplate
-      headerProps={{ title: t('profile.notifications') || 'Notifications' }}
-    >
+    <ScreenTemplate headerProps={{ title: t('profile.notifications') || 'Notifications' }}>
       <FlatList
         data={notifications}
         renderItem={renderItem}
-        keyExtractor={(item) => item.id}
+        keyExtractor={item => item.id}
         contentContainerStyle={notifications.length === 0 ? { flex: 1 } : { flexGrow: 1 }}
         refreshControl={
           <RefreshControl
@@ -181,7 +218,7 @@ export function NotificationsScreen() {
             title="No notifications yet"
             subtitle="When you get orders, promos, or updates, they will appear here."
             action={{
-              label: "Explore Deals",
+              label: 'Explore Deals',
               onPress: () => navigation.goBack(),
               variant: 'outline',
             }}

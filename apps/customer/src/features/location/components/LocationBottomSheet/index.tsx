@@ -47,12 +47,7 @@ export const LocationBottomSheet = forwardRef<BottomSheet, LocationBottomSheetPr
 
     const renderBackdrop = useCallback(
       (props: any) => (
-        <BottomSheetBackdrop
-          {...props}
-          disappearsOnIndex={-1}
-          appearsOnIndex={0}
-          opacity={0.45}
-        />
+        <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} opacity={0.45} />
       ),
       [],
     );
@@ -108,7 +103,7 @@ export const LocationBottomSheet = forwardRef<BottomSheet, LocationBottomSheetPr
               {t('addresses.empty')}
             </Text>
           ) : (
-            addresses.map((item) => {
+            addresses.map(item => {
               const selected = item.id === selectedAddressId;
               return (
                 <AnimatedPressable
@@ -158,7 +153,10 @@ export const LocationBottomSheet = forwardRef<BottomSheet, LocationBottomSheetPr
           <View style={styles.divider} />
 
           <AnimatedPressable
-            style={[styles.optionRow, { borderColor: colors.borderLight, backgroundColor: colors.surface }]}
+            style={[
+              styles.optionRow,
+              { borderColor: colors.borderLight, backgroundColor: colors.surface },
+            ]}
             onPress={onOpenMap}
             pressScale={microInteractions.cardPressScale}
             pressOpacity={microInteractions.pressOpacity}

@@ -14,24 +14,27 @@ export function OrdersListScreen() {
   const styles = React.useMemo(() => createStyles(colors), [colors]);
   const ctrl = useController();
 
-  const renderItem = React.useCallback(({ item }: { item: Order }) => (
-    <OrderCard
-      order={item}
-      onTrack={() => ctrl.handleTrack(item.id)}
-      onViewDetail={() => ctrl.handleDetail(item.id)}
-    />
-  ), [ctrl.handleTrack, ctrl.handleDetail]);
+  const renderItem = React.useCallback(
+    ({ item }: { item: Order }) => (
+      <OrderCard
+        order={item}
+        onTrack={() => ctrl.handleTrack(item.id)}
+        onViewDetail={() => ctrl.handleDetail(item.id)}
+      />
+    ),
+    [ctrl.handleTrack, ctrl.handleDetail],
+  );
 
   return (
     <ScreenTemplate
-      headerProps={{ 
+      headerProps={{
         title: t('orders.title'),
-        type: 'none'
+        type: 'none',
       }}
     >
       {/* Tab switcher */}
       <View style={styles.tabRow}>
-        {(['active', 'past'] as const).map((tab) => (
+        {(['active', 'past'] as const).map(tab => (
           <AnimatedPressable
             key={tab}
             style={[styles.tab, ctrl.activeTab === tab && styles.tabActive]}
@@ -41,10 +44,7 @@ export function OrdersListScreen() {
             pressTranslateY={1}
           >
             <Text
-              style={[
-                styles.tabLabel,
-                { fontWeight: ctrl.activeTab === tab ? '700' : '400' }
-              ]}
+              style={[styles.tabLabel, { fontWeight: ctrl.activeTab === tab ? '700' : '400' }]}
               color={ctrl.activeTab === tab ? '#fff' : colors.textSecondary}
             >
               {t(`orders.tab_${tab}`)}
@@ -62,8 +62,13 @@ export function OrdersListScreen() {
         />
       ) : ctrl.isLoading ? (
         <View style={{ gap: 12, paddingTop: 8 }}>
-          {[1, 2, 3].map((i) => (
-            <Skeleton key={i} width="92%" height={120} style={{ alignSelf: 'center', borderRadius: 16 }} />
+          {[1, 2, 3].map(i => (
+            <Skeleton
+              key={i}
+              width="92%"
+              height={120}
+              style={{ alignSelf: 'center', borderRadius: 16 }}
+            />
           ))}
         </View>
       ) : ctrl.orders.length === 0 ? (
@@ -76,7 +81,7 @@ export function OrdersListScreen() {
         <FlatList<Order>
           data={ctrl.orders}
           renderItem={renderItem}
-          keyExtractor={(item) => item.id}
+          keyExtractor={item => item.id}
           onRefresh={ctrl.refetch}
           refreshing={false}
           showsVerticalScrollIndicator={false}

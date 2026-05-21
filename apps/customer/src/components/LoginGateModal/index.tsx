@@ -1,14 +1,15 @@
 import React, { useCallback } from 'react';
-import {
-  Modal, View, StyleSheet, Pressable, TouchableOpacity, Dimensions,
-} from 'react-native';
+import { Modal, View, StyleSheet, Pressable, TouchableOpacity, Dimensions } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import { useTranslation } from '@dawwar/i18n';
 import { useTheme } from '@dawwar/theme';
 import { Text, Icon, Button } from '@dawwar/ui';
 import { useAppSelector } from '../../store/hooks';
-import { selectCartCount as selectCartItemCount, selectCartTotal } from '../../store/slices/cart.slice';
+import {
+  selectCartCount as selectCartItemCount,
+  selectCartTotal,
+} from '../../store/slices/cart.slice';
 import { AUTH_ROUTES } from '../../navigation/routes';
 import type { RootParamList, AuthReturnDestination } from '../../navigation/types';
 
@@ -81,7 +82,12 @@ export function LoginGateModal({ visible, onClose, reason }: LoginGateModalProps
       statusBarTranslucent
     >
       <Pressable style={styles.overlay} onPress={onClose}>
-        <Pressable style={[styles.sheet, { backgroundColor: colors.background, paddingBottom: space.xl + 20 }]}>
+        <Pressable
+          style={[
+            styles.sheet,
+            { backgroundColor: colors.background, paddingBottom: space.xl + 20 },
+          ]}
+        >
           <View style={[styles.handle, { backgroundColor: colors.border }]} />
 
           <View style={[styles.iconWrap, { backgroundColor: colors.primary + '15' }]}>
@@ -107,7 +113,9 @@ export function LoginGateModal({ visible, onClose, reason }: LoginGateModalProps
           />
 
           <TouchableOpacity style={styles.dismissBtn} onPress={onClose}>
-            <Text style={[styles.dismissText, { color: colors.textSecondary }]}>{t('gate.continueBrowsing')}</Text>
+            <Text style={[styles.dismissText, { color: colors.textSecondary }]}>
+              {t('gate.continueBrowsing')}
+            </Text>
           </TouchableOpacity>
         </Pressable>
       </Pressable>

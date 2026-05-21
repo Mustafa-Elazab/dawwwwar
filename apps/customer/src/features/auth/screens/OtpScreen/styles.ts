@@ -52,7 +52,7 @@ export const createStyles = (colors: AppColors) =>
       marginTop: space.md,
       fontWeight: '600',
     },
-    
+
     // ── Timer & Resend ──────────────────────────────────
     timerContainer: {
       alignItems: 'center',
@@ -71,7 +71,7 @@ export const createStyles = (colors: AppColors) =>
       fontSize: 16,
       fontWeight: '700',
     },
-    
+
     resendRow: {
       flexDirection: 'row',
       alignItems: 'center',

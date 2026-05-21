@@ -2,7 +2,11 @@ import { api } from '../client';
 import type { ApiResponse, Merchant, Product } from '@dawwar/types';
 
 export const merchantsApi = {
-  getNearby: async (lat?: number, lng?: number, allEgypt?: boolean): Promise<ApiResponse<Merchant[]>> => {
+  getNearby: async (
+    lat?: number,
+    lng?: number,
+    allEgypt?: boolean,
+  ): Promise<ApiResponse<Merchant[]>> => {
     const params: Record<string, unknown> = {};
     if (lat && lng) {
       params.latitude = lat;

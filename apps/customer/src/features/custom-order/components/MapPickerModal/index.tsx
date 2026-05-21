@@ -44,9 +44,9 @@ export function MapPickerModal({
         {/* Floating Header */}
         <View style={[styles.mapHeader, { top: insets.top }]}>
           <TouchableOpacity onPress={onClose} style={styles.mapBackBtn}>
-            <Icon 
-              name={I18nManager.isRTL ? 'chevron-right' : 'chevron-left'} 
-              size={24} 
+            <Icon
+              name={I18nManager.isRTL ? 'chevron-right' : 'chevron-left'}
+              size={24}
               color={colors.text}
             />
           </TouchableOpacity>

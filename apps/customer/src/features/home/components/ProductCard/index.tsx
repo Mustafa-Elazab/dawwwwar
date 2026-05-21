@@ -7,7 +7,12 @@ import { useTranslation } from '@dawwar/i18n';
 import { createStyles } from './styles';
 import type { ProductCardProps } from './types';
 
-export const ProductCard = React.memo(function ProductCard({ product, merchantName, onAdd, style }: ProductCardProps & { style?: ViewStyle }) {
+export const ProductCard = React.memo(function ProductCard({
+  product,
+  merchantName,
+  onAdd,
+  style,
+}: ProductCardProps & { style?: ViewStyle }) {
   const { colors } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
   const { t } = useTranslation();
@@ -28,7 +33,9 @@ export const ProductCard = React.memo(function ProductCard({ product, merchantNa
       <View style={styles.imageContainer}>
         <FastImage
           source={{
-            uri: product.images?.[0] || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=1000',
+            uri:
+              product.images?.[0] ||
+              'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=1000',
             priority: FastImage.priority.normal,
           }}
           style={styles.image}
@@ -61,7 +68,7 @@ export const ProductCard = React.memo(function ProductCard({ product, merchantNa
             </Text>
           )}
         </View>
-        
+
         <View style={styles.footer}>
           <View style={styles.priceContainer}>
             {hasDiscount && (
@@ -73,7 +80,7 @@ export const ProductCard = React.memo(function ProductCard({ product, merchantNa
               {product.price} {t('common.egp')}
             </Text>
           </View>
-          
+
           <AnimatedPressable
             onPress={handleAdd}
             disabled={!product.isAvailable}
@@ -82,11 +89,7 @@ export const ProductCard = React.memo(function ProductCard({ product, merchantNa
             pressTranslateY={1}
             style={styles.addBtn}
           >
-            <Icon
-              name={product.isAvailable ? 'plus' : 'close'}
-              size={20}
-              color="#fff"
-            />
+            <Icon name={product.isAvailable ? 'plus' : 'close'} size={20} color="#fff" />
           </AnimatedPressable>
         </View>
       </View>

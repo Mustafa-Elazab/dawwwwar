@@ -67,13 +67,7 @@ export function Button({
       spring="soft"
       disabledOpacity={0.55}
       onHaptic={onHaptic}
-      style={[
-        styles.base,
-        styles[variant],
-        styles[size],
-        fullWidth && styles.fullWidth,
-        style,
-      ]}
+      style={[styles.base, styles[variant], styles[size], fullWidth && styles.fullWidth, style]}
     >
       <Animated.View style={contentStyle}>
         {leftIcon}
@@ -96,9 +90,9 @@ export function Button({
       <Animated.View style={[styles.spinnerWrap, spinnerStyle]}>
         <ActivityIndicator
           size="small"
-          color={variant === 'primary' || variant === 'danger'
-            ? colors.primaryText
-            : colors.primary}
+          color={
+            variant === 'primary' || variant === 'danger' ? colors.primaryText : colors.primary
+          }
         />
       </Animated.View>
     </AnimatedPressable>

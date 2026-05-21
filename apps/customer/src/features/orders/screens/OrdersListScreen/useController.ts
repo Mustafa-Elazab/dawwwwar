@@ -16,7 +16,11 @@ export function useController() {
   const [activeTab, setActiveTab] = useState<OrderTab>('active');
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
 
-  const { data: activeOrders, isLoading: activeLoading, refetch: refetchActive } = useActiveOrders();
+  const {
+    data: activeOrders,
+    isLoading: activeLoading,
+    refetch: refetchActive,
+  } = useActiveOrders();
   const { data: pastOrders, isLoading: pastLoading, refetch: refetchPast } = usePastOrders();
 
   const handleLogin = useCallback(() => {
@@ -38,7 +42,8 @@ export function useController() {
   const refetch = activeTab === 'active' ? refetchActive : refetchPast;
 
   return {
-    activeTab, setActiveTab,
+    activeTab,
+    setActiveTab,
     orders: currentOrders,
     isLoading: isAuthenticated ? isLoading : false,
     handleTrack,

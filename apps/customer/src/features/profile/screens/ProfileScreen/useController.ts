@@ -3,7 +3,12 @@ import { useNavigation } from '@react-navigation/native';
 import { Alert } from 'react-native';
 import { useTranslation } from '@dawwar/i18n';
 import { useAppDispatch, useAppSelector } from '../../../../store/hooks';
-import { logout, selectUser, selectIsAuthenticated, updateUser } from '../../../../store/slices/auth.slice';
+import {
+  logout,
+  selectUser,
+  selectIsAuthenticated,
+  updateUser,
+} from '../../../../store/slices/auth.slice';
 import { resetLocationState } from '../../../../store/slices/location.slice';
 import { PROFILE_ROUTES, AUTH_ROUTES } from '../../../../navigation/routes';
 import type { StackNavigationProp } from '@react-navigation/stack';
@@ -34,22 +39,18 @@ export function useController() {
   }, [navigation]);
 
   const handleLogout = useCallback(() => {
-    Alert.alert(
-      t('profile.logout_confirm_title'),
-      t('profile.logout_confirm_body'),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('profile.logout_confirm_btn'),
-          style: 'destructive',
-          onPress: () => {
-            socketManager.disconnect();
-            dispatch(logout());
-            dispatch(resetLocationState());
-          },
+    Alert.alert(t('profile.logout_confirm_title'), t('profile.logout_confirm_body'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('profile.logout_confirm_btn'),
+        style: 'destructive',
+        onPress: () => {
+          socketManager.disconnect();
+          dispatch(logout());
+          dispatch(resetLocationState());
         },
-      ],
-    );
+      },
+    ]);
   }, [dispatch, t]);
 
   const handlePickImage = useCallback(async () => {
@@ -61,13 +62,13 @@ export function useController() {
     if (result.assets && result.assets.length > 0) {
       const asset = result.assets[0];
       const formData = new FormData();
-      
+
       const file: ReactNativeFile = {
         uri: asset.uri!,
         name: asset.fileName ?? 'profile.jpg',
         type: asset.type ?? 'image/jpeg',
       };
-      
+
       formData.append('file', file as unknown as Blob);
 
       try {

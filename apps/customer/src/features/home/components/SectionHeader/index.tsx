@@ -9,15 +9,16 @@ interface SectionHeaderProps {
   onSeeAll?: () => void;
 }
 
-export const SectionHeader = React.memo(function SectionHeader({ title, onSeeAll }: SectionHeaderProps) {
+export const SectionHeader = React.memo(function SectionHeader({
+  title,
+  onSeeAll,
+}: SectionHeaderProps) {
   const { colors } = useTheme();
   const { t } = useTranslation();
 
   return (
     <View style={[styles.row, { paddingHorizontal: layout.screenPaddingH }]}>
-      <Text style={[styles.title, { color: colors.text }]}>
-        {title}
-      </Text>
+      <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
       {onSeeAll != null && (
         <AnimatedPressable
           onPress={onSeeAll}

@@ -28,7 +28,7 @@ export function MerchantTabBar({ active, onChange }: TabBarProps) {
 
   const tabs = useMemo(() => (isRTL ? [...TABS].reverse() : TABS), [isRTL]);
   const tabWidth = width / tabs.length;
-  const activeIdx = tabs.findIndex((tab) => tab.key === active);
+  const activeIdx = tabs.findIndex(tab => tab.key === active);
   const indicatorX = useSharedValue(Math.max(activeIdx, 0) * tabWidth);
 
   useEffect(() => {
@@ -43,8 +43,10 @@ export function MerchantTabBar({ active, onChange }: TabBarProps) {
   }));
 
   return (
-    <View style={[styles.row, { borderBottomColor: colors.border, backgroundColor: colors.surface }]}>
-      {tabs.map((tab) => (
+    <View
+      style={[styles.row, { borderBottomColor: colors.border, backgroundColor: colors.surface }]}
+    >
+      {tabs.map(tab => (
         <AnimatedPressable
           key={tab.key}
           style={styles.tab}
@@ -55,7 +57,7 @@ export function MerchantTabBar({ active, onChange }: TabBarProps) {
         >
           <Text
             variant="label"
-            style={{ 
+            style={{
               color: active === tab.key ? colors.primary : colors.textSecondary,
               fontWeight: active === tab.key ? '800' : '600',
               fontSize: 15,
@@ -66,17 +68,17 @@ export function MerchantTabBar({ active, onChange }: TabBarProps) {
         </AnimatedPressable>
       ))}
 
-      <Animated.View 
+      <Animated.View
         style={[
-          styles.indicator, 
-          { 
+          styles.indicator,
+          {
             backgroundColor: colors.primary,
             width: tabWidth,
             left: 0,
             borderRadius: radius.full,
           },
           indicatorStyle,
-        ]} 
+        ]}
       />
     </View>
   );

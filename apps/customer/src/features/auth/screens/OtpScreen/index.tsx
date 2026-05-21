@@ -99,7 +99,9 @@ export function OtpScreen() {
                   transform={`rotate(-90 ${TIMER_SIZE / 2} ${TIMER_SIZE / 2})`}
                 />
               </Svg>
-              <Text style={styles.timerValue}>{ctrl.canResend ? '0' : `${ctrl.resendSeconds}`}</Text>
+              <Text style={styles.timerValue}>
+                {ctrl.canResend ? '0' : `${ctrl.resendSeconds}`}
+              </Text>
             </View>
 
             <View style={styles.resendRow}>
