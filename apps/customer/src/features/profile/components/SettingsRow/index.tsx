@@ -3,7 +3,7 @@ import { ListItem, Icon } from '@dawwar/ui';
 import { useTheme } from '@dawwar/theme';
 import type { SettingsRowProps } from './types';
 
-export function SettingsRow({
+export const SettingsRow = React.memo(function SettingsRow({
   icon, iconColor, title, subtitle, onPress, rightElement, testID,
 }: SettingsRowProps) {
   const { colors } = useTheme();
@@ -18,4 +18,4 @@ export function SettingsRow({
       testID={testID}
     />
   );
-}
+});

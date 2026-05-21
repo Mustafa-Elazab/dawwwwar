@@ -6,6 +6,11 @@ export const AUTH_ROUTES = {
   COMPLETE_PROFILE: 'CompleteProfileScreen',
 } as const;
 
+// ─── Onboarding Stack ───────────────────────────────────
+export const ONBOARDING_ROUTES = {
+  ONBOARDING: 'OnboardingScreen',
+} as const;
+
 // ─── Customer Tab Names ───────────────────────────────────
 export const TAB_ROUTES = {
   HOME_TAB: 'HomeTab',

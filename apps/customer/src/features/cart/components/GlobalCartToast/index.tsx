@@ -1,16 +1,22 @@
-import React from 'react';
-import { View, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, StyleSheet } from 'react-native';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  SlideInDown,
+  SlideOutDown,
+} from 'react-native-reanimated';
 import { useNavigation, useNavigationState } from '@react-navigation/native';
 import { useAppSelector } from '../../../../store/hooks';
 import { selectCartCount, selectCartTotal } from '../../../../store/slices/cart.slice';
-import { Text } from '@dawwar/ui';
-import { useTheme, space, radius, shadows } from '@dawwar/theme';
+import { Text, Icon, AnimatedPressable } from '@dawwar/ui';
+import { useTheme, space, radius, shadows, springs, layout } from '@dawwar/theme';
 import { useTranslation } from '@dawwar/i18n';
-import { MODAL_ROUTES, HOME_ROUTES, TAB_ROUTES } from '../../../../navigation/routes';
+import { MODAL_ROUTES } from '../../../../navigation/routes';
+import type { RootParamList } from '../../../../navigation/types';
+import type { StackNavigationProp } from '@react-navigation/stack';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-
-// Screens where the cart toast should be HIDDEN
 const HIDE_ON_SCREENS = [
   MODAL_ROUTES.CART,
   MODAL_ROUTES.CHECKOUT,
@@ -20,90 +26,126 @@ const HIDE_ON_SCREENS = [
   'OrderDetailScreen',
 ];
 
+type NestedRoute = {
+  name: string;
+  state?: {
+    routes: NestedRoute[];
+    index: number;
+  };
+};
+
 export function GlobalCartToast() {
-  const navigation = useNavigation<any>();
+  const navigation = useNavigation<StackNavigationProp<RootParamList>>();
   const { colors } = useTheme();
   const { t } = useTranslation();
-  
+
   const count = useAppSelector(selectCartCount);
   const total = useAppSelector(selectCartTotal);
+  const prevCount = React.useRef(count);
+
+  const badgeScale = useSharedValue(1);
+
+  useEffect(() => {
+    if (count !== prevCount.current && count > 0) {
+      badgeScale.value = withSpring(1.2, springs.stiff);
+      setTimeout(() => {
+        badgeScale.value = withSpring(1, springs.bouncy);
+      }, 100);
+    }
+    prevCount.current = count;
+  }, [count, badgeScale]);
+
+  const badgeStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: badgeScale.value }],
+  }));
 
   const currentRoute = useNavigationState((state) => {
     if (!state) return null;
-    let current = state.routes[state.index];
-    while (current.state) {
-      const nestedState = current.state as any;
-      current = nestedState.routes[nestedState.index];
+    let current = state.routes[state.index] as NestedRoute;
+    while (current.state?.routes?.length) {
+      current = current.state.routes[current.state.index];
     }
     return current.name;
   });
 
-  const isVisible = count > 0 && !HIDE_ON_SCREENS.includes(currentRoute as any);
+  const isVisible = count > 0 && !!currentRoute && !HIDE_ON_SCREENS.includes(currentRoute);
 
   if (!isVisible) return null;
 
   return (
-    <View style={styles.container}>
-      <TouchableOpacity 
-        style={[styles.toast, { backgroundColor: colors.primary }]} 
+    <Animated.View
+      entering={SlideInDown.springify().damping(18).stiffness(120)}
+      exiting={SlideOutDown.springify().damping(20)}
+      style={styles.container}
+    >
+      <AnimatedPressable
+        style={[styles.toast, { backgroundColor: colors.primary }]}
         onPress={() => navigation.navigate(MODAL_ROUTES.CART)}
-        activeOpacity={0.9}
+        pressScale={0.97}
       >
         <View style={styles.left}>
-          <View style={styles.badge}>
+          <Animated.View style={[styles.badge, badgeStyle]}>
             <Text style={styles.badgeText}>{count}</Text>
-          </View>
+          </Animated.View>
           <Text style={styles.totalText}>{total} {t('common.egp')}</Text>
         </View>
-        <Text style={styles.actionText}>{t('cart.view_cart', 'عرض السلة')}</Text>
-      </TouchableOpacity>
-    </View>
+        <View style={styles.right}>
+          <Text style={styles.actionText}>{t('cart.view_cart')}</Text>
+          <Icon name="chevron-right" size={18} color="#fff" />
+        </View>
+      </AnimatedPressable>
+    </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     position: 'absolute',
-    bottom: 90, // Above tab bar
-    left: space.base,
-    right: space.base,
+    bottom: 80,
+    left: layout.screenPaddingH,
+    right: layout.screenPaddingH,
     zIndex: 1000,
   },
   toast: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: space.md,
-    borderRadius: radius.lg,
-    ...shadows.lg,
-    elevation: 8,
+    paddingVertical: space.md,
+    paddingHorizontal: space.base,
+    borderRadius: radius.xl,
+    ...shadows.md,
   },
   left: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: space.sm,
   },
+  right: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.xs,
+  },
   badge: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    paddingHorizontal: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    paddingHorizontal: space.sm,
     paddingVertical: 2,
-    borderRadius: radius.sm,
-    minWidth: 24,
+    borderRadius: radius.md,
+    minWidth: 26,
     alignItems: 'center',
   },
   badgeText: {
     color: '#fff',
-    fontWeight: '900',
-    fontSize: 14,
+    fontWeight: '800',
+    fontSize: 13,
   },
   totalText: {
     color: '#fff',
-    fontWeight: '800',
-    fontSize: 16,
+    fontWeight: '700',
+    fontSize: 15,
   },
   actionText: {
     color: '#fff',
-    fontWeight: '900',
-    fontSize: 16,
+    fontWeight: '700',
+    fontSize: 14,
   },
 });

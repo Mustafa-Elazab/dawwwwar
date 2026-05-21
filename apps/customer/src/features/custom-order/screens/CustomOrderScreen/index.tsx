@@ -84,11 +84,11 @@ export function CustomOrderScreen() {
             <View style={styles.summaryRow}>
               <View style={styles.summaryItem}>
                 <Icon name={ctrl.shopAddress ? "check-circle" : "circle-outline"} size={16} color={ctrl.shopAddress ? colors.success : colors.textDisabled} />
-                <Text style={[styles.summaryText, { color: ctrl.shopAddress ? colors.text : colors.textDisabled }]}>العنوان</Text>
+                <Text style={[styles.summaryText, { color: ctrl.shopAddress ? colors.text : colors.textDisabled }]}>{t('custom_order.shop_address_summary')}</Text>
               </View>
               <View style={styles.summaryItem}>
                 <Icon name={(ctrl.textDescription || ctrl.voiceUri) ? "check-circle" : "circle-outline"} size={16} color={(ctrl.textDescription || ctrl.voiceUri) ? colors.success : colors.textDisabled} />
-                <Text style={[styles.summaryText, { color: (ctrl.textDescription || ctrl.voiceUri) ? colors.text : colors.textDisabled }]}>الوصف</Text>
+                <Text style={[styles.summaryText, { color: (ctrl.textDescription || ctrl.voiceUri) ? colors.text : colors.textDisabled }]}>{t('custom_order.items_summary')}</Text>
               </View>
             </View>
             <Button

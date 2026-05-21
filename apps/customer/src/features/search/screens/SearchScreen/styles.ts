@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
 import type { AppColors } from '@dawwar/theme';
-import { space, typography, radius } from '@dawwar/theme';
+import { space, typography, radius, layout } from '@dawwar/theme';
 
 export const createStyles = (colors: AppColors) =>
   StyleSheet.create({
@@ -10,7 +10,7 @@ export const createStyles = (colors: AppColors) =>
       gap: space.sm,
       padding: space.sm,
       borderBottomWidth: 1,
-      borderBottomColor: colors.border,
+      borderBottomColor: colors.borderLight,
     },
     backBtn: {
       padding: space.sm,
@@ -18,15 +18,12 @@ export const createStyles = (colors: AppColors) =>
     },
     searchBarWrapper: { flex: 1 },
     sectionHeader: {
-      ...typography.label,
-      color: colors.textSecondary,
-      textTransform: 'uppercase',
-      letterSpacing: 0.8,
-      paddingHorizontal: space.base,
-      paddingTop: space.base,
+      ...typography.overline,
+      color: colors.textTertiary,
+      paddingHorizontal: layout.screenPaddingH,
+      paddingTop: space.lg,
       paddingBottom: space.sm,
-      backgroundColor: colors.surface,
-      textAlign: 'left',
+      backgroundColor: colors.background,
     },
     loadingRow: {
       alignItems: 'center',
@@ -53,59 +50,65 @@ export const createStyles = (colors: AppColors) =>
       flexDirection: 'row',
       flexWrap: 'wrap',
       gap: space.sm,
-      paddingHorizontal: space.base,
+      paddingHorizontal: layout.screenPaddingH,
       paddingVertical: space.sm,
     },
     categoryChip: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: space.sm,
+      gap: space.xs,
       paddingHorizontal: space.md,
       paddingVertical: space.sm,
-      backgroundColor: colors.primaryMuted,
+      backgroundColor: colors.primaryLight,
       borderRadius: radius.full,
     },
-    categoryEmoji: { fontSize: 16 },
+    categoryEmoji: { fontSize: 15 },
     categoryLabel: {
-      ...typography.label,
+      ...typography.caption,
       color: colors.primary,
+      fontWeight: '600',
     },
     // Merchant result row
     merchantRow: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: space.md,
-      paddingHorizontal: space.base,
+      paddingHorizontal: layout.screenPaddingH,
       paddingVertical: space.md,
       borderBottomWidth: 1,
       borderBottomColor: colors.borderLight,
     },
-    merchantLogo: { width: 48, height: 48, borderRadius: radius.md },
-    merchantInfo: { 
+    merchantLogo: {
+      width: 48,
+      height: 48,
+      borderRadius: radius.lg,
+      backgroundColor: colors.surfaceVariant,
+    },
+    merchantInfo: {
       flex: 1,
       alignItems: 'flex-start',
     },
-    merchantName: { 
-      ...typography.label, 
+    merchantName: {
+      ...typography.body1,
       color: colors.text,
-      textAlign: 'left',
+      fontWeight: '600',
     },
-    merchantMeta: { 
-      ...typography.caption, 
+    merchantMeta: {
+      ...typography.caption,
       color: colors.textSecondary,
-      textAlign: 'left',
+      marginTop: 1,
     },
     searchContainer: {
-      padding: space.base,
+      padding: layout.screenPaddingH,
       backgroundColor: colors.surface,
       borderBottomWidth: 1,
-      borderBottomColor: colors.border,
+      borderBottomColor: colors.borderLight,
     },
     searchBar: {
       flexDirection: 'row',
       alignItems: 'center',
       backgroundColor: colors.surfaceVariant,
-      borderRadius: radius.md,
+      borderRadius: radius.xl,
       paddingHorizontal: space.md,
       height: 44,
       gap: space.sm,
@@ -115,38 +118,42 @@ export const createStyles = (colors: AppColors) =>
       ...typography.body2,
       color: colors.text,
       paddingVertical: 0,
-      textAlign: 'left',
     },
     // Product result row
     productRow: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: space.md,
-      paddingHorizontal: space.base,
+      paddingHorizontal: layout.screenPaddingH,
       paddingVertical: space.md,
       borderBottomWidth: 1,
       borderBottomColor: colors.borderLight,
     },
-    productImage: { width: 56, height: 56, borderRadius: radius.md },
-    productInfo: { 
+    productImage: {
+      width: 56,
+      height: 56,
+      borderRadius: radius.lg,
+      backgroundColor: colors.surfaceVariant,
+    },
+    productInfo: {
       flex: 1,
       alignItems: 'flex-start',
     },
-    productName: { 
-      ...typography.label, 
+    productName: {
+      ...typography.body1,
       color: colors.text,
-      textAlign: 'left',
+      fontWeight: '600',
     },
-    productPrice: { 
-      ...typography.body2, 
-      color: colors.primary, 
+    productPrice: {
+      ...typography.caption,
+      color: colors.primary,
+      fontWeight: '700',
       marginTop: 2,
-      textAlign: 'left',
     },
     addBtn: {
-      width: 32,
-      height: 32,
-      borderRadius: 16,
+      width: 34,
+      height: 34,
+      borderRadius: 17,
       backgroundColor: colors.primary,
       alignItems: 'center',
       justifyContent: 'center',

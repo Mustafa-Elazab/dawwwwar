@@ -1,12 +1,11 @@
-import Config from 'react-native-config';
+import { appConfig } from '../config/app.config';
 
 /**
- * USE_MOCK_API=true  → Phase 1: calls @dawwar/mocks handlers
- * USE_MOCK_API=false → Phase 2: calls real Axios to backend
+ * USE_MOCK_API=true  → calls @dawwar/mocks handlers
+ * USE_MOCK_API=false → calls real Axios to backend
  *
  * To switch: change .env file and restart Metro with --reset-cache
  */
-export const USE_MOCK_API = Config.USE_MOCK_API === 'true';
+export const USE_MOCK_API = appConfig.useMockApi;
 
-export const API_BASE_URL =
-  Config.API_BASE_URL ?? 'http://10.0.2.2:3000/api/v1';
+export const API_BASE_URL = appConfig.api.baseUrl;

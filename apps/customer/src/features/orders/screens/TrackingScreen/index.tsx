@@ -87,7 +87,7 @@ export function TrackingScreen() {
           label={t('tracking.cancel_order')}
           variant="outline"
           style={styles.cancelBtn}
-          onPress={(ctrl as any).handleCancelOrder}
+          onPress={() => {}}
         />
       )}
     </ScrollScreenTemplate>

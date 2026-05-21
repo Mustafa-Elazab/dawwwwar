@@ -1,5 +1,6 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, I18nManager } from 'react-native';
 import { AppColors } from '@dawwar/theme';
+import { space, typography, radius, layout } from '@dawwar/theme';
 
 export const createStyles = (colors: AppColors) =>
   StyleSheet.create({
@@ -7,11 +8,11 @@ export const createStyles = (colors: AppColors) =>
       height: 56,
       flexDirection: 'row',
       alignItems: 'center',
-      paddingHorizontal: 16,
+      paddingHorizontal: layout.screenPaddingH,
       backgroundColor: colors.background,
     },
     leftContainer: {
-      width: 40,
+      width: 44,
       justifyContent: 'center',
     },
     contentContainer: {
@@ -20,24 +21,28 @@ export const createStyles = (colors: AppColors) =>
       alignItems: 'center',
     },
     rightContainer: {
-      width: 40,
+      width: 44,
       justifyContent: 'center',
       alignItems: 'flex-end',
     },
     leftAction: {
-      padding: 8,
-      marginLeft: -8,
+      width: 40,
+      height: 40,
+      borderRadius: radius.lg,
+      backgroundColor: colors.surfaceVariant,
+      alignItems: 'center',
+      justifyContent: 'center',
     },
     title: {
-      fontSize: 18,
-      fontWeight: '600',
+      ...typography.body1,
+      fontWeight: '700',
       color: colors.text,
       textAlign: 'center',
     },
     subtitle: {
-      fontSize: 12,
+      ...typography.caption,
       color: colors.textSecondary,
       textAlign: 'center',
-      marginTop: 2,
+      marginTop: 1,
     },
   });

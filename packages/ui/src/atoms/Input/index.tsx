@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, TextInput, I18nManager, Pressable } from 'react-native';
+import { View, TextInput, I18nManager, Text as RNText } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -14,7 +14,7 @@ import { Text } from '../Text';
 import { createStyles } from './styles';
 import type { InputProps } from './types';
 
-const AnimatedTextInput = Animated.createAnimatedComponent(TextInput);
+const AnimatedLabelText = Animated.createAnimatedComponent(RNText);
 
 export function Input({
   label,
@@ -92,14 +92,10 @@ export function Input({
 
     return {
       transform: [{ translateY }, { scale }, { translateX }],
-      color: interpolateColor(
-        focusAnim.value,
-        [0, 1],
-        [
-          error ? colors.error : colors.textSecondary,
-          error ? colors.error : colors.primary,
-        ],
-      ),
+      color: interpolateColor(focusAnim.value, [0, 1], [
+        error ? colors.error : colors.textSecondary,
+        error ? colors.error : colors.primary,
+      ]),
     };
   });
 
@@ -117,14 +113,12 @@ export function Input({
     <View style={[styles.container, containerStyle]}>
       <View style={styles.inputWrapper}>
         {label && (
-          <Animated.View
+          <AnimatedLabelText
             pointerEvents="none"
-            style={[styles.labelFloating, animatedLabelStyle]}
+            style={[styles.labelFloating, styles.labelText, animatedLabelStyle]}
           >
-            <Text variant="label" style={{ color: 'inherit' as any }}>
-              {label}
-            </Text>
-          </Animated.View>
+            {label}
+          </AnimatedLabelText>
         )}
 
         <Animated.View

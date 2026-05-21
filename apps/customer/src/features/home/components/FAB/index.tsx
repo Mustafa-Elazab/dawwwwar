@@ -9,15 +9,15 @@ interface FABProps {
   onPress: () => void;
 }
 
-export function FAB({ onPress }: FABProps) {
+export const FAB = React.memo(function FAB({ onPress }: FABProps) {
   const { colors } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
   const { t } = useTranslation();
 
   return (
     <TouchableOpacity style={styles.fab} onPress={onPress} activeOpacity={0.85}>
-      <Icon name="pencil-box-outline" size={22} color="#fff" />
-      <Text style={styles.label}>{'طلب مخصص'}</Text>
+      <Icon name="pencil-box-outline" size={22} color={colors.surface} />
+      <Text style={styles.label}>{t('home.custom_order_btn')}</Text>
     </TouchableOpacity>
   );
-}
+});

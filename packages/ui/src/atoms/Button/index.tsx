@@ -1,11 +1,8 @@
-import React from 'react';
-import { ActivityIndicator, Pressable } from 'react-native';
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-} from 'react-native-reanimated';
-import { useTheme, springs } from '@dawwar/theme';
+import React, { useEffect } from 'react';
+import { ActivityIndicator } from 'react-native';
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import { easings, microInteractions, transitions, useTheme } from '@dawwar/theme';
+import { AnimatedPressable } from '../AnimatedPressable';
 import { Text } from '../Text';
 import { createStyles } from './styles';
 import type { ButtonProps } from './types';
@@ -20,6 +17,7 @@ export function Button({
   fullWidth = false,
   leftIcon,
   rightIcon,
+  onHaptic,
   style,
   testID,
 }: ButtonProps) {
@@ -28,22 +26,28 @@ export function Button({
 
   const isDisabled = disabled || loading;
 
-  // ─── Animations ───────────────────────────────────────────────────
-  const scale = useSharedValue(1);
+  // ─── Loading transition ───────────────────────────────────────────
+  const contentOpacity = useSharedValue(loading ? 0 : 1);
+  const spinnerOpacity = useSharedValue(loading ? 1 : 0);
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
+  useEffect(() => {
+    contentOpacity.value = withTiming(loading ? 0 : 1, {
+      duration: transitions.fast,
+      easing: easings.standard,
+    });
+    spinnerOpacity.value = withTiming(loading ? 1 : 0, {
+      duration: transitions.fast,
+      easing: easings.standard,
+    });
+  }, [loading, contentOpacity, spinnerOpacity]);
+
+  const contentStyle = useAnimatedStyle(() => ({
+    opacity: contentOpacity.value,
   }));
 
-  const handlePressIn = () => {
-    if (!isDisabled) {
-      scale.value = withSpring(0.96, springs.stiff);
-    }
-  };
-
-  const handlePressOut = () => {
-    scale.value = withSpring(1, springs.bouncy);
-  };
+  const spinnerStyle = useAnimatedStyle(() => ({
+    opacity: spinnerOpacity.value,
+  }));
 
   const labelStyleKey = `label${variant.charAt(0).toUpperCase()}${variant.slice(1)}` as
     | 'labelPrimary'
@@ -53,54 +57,50 @@ export function Button({
     | 'labelDanger';
 
   return (
-    <Animated.View
+    <AnimatedPressable
+      onPress={onPress}
+      disabled={isDisabled}
+      testID={testID}
+      pressScale={microInteractions.pressScale}
+      pressOpacity={microInteractions.pressOpacity}
+      pressTranslateY={1}
+      spring="soft"
+      disabledOpacity={0.55}
+      onHaptic={onHaptic}
       style={[
+        styles.base,
+        styles[variant],
+        styles[size],
         fullWidth && styles.fullWidth,
-        animatedStyle,
         style,
       ]}
     >
-      <Pressable
-        onPress={onPress}
-        onPressIn={handlePressIn}
-        onPressOut={handlePressOut}
-        disabled={isDisabled}
-        testID={testID}
-        style={[
-          styles.base,
-          styles[variant],
-          styles[size],
-          fullWidth && styles.fullWidth,
-          isDisabled && styles.disabled,
-        ]}
-      >
-        {loading ? (
-          <ActivityIndicator
-            size="small"
-            color={variant === 'primary' || variant === 'danger'
-              ? colors.primaryText
-              : colors.primary}
-          />
-        ) : (
-          <>
-            {leftIcon}
-            <Text
-              style={[
-                styles[labelStyleKey],
-                styles[
-                  `label${size.charAt(0).toUpperCase()}${size.slice(1)}` as
-                    | 'labelSm'
-                    | 'labelMd'
-                    | 'labelLg'
-                ],
-              ]}
-            >
-              {label}
-            </Text>
-            {rightIcon}
-          </>
-        )}
-      </Pressable>
-    </Animated.View>
+      <Animated.View style={contentStyle}>
+        {leftIcon}
+        <Text
+          style={[
+            styles[labelStyleKey],
+            styles[
+              `label${size.charAt(0).toUpperCase()}${size.slice(1)}` as
+                | 'labelSm'
+                | 'labelMd'
+                | 'labelLg'
+            ],
+          ]}
+        >
+          {label}
+        </Text>
+        {rightIcon}
+      </Animated.View>
+
+      <Animated.View style={[styles.spinnerWrap, spinnerStyle]}>
+        <ActivityIndicator
+          size="small"
+          color={variant === 'primary' || variant === 'danger'
+            ? colors.primaryText
+            : colors.primary}
+        />
+      </Animated.View>
+    </AnimatedPressable>
   );
 }

@@ -1,4 +1,4 @@
-import { StyleSheet, I18nManager } from 'react-native';
+import { StyleSheet } from 'react-native';
 import type { AppColors } from '@dawwar/theme';
 import { space, typography, radius, shadows } from '@dawwar/theme';
 
@@ -34,7 +34,6 @@ export const createStyles = (colors: AppColors) =>
       flex: 1,
       ...typography.body2,
       color: colors.text,
-      textAlign: I18nManager.isRTL ? 'right' : 'left',
     },
     promoBtn: {
       color: colors.primary,
@@ -56,8 +55,8 @@ export const createStyles = (colors: AppColors) =>
       justifyContent: 'space-between',
       alignItems: 'center',
     },
-    summaryLabel: { ...typography.body2, color: colors.textSecondary, textAlign: 'right' },
-    summaryValue: { ...typography.body1, color: colors.text, fontWeight: '700', textAlign: 'left' },
+    summaryLabel: { ...typography.body2, color: colors.textSecondary },
+    summaryValue: { ...typography.body1, color: colors.text, fontWeight: '700' },
     divider: {
       height: 1,
       backgroundColor: colors.borderLight,
@@ -81,13 +80,12 @@ export const createStyles = (colors: AppColors) =>
     
     // ── Bottom Action ───────────────────────────────────
     footer: {
-      paddingHorizontal: space.xl, // 16px horizontal padding inside container
+      paddingHorizontal: space.xl,
       paddingBottom: space.xl,
       backgroundColor: colors.surface,
     },
     checkoutBtn: { 
-      height: 56,
-      borderRadius: radius.lg,
-      ...shadows.md,
+      minHeight: 52,
+      borderRadius: radius.xl,
     },
   });

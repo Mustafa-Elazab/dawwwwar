@@ -1,8 +1,8 @@
-import React, { useEffect, useRef } from 'react';
-import { View, TouchableOpacity, StyleSheet, Animated, Dimensions, I18nManager } from 'react-native';
-import { useTheme } from '@dawwar/theme';
-import { Text } from '@dawwar/ui';
-import { space } from '@dawwar/theme';
+import React, { useEffect, useMemo } from 'react';
+import { View, StyleSheet, I18nManager, useWindowDimensions } from 'react-native';
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import { useTheme, motion, easings, space, radius, microInteractions } from '@dawwar/theme';
+import { Text, AnimatedPressable } from '@dawwar/ui';
 import { useTranslation } from '@dawwar/i18n';
 
 export type MerchantTab = 'menu' | 'info' | 'reviews';
@@ -18,38 +18,40 @@ const TABS: { key: MerchantTab; labelKey: string }[] = [
   { key: 'reviews', labelKey: 'merchant.tab_reviews' },
 ];
 
-const { width } = Dimensions.get('window');
-const TAB_WIDTH = width / TABS.length;
+const INDICATOR_HEIGHT = 3;
 
 export function MerchantTabBar({ active, onChange }: TabBarProps) {
   const { colors } = useTheme();
   const { t } = useTranslation();
-  
-  const activeIdx = TABS.findIndex(t => t.key === active);
-  const indicatorAnim = useRef(new Animated.Value(activeIdx)).current;
+  const { width } = useWindowDimensions();
+  const isRTL = I18nManager.isRTL;
+
+  const tabs = useMemo(() => (isRTL ? [...TABS].reverse() : TABS), [isRTL]);
+  const tabWidth = width / tabs.length;
+  const activeIdx = tabs.findIndex((tab) => tab.key === active);
+  const indicatorX = useSharedValue(Math.max(activeIdx, 0) * tabWidth);
 
   useEffect(() => {
-    Animated.spring(indicatorAnim, {
-      toValue: activeIdx,
-      useNativeDriver: true,
-      friction: 10,
-      tension: 50,
-    }).start();
-  }, [activeIdx]);
+    indicatorX.value = withTiming(Math.max(activeIdx, 0) * tabWidth, {
+      duration: motion.tabSwitchMs,
+      easing: easings.standard,
+    });
+  }, [activeIdx, indicatorX, tabWidth]);
 
-  const translateX = indicatorAnim.interpolate({
-    inputRange: [0, 1, 2],
-    outputRange: [0, TAB_WIDTH, TAB_WIDTH * 2],
-  });
+  const indicatorStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: indicatorX.value }],
+  }));
 
   return (
     <View style={[styles.row, { borderBottomColor: colors.border, backgroundColor: colors.surface }]}>
-      {TABS.map((tab) => (
-        <TouchableOpacity
+      {tabs.map((tab) => (
+        <AnimatedPressable
           key={tab.key}
           style={styles.tab}
           onPress={() => onChange(tab.key)}
-          activeOpacity={0.7}
+          pressScale={microInteractions.pressScale}
+          pressOpacity={microInteractions.pressOpacity}
+          pressTranslateY={1}
         >
           <Text
             variant="label"
@@ -61,19 +63,19 @@ export function MerchantTabBar({ active, onChange }: TabBarProps) {
           >
             {t(tab.labelKey)}
           </Text>
-        </TouchableOpacity>
+        </AnimatedPressable>
       ))}
-      
-      {/* Animated 3px Indicator */}
+
       <Animated.View 
         style={[
           styles.indicator, 
           { 
             backgroundColor: colors.primary,
-            width: TAB_WIDTH,
-            left: 0, // Explicitly set left to allow mirroring to right: 0 in RTL
-            transform: [{ translateX }]
-          }
+            width: tabWidth,
+            left: 0,
+            borderRadius: radius.full,
+          },
+          indicatorStyle,
         ]} 
       />
     </View>
@@ -94,7 +96,6 @@ const styles = StyleSheet.create({
   indicator: {
     position: 'absolute',
     bottom: 0,
-    height: 3,
-    borderRadius: 3,
+    height: INDICATOR_HEIGHT,
   },
 });

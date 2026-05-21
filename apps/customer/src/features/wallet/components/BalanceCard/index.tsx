@@ -9,7 +9,7 @@ interface BalanceCardProps {
   balance: number;
 }
 
-export function BalanceCard({ balance }: BalanceCardProps) {
+export const BalanceCard = React.memo(function BalanceCard({ balance }: BalanceCardProps) {
   const { colors } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
   const { t } = useTranslation();
@@ -23,4 +23,4 @@ export function BalanceCard({ balance }: BalanceCardProps) {
       </View>
     </View>
   );
-}
+});

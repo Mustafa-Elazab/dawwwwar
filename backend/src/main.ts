@@ -1,5 +1,5 @@
 import { NestFactory, Reflector } from '@nestjs/core';
-import { ValidationPipe, VersioningType } from '@nestjs/common';
+import { ValidationPipe, VersioningType, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import helmet from 'helmet';
@@ -13,6 +13,7 @@ import { RolesGuard } from './common/guards/roles.guard';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import * as express from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import * as path from 'path';
 
 async function bootstrap() {
@@ -20,12 +21,20 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const reflector = app.get(Reflector);
   const cacheManager = app.get<Cache>(CACHE_MANAGER);
+  const logger = new Logger('Bootstrap');
+  const appConfig = configService.get('app');
 
   // Security hardening
   app.use(helmet());
+  app.enableShutdownHooks();
+  if (appConfig?.trustProxy) {
+    const httpAdapter = app.getHttpAdapter();
+    const instance = httpAdapter.getInstance();
+    if (instance?.set) instance.set('trust proxy', 1);
+  }
 
   // API prefix
-  app.setGlobalPrefix('api');
+  app.setGlobalPrefix(appConfig?.apiPrefix ?? 'api');
 
   // Serve local uploads
   if (process.env.NODE_ENV !== 'production') {
@@ -36,6 +45,18 @@ async function bootstrap() {
   app.enableVersioning({
     type: VersioningType.URI,
     defaultVersion: '1',
+  });
+
+  // Body limits
+  app.use(express.json({ limit: appConfig?.bodyLimit ?? '2mb' }));
+  app.use(express.urlencoded({ extended: true, limit: appConfig?.bodyLimit ?? '2mb' }));
+
+  // Request timeouts
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    const timeoutMs = appConfig?.requestTimeoutMs ?? 30000;
+    req.setTimeout(timeoutMs);
+    res.setTimeout(timeoutMs);
+    next();
   });
 
   // Validation
@@ -71,14 +92,18 @@ async function bootstrap() {
   SwaggerModule.setup('docs', app, document);
 
   // CORS
+  const corsOrigins = appConfig?.corsOrigins ?? ['*'];
   app.enableCors({
-    origin: '*', // In production, replace with actual frontend domain
+    origin: corsOrigins.includes('*') ? true : corsOrigins,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
 
-  const port = configService.get<number>('app.port') ?? 3000;
-  await app.listen(port);
+  const port = appConfig?.port ?? 3000;
+  const host = appConfig?.host ?? '0.0.0.0';
+  await app.listen(port, host);
+
+  logger.log(`API listening on http://${host}:${port}/${appConfig?.apiPrefix ?? 'api'}`);
 
   // console.log(`Server running on http://localhost:${port}/${apiPrefix}`);
   // console.log(`Swagger docs: http://localhost:${port}/docs`);

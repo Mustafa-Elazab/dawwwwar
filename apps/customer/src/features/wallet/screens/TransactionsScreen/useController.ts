@@ -3,10 +3,12 @@ import { useTranslation } from '@dawwar/i18n';
 import { useNavigation } from '@react-navigation/native';
 import { useTransactions } from '../../core/hooks';
 import type { WalletTransaction } from '@dawwar/types';
+import type { StackNavigationProp } from '@react-navigation/stack';
+import type { WalletStackParamList } from '../../../../navigation/types';
 
 export function useController() {
   const { t } = useTranslation();
-  const navigation = useNavigation<any>();
+  const navigation = useNavigation<StackNavigationProp<WalletStackParamList>>();
   const { data: transactions, isLoading, isError, refetch } = useTransactions();
 
   const groupedTransactions = useMemo(() => {

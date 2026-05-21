@@ -1,11 +1,8 @@
-import api from '../../../core/api/client';
+import { customOrderApi as customOrderService } from '../../../core/api/services';
 
 // ── Phase 2 real implementations ─────────────────────────────────────
 const realCustomOrderApi = {
-  place: async (payload: object) => {
-    const { data } = await api.post('/orders/custom', payload);
-    return data;
-  },
+  place: async (payload: object) => customOrderService.place(payload),
 };
 
 

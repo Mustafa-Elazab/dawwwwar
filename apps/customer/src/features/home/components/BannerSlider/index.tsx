@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { View, FlatList, Image } from 'react-native';
+import { View, FlatList, Dimensions } from 'react-native';
 import { useIsFocused } from '@react-navigation/native';
 import { useTheme } from '@dawwar/theme';
+import FastImage from 'react-native-fast-image';
 import { createStyles } from './styles';
 import type { Banner } from './types';
 
@@ -23,9 +24,17 @@ const MOCK_BANNERS: Banner[] = [
   },
 ];
 
-const ITEM_WIDTH = 320;
+const SCREEN_WIDTH = Dimensions.get('window').width;
+const ITEM_WIDTH = SCREEN_WIDTH - 40;
+const ITEM_TOTAL_WIDTH = ITEM_WIDTH + 16;
 
-export function BannerSlider() {
+const getItemLayout = (_: any, index: number) => ({
+  length: ITEM_TOTAL_WIDTH,
+  offset: ITEM_TOTAL_WIDTH * index,
+  index,
+});
+
+export const BannerSlider = React.memo(function BannerSlider() {
   const { colors } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -41,16 +50,16 @@ export function BannerSlider() {
         flatRef.current?.scrollToIndex({ index: next, animated: true });
         return next;
       });
-    }, 3000);
+    }, 4000);
     return () => clearInterval(timer);
   }, [isFocused]);
 
   const renderItem = useCallback(({ item }: { item: Banner }) => (
-    <View style={styles.banner}>
-      <Image
-        source={{ uri: item.imageUrl }}
+    <View style={[styles.banner, { width: ITEM_WIDTH }]}> 
+      <FastImage
+        source={{ uri: item.imageUrl, priority: FastImage.priority.high }}
         style={styles.bannerImage}
-        resizeMode="cover"
+        resizeMode={FastImage.resizeMode.cover}
       />
     </View>
   ), [styles.banner, styles.bannerImage]);
@@ -65,8 +74,9 @@ export function BannerSlider() {
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ paddingHorizontal: 16 }}
-        snapToInterval={ITEM_WIDTH + 16}
+        snapToInterval={ITEM_TOTAL_WIDTH}
         decelerationRate="fast"
+        getItemLayout={getItemLayout}
         onScrollToIndexFailed={() => {}}
       />
       {/* Pagination dots */}
@@ -77,4 +87,4 @@ export function BannerSlider() {
       </View>
     </View>
   );
-}
+});

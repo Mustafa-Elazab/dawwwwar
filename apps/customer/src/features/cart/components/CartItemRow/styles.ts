@@ -9,57 +9,64 @@ export const createStyles = (colors: AppColors) =>
       alignItems: 'center',
       gap: space.md,
       paddingVertical: space.md,
+      paddingHorizontal: space.md,
       backgroundColor: colors.surface,
+      borderRadius: radius.lg,
+      borderWidth: 1,
+      borderColor: colors.borderLight,
+      ...shadows.xs,
     },
-    image: { 
-      width: 80, // 80x80px image
-      height: 80, 
+    image: {
+      width: 72,
+      height: 72,
       borderRadius: radius.lg,
       backgroundColor: colors.background,
     },
-    info: { 
-      flex: 1, 
+    info: {
+      flex: 1,
       gap: 2,
       alignItems: 'flex-start',
     },
-    name: { 
-      ...typography.label, 
+    name: {
+      ...typography.label,
       color: colors.text,
-      fontWeight: '800', // Bold product name
-      textAlign: 'left',
+      fontWeight: '600',
     },
     merchantName: {
       ...typography.caption,
       color: colors.textSecondary,
-      marginBottom: 4,
+      marginBottom: 2,
     },
-    price: { 
-      ...typography.body2, 
-      color: colors.primary, // Primary orange price
-      fontWeight: '800',
-      textAlign: 'left',
+    price: {
+      ...typography.body2,
+      color: colors.primary,
+      fontWeight: '700',
     },
     stepper: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: space.sm,
+      gap: space.xs,
       backgroundColor: colors.background,
       borderRadius: radius.full,
-      padding: 4,
+      padding: 3,
+      borderWidth: 1,
+      borderColor: colors.borderLight,
+      ...shadows.xs,
     },
     stepBtn: {
-      width: 32, // Circular buttons
-      height: 32,
-      borderRadius: 16,
+      width: 30,
+      height: 30,
+      borderRadius: radius.full,
       alignItems: 'center',
       justifyContent: 'center',
       backgroundColor: colors.surface,
-      ...shadows.sm,
+      borderWidth: 1,
+      borderColor: colors.borderLight,
     },
     count: {
       ...typography.label,
       color: colors.text,
-      minWidth: 28,
+      minWidth: 26,
       textAlign: 'center',
       fontWeight: '700',
     },

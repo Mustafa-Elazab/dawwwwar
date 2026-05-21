@@ -8,6 +8,7 @@ export interface ButtonProps {
   size?: ButtonSize;
   label: string;
   onPress?: () => void;
+  onHaptic?: () => void;
   loading?: boolean;
   disabled?: boolean;
   fullWidth?: boolean;

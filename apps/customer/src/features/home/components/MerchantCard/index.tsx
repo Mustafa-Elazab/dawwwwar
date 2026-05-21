@@ -1,13 +1,15 @@
-import React, { useMemo } from 'react';
-import { View, TouchableOpacity, Image, I18nManager } from 'react-native';
-import { useTheme } from '@dawwar/theme';
-import { Text, Badge, Icon } from '@dawwar/ui';
+import React from 'react';
+import { View } from 'react-native';
+import FastImage from 'react-native-fast-image';
+import { useTheme, microInteractions } from '@dawwar/theme';
+import { Text, Icon, AnimatedPressable } from '@dawwar/ui';
 import { useTranslation } from '@dawwar/i18n';
 import { getDistanceKm, formatDistance } from '../../utils/distance';
 import { createStyles } from './styles';
 import type { MerchantCardProps } from './types';
+import type { StyleProp, ViewStyle } from 'react-native';
 
-export const MerchantCard = React.memo(function MerchantCard({ merchant, onPress, style }: MerchantCardProps & { style?: any }) {
+export const MerchantCard = React.memo(function MerchantCard({ merchant, onPress, style }: MerchantCardProps & { style?: StyleProp<ViewStyle> }) {
   const { colors } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
   const { t } = useTranslation();
@@ -18,45 +20,60 @@ export const MerchantCard = React.memo(function MerchantCard({ merchant, onPress
   );
 
   return (
-    <TouchableOpacity style={[styles.card, style]} onPress={onPress} activeOpacity={0.9}>
+    <AnimatedPressable
+      style={[styles.card, style]}
+      onPress={onPress}
+      pressScale={microInteractions.cardPressScale}
+      pressOpacity={microInteractions.pressOpacity}
+      pressTranslateY={1}
+    >
       <View style={styles.coverContainer}>
-        <Image
-          source={{ uri: merchant.coverImage ?? merchant.logo ?? 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=1000' }}
+        <FastImage
+          source={{
+            uri: merchant.coverImage ?? merchant.logo ?? 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=1000',
+            priority: FastImage.priority.normal,
+          }}
           style={styles.cover}
-          resizeMode="cover"
+          resizeMode={FastImage.resizeMode.cover}
         />
-        {/* Gradient Overlay */}
-        <View style={styles.gradient} />
-        
-        {/* Open/Closed badge inside cover */}
-        <View style={styles.badgeOverlay}>
-          <Badge
-            label={merchant.isOpen ? t('merchant.open') : t('merchant.closed')}
-            variant={merchant.isOpen ? 'success' : 'error'}
-            size="sm"
-          />
-        </View>
-      </View>
+        {/* Scrim gradient overlay */}
+        <View style={styles.scrimTop} />
+        <View style={styles.scrimBottom} />
 
-      <View style={styles.body}>
-        <Text style={styles.name} numberOfLines={1}>
-          {merchant.businessName}
-        </Text>
-        <View style={styles.metaRow}>
-          <View style={styles.ratingRow}>
-            <Icon name="star" size={14} color={colors.warning} />
-            <Text style={styles.ratingText}>
-              {Number(merchant.rating || 0).toFixed(1)}
-            </Text>
-          </View>
-          <Text style={styles.metaText}>{'·'}</Text>
-          <Text style={styles.metaText}>{formatDistance(distanceKm)}</Text>
-          <Text style={styles.metaText}>{'·'}</Text>
-          <Text style={styles.metaText}>
+        {/* Status badge */}
+        <View style={[styles.badgeOverlay, merchant.isOpen ? styles.openBadge : styles.closedBadge]}>
+          <Text style={styles.statusLabel}>{merchant.isOpen ? t('merchant.open') : t('merchant.closed')}</Text>
+        </View>
+
+        {/* Delivery time pill */}
+        <View style={styles.deliveryPill}>
+          <Icon name="clock-outline" size={12} color="#fff" />
+          <Text style={styles.deliveryPillText}>
             {merchant.deliveryTimeMin}–{merchant.deliveryTimeMax} {t('common.min')}
           </Text>
         </View>
       </View>
-    </TouchableOpacity>
+
+      <View style={styles.body}>
+        <View style={styles.titleRow}>
+          <Text style={styles.name} numberOfLines={1}>
+            {merchant.businessName}
+          </Text>
+          <View style={styles.ratingChip}>
+            <Icon name="star" size={12} color={colors.warning} />
+            <Text style={styles.ratingText}>
+              {Number(merchant.rating || 0).toFixed(1)}
+            </Text>
+          </View>
+        </View>
+
+        <View style={styles.metaRow}>
+          <Icon name="map-marker-outline" size={13} color={colors.textTertiary} />
+          <Text style={styles.metaText}>{formatDistance(distanceKm)}</Text>
+          <View style={styles.metaDot} />
+          <Text style={styles.feeText}>{t('cart.delivery_fee')}</Text>
+        </View>
+      </View>
+    </AnimatedPressable>
   );
 });

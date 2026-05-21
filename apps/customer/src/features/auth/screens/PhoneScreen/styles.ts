@@ -1,6 +1,6 @@
 import { StyleSheet, Dimensions } from 'react-native';
 import type { AppColors } from '@dawwar/theme';
-import { space, typography, radius } from '@dawwar/theme';
+import { space, typography, radius, shadows } from '@dawwar/theme';
 
 const { height } = Dimensions.get('window');
 
@@ -9,76 +9,119 @@ export const createStyles = (colors: AppColors) =>
     // ── Layout ──────────────────────────────────────────
     container: {
       flex: 1,
-      backgroundColor: colors.primary, // Primary background for the top 40%
+      backgroundColor: colors.background,
     },
-    illustrationArea: {
-      height: height * 0.3,
+    atmosphere: {
+      ...StyleSheet.absoluteFillObject,
+    },
+    orbPrimary: {
+      position: 'absolute',
+      top: -140,
+      start: -100,
+      width: 320,
+      height: 320,
+      borderRadius: 160,
+      backgroundColor: colors.primary,
+      opacity: 0.14,
+    },
+    orbSecondary: {
+      position: 'absolute',
+      bottom: -180,
+      end: -120,
+      width: 360,
+      height: 360,
+      borderRadius: 180,
+      backgroundColor: colors.surfaceVariant,
+      opacity: 0.2,
+    },
+    hero: {
+      height: height * 0.4,
       alignItems: 'center',
       justifyContent: 'center',
-      paddingBottom: space.xl,
+      paddingTop: space['2xl'],
+      gap: space.sm,
+    },
+    logoShell: {
+      width: 128,
+      height: 128,
+      borderRadius: 64,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.primary,
+      borderWidth: 0,
+      ...shadows.sm,
     },
     logoText: {
-      ...typography.h1,
-      fontSize: 64,
-      color: '#fff',
-      fontWeight: '900',
-      
+      ...typography.display,
+      color: '#F5F5F5',
+      fontWeight: '800',
+      letterSpacing: -0.8,
     },
     tagline: {
-      ...typography.body2,
-      color: 'rgba(255, 255, 255, 0.9)',
+      ...typography.caption,
+      color: colors.primary,
       marginTop: space.xs,
+      fontSize: 14,
       fontWeight: '600',
-      letterSpacing: 0.5,
+    },
+    taglineRtl: {
+      letterSpacing: 0,
+      textTransform: 'none',
     },
 
     // ── Form Card ───────────────────────────────────────
     card: {
       flex: 1,
-      backgroundColor: colors.card,
-      borderTopLeftRadius: 32,
-      borderTopRightRadius: 32,
-      paddingHorizontal: space.xl,
-      paddingTop: space.xl,
+      backgroundColor: '#1A1A1A',
+      borderTopStartRadius: 32,
+      borderTopEndRadius: 32,
+      paddingHorizontal: 24,
+      paddingTop: 32,
       paddingBottom: space.xl,
-      // Subtle shadow for the card overlapping the primary background
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: -4 },
-      shadowOpacity: 0.1,
-      shadowRadius: 12,
-      elevation: 8,
+      borderTopWidth: 1,
+      borderColor: colors.borderLight,
     },
     
     // ── Form Content ────────────────────────────────────
     formTitle: {
       ...typography.h3,
-      color: colors.text,
+      color: '#F5F5F5',
+      fontSize: 22,
+      marginBottom: space.xs,
+      fontWeight: '700',
+    },
+    formSubtitle: {
+      ...typography.body2,
+      color: '#A0A0A0',
+      fontSize: 14,
       marginBottom: space.lg,
-      textAlign: 'left',
-      fontWeight: '800',
     },
     phoneRow: {
       flexDirection: 'row',
       alignItems: 'center',
       borderWidth: 1.5,
-      borderRadius: radius.lg,
+      borderRadius: 14,
       borderColor: colors.border,
-      backgroundColor: colors.background,
-      overflow: 'hidden',
+      backgroundColor: '#1F1F1F',
       marginBottom: space.md,
-      height: 56,
+      height: 54,
+      paddingHorizontal: space.xs,
+      gap: space.xs,
+    },
+    phoneRowFocused: {
+      borderColor: 'rgba(29,185,84,0.5)',
     },
     phoneRowError: {
-      borderColor: colors.error,
+      borderColor: '#EF4444',
     },
     countryPrefix: {
       flexDirection: 'row',
       alignItems: 'center',
       paddingHorizontal: space.md,
-      borderEndWidth: 1,
-      borderColor: colors.border,
+      borderRadius: 10,
+      backgroundColor: '#242424',
       gap: space.sm,
-      height: '100%',
+      height: 38,
     },
     prefixFlag: {
       fontSize: 20,
@@ -91,16 +134,15 @@ export const createStyles = (colors: AppColors) =>
     phoneInput: {
       flex: 1,
       ...typography.body1,
-      color: colors.text,
+      color: '#F5F5F5',
       paddingHorizontal: space.md,
       height: '100%',
-      textAlign: 'left',
     },
     errorText: {
       ...typography.caption,
       color: colors.error,
       marginBottom: space.sm,
-      textAlign: 'left',
+      paddingStart: space.xs,
     },
 
     // ── Terms ────────────────────────────────────────────
@@ -116,9 +158,9 @@ export const createStyles = (colors: AppColors) =>
       margin: -space.xs,
     },
     checkbox: {
-      width: 24,
+      width: 22,
       height: 22,
-      borderRadius: radius.md,
+      borderRadius: radius.sm,
       borderWidth: 2,
       borderColor: colors.border,
       alignItems: 'center',
@@ -134,7 +176,6 @@ export const createStyles = (colors: AppColors) =>
       flex: 1,
       ...typography.caption,
       color: colors.textSecondary,
-      textAlign: 'left',
       lineHeight: 18,
     },
     termsLink: {
@@ -144,10 +185,13 @@ export const createStyles = (colors: AppColors) =>
 
     // ── Bottom ────────────────────────────────────────────
     spacer: { flex: 1 },
-    sendButton: { 
-      height: 56,
-      borderRadius: radius.lg,
+    sendButton: {
+      minHeight: 52,
+      borderRadius: radius.xl,
       marginBottom: space.md,
+    },
+    sendButtonDisabled: {
+      backgroundColor: '#242424',
     },
     termsHint: {
       ...typography.caption,
@@ -159,6 +203,6 @@ export const createStyles = (colors: AppColors) =>
       ...typography.caption,
       color: colors.textDisabled,
       textAlign: 'center',
-      opacity: 0.8,
+      opacity: 0.7,
     },
   });

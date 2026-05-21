@@ -5,15 +5,27 @@ import { ScreenTemplate, Text, LoadingSpinner, ErrorState, EmptyState } from '@d
 import { useTheme, space, typography } from '@dawwar/theme';
 import { TransactionItem } from '../../components/TransactionItem';
 import { useController } from './useController';
+import type { SectionListData, SectionListRenderItemInfo } from 'react-native';
+import type { WalletTransaction } from '@dawwar/types';
+
+type TransactionSection = {
+  title: string;
+  data: WalletTransaction[];
+};
 
 export function TransactionsScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const ctrl = useController();
 
-  const renderItem = React.useCallback(({ item }: any) => <TransactionItem transaction={item} />, []);
+  const renderItem = React.useCallback(
+    ({ item }: SectionListRenderItemInfo<WalletTransaction, TransactionSection>) => (
+      <TransactionItem transaction={item} />
+    ),
+    []
+  );
   
-  const renderSectionHeader = React.useCallback(({ section: { title } }: any) => (
+  const renderSectionHeader = React.useCallback(({ section: { title } }: { section: SectionListData<WalletTransaction, TransactionSection> }) => (
     <View style={[styles.sectionHeader, { backgroundColor: colors.surfaceVariant }]}>
       <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>{title}</Text>
     </View>
@@ -31,13 +43,14 @@ export function TransactionsScreen() {
       edges={['top']}
       backgroundColor={colors.background}
     >
-      <SectionList
+      <SectionList<WalletTransaction, TransactionSection>
         sections={ctrl.sections}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
         renderSectionHeader={renderSectionHeader}
         stickySectionHeadersEnabled
         contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
         onRefresh={ctrl.refetch}
         refreshing={false}
         ListEmptyComponent={

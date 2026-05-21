@@ -31,7 +31,7 @@ export function MapPickerModal({
   });
 
   const getAddressFromCoords = (lat: number, lng: number): string =>
-    `${Number(lat || 0).toFixed(4)}, ${Number(lng || 0).toFixed(4)} — سنبلاوين`;
+    `${Number(lat || 0).toFixed(4)}, ${Number(lng || 0).toFixed(4)} — ${t('custom_order.sinbellawin')}`;
 
   const handleConfirm = () => {
     const address = getAddressFromCoords(region.latitude, region.longitude);
@@ -50,7 +50,7 @@ export function MapPickerModal({
               color={colors.text}
             />
           </TouchableOpacity>
-          <Text style={styles.mapTitle}>{'اختر موقعك'}</Text>
+          <Text style={styles.mapTitle}>{t('custom_order.map_title')}</Text>
         </View>
 
         <MapView

@@ -1,11 +1,12 @@
-import React from 'react';
-import { Pressable, View } from 'react-native';
+import React, { useCallback } from 'react';
+import { View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
 } from 'react-native-reanimated';
-import { useTheme, springs } from '@dawwar/theme';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { useTheme, springs, microInteractions } from '@dawwar/theme';
 import { createStyles } from './styles';
 import type { CardProps } from './types';
 
@@ -29,17 +30,17 @@ export function Card({
     opacity: opacity.value,
   }));
 
-  const handlePressIn = () => {
+  const handlePressIn = useCallback(() => {
     if (onPress && !disabled) {
-      scale.value = withSpring(0.98, springs.stiff);
-      opacity.value = withSpring(0.92, springs.soft);
+      scale.value = withSpring(microInteractions.cardPressScale, springs.snappy);
+      opacity.value = withSpring(0.95, springs.snappy);
     }
-  };
+  }, [onPress, disabled, scale, opacity]);
 
-  const handlePressOut = () => {
+  const handlePressOut = useCallback(() => {
     scale.value = withSpring(1, springs.bouncy);
-    opacity.value = withSpring(1, springs.soft);
-  };
+    opacity.value = withSpring(1, springs.bouncy);
+  }, [scale, opacity]);
 
   const containerStyle = [
     styles.base,
@@ -49,17 +50,24 @@ export function Card({
 
   if (onPress) {
     return (
-      <Animated.View style={[containerStyle, animatedStyle, style]}>
-        <Pressable
-          onPress={onPress}
-          onPressIn={handlePressIn}
-          onPressOut={handlePressOut}
-          disabled={disabled}
-          testID={testID}
+      <Animated.View
+        style={[containerStyle, animatedStyle, style]}
+        testID={testID}
+      >
+        <Animated.View
+          onTouchStart={handlePressIn}
+          onTouchEnd={handlePressOut}
+          onTouchCancel={handlePressOut}
+          // @ts-ignore — RN supports onStartShouldSetResponder
+          onStartShouldSetResponder={() => true}
+          onResponderRelease={() => {
+            handlePressOut();
+            onPress?.();
+          }}
           style={styles.pressable}
         >
           {children}
-        </Pressable>
+        </Animated.View>
       </Animated.View>
     );
   }

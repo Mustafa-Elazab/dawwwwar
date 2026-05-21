@@ -1,11 +1,11 @@
 import { StyleSheet } from 'react-native';
 import type { AppColors } from '@dawwar/theme';
-import { typography } from '@dawwar/theme';
+import { typography, space, radius, shadows } from '@dawwar/theme';
 
 export const createStyles = (colors: AppColors) =>
   StyleSheet.create({
     coverContainer: {
-      height: 220,
+      height: 260,
       width: '100%',
       position: 'relative',
       backgroundColor: colors.surfaceVariant,
@@ -17,51 +17,71 @@ export const createStyles = (colors: AppColors) =>
     },
     overlay: {
       ...StyleSheet.absoluteFillObject,
-      backgroundColor: 'rgba(0,0,0,0.15)',
+      backgroundColor: 'rgba(0,0,0,0.12)',
     },
     gradient: {
       position: 'absolute',
       bottom: 0,
-      left: 0,
-      right: 0,
-      height: 120,
-      backgroundColor: 'rgba(0,0,0,0.6)', // Simple solid fade to text, or use gradient if installed
+      start: 0,
+      end: 0,
+      height: 140,
+      backgroundColor: 'rgba(0,0,0,0.6)',
+    },
+    topControls: {
+      position: 'absolute',
+      top: 0,
+      start: 0,
+      end: 0,
+      paddingHorizontal: space.md,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    controlButton: {
+      width: 40,
+      height: 40,
+      borderRadius: radius.full,
+      backgroundColor: 'rgba(10,10,10,0.52)',
+      alignItems: 'center',
+      justifyContent: 'center',
+      ...shadows.xs,
     },
     headerContent: {
       position: 'absolute',
       bottom: 0,
-      left: 0,
-      right: 0,
-      padding: 16,
+      start: 0,
+      end: 0,
+      padding: space.lg,
     },
     businessName: {
-      ...typography.h2,
+      ...typography.heading,
       color: '#fff',
-      marginBottom: 8,
+      marginBottom: space.xs,
+      fontWeight: '800',
     },
     metaRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      marginBottom: 12,
+      marginBottom: space.md,
+      gap: space.sm,
     },
     ratingRow: {
       flexDirection: 'row',
       alignItems: 'center',
       backgroundColor: 'rgba(0,0,0,0.4)',
-      paddingHorizontal: 6,
-      paddingVertical: 2,
-      borderRadius: 12,
+      paddingHorizontal: space.sm,
+      paddingVertical: 3,
+      borderRadius: radius.full,
+      gap: 4,
     },
     ratingText: {
       ...typography.label,
       color: '#fff',
-      marginStart: 4,
       fontWeight: '700',
     },
     metaText: {
       ...typography.body2,
-      color: '#eee',
-      marginHorizontal: 4,
+      color: 'rgba(255,255,255,0.85)',
     },
     badgeWrapper: {
       alignSelf: 'flex-start',

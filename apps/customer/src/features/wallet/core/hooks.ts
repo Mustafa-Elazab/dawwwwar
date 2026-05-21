@@ -17,7 +17,7 @@ export function useWallet() {
     queryFn: () => walletApi.getWallet(user?.id ?? ''),
     enabled: !!user?.id,
     staleTime: 30_000,
-    select: (res) => res.data,
+    select: res => res.data,
   });
 }
 
@@ -28,7 +28,7 @@ export function useTransactions() {
     queryFn: () => walletApi.getTransactions(user?.id ?? ''),
     enabled: !!user?.id,
     staleTime: 60_000,
-    select: (res) => res.data,
+    select: res => res.data,
   });
 }
 

@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from '@dawwar/i18n';
 import { useAppDispatch, useAppSelector } from '../../../../store/hooks';
@@ -19,15 +19,14 @@ export function useController() {
   const location = useAppSelector(selectLocation);
 
   const delivery = useHomeDeliveryLocation();
-  const [discoveryMode, setDiscoveryMode] = useState<'nearby' | 'allEgypt'>('nearby');
 
   const {
     data: merchants,
     isLoading: merchantsLoading,
     refetch: refetchMerchants,
   } = useNearbyMerchants(
-    discoveryMode === 'nearby' ? delivery.merchantLat : undefined,
-    discoveryMode === 'nearby' ? delivery.merchantLng : undefined,
+    delivery.merchantLat,
+    delivery.merchantLng,
   );
   const { data: products } = useFeaturedProducts(delivery.merchantLat, delivery.merchantLng);
   const {
@@ -160,8 +159,12 @@ export function useController() {
     selectSavedAddress: delivery.selectSavedAddress,
     runSheetCurrentLocation,
     sheetGpsBusy,
-    discoveryMode,
-    setDiscoveryMode,
+    areaName: useMemo(() => {
+      // Extract the first meaningful segment from the address as area name
+      const addr = location.currentAddress || '';
+      const parts = addr.split(',').map((s: string) => s.trim()).filter(Boolean);
+      return parts[0] || '';
+    }, [location.currentAddress]),
     t,
   };
 }

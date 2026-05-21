@@ -3,12 +3,14 @@ import {
   Modal, View, StyleSheet, Pressable, TouchableOpacity, Dimensions,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import type { StackNavigationProp } from '@react-navigation/stack';
 import { useTranslation } from '@dawwar/i18n';
 import { useTheme } from '@dawwar/theme';
 import { Text, Icon, Button } from '@dawwar/ui';
 import { useAppSelector } from '../../store/hooks';
 import { selectCartCount as selectCartItemCount, selectCartTotal } from '../../store/slices/cart.slice';
 import { AUTH_ROUTES } from '../../navigation/routes';
+import type { RootParamList, AuthReturnDestination } from '../../navigation/types';
 
 const { height } = Dimensions.get('window');
 
@@ -20,25 +22,18 @@ interface LoginGateModalProps {
   reason: LoginGateReason;
 }
 
-const RETURN_DESTINATIONS: Record<LoginGateReason, string> = {
-  checkout: 'CheckoutModal',
-  orders: 'OrdersList', // Adjust according to actual route name
-  wallet: 'WalletScreen', // Adjust according to actual route name
-  address: 'AddressesScreen', // Adjust according to actual route name
-};
-
 export function LoginGateModal({ visible, onClose, reason }: LoginGateModalProps) {
   const { t } = useTranslation();
   const { colors, space, radius } = useTheme();
-  const navigation = useNavigation<any>();
+  const navigation = useNavigation<StackNavigationProp<RootParamList>>();
   const cartCount = useAppSelector(selectCartItemCount);
   const cartTotal = useAppSelector(selectCartTotal);
 
   const handleLogin = useCallback(() => {
     onClose();
     navigation.navigate('Auth', {
-      screen: AUTH_ROUTES.PHONE, // Assuming LOGIN is the starting point
-      params: { returnTo: RETURN_DESTINATIONS[reason] },
+      screen: AUTH_ROUTES.PHONE,
+      params: { returnTo: reason as AuthReturnDestination },
     });
   }, [onClose, navigation, reason]);
 

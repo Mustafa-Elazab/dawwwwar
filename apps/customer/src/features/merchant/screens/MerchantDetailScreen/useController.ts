@@ -17,6 +17,8 @@ import { useMerchantDetail, useMerchantProducts } from '../../core/hooks';
 import { MODAL_ROUTES } from '../../../../navigation/routes';
 import type { MerchantDetailNavProp, MerchantDetailRouteProp, MerchantTab } from './types';
 import type { Product } from '@dawwar/types';
+import type { RootParamList } from '../../../../navigation/types';
+import type { StackNavigationProp } from '@react-navigation/stack';
 
 export function useController() {
   const { t } = useTranslation();
@@ -128,7 +130,8 @@ export function useController() {
   );
 
   const handleCartBarPress = useCallback(() => {
-    navigation.navigate(MODAL_ROUTES.CART as any);
+    const rootNavigation = navigation.getParent<StackNavigationProp<RootParamList>>();
+    rootNavigation?.navigate(MODAL_ROUTES.CART);
   }, [navigation]);
 
   const isLoading = merchantLoading || productsLoading;

@@ -8,6 +8,14 @@ export function PrivacyScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
 
+  const dynamicStyles = React.useMemo(
+    () => ({
+      lastUpdated: { color: colors.textSecondary },
+      paragraph: { color: colors.textSecondary },
+    }),
+    [colors],
+  );
+
   return (
     <ScrollScreenTemplate
       headerProps={{ title: t('privacy.title') }}
@@ -15,13 +23,13 @@ export function PrivacyScreen() {
     >
       <View style={styles.header}>
         <Text style={styles.title}>{t('privacy.title')}</Text>
-        <Text style={styles.lastUpdated}>{t('common.today')}</Text>
+        <Text style={[styles.lastUpdated, dynamicStyles.lastUpdated]}>{t('common.today')}</Text>
       </View>
 
       <Divider />
 
       <View style={styles.section}>
-        <Text style={styles.paragraph}>
+        <Text style={[styles.paragraph, dynamicStyles.paragraph]}>
           {t('privacy.content')}
         </Text>
       </View>
@@ -44,7 +52,6 @@ const styles = StyleSheet.create({
   },
   lastUpdated: {
     ...typography.caption,
-    color: '#888',
     alignSelf:"flex-start"
   },
   section: {
@@ -57,9 +64,8 @@ const styles = StyleSheet.create({
   paragraph: {
     ...typography.body1,
     lineHeight: 24,
-    color: '#444',
-      alignSelf:"flex-start",
-      textAlign:"auto",
+    alignSelf:"flex-start",
+    textAlign:"auto",
   },
   bold: {
     fontWeight: '700',

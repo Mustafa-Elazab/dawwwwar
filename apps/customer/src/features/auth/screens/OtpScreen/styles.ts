@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
 import type { AppColors } from '@dawwar/theme';
-import { space, typography, radius, shadows } from '@dawwar/theme';
+import { space, typography, radius, layout, shadows } from '@dawwar/theme';
 
 export const createStyles = (colors: AppColors) =>
   StyleSheet.create({
@@ -10,9 +10,9 @@ export const createStyles = (colors: AppColors) =>
     },
     content: {
       flex: 1,
-      paddingHorizontal: space.xl,
-      justifyContent: 'center', // Center content vertically
-      paddingTop: '10%',
+      paddingHorizontal: layout.screenPaddingH + 6,
+      justifyContent: 'center',
+      paddingTop: '8%',
       paddingBottom: '20%',
     },
     header: {
@@ -23,11 +23,11 @@ export const createStyles = (colors: AppColors) =>
       ...typography.h2,
       color: colors.text,
       marginBottom: space.sm,
-      fontWeight: '800',
+      fontWeight: '700',
     },
     subtitle: {
       ...typography.body1,
-      color: colors.textSecondary,
+      color: '#A0A0A0',
       textAlign: 'center',
       lineHeight: 24,
     },
@@ -37,6 +37,13 @@ export const createStyles = (colors: AppColors) =>
     },
     otpWrapper: {
       marginBottom: space['2xl'],
+      paddingVertical: space.lg,
+      paddingHorizontal: space.md,
+      borderRadius: radius.lg,
+      backgroundColor: '#0D0D0D',
+      borderWidth: 1,
+      borderColor: 'rgba(255,255,255,0.08)',
+      ...shadows.xs,
     },
     errorText: {
       ...typography.body2,
@@ -51,23 +58,17 @@ export const createStyles = (colors: AppColors) =>
       alignItems: 'center',
       marginBottom: space.xl,
     },
-    circleTimer: {
-      width: 80,
-      height: 80,
-      borderRadius: 40,
-      borderWidth: 3,
-      borderColor: colors.primary,
+    circleTimerWrap: {
+      width: 72,
+      height: 72,
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: colors.surface,
-      ...shadows.sm,
-    },
-    circleTimerExpired: {
-      borderColor: colors.error,
     },
     timerValue: {
-      ...typography.h4,
-      color: colors.primary,
+      ...typography.label,
+      position: 'absolute',
+      color: '#F5F5F5',
+      fontSize: 16,
       fontWeight: '700',
     },
     
@@ -84,32 +85,35 @@ export const createStyles = (colors: AppColors) =>
     },
     resendBtn: {
       paddingVertical: space.xs,
+      paddingHorizontal: space.xs,
     },
     resendActive: {
       ...typography.label,
-      color: colors.primary,
+      color: '#1DB954',
       fontWeight: '700',
-      textDecorationLine: 'underline',
     },
     resendDisabled: {
       ...typography.label,
-      color: colors.textDisabled,
+      color: '#606060',
     },
 
     // ── Bottom ────────────────────────────────────────────
     bottomAction: {
-      padding: space.xl,
+      paddingHorizontal: layout.screenPaddingH + 6,
+      paddingVertical: space.lg,
       backgroundColor: colors.background,
+      borderTopWidth: 1,
+      borderTopColor: colors.borderLight,
     },
     confirmBtn: {
-      height: 56,
-      borderRadius: radius.lg,
+      minHeight: 52,
+      borderRadius: radius.xl,
     },
     loadingRow: {
       position: 'absolute',
       top: '50%',
-      left: '50%',
-      marginLeft: -10,
+      start: '50%',
+      marginStart: -10,
       marginTop: -10,
     },
     hintText: {

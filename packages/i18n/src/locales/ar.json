@@ -30,7 +30,6 @@
     "no_internet_body": "يرجى التحقق من الاتصال والمحاولة مرة أخرى.",
     "version": "الإصدار {{version}}"
   },
-
   "days": {
     "sunday": "الأحد",
     "monday": "الاثنين",
@@ -40,7 +39,6 @@
     "friday": "الجمعة",
     "saturday": "السبت"
   },
-
   "notifications": {
     "title": "الإشعارات",
     "empty": "لا توجد إشعارات بعد",
@@ -50,7 +48,6 @@
     "wallet_recharged": "تم شحن المحفظة",
     "wallet_recharged_body": "تم شحن محفظتك بنجاح بمبلغ {{amount}} جنيه."
   },
-
   "auth": {
     "auth_selection_title": "مرحباً بك في دوّار",
     "auth_selection_subtitle": "أسهل طريقة لإعادة التدوير والحصول على مكافآت.",
@@ -77,7 +74,6 @@
     "terms_suffix": " و",
     "privacy_link": "سياسة الخصوصية",
     "terms_required": "يرجى قبول الشروط للمتابعة",
-
     "otp_title": "أدخل الرمز",
     "otp_subtitle": "لقد أرسلنا كوداً مكوناً من 6 أرقام إلى\n",
     "otp_sandbox_hint": "وضع الاختبار: استخدم الرمز 123456",
@@ -90,9 +86,6 @@
     "verifying": "جاري التحقق...",
     "didnt_receive_code": "لم تستلم الرمز؟",
     "accept_terms_hint": "يجب قبول الشروط والأحكام للمتابعة",
-    "terms_link": "الشروط والأحكام",
-    "privacy_link": "سياسة الخصوصية",
-
     "choose_role": "كيف ستستخدم دوّار؟",
     "choose_role_subtitle": "يمكنك تغيير ذلك لاحقاً من الإعدادات.",
     "as_customer": "طلب واستلام",
@@ -102,12 +95,10 @@
     "as_driver": "توصيل واكسب",
     "as_driver_sub": "اقبل طلبات التوصيل واكسب المال",
     "continue": "متابعة",
-
     "onboarding_merchant_title": "إعداد متجرك",
     "onboarding_driver_title": "إعداد ملفك الشخصي",
     "submit_for_review": "تقديم للمراجعة",
     "submitting": "جاري التقديم...",
-
     "pending_title": "قيد المراجعة",
     "pending_body": "حسابك قيد المراجعة من فريقنا. سنُعلمك خلال 24 ساعة عند الموافقة.",
     "pending_contact": "تحتاج مساعدة؟ تواصل معنا على واتساب",
@@ -116,9 +107,28 @@
     "complete_profile_subtitle": "يرجى إدخال اسمك بالكامل للمتابعة.",
     "name_placeholder": "مثل: مصطفى محمد",
     "name_required": "الاسم بالكامل مطلوب",
-    "profile_updated": "تم تحديث الملف الشخصي بنجاح!"
+    "profile_updated": "تم تحديث الملف الشخصي بنجاح!",
+    "verify_phone": "تأكيد الرقم"
   },
-
+  "onboarding": {
+    "slide1": {
+      "title": "ابدأ بخطى واثقة",
+      "subtitle": "اكتشف احتياجاتك القريبة بتجربة هادئة وموثوقة."
+    },
+    "slide2": {
+      "title": "محلات محلية موثوقة",
+      "subtitle": "كل متجر مُعتمد، وكل طلب متابع من البداية للنهاية."
+    },
+    "slide3": {
+      "title": "طلب أسهل وأكثر هدوءاً",
+      "subtitle": "خطوات واضحة من التصفح حتى التوصيل."
+    },
+    "cta": {
+      "next": "التالي",
+      "skip": "تخطي",
+      "finish": "ابدأ الآن"
+    }
+  },
   "gate": {
     "checkoutTitle": "سجّل دخولك لإتمام الطلب",
     "checkoutSubtitle": "نحتاج بيانات حسابك لتوصيل طلبك بأمان",
@@ -135,7 +145,6 @@
     "itemsSaved": "عناصر محفوظة في سلتك",
     "continueBrowsing": "متابعة التصفح"
   },
-
   "home": {
     "deliver_to": "توصيل إلى",
     "welcome": "مرحباً بك في دوّار",
@@ -160,9 +169,26 @@
     "deliverToDifferentLocation": "التوصيل إلى موقع مختلف",
     "chooseLocationOnMap": "اختر الموقع على الخريطة",
     "deliverToCurrentLocation": "التوصيل إلى موقعي الحالي",
-    "locationUnavailable": "الموقع غير متاح — اضغط للاختيار"
+    "locationUnavailable": "الموقع غير متاح — اضغط للاختيار",
+    "no_products": "لا توجد منتجات بعد",
+    "no_products_sub": "ستظهر المنتجات هنا قريباً.",
+    "popular_in": "الأكثر طلبًا في {{area}}",
+    "recommended": "مُقترح لك",
+    "explore_categories": "استكشف",
+    "top_picks": "اختياراتنا",
+    "quick_order": "طلب سريع",
+    "hero_title": "اطلب بثقة وهدوء",
+    "hero_subtitle": "تجربة أهدأ لاكتشاف ما حولك",
+    "hero_body": "محلات مختارة، مواعيد واضحة، وتصفح أكثر هدوءاً.",
+    "hero_cta": "ابدأ الاستكشاف",
+    "search_cta": "استكشف",
+    "recommended_for_you": "مقترح لك",
+    "trending_now": "الأكثر رواجاً الآن",
+    "fast_delivery": "توصيل سريع",
+    "top_rated_nearby": "الأعلى تقييماً بالقرب منك",
+    "because_you_ordered": "لأنك طلبت سابقاً",
+    "popular_tonight": "الشائع الليلة"
   },
-
   "categories": {
     "title": "التصنيفات",
     "all": "الكل",
@@ -186,7 +212,6 @@
     "filter": "فلترة",
     "sort": "ترتيب حسب"
   },
-
   "location": {
     "choose_delivery": "اختر عنوان التوصيل",
     "saved_locations": "العناوين المحفوظة",
@@ -198,7 +223,6 @@
     "confirm": "تأكيد الموقع",
     "deliver_to": "توصيل إلى"
   },
-
   "merchant": {
     "splash": {
       "loading": "جاري التحميل..."
@@ -409,7 +433,6 @@
     "add": "إضافة",
     "add_to_cart": "أضف للسلة"
   },
-
   "cart": {
     "title": "سلة التسوق",
     "empty": "سلة التسوق فارغة",
@@ -426,9 +449,13 @@
     "clear_cart_title": "استبدال السلة؟",
     "clear_cart_body": "سلتك تحتوي على منتجات من {{merchant}}. هل تريد مسحها وإضافة من {{newMerchant}}؟",
     "clear_and_add": "مسح وإضافة",
-    "keep_current": "الاحتفاظ بالحالية"
+    "keep_current": "الاحتفاظ بالحالية",
+    "apply": "تطبيق",
+    "conflict_body": "سلتك تحتوي على منتجات من محل آخر. هل تريد مسحها والإضافة من هنا؟",
+    "conflict_title": "محل مختلف",
+    "promo_placeholder": "أدخل كود الخصم",
+    "view_cart": "عرض السلة"
   },
-
   "checkout": {
     "title": "إتمام الطلب",
     "delivery_title": "عنوان التوصيل",
@@ -449,9 +476,10 @@
     "summary_title": "ملخص الطلب",
     "place_order": "تأكيد الطلب",
     "placing": "جاري الطلب...",
-    "order_placed": "تم الطلب بنجاح!"
+    "order_placed": "تم الطلب بنجاح!",
+    "add_address_hint": "أضف عنوان توصيل للمتابعة",
+    "free_delivery": "مجاني"
   },
-
   "custom_order": {
     "title": "اطلب أي شيء",
     "subtitle": "اطلب من أي محل في سنبلاوين",
@@ -490,9 +518,12 @@
     "delivery_section": "تفاصيل التوصيل",
     "place_order": "تأكيد الطلب المخصص",
     "placing": "جاري الطلب...",
-    "success": "تم الطلب المخصص!"
+    "success": "تم الطلب المخصص!",
+    "shop_address_summary": "العنوان",
+    "items_summary": "الوصف",
+    "map_title": "اختر الموقع",
+    "sinbellawin": "سنبلاوين"
   },
-
   "tracking": {
     "finding_driver": "جاري البحث عن سائق...",
     "driver_assigned": "تم تعيين السائق",
@@ -526,9 +557,9 @@
       "COMPLETED": "اكتمل الطلب",
       "CANCELLED": "تم إلغاء الطلب",
       "REJECTED": "تم رفض الطلب"
-    }
+    },
+    "delivered_success": "تم توصيل الطلب بنجاح!"
   },
-
   "orders": {
     "title": "طلباتي",
     "tab_active": "الجارية",
@@ -547,9 +578,10 @@
     "total": "{{amount}} ج.م",
     "items_count": "{{count}} منتج",
     "items_count_plural": "{{count}} منتجات",
-    "placed_at": "طُلب {{time}}"
+    "placed_at": "طُلب {{time}}",
+    "no_past_orders": "لا توجد طلبات سابقة",
+    "no_past_orders_sub": "ستظهر طلباتك المكتملة هنا"
   },
-
   "wallet": {
     "title": "المحفظة",
     "balance_label": "الرصيد",
@@ -576,9 +608,9 @@
       "ADJUSTMENT": "تعديل رصيد"
     },
     "balance_before": "قبل: {{amount}} ج.م",
-    "balance_after": "بعد: {{amount}} ج.م"
+    "balance_after": "بعد: {{amount}} ج.م",
+    "select_amount_first": "يرجى اختيار أو إدخال مبلغ"
   },
-
   "profile": {
     "title": "الملف الشخصي",
     "edit_profile": "تعديل الملف الشخصي",
@@ -603,7 +635,6 @@
     "logout_confirm_btn": "نعم، تسجيل الخروج",
     "version": "الإصدار {{version}}"
   },
-
   "addresses": {
     "title": "العناوين المحفوظة",
     "add": "إضافة عنوان جديد",
@@ -636,9 +667,11 @@
     "delete_confirm_body": "سيتم حذف هذا العنوان نهائياً.",
     "delete": "حذف",
     "saved": "تم حفظ العنوان!",
-    "updated": "تم تحديث العنوان!"
+    "updated": "تم تحديث العنوان!",
+    "deleted": "تم حذف العنوان",
+    "edit": "تعديل",
+    "other": "أخرى"
   },
-
   "language": {
     "title": "اللغة",
     "english": "English",
@@ -649,17 +682,14 @@
     "restart_now": "إعادة التشغيل الآن",
     "restart_later": "لاحقاً"
   },
-
   "terms": {
     "title": "الشروط والأحكام",
     "content": "مرحباً بك في دوّار. باستخدامك لهذا التطبيق، فإنك توافق على الشروط والأحكام التالية..."
   },
-
   "privacy": {
     "title": "سياسة الخصوصية",
     "content": "نحن نهتم بخصوصيتك. توضح هذه السياسة كيفية جمعنا واستخدامنا لبياناتك..."
   },
-
   "appearance": {
     "title": "المظهر",
     "light": "فاتح",
@@ -668,7 +698,6 @@
     "system_sub": "يتبع إعدادات جهازك",
     "preview": "معاينة"
   },
-
   "errors": {
     "title": "خطأ",
     "network": "خطأ في الشبكة. يرجى التحقق من اتصالك بالإنترنت.",
@@ -691,9 +720,9 @@
       "merchantInDriver": "هذا الرقم مسجّل كتاجر. لا يمكنك العمل كسائق أيضاً.",
       "driverInCustomer": "هذا الرقم مسجّل كحساب سائق. يُرجى استخدام تطبيق دوّار للسائقين.",
       "driverInMerchant": "هذا الرقم مسجّل كحساب سائق. لا يمكنك العمل كتاجر أيضاً."
-    }
+    },
+    "required": "هذا الحقل مطلوب"
   },
-
   "driver": {
     "go_online": "بدء استقبال الطلبات",
     "go_offline": "إيقاف الاستقبال",
@@ -752,9 +781,9 @@
       "MOTORCYCLE": "دراجة نارية",
       "BICYCLE": "دراجة هوائية",
       "CAR": "سيارة"
-    }
+    },
+    "on_the_way": "السائق في الطريق"
   },
-
   "merchant_app": {
     "new_order_title": "طلب جديد!",
     "new_order_body": "{{amount}} ج.م — أجب قبل انتهاء الوقت",
@@ -821,5 +850,23 @@
     "categories": "التصنيفات",
     "orders": "الطلبات",
     "profile": "حسابي"
+  },
+  "address_labels": {
+    "home": "المنزل",
+    "work": "العمل",
+    "other": "أخرى"
+  },
+  "guest": {
+    "login": "تسجيل الدخول"
+  },
+  "product": {
+    "popular": "شائع"
+  },
+  "chat": {
+    "order_title": "محادثة الطلب"
+  },
+  "brand": {
+    "name": "دوّار",
+    "tagline": "كل اللي تحتاجه، في دقيقة"
   }
 }

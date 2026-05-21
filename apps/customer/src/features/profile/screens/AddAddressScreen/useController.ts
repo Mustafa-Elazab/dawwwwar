@@ -9,13 +9,14 @@ import Toast from 'react-native-toast-message';
 import type { RouteProp } from '@react-navigation/native';
 import type { ProfileStackParamList } from '../../../../navigation/types';
 import { PROFILE_ROUTES } from '../../../../navigation/routes';
+import type { StackNavigationProp } from '@react-navigation/stack';
 
 export function useController() {
   const { t } = useTranslation();
   const { profile } = useApiClient();
-  const navigation = useNavigation<any>();
+  const navigation = useNavigation<StackNavigationProp<ProfileStackParamList>>();
   const route = useRoute<RouteProp<ProfileStackParamList, 'AddAddressScreen'>>();
-  const { editId } = (route.params as any) ?? {};
+  const editId = route.params?.editId;
   
   const user = useAppSelector(selectUser);
   const queryClient = useQueryClient();

@@ -1,6 +1,7 @@
 import type { NavigatorScreenParams } from '@react-navigation/native';
 import type {
   AUTH_ROUTES,
+  ONBOARDING_ROUTES,
   TAB_ROUTES,
   HOME_ROUTES,
   ORDER_ROUTES,
@@ -9,14 +10,21 @@ import type {
   MODAL_ROUTES,
 } from './routes';
 
+export type AuthReturnDestination = 'checkout' | 'orders' | 'wallet' | 'address';
+
 // ─── Auth Stack ──────────────────────────────────────────
 export type AuthStackParamList = {
   [AUTH_ROUTES.SPLASH]: undefined;
-  [AUTH_ROUTES.PHONE]: { returnTo?: string };
-  [AUTH_ROUTES.OTP]: { phone: string; returnTo?: string };
-  [AUTH_ROUTES.COMPLETE_PROFILE]: { returnTo?: string };
+  [AUTH_ROUTES.PHONE]: { returnTo?: AuthReturnDestination };
+  [AUTH_ROUTES.OTP]: { phone: string; returnTo?: AuthReturnDestination };
+  [AUTH_ROUTES.COMPLETE_PROFILE]: { returnTo?: AuthReturnDestination };
   [PROFILE_ROUTES.TERMS]: undefined;
   [PROFILE_ROUTES.PRIVACY]: undefined;
+};
+
+// ─── Onboarding Stack ───────────────────────────────────
+export type OnboardingStackParamList = {
+  [ONBOARDING_ROUTES.ONBOARDING]: undefined;
 };
 
 // ─── Home Stack ───────────────────────────────────────────
@@ -71,6 +79,8 @@ export type CustomerTabParamList = {
 export type RootParamList = {
   CustomerTabs: NavigatorScreenParams<CustomerTabParamList>;
   Auth: NavigatorScreenParams<AuthStackParamList>;
+  Onboarding: undefined;
+  CompleteProfile: { returnTo?: AuthReturnDestination } | undefined;
   [MODAL_ROUTES.CART]: undefined;
   [MODAL_ROUTES.CHECKOUT]: undefined;
   [MODAL_ROUTES.CUSTOM_ORDER]: undefined;

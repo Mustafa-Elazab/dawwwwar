@@ -1,8 +1,9 @@
-import React, { useMemo } from 'react';
-import { View, TouchableOpacity, StatusBar } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, StatusBar, I18nManager } from 'react-native';
+import Animated, { useAnimatedStyle, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated';
 import { useTranslation } from '@dawwar/i18n';
-import { ScreenTemplate, Text, Button, Icon } from '@dawwar/ui';
-import { useTheme } from '@dawwar/theme';
+import { ScreenTemplate, Text, Button, Icon, AnimatedPressable } from '@dawwar/ui';
+import { easings, microInteractions, motion, useTheme } from '@dawwar/theme';
 import RTLTextInput from '../../../../components/RTLTextInput';
 import { useController } from './useController';
 import { createStyles } from './styles';
@@ -12,27 +13,64 @@ export function PhoneScreen() {
   const { colors } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
   const ctrl = useController();
+  const [isPhoneFocused, setPhoneFocused] = React.useState(false);
+
+  const enter = useSharedValue(0);
+  const float = useSharedValue(0);
+
+  useEffect(() => {
+    enter.value = withTiming(1, { duration: motion.pageEnterMs, easing: easings.standard });
+    float.value = withRepeat(
+      withTiming(1, { duration: motion.splashFloatMs, easing: easings.standard }),
+      -1,
+      true,
+    );
+  }, [enter, float]);
+
+  const heroStyle = useAnimatedStyle(() => ({
+    opacity: enter.value,
+    transform: [{ translateY: (1 - enter.value) * 16 + float.value * -4 }],
+  }));
+
+  const sheetStyle = useAnimatedStyle(() => ({
+    opacity: enter.value,
+    transform: [{ translateY: (1 - enter.value) * 22 }],
+  }));
 
   return (
-    <ScreenTemplate 
-      backgroundColor={colors.primary}
-    >
-      <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
+    <ScreenTemplate backgroundColor={colors.background}>
+      <StatusBar barStyle="light-content" backgroundColor={colors.background} />
       
       <View style={styles.container}>
-        {/* Top 40% Illustration/Branding area */}
-        <View style={styles.illustrationArea}>
-          <Text style={styles.logoText}>{'دوّار'}</Text>
-          <Text style={styles.tagline}>{'كل اللي تحتاجه، في دقيقة'}</Text>
-        </View>
+        <Animated.View style={[styles.atmosphere, heroStyle]}>
+          <View style={styles.orbPrimary} />
+          <View style={styles.orbSecondary} />
+        </Animated.View>
+
+        <Animated.View style={[styles.hero, heroStyle]}>
+          <View style={styles.logoShell}>
+            <Icon name="moped" size={56} color="#FFFFFF" />
+          </View>
+          <Text style={styles.logoText}>{t('common.app_name')}</Text>
+          <Text style={[styles.tagline, I18nManager.isRTL && styles.taglineRtl]}>
+            {t('auth.auth_selection_subtitle')}
+          </Text>
+        </Animated.View>
 
         {/* Form Card (Bottom Sheet style) */}
-        <View style={styles.card}>
+        <Animated.View style={[styles.card, sheetStyle]}>
           {/* Form title */}
-          <Text style={styles.formTitle}>{t('auth.phone_label')}</Text>
+          <Text style={styles.formTitle}>{t('auth.enterPhone')}</Text>
+          <Text style={styles.formSubtitle}>{t('auth.phone_subtitle')}</Text>
 
           {/* Phone input row */}
-          <View style={[styles.phoneRow, ctrl.phoneError ? styles.phoneRowError : null]}>
+          <View
+            style={[
+              styles.phoneRow,
+              isPhoneFocused && styles.phoneRowFocused,
+              ctrl.phoneError ? styles.phoneRowError : null,
+            ]}
+          >
             {/* Country code prefix */}
             <View style={styles.countryPrefix}>
               <Text style={styles.prefixFlag}>{'🇪🇬'}</Text>
@@ -50,6 +88,8 @@ export function PhoneScreen() {
               maxLength={11}
               returnKeyType="done"
               onSubmitEditing={ctrl.handleSendOtp}
+              onFocus={() => setPhoneFocused(true)}
+              onBlur={() => setPhoneFocused(false)}
               autoFocus
             />
           </View>
@@ -61,10 +101,12 @@ export function PhoneScreen() {
 
           {/* T&C checkbox */}
           <View style={styles.termsRow}>
-            <TouchableOpacity
+            <AnimatedPressable
               style={styles.checkboxContainer}
               onPress={ctrl.handleTermsToggle}
-              activeOpacity={0.8}
+              pressScale={microInteractions.pressScale}
+              pressOpacity={microInteractions.pressOpacity}
+              pressTranslateY={1}
               testID="terms-checkbox"
             >
               <View style={[styles.checkbox, ctrl.termsAccepted && styles.checkboxChecked]}>
@@ -72,7 +114,7 @@ export function PhoneScreen() {
                   <Icon name="check" size={14} color="#fff" />
                 )}
               </View>
-            </TouchableOpacity>
+            </AnimatedPressable>
             
             <Text style={styles.termsText}>
               {t('auth.terms_prefix')}
@@ -91,10 +133,7 @@ export function PhoneScreen() {
             loading={ctrl.isLoading}
             disabled={ctrl.isButtonDisabled}
             fullWidth
-            style={[
-              styles.sendButton,
-              ctrl.isButtonDisabled && { backgroundColor: colors.border, opacity: 0.8 }
-            ]}
+            style={[styles.sendButton, ctrl.isButtonDisabled && styles.sendButtonDisabled]}
           />
 
           {/* Terms acceptance hint */}
@@ -105,8 +144,8 @@ export function PhoneScreen() {
           )}
 
           {/* Sandbox hint */}
-          <Text style={styles.hintText}>{t('auth.otp_sandbox_hint')}</Text>
-        </View>
+          {__DEV__ ? <Text style={styles.hintText}>{t('auth.otp_sandbox_hint')}</Text> : null}
+        </Animated.View>
       </View>
     </ScreenTemplate>
   );

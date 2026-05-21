@@ -1,10 +1,10 @@
 import React, { forwardRef, useCallback, useMemo } from 'react';
-import { View, TouchableOpacity, StyleSheet, ActivityIndicator, I18nManager } from 'react-native';
+import { View, StyleSheet, ActivityIndicator, I18nManager } from 'react-native';
 import BottomSheet, { BottomSheetBackdrop, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from '@dawwar/i18n';
-import { Text, Icon, Button } from '@dawwar/ui';
-import { useTheme, space, typography, radius } from '@dawwar/theme';
+import { Text, Icon, Button, AnimatedPressable } from '@dawwar/ui';
+import { useTheme, space, typography, radius, shadows, microInteractions } from '@dawwar/theme';
 import type { Address } from '@dawwar/types';
 
 export interface LocationBottomSheetProps {
@@ -20,8 +20,8 @@ export interface LocationBottomSheetProps {
 
 function labelIcon(label: string): string {
   const l = (label || '').toLowerCase();
-  if (l === 'home' || l === 'المنزل' || l.includes('منزل')) return 'home-variant';
-  if (l === 'work' || l === 'العمل' || l.includes('عمل')) return 'briefcase-variant';
+  if (l === 'home' || l.includes('home') || l.includes('منزل')) return 'home-variant';
+  if (l === 'work' || l.includes('work') || l.includes('عمل')) return 'briefcase-variant';
   return 'map-marker-outline';
 }
 
@@ -83,9 +83,16 @@ export const LocationBottomSheet = forwardRef<BottomSheet, LocationBottomSheetPr
             <Text style={[styles.title, { color: colors.text, textAlign: 'auto' }]}>
               {t('home.chooseDeliveryLocation')}
             </Text>
-            <TouchableOpacity onPress={onClose} style={styles.closeBtn} hitSlop={12}>
+            <AnimatedPressable
+              onPress={onClose}
+              style={styles.closeBtn}
+              hitSlop={12}
+              pressScale={microInteractions.pressScale}
+              pressOpacity={microInteractions.pressOpacity}
+              pressTranslateY={1}
+            >
               <Icon name="close" size={24} color={colors.textSecondary} />
-            </TouchableOpacity>
+            </AnimatedPressable>
           </View>
 
           <Text style={[styles.sectionTitle, { color: colors.textSecondary, textAlign: 'auto' }]}>
@@ -104,7 +111,7 @@ export const LocationBottomSheet = forwardRef<BottomSheet, LocationBottomSheetPr
             addresses.map((item) => {
               const selected = item.id === selectedAddressId;
               return (
-                <TouchableOpacity
+                <AnimatedPressable
                   key={item.id}
                   style={[
                     styles.addressCard,
@@ -114,7 +121,9 @@ export const LocationBottomSheet = forwardRef<BottomSheet, LocationBottomSheetPr
                     },
                   ]}
                   onPress={() => onSelectAddress(item)}
-                  activeOpacity={0.75}
+                  pressScale={microInteractions.cardPressScale}
+                  pressOpacity={microInteractions.pressOpacity}
+                  pressTranslateY={1}
                 >
                   <View style={[styles.iconCircle, { backgroundColor: colors.surfaceVariant }]}>
                     <Icon name={labelIcon(item.label)} size={22} color={colors.primary} />
@@ -141,17 +150,19 @@ export const LocationBottomSheet = forwardRef<BottomSheet, LocationBottomSheetPr
                       color={colors.border}
                     />
                   )}
-                </TouchableOpacity>
+                </AnimatedPressable>
               );
             })
           )}
 
           <View style={styles.divider} />
 
-          <TouchableOpacity
+          <AnimatedPressable
             style={[styles.optionRow, { borderColor: colors.borderLight, backgroundColor: colors.surface }]}
             onPress={onOpenMap}
-            activeOpacity={0.75}
+            pressScale={microInteractions.cardPressScale}
+            pressOpacity={microInteractions.pressOpacity}
+            pressTranslateY={1}
           >
             <View style={[styles.optionIcon, { backgroundColor: `${colors.primary}18` }]}>
               <Icon name="map-search-outline" size={22} color={colors.primary} />
@@ -169,7 +180,7 @@ export const LocationBottomSheet = forwardRef<BottomSheet, LocationBottomSheetPr
               size={22}
               color={colors.textSecondary}
             />
-          </TouchableOpacity>
+          </AnimatedPressable>
 
           <Button
             label={t('home.deliverToCurrentLocation')}
@@ -226,6 +237,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: space.sm,
     gap: space.md,
+    ...shadows.xs,
   },
   iconCircle: {
     width: 44,
@@ -258,6 +270,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: space.md,
     gap: space.md,
+    ...shadows.xs,
   },
   optionIcon: {
     width: 44,

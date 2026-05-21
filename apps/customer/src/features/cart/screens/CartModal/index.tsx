@@ -1,8 +1,8 @@
-import React, { useMemo } from 'react';
-import { View, ScrollView, TouchableOpacity, TextInput, I18nManager } from 'react-native';
+import React from 'react';
+import { View, ScrollView, TextInput } from 'react-native';
 import { useTranslation } from '@dawwar/i18n';
-import { ScreenTemplate, Text, Icon, Button, EmptyState } from '@dawwar/ui';
-import { useTheme } from '@dawwar/theme';
+import { ScreenTemplate, Text, Icon, Button, EmptyState, AnimatedPressable } from '@dawwar/ui';
+import { useTheme, microInteractions } from '@dawwar/theme';
 import { CartItemRow } from '../../components/CartItemRow';
 import { useController } from './useController';
 import { createStyles } from './styles';
@@ -66,12 +66,16 @@ export function CartModal() {
             <Icon name="tag-outline" size={20} color={colors.primary} />
             <TextInput 
               style={styles.promoInput}
-              placeholder={t('cart.promo_placeholder', 'هل لديك كود خصم؟')}
+              placeholder={t('cart.promo_placeholder')}
               placeholderTextColor={colors.placeholder}
             />
-            <TouchableOpacity activeOpacity={0.7}>
-              <Text style={styles.promoBtn}>{t('cart.apply', 'تطبيق')}</Text>
-            </TouchableOpacity>
+            <AnimatedPressable
+              pressScale={microInteractions.pressScale}
+              pressOpacity={microInteractions.pressOpacity}
+              pressTranslateY={1}
+            >
+              <Text style={styles.promoBtn}>{t('cart.apply')}</Text>
+            </AnimatedPressable>
           </View>
 
           {/* Summary Section */}

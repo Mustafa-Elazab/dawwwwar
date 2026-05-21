@@ -30,7 +30,6 @@
     "no_internet_body": "Please check your connection and try again.",
     "version": "Version {{version}}"
   },
-
   "days": {
     "sunday": "Sunday",
     "monday": "Monday",
@@ -40,7 +39,6 @@
     "friday": "Friday",
     "saturday": "Saturday"
   },
-
   "notifications": {
     "title": "Notifications",
     "empty": "No notifications yet",
@@ -50,7 +48,6 @@
     "wallet_recharged": "Wallet Recharged",
     "wallet_recharged_body": "Your wallet has been successfully recharged with {{amount}} EGP."
   },
-
   "auth": {
     "auth_selection_title": "Welcome to Dawwar",
     "auth_selection_subtitle": "The easiest way to recycle and earn rewards.",
@@ -77,7 +74,6 @@
     "terms_suffix": " and ",
     "privacy_link": "Privacy Policy",
     "terms_required": "Please accept the terms to continue",
-
     "otp_title": "Enter the Code",
     "otp_subtitle": "We sent a 6-digit code to\n",
     "otp_sandbox_hint": "Sandbox mode: use code 123456",
@@ -90,9 +86,6 @@
     "verifying": "Verifying...",
     "didnt_receive_code": "Didn't receive a code?",
     "accept_terms_hint": "You must accept terms and conditions to continue",
-    "terms_link": "Terms & Conditions",
-    "privacy_link": "Privacy Policy",
-
     "choose_role": "How will you use Dawwar?",
     "choose_role_subtitle": "You can change this later in settings.",
     "as_customer": "Order & Receive",
@@ -102,12 +95,10 @@
     "as_driver": "Deliver & Earn",
     "as_driver_sub": "Accept delivery orders and earn money",
     "continue": "Continue",
-
     "onboarding_merchant_title": "Set Up Your Shop",
     "onboarding_driver_title": "Set Up Your Profile",
     "submit_for_review": "Submit for Review",
     "submitting": "Submitting...",
-
     "pending_title": "Under Review",
     "pending_body": "Your account is being reviewed by our team. We'll notify you within 24 hours once approved.",
     "pending_contact": "Need help? Contact us on WhatsApp",
@@ -116,9 +107,28 @@
     "complete_profile_subtitle": "Please enter your full name to continue.",
     "name_placeholder": "e.g. Mostafa Mohamed",
     "name_required": "Full name is required",
-    "profile_updated": "Profile updated successfully!"
+    "profile_updated": "Profile updated successfully!",
+    "verify_phone": "Verify Phone"
   },
-
+  "onboarding": {
+    "slide1": {
+      "title": "Move with clarity",
+      "subtitle": "Discover nearby essentials with a calm, trusted experience."
+    },
+    "slide2": {
+      "title": "Trusted local merchants",
+      "subtitle": "Every shop is verified, every order is tracked end to end."
+    },
+    "slide3": {
+      "title": "A calmer way to order",
+      "subtitle": "Clean, focused steps from browse to delivery."
+    },
+    "cta": {
+      "next": "Next",
+      "skip": "Skip",
+      "finish": "Get started"
+    }
+  },
   "gate": {
     "checkoutTitle": "Sign in to complete your order",
     "checkoutSubtitle": "We need your account details to deliver your order safely.",
@@ -135,7 +145,6 @@
     "itemsSaved": "items saved in your cart",
     "continueBrowsing": "Continue Browsing"
   },
-
   "home": {
     "deliver_to": "Deliver to",
     "welcome": "Welcome to Dawwar",
@@ -160,9 +169,26 @@
     "deliverToDifferentLocation": "Deliver to a different location",
     "chooseLocationOnMap": "Choose location on map",
     "deliverToCurrentLocation": "Deliver to current location",
-    "locationUnavailable": "Location unavailable — tap to choose"
+    "locationUnavailable": "Location unavailable — tap to choose",
+    "no_products": "No products yet",
+    "no_products_sub": "Products will appear here soon.",
+    "popular_in": "Popular in {{area}}",
+    "recommended": "Recommended for You",
+    "explore_categories": "Explore",
+    "top_picks": "Top Picks",
+    "quick_order": "Quick Order",
+    "hero_title": "Order with calm confidence",
+    "hero_subtitle": "A smoother way to discover what's close",
+    "hero_body": "Curated merchants, clear delivery times, and a calmer way to browse.",
+    "hero_cta": "Browse nearby",
+    "search_cta": "Explore",
+    "recommended_for_you": "Recommended for you",
+    "trending_now": "Trending now",
+    "fast_delivery": "Fast delivery",
+    "top_rated_nearby": "Top rated nearby",
+    "because_you_ordered": "Because you ordered",
+    "popular_tonight": "Popular tonight"
   },
-
   "categories": {
     "title": "Categories",
     "all": "All",
@@ -186,7 +212,6 @@
     "filter": "Filter",
     "sort": "Sort by"
   },
-
   "location": {
     "choose_delivery": "Choose delivery location",
     "saved_locations": "Saved Locations",
@@ -198,7 +223,6 @@
     "confirm": "Confirm Location",
     "deliver_to": "Deliver to"
   },
-
   "merchant": {
     "splash": {
       "loading": "Loading..."
@@ -409,7 +433,6 @@
     "add": "Add",
     "add_to_cart": "Add to Cart"
   },
-
   "cart": {
     "title": "Your Cart",
     "empty": "Your cart is empty",
@@ -426,9 +449,13 @@
     "clear_cart_title": "Replace Cart?",
     "clear_cart_body": "Your cart has items from {{merchant}}. Do you want to clear it and add from {{newMerchant}}?",
     "clear_and_add": "Clear & Add",
-    "keep_current": "Keep Current"
+    "keep_current": "Keep Current",
+    "apply": "Apply",
+    "conflict_body": "Your cart has items from another shop. Clear it to add from here?",
+    "conflict_title": "Different Shop",
+    "promo_placeholder": "Enter promo code",
+    "view_cart": "View Cart"
   },
-
   "checkout": {
     "title": "Checkout",
     "delivery_title": "Delivery Address",
@@ -449,9 +476,10 @@
     "summary_title": "Order Summary",
     "place_order": "Place Order",
     "placing": "Placing Order...",
-    "order_placed": "Order placed successfully!"
+    "order_placed": "Order placed successfully!",
+    "add_address_hint": "Add a delivery address to continue",
+    "free_delivery": "Free"
   },
-
   "custom_order": {
     "title": "Order Anything",
     "subtitle": "Order from any shop in Sinbellawin",
@@ -490,9 +518,12 @@
     "delivery_section": "Delivery details",
     "place_order": "Place Custom Order",
     "placing": "Placing Order...",
-    "success": "Custom order placed!"
+    "success": "Custom order placed!",
+    "shop_address_summary": "Address",
+    "items_summary": "Description",
+    "map_title": "Choose Location",
+    "sinbellawin": "Sinbellawin"
   },
-
   "tracking": {
     "finding_driver": "Finding a driver...",
     "driver_assigned": "Driver assigned",
@@ -526,7 +557,8 @@
       "COMPLETED": "Order completed",
       "CANCELLED": "Order cancelled",
       "REJECTED": "Order rejected"
-    }
+    },
+    "delivered_success": "Order delivered successfully!"
   },
   "orders": {
     "title": "Orders",
@@ -550,7 +582,6 @@
     "items_count_plural": "{{count}} items",
     "placed_at": "Placed {{time}}"
   },
-
   "wallet": {
     "title": "Wallet",
     "balance_label": "Balance",
@@ -577,9 +608,9 @@
       "ADJUSTMENT": "Balance Adjustment"
     },
     "balance_before": "Before: {{amount}} EGP",
-    "balance_after": "After: {{amount}} EGP"
+    "balance_after": "After: {{amount}} EGP",
+    "select_amount_first": "Please select or enter an amount"
   },
-
   "profile": {
     "title": "Profile",
     "section_account": "Account",
@@ -601,9 +632,9 @@
     "logout_confirm_title": "Logout?",
     "logout_confirm_body": "You will be logged out of your account.",
     "logout_confirm_btn": "Yes, Logout",
-    "version": "Version {{version}}"
+    "version": "Version {{version}}",
+    "edit_profile": "Edit Profile"
   },
-
   "addresses": {
     "title": "Saved Addresses",
     "add": "Add New Address",
@@ -636,9 +667,11 @@
     "delete_confirm_body": "This address will be permanently removed.",
     "delete": "Delete",
     "saved": "Address saved!",
-    "updated": "Address updated!"
+    "updated": "Address updated!",
+    "deleted": "Address deleted",
+    "edit": "Edit",
+    "other": "Other"
   },
-
   "language": {
     "title": "Language",
     "english": "English",
@@ -649,17 +682,14 @@
     "restart_now": "Restart Now",
     "restart_later": "Later"
   },
-
   "terms": {
     "title": "Terms & Conditions",
     "content": "Welcome to Dawwar. By using this app, you agree to the following terms and conditions..."
   },
-
   "privacy": {
     "title": "Privacy Policy",
     "content": "We care about your privacy. This policy explains how we collect and use your data..."
   },
-
   "appearance": {
     "title": "Appearance",
     "light": "Light",
@@ -668,7 +698,6 @@
     "system_sub": "Follows your device settings",
     "preview": "Preview"
   },
-
   "errors": {
     "title": "Error",
     "network": "Network error. Please check your internet connection.",
@@ -691,9 +720,9 @@
       "merchantInDriver": "This number is registered as a merchant. You cannot also be a driver.",
       "driverInCustomer": "This number is registered as a driver account. Please use the Dawwar Driver app.",
       "driverInMerchant": "This number is registered as a driver. You cannot also be a merchant."
-    }
+    },
+    "required": "This field is required"
   },
-
   "driver": {
     "go_online": "Go Online",
     "go_offline": "Go Offline",
@@ -752,9 +781,9 @@
       "MOTORCYCLE": "Motorcycle",
       "BICYCLE": "Bicycle",
       "CAR": "Car"
-    }
+    },
+    "on_the_way": "Driver is on the way"
   },
-
   "merchant_app": {
     "new_order_title": "New Order!",
     "new_order_body": "{{amount}} EGP — Respond before timer runs out",
@@ -821,5 +850,23 @@
     "categories": "Categories",
     "orders": "Orders",
     "profile": "Profile"
+  },
+  "address_labels": {
+    "home": "Home",
+    "work": "Work",
+    "other": "Other"
+  },
+  "guest": {
+    "login": "Sign In"
+  },
+  "product": {
+    "popular": "Popular"
+  },
+  "chat": {
+    "order_title": "Order Chat"
+  },
+  "brand": {
+    "name": "Dawwar",
+    "tagline": "Everything you need, in a minute"
   }
 }

@@ -1,24 +1,44 @@
 import { StyleSheet, I18nManager } from 'react-native';
-import type { AppColors } from '@dawwar/theme';
-import { typography } from '@dawwar/theme';
+import type { AppColors, TypographyVariant } from '@dawwar/theme';
+import { getTypographyStyle } from '@dawwar/theme';
 
-export const createStyles = (colors: AppColors) =>
-  StyleSheet.create({
+const buildVariantStyles = (rtl: boolean) => {
+  const variants: TypographyVariant[] = [
+    'display',
+    'heading',
+    'title',
+    'h1',
+    'h2',
+    'h3',
+    'h4',
+    'body',
+    'bodySm',
+    'body1',
+    'body2',
+    'caption',
+    'label',
+    'button',
+    'buttonSm',
+    'overline',
+  ];
+
+  return variants.reduce<Record<TypographyVariant, ReturnType<typeof getTypographyStyle>>>((acc, variant) => {
+    acc[variant] = getTypographyStyle(variant, rtl);
+    return acc;
+  }, {} as Record<TypographyVariant, ReturnType<typeof getTypographyStyle>>);
+};
+
+export const createStyles = (colors: AppColors) => {
+  const rtl = I18nManager.isRTL;
+  const variantStyles = buildVariantStyles(rtl);
+
+  return StyleSheet.create({
     base: {
       color: colors.text,
       // RTL: writingDirection mirrors text for Arabic characters
-      writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr',
+      writingDirection: rtl ? 'rtl' : 'ltr',
     },
     // Pre-built variant overrides (color applied separately via prop)
-    h1: typography.h1,
-    h2: typography.h2,
-    h3: typography.h3,
-    h4: typography.h4,
-    body1: typography.body1,
-    body2: typography.body2,
-    caption: typography.caption,
-    label: typography.label,
-    button: typography.button,
-    buttonSm: typography.buttonSm,
-    overline: typography.overline,
+    ...variantStyles,
   });
+};

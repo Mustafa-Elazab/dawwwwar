@@ -6,7 +6,7 @@ export const createStyles = (colors: AppColors) =>
   StyleSheet.create({
     base: {
       alignSelf: 'flex-start',
-      borderRadius: radius.full,
+      borderRadius: radius.chip,
       alignItems: 'center',
       justifyContent: 'center',
     },
@@ -18,8 +18,8 @@ export const createStyles = (colors: AppColors) =>
     error: { backgroundColor: colors.errorBg },
     warning: { backgroundColor: colors.warningBg },
     info: { backgroundColor: colors.infoBg },
-    neutral: { backgroundColor: colors.surfaceVariant },
-    primary: { backgroundColor: colors.primaryMuted },
+    neutral: { backgroundColor: colors.surfaceVariant, borderWidth: 1, borderColor: colors.border },
+    primary: { backgroundColor: colors.primaryGlow ?? colors.primaryMuted },
 
     labelSuccess: { ...typography.caption, color: colors.success, fontWeight: '600' },
     labelError: { ...typography.caption, color: colors.error, fontWeight: '600' },

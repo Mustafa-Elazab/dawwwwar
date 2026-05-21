@@ -10,6 +10,8 @@ export const StorageKeys = {
   REFRESH_TOKEN: 'refresh_token',
   THEME_MODE: 'dawwar_theme_mode',
   APP_LANGUAGE: 'dawwar_language',
+  ONBOARDING_COMPLETED: 'onboarding_completed',
+  ONBOARDING_VERSION: 'onboarding_version',
 } as const;
 
 export type StorageKey = (typeof StorageKeys)[keyof typeof StorageKeys];

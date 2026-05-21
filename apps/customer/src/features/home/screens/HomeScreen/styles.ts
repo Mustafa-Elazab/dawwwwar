@@ -1,168 +1,218 @@
-import { StyleSheet, I18nManager } from 'react-native';
+import { StyleSheet } from 'react-native';
 import type { AppColors } from '@dawwar/theme';
-import { space, typography, radius, shadows } from '@dawwar/theme';
+import { space, typography, radius, shadows, layout } from '@dawwar/theme';
 
 export const createStyles = (colors: AppColors) =>
   StyleSheet.create({
     scrollContent: {
-      paddingBottom: 120,
+      paddingBottom: 140,
+      gap: space.xl,
     },
 
     // ── Header ──────────────────────────────────────
     headerContainer: {
-      paddingHorizontal: space.base,
-      paddingTop: space.sm,
-      paddingBottom: space.md,
+      paddingHorizontal: layout.screenPaddingH,
+      paddingTop: space.md,
+      paddingBottom: space.lg,
       backgroundColor: colors.background,
+      gap: space.sm,
     },
     headerTopRow: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      marginBottom: space.sm,
+    },
+    headerActions: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: space.xs,
     },
     greetingWrapper: {
       flex: 1,
       alignItems: 'flex-start',
     },
     greetingText: {
-      ...typography.h3,
+      ...typography.h2,
       color: colors.text,
       fontWeight: '800',
+      letterSpacing: -0.3,
+    },
+    greetingSub: {
+      ...typography.body2,
+      color: colors.textSecondary,
+      marginTop: 2,
     },
     bellBtn: {
       width: 44,
       height: 44,
-      borderRadius: 22,
+      borderRadius: radius.lg,
       backgroundColor: colors.surface,
       alignItems: 'center',
       justifyContent: 'center',
-      ...shadows.sm,
       borderWidth: 1,
       borderColor: colors.borderLight,
+      ...shadows.xs,
+    },
+    iconBtnGhost: {
+      width: 44,
+      height: 44,
+      borderRadius: radius.lg,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
     },
     badgeDot: {
       position: 'absolute',
       top: 10,
-      end: 12,
-      width: 10,
-      height: 10,
-      borderRadius: 5,
+      end: 11,
+      width: 9,
+      height: 9,
+      borderRadius: 4.5,
       backgroundColor: colors.error,
       borderWidth: 1.5,
       borderColor: colors.surface,
     },
     locationBlock: {
       alignSelf: 'flex-start',
-      marginBottom: space.md,
       maxWidth: '100%',
+      paddingVertical: space.xs,
     },
     deliveringLabel: {
       ...typography.caption,
-      color: colors.textSecondary,
-      fontWeight: '600',
-      marginBottom: 2,
-      textAlign: 'auto',
+      color: colors.textTertiary,
+      fontWeight: '500',
+      marginBottom: 1,
     },
     locationRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 6,
+      gap: space.xs,
     },
     locationPrimary: {
-      ...typography.body1,
+      ...typography.body2,
       color: colors.text,
-      fontWeight: '800',
+      fontWeight: '700',
       flexShrink: 1,
-      textAlign: 'auto',
     },
 
     // ── Search ──────────────────────────────────────
-    searchWrapper: {
-      marginTop: space.xs,
-    },
+    searchWrapper: {},
     searchTap: {
-      height: 48,
+      height: 50,
       flexDirection: 'row',
       alignItems: 'center',
-      backgroundColor: colors.surface,
-      borderRadius: radius.md, 
-      paddingHorizontal: space.md,
+      backgroundColor: '#1A1A1A',
+      borderRadius: 16,
+      paddingHorizontal: space.base,
       gap: space.sm,
-      ...shadows.sm,
       borderWidth: 1,
-      borderColor: colors.borderLight,
-    },
-    filterBtn: {
-      padding: space.xs,
-      borderEndWidth: 1,
-      borderColor: colors.border,
-      marginEnd: space.xs,
+      borderColor: 'rgba(255,255,255,0.08)',
     },
     searchPlaceholder: {
       ...typography.body2,
-      color: colors.placeholder,
+      color: '#606060',
       flex: 1,
       textAlign: 'auto',
     },
-
-    // ── Banner ──────────────────────────────────────
-    bannerContainer: {
-      paddingHorizontal: space.base,
-      marginBottom: space.lg,
+    discoveryWrap: {
+      flexDirection: 'row',
+      backgroundColor: '#1A1A1A',
+      borderRadius: 12,
+      padding: 4,
+      gap: 4,
     },
-    bannerWrapper: {
-      borderRadius: radius.xl,
-      overflow: 'hidden',
-    },
-
-    // ── Categories ──────────────────────────────────
-    categoriesContent: {
-      paddingHorizontal: space.base,
-      paddingBottom: space.lg,
-      gap: space.md,
-    },
-    categoryCard: {
-      alignItems: 'center',
-      width: 72,
-    },
-    categoryIconCircle: {
-      width: 64,
-      height: 64,
-      borderRadius: radius.lg,
+    discoveryPill: {
+      flex: 1,
+      borderRadius: 10,
+      paddingVertical: 8,
       alignItems: 'center',
       justifyContent: 'center',
-      marginBottom: space.xs,
-      ...shadows.sm,
+      backgroundColor: 'transparent',
+    },
+    discoveryPillActive: {
+      backgroundColor: '#FFFFFF',
+      ...shadows.xs,
+    },
+    discoveryText: {
+      ...typography.caption,
+      color: '#A0A0A0',
+      fontWeight: '600',
+    },
+    discoveryTextActive: {
+      color: '#1DB954',
+      fontWeight: '700',
+    },
+    chipsRow: {
+      paddingTop: space.sm,
+      gap: space.sm,
+    },
+    categoryChip: {
+      width: 68,
+      height: 72,
+      borderRadius: 14,
+      backgroundColor: '#1A1A1A',
+      borderWidth: 1,
+      borderColor: 'rgba(255,255,255,0.08)',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 4,
+    },
+    categoryEmoji: {
+      fontSize: 24,
+      lineHeight: 26,
     },
     categoryLabel: {
       ...typography.caption,
+      color: '#F5F5F5',
+      fontSize: 11,
+      textAlign: 'center',
+      paddingHorizontal: 3,
+    },
+
+    // ── Hero ───────────────────────────────────────
+    heroCard: {
+      marginHorizontal: layout.screenPaddingH,
+      padding: space.lg,
+      borderRadius: radius['2xl'],
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.borderLight,
+      ...shadows.sm,
+      overflow: 'hidden',
+      gap: space.sm,
+    },
+    heroGlow: {
+      position: 'absolute',
+      top: -60,
+      end: -40,
+      width: 160,
+      height: 160,
+      borderRadius: 80,
+      backgroundColor: colors.primary,
+      opacity: 0.12,
+    },
+    heroTitle: {
+      ...typography.title,
       color: colors.text,
-      fontWeight: '700',
-      textAlign: 'center',
-      maxWidth: 72,
+      fontWeight: '800',
     },
-    categoryEmoji: {
-      fontSize: 28,
-      textAlign: 'center',
-    },
-    categoriesEmpty: {
-      paddingVertical: space.md,
-      paddingHorizontal: space.base,
-    },
-    categoriesEmptyText: {
+    heroCopy: {
       ...typography.body2,
       color: colors.textSecondary,
-      textAlign: 'auto',
+    },
+    heroButton: {
+      alignSelf: 'flex-start',
     },
 
     // ── Lists ───────────────────────────────────────
     merchantsList: {
-      paddingHorizontal: space.base,
-      paddingBottom: space.md,
+      paddingHorizontal: layout.screenPaddingH,
+      paddingBottom: space.xs,
     },
     productsGrid: {
-      paddingHorizontal: space.base,
+      paddingHorizontal: layout.screenPaddingH,
       flexDirection: 'row',
       flexWrap: 'wrap',
       gap: space.md,
@@ -171,70 +221,56 @@ export const createStyles = (colors: AppColors) =>
       width: '47.5%',
     },
     skeletonRow: {
-      paddingHorizontal: space.base,
+      paddingHorizontal: layout.screenPaddingH,
       flexDirection: 'row',
-      marginBottom: space.lg,
-    },
-    skeletonGrid: {
-      paddingHorizontal: space.base,
-      flexDirection: 'row',
-      flexWrap: 'wrap',
       gap: space.md,
-      marginBottom: space.lg,
     },
-    skeletonGridItem: {
-      width: '47.5%',
+    sectionBlock: {
+      gap: space.md,
     },
 
-    // ── FAB ─────────────────────────────────────────
-    fab: {
+    // ── Floating Cart Bar ─────────────────────────
+    cartBarWrap: {
       position: 'absolute',
-      bottom: 90,
-      end: space.base,
+      bottom: 96,
+      start: 20,
+      end: 20,
+    },
+    cartBar: {
       flexDirection: 'row',
-      backgroundColor: colors.primary,
-      borderRadius: radius.full,
-      paddingHorizontal: space.lg,
-      paddingVertical: space.md,
+      backgroundColor: '#1DB954',
+      borderRadius: 16,
+      height: 52,
+      paddingHorizontal: space.base,
       alignItems: 'center',
-      gap: 8,
+      justifyContent: 'space-between',
       ...shadows.md,
-      elevation: 6,
+      shadowColor: '#1DB954',
+      shadowOpacity: 0.4,
+      shadowRadius: 12,
     },
-    fabText: {
-      ...typography.label,
-      color: '#fff',
-      fontWeight: '800',
-    },
-
-    // ── Discovery Toggle ────────────────────────────
-    toggleRow: {
-      flexDirection: 'row',
-      backgroundColor: colors.surfaceVariant,
-      borderRadius: radius.lg,
-      padding: 4,
-      marginHorizontal: space.base,
-      marginBottom: space.lg,
-    },
-    toggleBtn: {
-      flex: 1,
-      flexDirection: 'row',
+    cartCountBubble: {
+      minWidth: 26,
+      height: 26,
+      borderRadius: 13,
+      backgroundColor: '#0D0D0D',
       alignItems: 'center',
       justifyContent: 'center',
-      paddingVertical: 10,
-      borderRadius: radius.md,
-      gap: 6,
+      paddingHorizontal: 6,
     },
-    toggleBtnActive: {
-      backgroundColor: colors.surface,
-      ...shadows.sm,
-    },
-    toggleLabel: {
+    cartCountText: {
       ...typography.caption,
-      color: colors.textSecondary,
+      color: '#F5F5F5',
       fontWeight: '700',
     },
-    toggleLabelActive: {
-      color: colors.primary,
+    cartCta: {
+      ...typography.label,
+      color: '#0D0D0D',
+      fontWeight: '700',
+    },
+    cartTotal: {
+      ...typography.label,
+      color: '#0D0D0D',
+      fontWeight: '800',
     },
   });

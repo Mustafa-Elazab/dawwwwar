@@ -16,12 +16,13 @@ export function useVerifyOtp() {
     ...mutation,
     mutateAsync: async (params: { phone: string; code: string }) => {
       const res = await mutation.mutateAsync(params);
+      const payload = res.data;
       
       dispatch(
         setAuth({
-          user: res.user,
-          accessToken: res.accessToken,
-          refreshToken: res.refreshToken,
+          user: payload.user,
+          accessToken: payload.accessToken,
+          refreshToken: payload.refreshToken,
         }),
       );
 
@@ -36,7 +37,7 @@ export function useVerifyOtp() {
         }
       }
       
-      return res;
+      return payload;
     }
   };
 }

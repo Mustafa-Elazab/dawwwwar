@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
 import type { AppColors } from '@dawwar/theme';
-import { space, typography, radius, shadows } from '@dawwar/theme';
+import { space, typography, radius, shadows, layout } from '@dawwar/theme';
 
 export const createStyles = (colors: AppColors) =>
   StyleSheet.create({
@@ -8,25 +8,35 @@ export const createStyles = (colors: AppColors) =>
       backgroundColor: colors.card,
       borderRadius: radius.xl,
       padding: space.base,
-      marginHorizontal: space.base,
+      marginHorizontal: layout.screenPaddingH,
       marginBottom: space.md,
-      ...shadows.sm,
+      borderWidth: 1,
+      borderColor: colors.borderLight,
+      ...shadows.xs,
+      gap: space.md,
     },
     topRow: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      marginBottom: space.sm,
     },
-    orderNum: { ...typography.label, color: colors.text },
+    orderNum: {
+      ...typography.label,
+      color: colors.text,
+      fontWeight: '700',
+    },
     metaRow: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: space.sm,
-      marginBottom: space.md,
+      flexWrap: 'wrap',
     },
-    metaText: { ...typography.body2, color: colors.textSecondary },
-    totalText: { ...typography.label, color: colors.primary },
+    metaText: { ...typography.caption, color: colors.textSecondary },
+    totalText: {
+      ...typography.label,
+      color: colors.primary,
+      fontWeight: '700',
+    },
     actionRow: {
       flexDirection: 'row',
       gap: space.sm,

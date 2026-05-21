@@ -35,6 +35,12 @@ export const setI18nConfig = async () => {
   configureRTL(userLang);
 
   console.log('[I18N] Initializing i18n instance');
+  const logMissingKey = (lng: string | readonly string[], ns: string, key: string) => {
+    if (!__DEV__) return;
+    const lang = Array.isArray(lng) ? lng.join(',') : lng;
+    console.warn(`[I18N] Missing key: ${lang}:${ns}.${key}`);
+  };
+
   await i18n.use(initReactI18next).init({
     lng: userLang,
     fallbackLng: 'en',
@@ -46,6 +52,11 @@ export const setI18nConfig = async () => {
     },
     interpolation: { escapeValue: false },
     compatibilityJSON: 'v3',
+    saveMissing: __DEV__,
+    returnEmptyString: false,
+    returnNull: false,
+    missingKeyHandler: (lng, ns, key) => logMissingKey(lng, ns, key),
+    parseMissingKeyHandler: (key) => key,
   });
   console.log('[I18N] i18n instance initialized');
 };

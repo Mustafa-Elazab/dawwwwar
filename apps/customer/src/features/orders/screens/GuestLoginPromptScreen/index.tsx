@@ -32,7 +32,7 @@ export function GuestLoginPromptScreen() {
           fullWidth
         />
         
-        <View style={styles.cartInfo}>
+        <View style={[styles.cartInfo, { backgroundColor: colors.success + '15' }]}>
           <Text style={[styles.cartText, { color: colors.success }]}>
             {t('guest.cartPreserved')}
           </Text>
@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
   cartInfo: {
     marginTop: space.xl,
     padding: space.md,
-    backgroundColor: '#F0FFF4',
+    backgroundColor: undefined,
     borderRadius: 12,
   },
   cartText: {

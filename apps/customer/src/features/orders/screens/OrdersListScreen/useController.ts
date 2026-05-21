@@ -4,9 +4,9 @@ import { useTranslation } from '@dawwar/i18n';
 import { useAppSelector } from '../../../../store/hooks';
 import { selectIsAuthenticated } from '../../../../store/slices/auth.slice';
 import { useActiveOrders, usePastOrders } from '../../core/hooks';
-import { ORDER_ROUTES } from '../../../../navigation/routes';
+import { AUTH_ROUTES, ORDER_ROUTES } from '../../../../navigation/routes';
 import type { StackNavigationProp } from '@react-navigation/stack';
-import type { OrdersStackParamList } from '../../../../navigation/types';
+import type { OrdersStackParamList, RootParamList } from '../../../../navigation/types';
 
 export type OrderTab = 'active' | 'past';
 
@@ -16,8 +16,13 @@ export function useController() {
   const [activeTab, setActiveTab] = useState<OrderTab>('active');
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
 
-  const { data: activeOrders, isLoading: activeLoading, refetch: refetchActive } = useActiveOrders({ enabled: isAuthenticated });
-  const { data: pastOrders, isLoading: pastLoading, refetch: refetchPast } = usePastOrders({ enabled: isAuthenticated });
+  const { data: activeOrders, isLoading: activeLoading, refetch: refetchActive } = useActiveOrders();
+  const { data: pastOrders, isLoading: pastLoading, refetch: refetchPast } = usePastOrders();
+
+  const handleLogin = useCallback(() => {
+    const rootNavigation = navigation.getParent<StackNavigationProp<RootParamList>>();
+    rootNavigation?.navigate('Auth', { screen: AUTH_ROUTES.PHONE, params: {} });
+  }, [navigation]);
 
   const handleTrack = useCallback(
     (orderId: string) => navigation.navigate(ORDER_ROUTES.TRACKING, { orderId }),
@@ -40,7 +45,7 @@ export function useController() {
     handleDetail,
     refetch,
     isAuthenticated,
-    handleLogin: () => navigation.navigate('Auth' as any),
+    handleLogin,
     t,
   };
 }

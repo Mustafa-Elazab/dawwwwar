@@ -18,16 +18,15 @@ export function Text({
   const { colors } = useTheme();
   const styles = createStyles(colors);
 
-  // RTL: default align right for Arabic, left for English
-  const resolvedAlign =
-    align ?? (I18nManager.isRTL ? 'right' : 'left');
-
   return (
     <RNText
       style={[
         styles.base,
         styles[variant],
-        { color: color ?? colors.text, textAlign: resolvedAlign },
+        {
+          color: color ?? colors.text,
+          ...(align ? { textAlign: align } : undefined),
+        },
         style,
       ]}
       numberOfLines={numberOfLines}

@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
 import type { AppColors } from '@dawwar/theme';
-import { space, typography, shadows } from '@dawwar/theme';
+import { space, typography, radius, layout } from '@dawwar/theme';
 
 export const createStyles = (colors: AppColors) =>
   StyleSheet.create({
@@ -13,9 +13,10 @@ export const createStyles = (colors: AppColors) =>
       alignItems: 'center',
       justifyContent: 'space-between',
       backgroundColor: colors.primary,
-      paddingHorizontal: space.base,
+      paddingHorizontal: layout.screenPaddingH,
       paddingVertical: space.md,
-      ...shadows.lg,
+      borderTopStartRadius: radius.xl,
+      borderTopEndRadius: radius.xl,
     },
     leftText: { ...typography.label, color: '#fff' },
     rightText: { ...typography.label, color: '#fff', fontWeight: '700' },

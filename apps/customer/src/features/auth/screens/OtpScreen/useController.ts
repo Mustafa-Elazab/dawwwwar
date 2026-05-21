@@ -1,10 +1,13 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { Animated } from 'react-native';
+import { useSharedValue, withSequence, withTiming } from 'react-native-reanimated';
+import { easings, motion } from '@dawwar/theme';
 import { useTranslation } from '@dawwar/i18n';
 import { useVerifyOtp, useSendOtp } from '../../core/hooks';
 import { useOtpCountdown } from '../../hooks/useOtpCountdown';
-import { AUTH_ROUTES } from '../../../../navigation/routes';
+import { AUTH_ROUTES, MODAL_ROUTES, PROFILE_ROUTES, TAB_ROUTES, WALLET_ROUTES } from '../../../../navigation/routes';
+import type { RootParamList } from '../../../../navigation/types';
+import type { StackNavigationProp } from '@react-navigation/stack';
 import type { OtpScreenNavProp, OtpScreenRouteProp } from './types';
 
 export function useController() {
@@ -18,18 +21,21 @@ export function useController() {
   const [otpError, setOtpError] = useState<string | null>(null);
 
   // Shake animation (triggered on wrong OTP)
-  const shakeX = useRef(new Animated.Value(0)).current;
+  const shakeX = useSharedValue(0);
 
   const triggerShake = useCallback(() => {
-    Animated.sequence([
-      Animated.timing(shakeX, { toValue: -10, duration: 50, useNativeDriver: false }),
-      Animated.timing(shakeX, { toValue: 10, duration: 100, useNativeDriver: false }),
-      Animated.timing(shakeX, { toValue: -10, duration: 100, useNativeDriver: false }),
-      Animated.timing(shakeX, { toValue: 10, duration: 100, useNativeDriver: false }),
-      Animated.timing(shakeX, { toValue: -10, duration: 100, useNativeDriver: false }),
-      Animated.timing(shakeX, { toValue: 10, duration: 100, useNativeDriver: false }),
-      Animated.timing(shakeX, { toValue: 0, duration: 50, useNativeDriver: false }),
-    ]).start();
+    const step = (value: number) =>
+      withTiming(value, { duration: motion.shakeMs, easing: easings.standard });
+
+    shakeX.value = withSequence(
+      step(-10),
+      step(10),
+      step(-10),
+      step(10),
+      step(-6),
+      step(6),
+      step(0),
+    );
   }, [shakeX]);
 
   // Main OTP countdown (120 seconds)
@@ -48,38 +54,80 @@ const submitOtp = useCallback(
     try {
       const res = await verifyMutation.mutateAsync({ phone, code });
       
-      if (res.isNewUser) {
+      if (res.isFirstLogin) {
         navigation.replace(AUTH_ROUTES.COMPLETE_PROFILE, { returnTo });
         return;
       }
 
+      const rootNavigation = navigation.getParent<StackNavigationProp<RootParamList>>();
+
       if (returnTo) {
-        navigation.reset({
-          index: 1,
-          routes: [
-            { name: 'CustomerTabs' },
-            { name: returnTo as any },
-          ],
-        });
+        if (rootNavigation) {
+          if (returnTo === 'checkout') {
+            rootNavigation.reset({
+              index: 1,
+              routes: [{ name: 'CustomerTabs' }, { name: MODAL_ROUTES.CHECKOUT }],
+            });
+            return;
+          }
+
+          if (returnTo === 'orders') {
+            rootNavigation.reset({
+              index: 0,
+              routes: [{ name: 'CustomerTabs', params: { screen: TAB_ROUTES.ORDERS_TAB } }],
+            });
+            return;
+          }
+
+          if (returnTo === 'wallet') {
+            rootNavigation.reset({
+              index: 0,
+              routes: [{
+                name: 'CustomerTabs',
+                params: {
+                  screen: TAB_ROUTES.PROFILE_TAB,
+                  params: { screen: WALLET_ROUTES.WALLET },
+                },
+              }],
+            });
+            return;
+          }
+
+          if (returnTo === 'address') {
+            rootNavigation.reset({
+              index: 0,
+              routes: [{
+                name: 'CustomerTabs',
+                params: {
+                  screen: TAB_ROUTES.PROFILE_TAB,
+                  params: { screen: PROFILE_ROUTES.ADDRESSES },
+                },
+              }],
+            });
+            return;
+          }
+        }
+
+        rootNavigation?.reset({ index: 0, routes: [{ name: 'CustomerTabs' }] });
       } else {
-        // Fallback if no returnTo: just go to tabs (RootNavigator will handle showing tabs)
-        // Since setAuth was called in the hook, RootNavigator will swap to Main App
-        // But if we are already in the "Auth" stack which is a screen in Root, 
-        // we might want to pop or reset.
-        navigation.reset({ index: 0, routes: [{ name: 'CustomerTabs' }] });
+        rootNavigation?.reset({ index: 0, routes: [{ name: 'CustomerTabs' }] });
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('[OtpScreen] verifyOtp error:', err);
       triggerShake();
-      
-      const status = err?.response?.status;
-      const message = err?.response?.data?.message;
+
+      const maybeErr = err as {
+        response?: { status?: number; data?: { message?: string } };
+        message?: string;
+      };
+      const status = maybeErr.response?.status;
+      const message = maybeErr.response?.data?.message;
 
       if (status === 403) {
         setOtpError(message ?? t('errors.roleMismatch.merchantInCustomer'));
-      } else if (err.message === 'INVALID_OTP') {
+      } else if (maybeErr.message === 'INVALID_OTP') {
         setOtpError(t('auth.otp_invalid'));
-      } else if (err.message === 'OTP_EXPIRED') {
+      } else if (maybeErr.message === 'OTP_EXPIRED') {
         setOtpError(t('auth.otp_expired'));
       } else {
         setOtpError(t('errors.server'));

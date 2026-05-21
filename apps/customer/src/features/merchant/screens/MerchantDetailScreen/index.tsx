@@ -1,9 +1,9 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
-import { View, Animated, TouchableOpacity, I18nManager, SectionList, FlatList } from 'react-native';
+import { View, Animated, I18nManager, SectionList, FlatList, TouchableOpacity } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from '@dawwar/i18n';
-import { ErrorState, Skeleton, Text, Icon } from '@dawwar/ui';
-import { useTheme } from '@dawwar/theme';
+import { ErrorState, Skeleton, Text, Icon, AnimatedPressable } from '@dawwar/ui';
+import { useTheme, microInteractions } from '@dawwar/theme';
 import { MerchantHeader } from '../../components/MerchantHeader';
 import { MerchantTabBar } from '../../components/TabBar';
 import { ProductRow } from '../../components/ProductRow';
@@ -34,7 +34,7 @@ export function MerchantDetailScreen() {
     }
   }, [ctrl.groupedProducts, activeCategoryId]);
 
-  const HEADER_HEIGHT = 220;
+  const HEADER_HEIGHT = 260;
   const TAB_BAR_HEIGHT = 56;
   const CATEGORIES_HEIGHT = 60;
   
@@ -98,12 +98,15 @@ export function MerchantDetailScreen() {
     ({ item, index }: { item: any, index: number }) => {
       const isSelected = item.categoryId === activeCategoryId;
       return (
-        <TouchableOpacity
+        <AnimatedPressable
           onPress={() => handleCategoryPress(index, item.categoryId)}
           style={[
             styles.categoryChip,
             isSelected && { backgroundColor: colors.primary, borderColor: colors.primary }
           ]}
+          pressScale={microInteractions.pressScale}
+          pressOpacity={microInteractions.pressOpacity}
+          pressTranslateY={1}
         >
           <Text style={[
             styles.categoryChipText,
@@ -111,7 +114,7 @@ export function MerchantDetailScreen() {
           ]}>
             {item.categoryName}
           </Text>
-        </TouchableOpacity>
+        </AnimatedPressable>
       );
     },
     [activeCategoryId, handleCategoryPress, styles.categoryChip, styles.categoryChipText, colors.primary]
@@ -134,7 +137,7 @@ export function MerchantDetailScreen() {
     if (ctrl.isLoading || !ctrl.merchant) {
       return (
         <View style={{ flex: 1, backgroundColor: colors.background }}>
-          <Skeleton width="100%" height={220} />
+          <Skeleton width="100%" height={260} />
           <View style={{ padding: 16, gap: 12 }}>
             <Skeleton width="60%" height={24} />
             <Skeleton width="80%" height={16} />
@@ -200,7 +203,7 @@ export function MerchantDetailScreen() {
     return (
       <View style={{ flex: 1, backgroundColor: colors.background }}>
         <AnimatedSectionList
-          ref={sectionListRef as any}
+          ref={sectionListRef as unknown as React.RefObject<SectionList<unknown, unknown>>}
           sections={sections}
           keyExtractor={(item: any) => item.id}
           ListHeaderComponent={renderHeader}
@@ -214,9 +217,8 @@ export function MerchantDetailScreen() {
           viewabilityConfig={{ itemVisiblePercentThreshold: 10, minimumViewTime: 100 }}
           renderSectionHeader={({ section }: any) => (
             <View style={styles.categoryTitleContainer}>
-              <Text variant="h4" color={colors.text} style={styles.categoryTitle}>
-                {section.categoryName}
-              </Text>
+              <Text style={styles.categoryTitle}>{section.categoryName}</Text>
+              <View style={styles.categoryDivider} />
             </View>
           )}
           renderItem={renderProductRow}
@@ -228,6 +230,7 @@ export function MerchantDetailScreen() {
             </View>
           }
           contentContainerStyle={{ paddingBottom: 100 }}
+          removeClippedSubviews
         />
 
         {/* Sticky Horizontal Categories */}

@@ -1,8 +1,8 @@
 import React from 'react';
-import { View, TouchableOpacity } from 'react-native';
-import { useTheme } from '@dawwar/theme';
+import { View } from 'react-native';
+import { useTheme, microInteractions } from '@dawwar/theme';
 import { useTranslation } from '@dawwar/i18n';
-import { Text } from '@dawwar/ui';
+import { Text, AnimatedPressable } from '@dawwar/ui';
 import { createStyles } from './styles';
 import type { CategoryCardProps } from './types';
 
@@ -31,15 +31,17 @@ export const CategoryCard = React.memo(function CategoryCard({ category, merchan
   const tints = PASTEL_PALETTE[colorIndex] || PASTEL_PALETTE[0];
 
   return (
-    <TouchableOpacity 
-      style={[styles.card, { backgroundColor: tints.bg, borderColor: tints.border }]} 
-      onPress={onPress} 
-      activeOpacity={0.85}
+    <AnimatedPressable
+      style={[styles.card, { backgroundColor: tints.bg, borderColor: tints.border }]}
+      onPress={onPress}
+      pressScale={microInteractions.cardPressScale}
+      pressOpacity={microInteractions.pressOpacity}
+      pressTranslateY={1}
     >
       <View style={styles.iconCircle}>
         <Text style={styles.emoji}>{category.icon}</Text>
       </View>
       <Text style={styles.name} numberOfLines={1}>{displayName}</Text>
-    </TouchableOpacity>
+    </AnimatedPressable>
   );
 });

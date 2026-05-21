@@ -1,15 +1,14 @@
-import { StyleSheet, I18nManager } from 'react-native';
+import { StyleSheet } from 'react-native';
 import type { AppColors } from '@dawwar/theme';
-import { space, typography, radius, shadows } from '@dawwar/theme';
+import { space, typography, radius, shadows, layout } from '@dawwar/theme';
 
 export const createStyles = (colors: AppColors) =>
   StyleSheet.create({
     section: {
-      paddingHorizontal: space.base,
-      paddingVertical: space.md,
+      paddingHorizontal: layout.screenPaddingH,
+      paddingVertical: space.base,
       backgroundColor: colors.surface,
       marginBottom: space.sm,
-      ...shadows.xs,
     },
     sectionHeader: {
       flexDirection: 'row',
@@ -19,8 +18,8 @@ export const createStyles = (colors: AppColors) =>
     },
     sectionTitle: {
       ...typography.overline,
-      color: colors.textSecondary,
-      fontWeight: '800',
+      color: colors.textTertiary,
+      fontWeight: '700',
       letterSpacing: 1,
     },
     
@@ -31,26 +30,22 @@ export const createStyles = (colors: AppColors) =>
       gap: space.md,
     },
     iconCircle: {
-      width: 48,
-      height: 48,
-      borderRadius: radius.full,
-      backgroundColor: colors.surfaceVariant,
+      width: 44,
+      height: 44,
+      borderRadius: radius.lg,
+      backgroundColor: colors.primaryLight,
       alignItems: 'center',
       justifyContent: 'center',
-      borderWidth: 1,
-      borderColor: colors.borderLight,
     },
     addressLabel: {
       ...typography.body1,
       color: colors.text,
-      fontWeight: '800',
-      textAlign: 'auto',
+      fontWeight: '700',
       marginBottom: 2,
     },
     addressText: {
       ...typography.body2,
       color: colors.textSecondary,
-      textAlign: 'auto',
     },
 
     // ── Payment ────────────────────────────────────────
@@ -58,20 +53,21 @@ export const createStyles = (colors: AppColors) =>
       flexDirection: 'row',
       alignItems: 'center',
       padding: space.md,
-      borderRadius: radius.lg,
+      borderRadius: radius.xl,
       borderWidth: 1.5,
       borderColor: colors.borderLight,
       marginBottom: space.sm,
       gap: space.md,
+      ...shadows.xs,
     },
     paymentOptionSelected: {
       borderColor: colors.primary,
-      backgroundColor: colors.primary + '10',
+      backgroundColor: colors.primaryLight,
     },
     paymentIconWrap: {
       width: 44,
       height: 44,
-      borderRadius: radius.md,
+      borderRadius: radius.lg,
       backgroundColor: colors.surfaceVariant,
       alignItems: 'center',
       justifyContent: 'center',
@@ -81,9 +77,9 @@ export const createStyles = (colors: AppColors) =>
       alignItems: 'flex-start',
     },
     radio: {
-      width: 24,
-      height: 24,
-      borderRadius: 12,
+      width: 22,
+      height: 22,
+      borderRadius: 11,
       borderWidth: 2,
       borderColor: colors.border,
       alignItems: 'center',
@@ -93,15 +89,15 @@ export const createStyles = (colors: AppColors) =>
       borderColor: colors.primary,
     },
     radioDot: {
-      width: 12,
-      height: 12,
-      borderRadius: 6,
+      width: 10,
+      height: 10,
+      borderRadius: 5,
       backgroundColor: colors.primary,
     },
     paymentLabel: {
       ...typography.body1,
       color: colors.text,
-      fontWeight: '700',
+      fontWeight: '600',
     },
     paymentSub: {
       ...typography.caption,
@@ -110,7 +106,7 @@ export const createStyles = (colors: AppColors) =>
     paymentError: {
       ...typography.caption,
       color: colors.error,
-      marginTop: 4,
+      marginTop: space.xxs,
       fontWeight: '600',
     },
 
@@ -131,38 +127,38 @@ export const createStyles = (colors: AppColors) =>
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      marginVertical: space['2xl'],
+      paddingVertical: space.sm,
     },
     summaryLabel: {
-      ...typography.body1,
+      ...typography.body2,
       color: colors.textSecondary,
     },
     summaryValue: {
-      ...typography.body1,
+      ...typography.body2,
       color: colors.text,
       fontWeight: '600',
     },
     totalLabel: {
-      ...typography.h3,
+      ...typography.h4,
       color: colors.text,
       fontWeight: '800',
     },
     totalValue: {
-      ...typography.h3,
+      ...typography.h4,
       color: colors.primary,
-      fontWeight: '900',
+      fontWeight: '800',
     },
 
     // ── Footer ─────────────────────────────────────────
     footer: {
-      padding: space.base,
+      padding: layout.screenPaddingH,
+      paddingBottom: space.xl,
       backgroundColor: colors.surface,
       borderTopWidth: 1,
       borderTopColor: colors.borderLight,
-      ...shadows.lg,
     },
     placeOrderBtn: {
-      height: 56,
+      minHeight: 52,
       borderRadius: radius.xl,
     },
   });

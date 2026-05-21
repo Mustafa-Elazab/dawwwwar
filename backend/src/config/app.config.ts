@@ -2,8 +2,16 @@ import { registerAs } from '@nestjs/config';
 
 export const appConfig = registerAs('app', () => ({
   nodeEnv: process.env.NODE_ENV ?? 'development',
+  host: process.env.HOST ?? '0.0.0.0',
   port: parseInt(process.env.PORT ?? '3000', 10),
   apiPrefix: process.env.API_PREFIX ?? 'api',
+  corsOrigins: (process.env.CORS_ORIGINS ?? '*')
+    .split(',')
+    .map((o) => o.trim())
+    .filter(Boolean),
+  bodyLimit: process.env.BODY_LIMIT ?? '2mb',
+  requestTimeoutMs: parseInt(process.env.REQUEST_TIMEOUT_MS ?? '30000', 10),
+  trustProxy: process.env.TRUST_PROXY === 'true',
   otpSandbox: process.env.OTP_SANDBOX === 'true',
   otpSandboxCode: process.env.OTP_SANDBOX_CODE ?? '1111',
   otpExpiresSeconds: parseInt(process.env.OTP_EXPIRES_SECONDS ?? '120', 10),

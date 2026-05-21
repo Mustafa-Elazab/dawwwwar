@@ -1,12 +1,12 @@
 import { StyleSheet } from 'react-native';
 import type { AppColors } from '@dawwar/theme';
-import { space, typography, radius, shadows } from '@dawwar/theme';
+import { space, typography, radius, shadows, layout } from '@dawwar/theme';
 
 export const createStyles = (colors: AppColors) =>
   StyleSheet.create({
     timelineContainer: {
       backgroundColor: colors.card,
-      paddingHorizontal: space.base,
+      paddingHorizontal: layout.screenPaddingH,
       paddingVertical: space.lg,
       marginBottom: space.sm,
     },
@@ -15,31 +15,35 @@ export const createStyles = (colors: AppColors) =>
       color: colors.text,
       textAlign: 'center',
       marginTop: space.base,
+      fontWeight: '700',
     },
     driverCard: {
       backgroundColor: colors.card,
-      marginHorizontal: space.base,
+      marginHorizontal: layout.screenPaddingH,
       borderRadius: radius.xl,
       padding: space.base,
       flexDirection: 'row',
       alignItems: 'center',
       gap: space.md,
       marginBottom: space.sm,
-      ...shadows.md,
+      borderWidth: 1,
+      borderColor: colors.borderLight,
+      ...shadows.xs,
     },
-    driverInfo: { flex: 1 },
-    driverName: { ...typography.label, color: colors.text },
+    driverInfo: { flex: 1, gap: 2 },
+    driverName: { ...typography.label, color: colors.text, fontWeight: '600' },
     driverMeta: { ...typography.caption, color: colors.textSecondary },
     callBtn: {
       width: 44,
       height: 44,
-      borderRadius: 22,
-      backgroundColor: colors.surfaceVariant,
+      borderRadius: radius.full,
+      backgroundColor: colors.primaryLight,
       alignItems: 'center',
       justifyContent: 'center',
     },
     cancelBtn: {
-      margin: space.base,
+      marginHorizontal: layout.screenPaddingH,
+      marginVertical: space.md,
     },
     mapPlaceholder: {
       height: 180,

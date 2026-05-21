@@ -1,150 +1,152 @@
-// Brand palette — raw values, not used directly by components
-export const palette = {
-  brand: '#1DB954',         // Green
-  brandDark: '#17A348',     // Darker green
-  brandLight: '#E8F8EF',    // Lightest green tint
-  brandMuted: '#A8E6C3',    // Muted green
+export const Colors = {
+  // Brand
+  primary: '#1DB954',
+  primaryDark: '#17A348',
+  primaryLight: '#E8F8EF',
+  primaryGlow: 'rgba(29,185,84,0.15)',
 
-  green: '#1DB954',
-  greenLight: '#E8F8EF',
-  red: '#EF4444',
-  redLight: '#FEE2E2',
-  orange: '#F59E0B',
-  orangeLight: '#FEF3C7',
-  blue: '#3B82F6',
-  blueLight: '#DBEAFE',
+  // Backgrounds
+  bg: '#0D0D0D',
+  bgCard: '#1A1A1A',
+  bgElevated: '#242424',
+  bgInput: '#1F1F1F',
+  bgOverlay: 'rgba(0,0,0,0.6)',
 
-  gray50: '#F9FAFB',
-  gray100: '#F3F4F6',
-  gray200: '#E5E7EB',
-  gray300: '#D1D5DB',
-  gray400: '#9CA3AF',
-  gray500: '#6B7280',
-  gray600: '#4B5563',
-  gray700: '#374151',
-  gray800: '#1F2937',
-  gray900: '#111827',
+  // Text
+  textPrimary: '#F5F5F5',
+  textSecondary: '#A0A0A0',
+  textTertiary: '#606060',
+  textInverse: '#0D0D0D',
+
+  // Borders
+  border: 'rgba(255,255,255,0.08)',
+  borderMid: 'rgba(255,255,255,0.14)',
+
+  // Semantic
+  success: '#1DB954',
+  warning: '#F59E0B',
+  error: '#EF4444',
+  info: '#3B82F6',
+
+  // Order status
+  statusPending: '#F59E0B',
+  statusAccepted: '#3B82F6',
+  statusReady: '#8B5CF6',
+  statusAssigned: '#EC4899',
+  statusPickedUp: '#F97316',
+  statusDelivered: '#1DB954',
+  statusCompleted: '#059669',
+  statusCancelled: '#6B7280',
+  statusRejected: '#EF4444',
 
   white: '#FFFFFF',
   black: '#000000',
 } as const;
 
-// Light theme — every key is a semantic name, not a raw color
-export const lightColors = {
-  // Backgrounds
-  background: palette.gray50,
-  surface: palette.white,
-  surfaceVariant: palette.gray100,
-  card: palette.white,
-
-  // Borders
-  border: palette.gray200,
-  borderLight: palette.gray100,
-  borderFocus: palette.brand,
-
-  // Text
-  text: palette.gray900,
-  textSecondary: palette.gray500,
-  textTertiary: palette.gray400,
-  textDisabled: palette.gray300,
-  textInverse: palette.white,
-  textLink: palette.brand,
-
-  // Brand
-  primary: palette.brand,
-  primaryDark: palette.brandDark,
-  primaryLight: palette.brandLight,
-  primaryMuted: palette.brandMuted,
-  primaryText: palette.white,          // text on primary background
-
-  // Status
-  success: palette.green,
-  successBg: palette.greenLight,
-  error: palette.red,
-  errorBg: palette.redLight,
-  warning: palette.orange,
-  warningBg: palette.orangeLight,
-  info: palette.blue,
-  infoBg: palette.blueLight,
-
-  // UI elements
-  icon: palette.gray500,
-  iconActive: palette.brand,
-  iconInverse: palette.white,
-  placeholder: palette.gray400,
-  overlay: 'rgba(0, 0, 0, 0.5)',
-  shadow: 'rgba(0, 0, 0, 0.08)',
-  shimmer: palette.gray200,            // skeleton loading color
-  shimmerHighlight: palette.gray50,    // skeleton shimmer highlight
-
-  // Navigation
-  tabBar: palette.white,
-  tabBarBorder: palette.gray200,
-  tabBarIcon: palette.gray400,
-  tabBarIconActive: palette.brand,
-
-  // Status bar
-  statusBarStyle: 'dark-content' as const,
-  statusBarBg: palette.gray50,
+// Backward-compatible raw palette used across existing components.
+export const palette = {
+  brand: Colors.primary,
+  brandDark: Colors.primaryDark,
+  brandLight: Colors.primaryLight,
+  brandMuted: Colors.primaryGlow,
+  green: Colors.success,
+  greenLight: Colors.primaryLight,
+  red: Colors.error,
+  redLight: 'rgba(239,68,68,0.16)',
+  orange: Colors.warning,
+  orangeLight: 'rgba(245,158,11,0.18)',
+  blue: Colors.info,
+  blueLight: 'rgba(59,130,246,0.18)',
+  gray50: Colors.textPrimary,
+  gray100: Colors.bgInput,
+  gray200: Colors.border,
+  gray300: Colors.borderMid,
+  gray400: Colors.textTertiary,
+  gray500: Colors.textSecondary,
+  gray600: '#808080',
+  gray700: Colors.bgElevated,
+  gray800: Colors.bgCard,
+  gray900: Colors.bg,
+  white: Colors.white,
+  black: Colors.black,
 } as const;
 
-// Dark theme — EVERY key from lightColors must be present here
-export const darkColors = {
+const semanticTheme = {
   // Backgrounds
-  background: '#0A0A0A',
-  surface: '#1A1A1A',
-  surfaceVariant: '#252525',
-  card: '#1A1A1A',
+  background: Colors.bg,
+  surface: Colors.bgCard,
+  surfaceVariant: Colors.bgElevated,
+  card: Colors.bgCard,
 
   // Borders
-  border: '#2A2A2A',
-  borderLight: '#2C2C2E',
-  borderFocus: palette.brand,
+  border: Colors.border,
+  borderLight: Colors.borderMid,
+  borderFocus: 'rgba(29,185,84,0.5)',
 
   // Text
-  text: '#F9FAFB',
-  textSecondary: '#9CA3AF',
-  textTertiary: '#6B7280',
-  textDisabled: '#6B7280',
-  textInverse: '#111827',
-  textLink: palette.brand,
+  text: Colors.textPrimary,
+  textSecondary: Colors.textSecondary,
+  textTertiary: Colors.textTertiary,
+  textDisabled: Colors.textTertiary,
+  textInverse: Colors.textInverse,
+  textLink: Colors.primary,
 
-  // Brand (same in both themes)
-  primary: palette.brand,
-  primaryDark: palette.brandDark,
-  primaryLight: palette.brandLight,
-  primaryMuted: '#0F5132',
-  primaryText: palette.white,
+  // Brand
+  primary: Colors.primary,
+  primaryDark: Colors.primaryDark,
+  primaryLight: Colors.primaryLight,
+  primaryGlow: Colors.primaryGlow,
+  primaryMuted: Colors.primaryGlow,
+  primaryText: Colors.textInverse,
 
   // Status
-  success: '#1DB954',
-  successBg: '#0F5132',
-  error: '#EF4444',
-  errorBg: '#2E1410',
-  warning: '#F59E0B',
-  warningBg: '#2E2A0A',
-  info: '#3B82F6',
-  infoBg: '#0A1A2E',
+  success: Colors.success,
+  successBg: 'rgba(29,185,84,0.16)',
+  error: Colors.error,
+  errorBg: 'rgba(239,68,68,0.16)',
+  warning: Colors.warning,
+  warningBg: 'rgba(245,158,11,0.16)',
+  info: Colors.info,
+  infoBg: 'rgba(59,130,246,0.16)',
 
   // UI elements
-  icon: '#9CA3AF',
-  iconActive: palette.brand,
-  iconInverse: '#111827',
-  placeholder: '#6B7280',
-  overlay: 'rgba(0, 0, 0, 0.7)',
-  shadow: 'rgba(0, 0, 0, 0.4)',
-  shimmer: '#2A2A2A',
-  shimmerHighlight: '#3A3A3A',
+  icon: Colors.textSecondary,
+  iconActive: Colors.primary,
+  iconInverse: Colors.textInverse,
+  placeholder: Colors.textTertiary,
+  overlay: Colors.bgOverlay,
+  shadow: 'rgba(0,0,0,0.35)',
+  shimmer: Colors.bgElevated,
+  shimmerHighlight: '#2D2D2D',
 
   // Navigation
-  tabBar: '#1A1A1A',
-  tabBarBorder: '#2A2A2A',
-  tabBarIcon: '#6B7280',
-  tabBarIconActive: palette.brand,
+  tabBar: Colors.bgCard,
+  tabBarBorder: Colors.border,
+  tabBarIcon: Colors.textTertiary,
+  tabBarIconActive: Colors.primary,
+
+  // Order status
+  statusPending: Colors.statusPending,
+  statusAccepted: Colors.statusAccepted,
+  statusReady: Colors.statusReady,
+  statusAssigned: Colors.statusAssigned,
+  statusPickedUp: Colors.statusPickedUp,
+  statusDelivered: Colors.statusDelivered,
+  statusCompleted: Colors.statusCompleted,
+  statusCancelled: Colors.statusCancelled,
+  statusRejected: Colors.statusRejected,
 
   // Status bar
   statusBarStyle: 'light-content' as const,
-  statusBarBg: '#0A0A0A',
+  statusBarBg: Colors.bg,
+} as const;
+
+export const lightColors = {
+  ...semanticTheme,
+} as const;
+
+export const darkColors = {
+  ...semanticTheme,
 } as const;
 
 // AppColors type — derived from lightColors (both themes must satisfy this type)

@@ -30,7 +30,7 @@ export function useController() {
   const uploadFileMutation = useUploadFile();
 
   const handleLogin = useCallback(() => {
-    navigation.navigate('Auth', { screen: AUTH_ROUTES.LOGIN });
+    navigation.navigate('Auth', { screen: AUTH_ROUTES.PHONE });
   }, [navigation]);
 
   const handleLogout = useCallback(() => {

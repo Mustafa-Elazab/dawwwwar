@@ -36,6 +36,11 @@ export function AddressesScreen() {
     );
   };
 
+  const isHomeLabel = (label?: string) => {
+    const l = (label || '').toLowerCase();
+    return l === 'home' || l === 'المنزل' || l.includes('home');
+  };
+
   const renderItem = React.useCallback(({ item }: { item: Address }) => (
     <View style={styles.card}>
       {item.isDefault && (
@@ -44,16 +49,16 @@ export function AddressesScreen() {
         </View>
       )}
       
-      <View style={[styles.iconCircle, { backgroundColor: item.label === 'Home' || item.label === 'المنزل' ? `${colors.primary}20` : '#E3F2FD' }]}>
+      <View style={[styles.iconCircle, { backgroundColor: isHomeLabel(item.label) ? `${colors.primary}20` : `${colors.info}15` }]}>
         <Icon 
-          name={item.label === 'Home' || item.label === 'المنزل' ? 'home-variant' : 'briefcase-variant'} 
+          name={isHomeLabel(item.label) ? 'home-variant' : 'briefcase-variant'} 
           size={22} 
-          color={item.label === 'Home' || item.label === 'المنزل' ? colors.primary : '#2196F3'} 
+          color={isHomeLabel(item.label) ? colors.primary : colors.info} 
         />
       </View>
 
       <View style={styles.info}>
-        <Text style={styles.label}>{t(`address_labels.${(item.label || 'other').toLowerCase()}`, { defaultValue: item.label || t('addresses.other', 'أخرى') })}</Text>
+        <Text style={styles.label}>{t(`address_labels.${(item.label || 'other').toLowerCase()}`, { defaultValue: item.label || t('addresses.other') })}</Text>
         <Text style={styles.street} numberOfLines={1}>{item.address}</Text>
       </View>
 

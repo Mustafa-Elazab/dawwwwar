@@ -14,6 +14,7 @@ import { api, publicApi } from '../core/api/client';
 import { authApi } from '../features/auth/core/api';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { PersistGate } from 'redux-persist/integration/react';
+import RNBootSplash from 'react-native-bootsplash';
 import logger from '../utils/logger';
 
 const queryClient = new QueryClient({
@@ -50,12 +51,12 @@ export function AppProviders({ children }: AppProvidersProps) {
       const token = storage.getString(StorageKeys.ACCESS_TOKEN);
       logger.log('[AppProviders] Token exists:', !!token);
 
-      if (!token) {
-        store.dispatch(setGuestMode());
-        return;
-      }
-
       try {
+        if (!token) {
+          store.dispatch(setGuestMode());
+          return;
+        }
+
         const res = await authApi.getMe();
         if (res.success && res.data) {
           store.dispatch(setUser(res.data));
@@ -66,6 +67,8 @@ export function AppProviders({ children }: AppProvidersProps) {
         logger.error('[AppProviders] restoreSession error:', err);
         // On error (e.g. token expired), fall back to guest mode
         store.dispatch(setGuestMode());
+      } finally {
+        void RNBootSplash.hide({ fade: true });
       }
     };
 

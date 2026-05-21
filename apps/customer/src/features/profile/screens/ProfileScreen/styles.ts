@@ -1,23 +1,27 @@
-import { StyleSheet, I18nManager } from 'react-native';
+import { StyleSheet } from 'react-native';
 import type { AppColors } from '@dawwar/theme';
-import { space, typography, radius } from '@dawwar/theme';
+import { space, typography, radius, shadows, layout } from '@dawwar/theme';
 
 export const createStyles = (colors: AppColors) =>
   StyleSheet.create({
     userCard: {
       alignItems: 'center',
-      padding: space.xl,
+      paddingVertical: space['2xl'],
+      paddingHorizontal: layout.screenPaddingH,
       backgroundColor: colors.card,
       marginBottom: space.sm,
       gap: space.sm,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.borderLight,
     },
-    userName: { 
-      ...typography.h3, 
+    userName: {
+      ...typography.h3,
       color: colors.text,
+      fontWeight: '700',
       textAlign: 'center',
     },
-    userPhone: { 
-      ...typography.body2, 
+    userPhone: {
+      ...typography.body2,
       color: colors.textSecondary,
       textAlign: 'center',
     },
@@ -27,7 +31,7 @@ export const createStyles = (colors: AppColors) =>
     editIconContainer: {
       position: 'absolute',
       bottom: 0,
-      right: 0,
+      end: 0,
       backgroundColor: colors.primary,
       width: 28,
       height: 28,
@@ -38,33 +42,34 @@ export const createStyles = (colors: AppColors) =>
       justifyContent: 'center',
     },
     sectionLabel: {
-      ...typography.caption,
-      color: colors.textSecondary,
-      textTransform: 'uppercase',
-      letterSpacing: 0.8,
-      paddingHorizontal: space.base,
-      paddingTop: space.base,
+      ...typography.overline,
+      color: colors.textTertiary,
+      paddingHorizontal: layout.screenPaddingH,
+      paddingTop: space.lg,
       paddingBottom: space.sm,
-      flex:1,
-      alignSelf:"flex-start",
+      alignSelf: 'flex-start',
     },
     sectionCard: {
       backgroundColor: colors.card,
-      marginBottom: space.sm,
-      borderRadius: radius.lg,
+      marginBottom: space.xs,
+      marginHorizontal: layout.screenPaddingH,
+      borderRadius: radius.xl,
       overflow: 'hidden',
+      borderWidth: 1,
+      borderColor: colors.borderLight,
     },
     versionText: {
       ...typography.caption,
       color: colors.textDisabled,
       textAlign: 'center',
-      padding: space.xl,
+      paddingVertical: space.xl,
     },
-    logoutRow: { 
-      backgroundColor: colors.card, 
+    logoutRow: {
+      backgroundColor: colors.card,
       marginTop: space.md,
-      marginBottom: space.sm,
+      marginHorizontal: layout.screenPaddingH,
+      borderRadius: radius.xl,
       borderWidth: 1,
-      borderColor: `${colors.error}20`,
+      borderColor: colors.errorBg,
     },
   });

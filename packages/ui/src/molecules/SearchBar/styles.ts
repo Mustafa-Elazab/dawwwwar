@@ -1,24 +1,24 @@
-import { StyleSheet, I18nManager } from 'react-native';
+import { StyleSheet } from 'react-native';
 import type { AppColors } from '@dawwar/theme';
 import { space, radius, typography } from '@dawwar/theme';
 
 export const createStyles = (colors: AppColors) =>
   StyleSheet.create({
     container: {
-      flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
+      flexDirection: 'row',
       alignItems: 'center',
       backgroundColor: colors.surfaceVariant,
-      borderRadius: radius.full,
+      borderRadius: radius.xl,
       paddingHorizontal: space.md,
       paddingVertical: space.sm,
       gap: space.sm,
+      minHeight: 44,
     },
     input: {
       flex: 1,
       ...typography.body1,
       color: colors.text,
-      textAlign: I18nManager.isRTL ? 'right' : 'left',
-      paddingVertical: 0,   // remove default Android padding
+      paddingVertical: 0,
     },
     clearButton: { padding: space.xs },
   });

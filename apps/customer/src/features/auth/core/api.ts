@@ -1,24 +1,13 @@
-import api from '../../../core/api/client';
 import type { ApiResponse } from '@dawwar/types';
 import type { SendOtpResponse, VerifyOtpResponse } from './response';
+import { authApi as authService, otpApi as otpService } from '../../../core/api/services';
 
 // ── Phase 2 real implementations ─────────────────────────────────────
 const realAuthApi = {
-  getMe: async (): Promise<ApiResponse<any>> => {
-    const { data } = await api.get('/users/me');
-    return data;
-  },
-  sendOtp: async (phone: string): Promise<ApiResponse<SendOtpResponse>> => {
-    const { data } = await api.post('/auth/send-otp', { phone });
-    return data;
-  },
-  verifyOtp: async (
-    phone: string,
-    code: string,
-  ): Promise<ApiResponse<VerifyOtpResponse>> => {
-    const { data } = await api.post('/auth/verify-otp', { phone, code });
-    return data;
-  },
+  getMe: async (): Promise<ApiResponse<any>> => authService.getMe(),
+  sendOtp: async (phone: string): Promise<ApiResponse<SendOtpResponse>> => otpService.sendOtp(phone),
+  verifyOtp: async (phone: string, code: string): Promise<ApiResponse<VerifyOtpResponse>> =>
+    otpService.verifyOtp(phone, code),
 };
 
 

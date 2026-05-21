@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
-import { View, FlatList, TouchableOpacity } from 'react-native';
+import { View, FlatList } from 'react-native';
 import { useTranslation } from '@dawwar/i18n';
-import { ScreenTemplate, Text, EmptyState, Skeleton } from '@dawwar/ui';
-import { useTheme } from '@dawwar/theme';
+import { ScreenTemplate, Text, EmptyState, Skeleton, AnimatedPressable } from '@dawwar/ui';
+import { microInteractions, useTheme } from '@dawwar/theme';
 import { OrderCard } from '../../components/OrderCard';
 import { useController } from './useController';
 import { createStyles } from './styles';
@@ -32,10 +32,13 @@ export function OrdersListScreen() {
       {/* Tab switcher */}
       <View style={styles.tabRow}>
         {(['active', 'past'] as const).map((tab) => (
-          <TouchableOpacity
+          <AnimatedPressable
             key={tab}
             style={[styles.tab, ctrl.activeTab === tab && styles.tabActive]}
             onPress={() => ctrl.setActiveTab(tab)}
+            pressScale={microInteractions.pressScale}
+            pressOpacity={microInteractions.pressOpacity}
+            pressTranslateY={1}
           >
             <Text
               style={[
@@ -46,7 +49,7 @@ export function OrdersListScreen() {
             >
               {t(`orders.tab_${tab}`)}
             </Text>
-          </TouchableOpacity>
+          </AnimatedPressable>
         ))}
       </View>
 
@@ -55,8 +58,7 @@ export function OrdersListScreen() {
           icon="account-lock-outline"
           title={t('gate.ordersTitle')}
           subtitle={t('gate.ordersSubtitle')}
-          actionLabel={t('gate.loginToViewOrders')}
-          onAction={ctrl.handleLogin}
+          action={{ label: t('gate.loginToViewOrders'), onPress: ctrl.handleLogin }}
         />
       ) : ctrl.isLoading ? (
         <View style={{ gap: 12, paddingTop: 8 }}>
@@ -79,6 +81,7 @@ export function OrdersListScreen() {
           refreshing={false}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingTop: 8, paddingBottom: 24 }}
+          removeClippedSubviews
         />
       )}
     </ScreenTemplate>

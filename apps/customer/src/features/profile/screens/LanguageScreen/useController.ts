@@ -5,10 +5,12 @@ import { useTranslation, updateLanguage } from '@dawwar/i18n';
 import { useAppDispatch, useAppSelector } from '../../../../store/hooks';
 import { setLanguage, selectLanguage } from '../../../../store/slices/ui.slice';
 import { Language } from '@dawwar/types';
+import type { ProfileStackParamList } from '../../../../navigation/types';
+import type { StackNavigationProp } from '@react-navigation/stack';
 
 export function useController() {
   const { t } = useTranslation();
-  const navigation = useNavigation<any>();
+  const navigation = useNavigation<StackNavigationProp<ProfileStackParamList>>();
   const dispatch = useAppDispatch();
   const currentLanguage = useAppSelector(selectLanguage);
 
@@ -28,7 +30,7 @@ export function useController() {
               dispatch(setLanguage(lang));
               
               // 2. Delegate everything else to the new localization manager
-              await updateLanguage(lang as any);
+              await updateLanguage(lang === Language.AR ? 'ar' : 'en');
             },
           },
         ],

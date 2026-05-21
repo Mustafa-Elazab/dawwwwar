@@ -13,6 +13,8 @@ import { MODAL_ROUTES } from './routes';
 import type { RootParamList } from './types';
 import { CompleteProfileScreen } from '../features/auth/screens/CompleteProfileScreen';
 import { JS_SplashScreen } from '../features/auth/components/SplashScreen';
+import { OnboardingScreen } from '../features/onboarding/screens/OnboardingScreen';
+import { useOnboardingGate } from '../features/onboarding/onboarding.service';
 
 const Root = createStackNavigator<RootParamList>();
 
@@ -20,6 +22,7 @@ export function RootNavigator() {
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const isLoading = useAppSelector(selectIsLoading);
   const user = useAppSelector(selectUser);
+  const onboarding = useOnboardingGate();
 
   const hasName = !!user?.name;
 
@@ -33,16 +36,27 @@ export function RootNavigator() {
   }, [isAuthenticated, isLoading, hasName]);
 
   // Show loading while session is being restored
-  if (isLoading) {
+  if (isLoading || !onboarding.isReady) {
     return <JS_SplashScreen />;
   }
 
   // Main App (Guest or Authenticated)
+  const shouldShowOnboarding = onboarding.shouldShow;
+  const initialRoute = shouldShowOnboarding
+    ? 'Onboarding'
+    : !isAuthenticated
+      ? 'Auth'
+      : !hasName
+        ? 'CompleteProfile'
+        : 'CustomerTabs';
+
   return (
     <Root.Navigator 
       screenOptions={{ headerShown: false, presentation: 'modal' }}
-      initialRouteName={(isAuthenticated && !hasName) ? 'CompleteProfile' : 'CustomerTabs'}
+      initialRouteName={initialRoute}
+      key={initialRoute}
     >
+      <Root.Screen name="Onboarding" component={OnboardingScreen} />
       <Root.Screen name="CustomerTabs" component={CustomerTabs} />
       <Root.Screen name="Auth" component={AuthNavigator} />
       <Root.Screen name="CompleteProfile" component={CompleteProfileScreen} />

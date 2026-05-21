@@ -41,8 +41,8 @@ export function useController() {
   const [showLoginGate, setShowLoginGate] = useState(false);
 
   // Real Data Hooks
-  const { data: addressesRes } = useAddresses(user?.id, { enabled: isAuthenticated });
-  const { data: walletRes } = useWallet({ enabled: isAuthenticated });
+  const { data: addressesRes } = useAddresses(isAuthenticated ? user?.id : undefined);
+  const { data: walletRes } = useWallet();
   
   const addresses = addressesRes?.data || [];
   const wallet = walletRes?.data;
@@ -121,7 +121,7 @@ export function useController() {
         screen: 'OrdersTab',
         params: { 
           screen: 'TrackingScreen',
-          params: { orderId: res.id }
+          params: { orderId: res.data.id }
         }
       });
     } catch {

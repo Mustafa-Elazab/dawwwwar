@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { View, TouchableOpacity, Alert } from 'react-native';
-import { useTheme } from '@dawwar/theme';
-import { Text, Button } from '@dawwar/ui';
+import { View, Alert } from 'react-native';
+import { microInteractions, useTheme } from '@dawwar/theme';
+import { Text, Button, AnimatedPressable } from '@dawwar/ui';
 import { useTranslation } from '@dawwar/i18n';
 import RTLTextInput from '../../../../components/RTLTextInput';
 import { useRecharge } from '../../core/hooks';
@@ -9,7 +9,7 @@ import { createStyles } from './styles';
 
 const PRESET_AMOUNTS = [50, 100, 200, 500];
 
-export function RechargeChips() {
+export const RechargeChips = React.memo(function RechargeChips() {
   const { colors } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
   const { t } = useTranslation();
@@ -49,7 +49,7 @@ export function RechargeChips() {
     );
   };
 
-  const isSelected = selected !== null || (showCustom && customAmount);
+  const isSelected = selected !== null || (showCustom && customAmount.length > 0);
   const currentAmount = showCustom ? customAmount : selected;
 
   return (
@@ -57,24 +57,30 @@ export function RechargeChips() {
       <Text style={styles.title}>{t('wallet.select_amount')}</Text>
       <View style={styles.row}>
         {PRESET_AMOUNTS.map((amount) => (
-          <TouchableOpacity
+          <AnimatedPressable
             key={amount}
             style={[styles.chip, selected === amount && styles.chipSelected]}
             onPress={() => handleChipPress(amount)}
+            pressScale={microInteractions.pressScale}
+            pressOpacity={microInteractions.pressOpacity}
+            pressTranslateY={1}
           >
             <Text style={[styles.chipLabel, selected === amount && styles.chipLabelSelected]}>
               {amount} {t('common.egp')}
             </Text>
-          </TouchableOpacity>
+          </AnimatedPressable>
         ))}
-        <TouchableOpacity
+        <AnimatedPressable
           style={[styles.chip, showCustom && styles.chipSelected]}
           onPress={() => handleChipPress('custom')}
+          pressScale={microInteractions.pressScale}
+          pressOpacity={microInteractions.pressOpacity}
+          pressTranslateY={1}
         >
           <Text style={[styles.chipLabel, showCustom && styles.chipLabelSelected]}>
             {t('wallet.custom_amount')}
           </Text>
-        </TouchableOpacity>
+        </AnimatedPressable>
         {showCustom && (
           <RTLTextInput
             style={styles.customInput}
@@ -105,4 +111,4 @@ export function RechargeChips() {
       )}
     </View>
   );
-}
+});

@@ -102,10 +102,11 @@ export function NotificationsScreen() {
     let displayBody = item.body;
 
     if (item.type === 'order') {
+      const merchantFromBody = item.body.includes('KFC') ? 'KFC' : '';
       displayTitle = t('notifications.order_delivered');
       displayBody = t('notifications.order_delivered_body', { 
         orderId: item.payload?.orderId?.replace('ORD-', '') || '123', 
-        merchant: item.body.includes('KFC') ? 'KFC' : 'المحل' 
+        merchant: merchantFromBody,
       });
     } else if (item.type === 'promo') {
       displayTitle = t('notifications.weekend_sale');

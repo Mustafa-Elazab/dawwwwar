@@ -12,6 +12,7 @@ import { appConfig } from './config/app.config';
 import { uploadConfig } from './config/upload.config';
 import { firebaseConfig } from './config/firebase.config';
 import { paymobConfig } from './config/paymob.config';
+import { validateEnv } from './config/env.validation';
 import { HealthModule } from './modules/health/health.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
@@ -71,6 +72,7 @@ import {
       isGlobal: true,
       envFilePath: ['.env.production', '.env.development', '.env'],
       load: [databaseConfig, redisConfig, jwtConfig, appConfig, uploadConfig, firebaseConfig, paymobConfig],
+      validate: validateEnv,
     }),
     BullModule.forRootAsync({
       inject: [ConfigService],

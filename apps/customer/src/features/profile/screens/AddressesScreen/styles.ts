@@ -1,11 +1,11 @@
-import { StyleSheet, I18nManager } from 'react-native';
+import { StyleSheet } from 'react-native';
 import type { AppColors } from '@dawwar/theme';
-import { space, typography, radius, shadows } from '@dawwar/theme';
+import { space, typography, radius, shadows, layout } from '@dawwar/theme';
 
 export const createStyles = (colors: AppColors) =>
   StyleSheet.create({
     listContent: {
-      padding: space.base,
+      padding: layout.screenPaddingH,
     },
     
     // ── Add New Card ────────────────────────────────────
@@ -13,9 +13,9 @@ export const createStyles = (colors: AppColors) =>
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: colors.surface,
-      borderRadius: radius.lg,
-      borderWidth: 2,
+      backgroundColor: colors.primaryLight,
+      borderRadius: radius.xl,
+      borderWidth: 1.5,
       borderColor: colors.primary,
       borderStyle: 'dashed',
       padding: space.lg,
@@ -25,16 +25,15 @@ export const createStyles = (colors: AppColors) =>
     addText: {
       ...typography.label,
       color: colors.primary,
-      fontWeight: '800',
+      fontWeight: '700',
     },
 
     // ── Address Card ────────────────────────────────────
     card: {
       backgroundColor: colors.card,
-      borderRadius: 12, // Radius 12
+      borderRadius: radius.xl,
       padding: space.md,
       marginBottom: space.md,
-      ...shadows.sm,
       borderWidth: 1,
       borderColor: colors.borderLight,
       flexDirection: 'row',
@@ -45,8 +44,8 @@ export const createStyles = (colors: AppColors) =>
     iconCircle: {
       width: 40,
       height: 40,
-      borderRadius: 20,
-      backgroundColor: colors.primaryMuted,
+      borderRadius: radius.full,
+      backgroundColor: colors.primaryLight,
       alignItems: 'center',
       justifyContent: 'center',
     },
@@ -63,29 +62,26 @@ export const createStyles = (colors: AppColors) =>
     label: {
       ...typography.body1,
       color: colors.text,
-      fontWeight: '800',
+      fontWeight: '700',
     },
     street: {
       ...typography.caption,
       color: colors.textSecondary,
-      textAlign: 'left',
     },
     
     defaultBadge: {
       position: 'absolute',
       top: -8,
-      right: I18nManager.isRTL ? 12 : undefined,
-      left: I18nManager.isRTL ? undefined : 12,
+      start: 12,
       backgroundColor: colors.primary,
       paddingHorizontal: 8,
       paddingVertical: 2,
       borderRadius: radius.full,
-      ...shadows.sm,
     },
     defaultText: {
       ...typography.overline,
       color: '#fff',
-      fontWeight: '800',
+      fontWeight: '700',
     },
     
     menuBtn: {

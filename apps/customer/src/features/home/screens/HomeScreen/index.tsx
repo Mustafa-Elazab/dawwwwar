@@ -1,33 +1,33 @@
-import React, { useRef, useCallback } from 'react';
+import React, { useRef, useCallback, useMemo } from 'react';
 import {
   View,
   FlatList,
-  TouchableOpacity,
   ScrollView,
   I18nManager,
   Dimensions,
   RefreshControl,
 } from 'react-native';
 import { useTranslation } from '@dawwar/i18n';
-import { ScreenTemplate, Text, Icon, Skeleton } from '@dawwar/ui';
-import { useTheme } from '@dawwar/theme';
+import { ScreenTemplate, Text, Icon, Skeleton, AnimatedPressable, Button } from '@dawwar/ui';
+import { useTheme, microInteractions } from '@dawwar/theme';
+import Animated, { SlideInDown, SlideOutDown } from 'react-native-reanimated';
 import BottomSheet from '@gorhom/bottom-sheet';
-import { BannerSlider } from '../../components/BannerSlider';
 import { MerchantCard } from '../../components/MerchantCard';
 import { ProductCard } from '../../../home/components/ProductCard';
 import { SectionHeader } from '../../components/SectionHeader';
+import { BannerSlider } from '../../components/BannerSlider';
 import { useController } from './useController';
 import { createStyles } from './styles';
-import type { Merchant, Product, Category } from '@dawwar/types';
+import type { Merchant, Product } from '@dawwar/types';
 import { LocationBottomSheet } from '../../../location/components/LocationBottomSheet';
+import { useAppSelector } from '../../../../store/hooks';
+import { selectCartCount, selectCartTotal } from '../../../../store/slices/cart.slice';
+import { selectAuthStatus } from '../../../../store/slices/auth.slice';
+import { MODAL_ROUTES } from '../../../../navigation/routes';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-const PASTEL = ['#FFF3E0', '#FCE4EC', '#E3F2FD', '#E8F5E9', '#F3E5F5', '#FFFDE7', '#E0F2F1'];
-
-function isMaterialStyleIcon(icon: string) {
-  return /^[a-z0-9-]+$/.test(icon.trim()) && icon.trim().length >= 2;
-}
+const MERCHANT_CARD_STYLE = { width: 200, marginEnd: 12 } as const;
 
 export function HomeScreen() {
   const { t } = useTranslation();
@@ -35,6 +35,11 @@ export function HomeScreen() {
   const styles = React.useMemo(() => createStyles(colors), [colors]);
   const ctrl = useController();
   const bottomSheetRef = useRef<BottomSheet>(null);
+  const [discoveryMode, setDiscoveryMode] = React.useState<'nearby' | 'country'>('nearby');
+  const cartCount = useAppSelector(selectCartCount);
+  const cartTotal = useAppSelector(selectCartTotal);
+  const authStatus = useAppSelector(selectAuthStatus);
+  const isGuest = authStatus === 'guest';
 
   const openLocationModal = () => {
     bottomSheetRef.current?.expand();
@@ -51,43 +56,99 @@ export function HomeScreen() {
           <Text style={styles.greetingText} numberOfLines={1}>
             {t('home.greeting', { name: ctrl.user?.name ? ctrl.user.name.split(' ')[0] : '' })}
           </Text>
+          <Text style={styles.greetingSub}>{t('home.hero_subtitle')}</Text>
         </View>
 
-        <TouchableOpacity style={styles.bellBtn} onPress={ctrl.handleNotificationsPress}>
-          <Icon name="bell-outline" size={24} color={colors.text} />
-          <View style={styles.badgeDot} />
-        </TouchableOpacity>
+        <View style={styles.headerActions}>
+          <AnimatedPressable
+            style={styles.bellBtn}
+            onPress={ctrl.handleNotificationsPress}
+            pressScale={microInteractions.pressScale}
+            pressOpacity={microInteractions.pressOpacity}
+            pressTranslateY={1}
+          >
+            <Icon name="bell-outline" size={22} color={colors.textSecondary} />
+            <View style={styles.badgeDot} />
+          </AnimatedPressable>
+          <View style={styles.iconBtnGhost}>
+            <Icon name="map-marker-outline" size={20} color={colors.textSecondary} />
+          </View>
+        </View>
       </View>
 
-      <TouchableOpacity
+      <AnimatedPressable
         style={styles.locationBlock}
         onPress={openLocationModal}
-        activeOpacity={0.7}
-        hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+        pressScale={microInteractions.pressScale}
+        pressOpacity={microInteractions.pressOpacity}
+        pressTranslateY={1}
       >
         <Text style={styles.deliveringLabel}>{t('home.delivering_to_label')}</Text>
         <View style={styles.locationRow}>
-          <Icon name="chevron-down" size={16} color={colors.primary} />
+          <Icon name="chevron-down" size={14} color={colors.primary} />
           <Text style={styles.locationPrimary} numberOfLines={1}>
             {ctrl.isLocationLoading ? t('home.location_loading') : ctrl.headerLocationText}
           </Text>
-          <Icon name="map-marker-outline" size={16} color={colors.primary} />
+          <Icon name="map-marker-outline" size={14} color={colors.primary} />
         </View>
-      </TouchableOpacity>
+      </AnimatedPressable>
 
-      <View style={styles.searchWrapper}>
-        <TouchableOpacity
-          style={styles.searchTap}
-          onPress={ctrl.handleSearchPress}
-          activeOpacity={0.9}
+      <AnimatedPressable
+        style={styles.searchTap}
+        onPress={ctrl.handleSearchPress}
+        pressScale={microInteractions.pressScale}
+        pressOpacity={microInteractions.pressOpacity}
+        pressTranslateY={1}
+      >
+        <Icon name="magnify" size={20} color="#606060" />
+        <Text style={styles.searchPlaceholder}>{t('home.search_placeholder')}</Text>
+      </AnimatedPressable>
+
+      <View style={styles.discoveryWrap}>
+        <AnimatedPressable
+          style={[styles.discoveryPill, discoveryMode === 'nearby' && styles.discoveryPillActive]}
+          onPress={() => setDiscoveryMode('nearby')}
+          pressScale={microInteractions.pressScale}
+          pressOpacity={microInteractions.pressOpacity}
+          pressTranslateY={1}
         >
-          <View style={styles.filterBtn}>
-            <Icon name="tune-vertical" size={20} color={colors.primary} />
-          </View>
-          <Text style={styles.searchPlaceholder}>{t('home.search_placeholder')}</Text>
-          <Icon name="magnify" size={22} color={colors.placeholder} />
-        </TouchableOpacity>
+          <Text style={[styles.discoveryText, discoveryMode === 'nearby' && styles.discoveryTextActive]}>
+            {t('home.discovery_nearby')}
+          </Text>
+        </AnimatedPressable>
+        <AnimatedPressable
+          style={[styles.discoveryPill, discoveryMode === 'country' && styles.discoveryPillActive]}
+          onPress={() => setDiscoveryMode('country')}
+          pressScale={microInteractions.pressScale}
+          pressOpacity={microInteractions.pressOpacity}
+          pressTranslateY={1}
+        >
+          <Text style={[styles.discoveryText, discoveryMode === 'country' && styles.discoveryTextActive]}>
+            {t('home.discovery_country')}
+          </Text>
+        </AnimatedPressable>
       </View>
+
+      <FlatList
+        horizontal
+        data={ctrl.categories}
+        keyExtractor={(item) => item.id}
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.chipsRow}
+        inverted={I18nManager.isRTL}
+        renderItem={({ item }) => (
+          <AnimatedPressable
+            style={styles.categoryChip}
+            onPress={() => ctrl.handleCategoryPress(item.id, ctrl.categoryDisplayName(item))}
+            pressScale={microInteractions.pressScale}
+            pressOpacity={microInteractions.pressOpacity}
+            pressTranslateY={1}
+          >
+            <Text style={styles.categoryEmoji}>{item.icon || '🍽️'}</Text>
+            <Text numberOfLines={1} style={styles.categoryLabel}>{ctrl.categoryDisplayName(item)}</Text>
+          </AnimatedPressable>
+        )}
+      />
     </View>
   );
 
@@ -96,13 +157,60 @@ export function HomeScreen() {
       <MerchantCard
         merchant={item}
         onPress={() => ctrl.handleMerchantPress(item.id)}
-        style={{ width: SCREEN_WIDTH * 0.75, marginEnd: 12 }}
+        style={MERCHANT_CARD_STYLE}
       />
     ),
     [ctrl.handleMerchantPress],
   );
 
-  const homeCategories = ctrl.categories.slice(0, 12);
+  const sections = useMemo(() => {
+    const merchants = ctrl.merchants;
+    const products = ctrl.products;
+
+    const byDelivery = [...merchants].sort((a, b) => (a.deliveryTimeMin ?? 99) - (b.deliveryTimeMin ?? 99));
+    const byRating = [...merchants].sort((a, b) => (Number(b.rating || 0) - Number(a.rating || 0)));
+
+    return [
+      {
+        id: 'recommended',
+        title: t('home.recommended_for_you'),
+        type: 'merchants' as const,
+        data: merchants.slice(0, 8),
+        onSeeAll: () => ctrl.navigate('NearbyMerchantsScreen'),
+      },
+      {
+        id: 'trending',
+        title: t('home.trending_now'),
+        type: 'products' as const,
+        data: products.slice(0, 6),
+        onSeeAll: () => ctrl.navigate('PopularProductsScreen'),
+      },
+      {
+        id: 'fast',
+        title: t('home.fast_delivery'),
+        type: 'merchants' as const,
+        data: byDelivery.slice(0, 6),
+      },
+      {
+        id: 'top_rated',
+        title: t('home.top_rated_nearby'),
+        type: 'merchants' as const,
+        data: byRating.slice(0, 6),
+      },
+      {
+        id: 'because_you_ordered',
+        title: t('home.because_you_ordered'),
+        type: 'products' as const,
+        data: products.slice(2, 8),
+      },
+      {
+        id: 'popular_tonight',
+        title: t('home.popular_tonight'),
+        type: 'merchants' as const,
+        data: merchants.slice(2, 10),
+      },
+    ];
+  }, [ctrl.merchants, ctrl.products, t, ctrl.navigate]);
 
   return (
     <>
@@ -119,153 +227,83 @@ export function HomeScreen() {
           }
           contentContainerStyle={styles.scrollContent}
         >
-          <View style={styles.bannerContainer}>
-            {ctrl.isLoading ? (
-              <Skeleton width="100%" height={160} style={{ borderRadius: 16 }} />
-            ) : (
-              <View style={styles.bannerWrapper}>
-                <BannerSlider />
-              </View>
-            )}
-          </View>
+          <BannerSlider />
 
-          {/* Discovery mode toggle */}
-          <View style={styles.toggleRow}>
-            <TouchableOpacity
-              style={[styles.toggleBtn, ctrl.discoveryMode === 'nearby' && styles.toggleBtnActive]}
-              onPress={() => ctrl.setDiscoveryMode('nearby')}
-            >
-              <Text style={[styles.toggleLabel, ctrl.discoveryMode === 'nearby' && styles.toggleLabelActive]}>
-                📍 {t('home.nearMe', 'Nearby')}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.toggleBtn, ctrl.discoveryMode === 'allEgypt' && styles.toggleBtnActive]}
-              onPress={() => ctrl.setDiscoveryMode('allEgypt')}
-            >
-              <Text style={[styles.toggleLabel, ctrl.discoveryMode === 'allEgypt' && styles.toggleLabelActive]}>
-                🇪🇬 {t('home.allEgypt', 'All Egypt')}
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.categoriesContent}
-          >
-            {ctrl.categoriesLoading ? (
-              <>
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <View key={i} style={styles.categoryCard}>
-                    <Skeleton width={64} height={64} style={{ borderRadius: 16, marginBottom: 4 }} />
-                    <Skeleton width={56} height={12} />
-                  </View>
-                ))}
-              </>
-            ) : homeCategories.length === 0 ? (
-              <View style={styles.categoriesEmpty}>
-                <Text style={styles.categoriesEmptyText}>{t('categories.no_results')}</Text>
-              </View>
-            ) : (
-              homeCategories.map((cat: Category, index: number) => {
-                const bg = PASTEL[index % PASTEL.length];
-                const iconRaw = (cat.icon || '').trim();
-                return (
-                  <TouchableOpacity
-                    key={cat.id}
-                    style={styles.categoryCard}
-                    onPress={() =>
-                      ctrl.handleCategoryPress(cat.id, ctrl.categoryDisplayName(cat))
-                    }
-                  >
-                    <View style={[styles.categoryIconCircle, { backgroundColor: bg }]}>
-                      {iconRaw && isMaterialStyleIcon(iconRaw) ? (
-                        <Icon name={iconRaw as any} size={28} color={colors.primary} />
-                      ) : (
-                        <Text style={styles.categoryEmoji}>{iconRaw || '📦'}</Text>
-                      )}
-                    </View>
-                    <Text style={styles.categoryLabel} numberOfLines={2}>
-                      {ctrl.categoryDisplayName(cat)}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })
-            )}
-            <TouchableOpacity
-              style={styles.categoryCard}
-              onPress={() => ctrl.navigate('CategoriesTab')}
-            >
-              <View style={[styles.categoryIconCircle, { backgroundColor: colors.surfaceVariant }]}>
-                <Icon
-                  name={I18nManager.isRTL ? 'arrow-left' : 'arrow-right'}
-                  size={24}
-                  color={colors.primary}
-                />
-              </View>
-              <Text style={styles.categoryLabel}>{t('home.see_all')}</Text>
-            </TouchableOpacity>
-          </ScrollView>
-
-          <SectionHeader
-            title={t('home.nearby_title')}
-            onSeeAll={() => ctrl.navigate('NearbyMerchantsScreen')}
-          />
-          {ctrl.isLoading ? (
-            <View style={styles.skeletonRow}>
-              {[1, 2].map((i) => (
-                <Skeleton
-                  key={i}
-                  width={SCREEN_WIDTH * 0.7}
-                  height={180}
-                  style={{ borderRadius: 12, marginEnd: 12 }}
-                />
-              ))}
-            </View>
-          ) : (
-            <FlatList<Merchant>
-              data={ctrl.merchants}
-              renderItem={renderMerchant}
-              keyExtractor={(item) => item.id}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.merchantsList}
-              inverted={I18nManager.isRTL}
-              snapToInterval={SCREEN_WIDTH * 0.75 + 12}
-              decelerationRate="fast"
+          <View style={styles.heroCard}>
+            <View style={styles.heroGlow} />
+            <Text style={styles.heroTitle}>{t('home.hero_title')}</Text>
+            <Text style={styles.heroCopy}>{t('home.hero_body')}</Text>
+            <Button
+              label={t('home.hero_cta')}
+              onPress={ctrl.handleSearchPress}
+              size="sm"
+              style={styles.heroButton}
             />
-          )}
+          </View>
 
-          <SectionHeader title={t('home.popular_title')} onSeeAll={() => ctrl.navigate('PopularProductsScreen')} />
-          {ctrl.isLoading ? (
-            <View style={styles.skeletonGrid}>
-              {[1, 2, 3, 4].map((i) => (
-                <View key={i} style={styles.skeletonGridItem}>
-                  <Skeleton width="100%" height={210} />
+          {sections.map((section) => (
+            <View key={section.id} style={styles.sectionBlock}>
+              <SectionHeader title={section.title} onSeeAll={section.onSeeAll} />
+
+              {ctrl.isLoading ? (
+                <View style={styles.skeletonRow}>
+                  {[1, 2].map((i) => (
+                    <Skeleton
+                      key={`${section.id}-${i}`}
+                      width={SCREEN_WIDTH * 0.7}
+                      height={180}
+                      style={{ borderRadius: 16, marginEnd: 16 }}
+                    />
+                  ))}
                 </View>
-              ))}
-            </View>
-          ) : (
-            <View style={styles.productsGrid}>
-              {ctrl.products.map((product: Product) => (
-                <View key={product.id} style={styles.productGridItem}>
-                  <ProductCard product={product} onAdd={() => ctrl.handleProductAdd(product)} />
+              ) : section.type === 'merchants' ? (
+                <FlatList<Merchant>
+                  data={section.data as Merchant[]}
+                  renderItem={renderMerchant}
+                  keyExtractor={(item) => item.id}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.merchantsList}
+                  inverted={I18nManager.isRTL}
+                  snapToInterval={SCREEN_WIDTH * 0.74 + 16}
+                  decelerationRate="fast"
+                  removeClippedSubviews
+                />
+              ) : (
+                <View style={styles.productsGrid}>
+                  {(section.data as Product[]).slice(0, 4).map((product) => (
+                    <View key={product.id} style={styles.productGridItem}>
+                      <ProductCard product={product} onAdd={() => ctrl.handleProductAdd(product)} />
+                    </View>
+                  ))}
                 </View>
-              ))}
+              )}
             </View>
-          )}
+          ))}
         </ScrollView>
       </ScreenTemplate>
 
-      <TouchableOpacity
-        style={styles.fab}
-        onPress={ctrl.handleCustomOrder}
-        activeOpacity={0.9}
-      >
-        <Text style={styles.fabText}>{t('home.custom_order_btn')}</Text>
-        <Icon name="plus" size={20} color="#fff" />
-      </TouchableOpacity>
+      {cartCount > 0 ? (
+        <Animated.View entering={SlideInDown.duration(200)} exiting={SlideOutDown.duration(150)} style={styles.cartBarWrap}>
+          <AnimatedPressable
+            style={styles.cartBar}
+            onPress={() => {
+              if (isGuest) {
+                ctrl.navigate('Auth');
+                return;
+              }
+              ctrl.navigate(MODAL_ROUTES.CART);
+            }}
+            pressScale={microInteractions.pressScale}
+            pressOpacity={microInteractions.pressOpacity}
+            pressTranslateY={1}
+          >
+            <View style={styles.cartCountBubble}><Text style={styles.cartCountText}>{`${cartCount}`}</Text></View>
+            <Text style={styles.cartCta}>{t('cart.open_cart')}</Text>
+            <Text style={styles.cartTotal}>{`${cartTotal} ${t('common.egp')}`}</Text>
+          </AnimatedPressable>
+        </Animated.View>
+      ) : null}
 
       <LocationBottomSheet
         ref={bottomSheetRef}

@@ -1,68 +1,61 @@
-import React from 'react';
-import {
-  View,
-  StyleSheet,
-  Pressable,
-  Platform,
-} from 'react-native';
-import {
-  createBottomTabNavigator,
-  BottomTabBarProps,
-} from '@react-navigation/bottom-tabs';
+import React, { memo, useCallback, useMemo } from 'react';
+import { I18nManager, StyleSheet, View } from 'react-native';
+import { BottomTabBarProps, createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useTheme } from '@dawwar/theme';
-import { Icon, Text } from '@dawwar/ui';
-
+import { Icon, Text, AnimatedPressable } from '@dawwar/ui';
 import {
-  TAB_ROUTES,
-  HOME_ROUTES,
-  ORDER_ROUTES,
-  PROFILE_ROUTES,
-} from './routes';
+  microInteractions,
+  space,
+  useTheme,
+} from '@dawwar/theme';
+import { useTranslation } from '@dawwar/i18n';
 
-import type { CustomerTabParamList } from './types';
-
+import { CategoriesScreen } from './placeholders';
+import { HOME_ROUTES, ORDER_ROUTES, PROFILE_ROUTES, TAB_ROUTES } from './routes';
 import { HomeStack } from './stacks/HomeStack';
 import { OrdersStack } from './stacks/OrdersStack';
 import { ProfileStack } from './stacks/ProfileStack';
-import { CategoriesScreen } from './placeholders';
+import type { CustomerTabParamList } from './types';
 import { GuestProfileScreen } from '../features/profile/screens/GuestProfileScreen';
 import { GuestLoginPromptScreen } from '../features/orders/screens/GuestLoginPromptScreen';
-
 import { GlobalCartToast } from '../features/cart/components/GlobalCartToast';
 import { useAppSelector } from '../store/hooks';
 import { selectAuthStatus } from '../store/slices/auth.slice';
 
-import { useTranslation } from 'react-i18next';
-
 const Tab = createBottomTabNavigator<CustomerTabParamList>();
+
+const TAB_METRICS = { iconSize: 22, minTabHeight: 48, minBottomPadding: space.sm } as const;
 
 const TAB_CONFIG = {
   [TAB_ROUTES.HOME_TAB]: {
     activeIcon: 'home',
     inactiveIcon: 'home-outline',
-    label: 'mainTabs.home',
+    labelKey: 'mainTabs.home',
+    analyticsId: 'tab_home',
   },
-
   [TAB_ROUTES.CATEGORIES_TAB]: {
     activeIcon: 'shape',
     inactiveIcon: 'shape-outline',
-    label: 'mainTabs.categories',
+    labelKey: 'mainTabs.categories',
+    analyticsId: 'tab_categories',
   },
-
   [TAB_ROUTES.ORDERS_TAB]: {
     activeIcon: 'clipboard-text',
     inactiveIcon: 'clipboard-text-outline',
-    label: 'mainTabs.orders',
+    labelKey: 'mainTabs.orders',
+    analyticsId: 'tab_orders',
   },
-
   [TAB_ROUTES.PROFILE_TAB]: {
     activeIcon: 'account-circle',
     inactiveIcon: 'account-circle-outline',
-    label: 'mainTabs.profile',
+    labelKey: 'mainTabs.profile',
+    analyticsId: 'tab_profile',
   },
 } as const;
+
+type TabRouteName = keyof typeof TAB_CONFIG;
 
 const TAB_BAR_VISIBLE_ROUTES: string[] = [
   HOME_ROUTES.HOME,
@@ -71,121 +64,130 @@ const TAB_BAR_VISIBLE_ROUTES: string[] = [
   PROFILE_ROUTES.PROFILE,
 ];
 
-const getTabBarVisibility = (route: any) => {
+const getTabBarVisibility = (route: Parameters<typeof getFocusedRouteNameFromRoute>[0]) => {
   const routeName = getFocusedRouteNameFromRoute(route) ?? '';
-  
-  // If we are at the root of the tab stack (routeName is empty), show it
   if (!routeName) return true;
-
   return TAB_BAR_VISIBLE_ROUTES.includes(routeName);
 };
 
-function CustomTabBar({
-  state,
-  descriptors,
-  navigation,
-}: BottomTabBarProps) {
+// Placeholder hook points for future analytics wiring.
+const trackTabPress = (_analyticsId: string) => {
+  return;
+};
+
+// Placeholder hook point for future badge counts (cart, notifications, etc.).
+const getBadgeCount = (_routeName: TabRouteName): number | undefined => {
+  return undefined;
+};
+
+type TabButtonProps = {
+  isFocused: boolean;
+  routeName: TabRouteName;
+  onPress: () => void;
+  label: string;
+  badgeCount?: number;
+};
+
+const TabButton = memo(function TabButton({
+  isFocused,
+  routeName,
+  onPress,
+  label,
+  badgeCount,
+}: TabButtonProps) {
   const { colors } = useTheme();
-  const { t } = useTranslation();
-
-  // Check if current focused route should hide the tab bar
-  const activeRoute = state.routes[state.index];
-  const isVisible = getTabBarVisibility(activeRoute);
-
-  if (!isVisible) return null;
+  const config = TAB_CONFIG[routeName];
+  const iconColor = isFocused ? '#1DB954' : '#606060';
 
   return (
-    <View
-      style={[
-        styles.wrapper,
-        {
-          backgroundColor: colors.background,
-        },
-      ]}
+    <AnimatedPressable
+      onPress={onPress}
+      pressScale={microInteractions.pressScale}
+      pressOpacity={microInteractions.pressOpacity}
+      pressTranslateY={1}
+      style={styles.tabButton}
     >
-      <View
-        style={[
-          styles.container,
-          {
-            backgroundColor: colors.surface,
-            borderColor: colors.border,
-          },
-        ]}
-      >
-        {state.routes.map((route, index) => {
-          const isFocused = state.index === index;
+      <View style={styles.activeContainer}>
+        <View style={styles.iconWrap}>
+          <Icon
+            name={isFocused ? config.activeIcon : config.inactiveIcon}
+            size={TAB_METRICS.iconSize}
+            color={iconColor}
+          />
+          {badgeCount != null && badgeCount > 0 ? (
+            <View style={[styles.badge, { backgroundColor: colors.error }]}> 
+              <Text style={styles.badgeText}>{badgeCount > 99 ? '99+' : `${badgeCount}`}</Text>
+            </View>
+          ) : null}
+        </View>
 
-          const config =
-            TAB_CONFIG[
-              route.name as keyof typeof TAB_CONFIG
-            ];
+        {isFocused ? (
+          <>
+            <Text style={styles.activeLabel} numberOfLines={1}>{label}</Text>
+            <View style={styles.activeDot} />
+          </>
+        ) : null}
+      </View>
+    </AnimatedPressable>
+  );
+}, (prev, next) => {
+  return (
+    prev.isFocused === next.isFocused
+    && prev.routeName === next.routeName
+    && prev.label === next.label
+    && prev.badgeCount === next.badgeCount
+    && prev.onPress === next.onPress
+  );
+});
 
-          const onPress = () => {
-            const event = navigation.emit({
-              type: 'tabPress',
-              target: route.key,
-              canPreventDefault: true,
-            });
+function CustomTabBar({ state, navigation }: BottomTabBarProps) {
+  const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
+  const isRTL = I18nManager.isRTL;
 
-            if (!isFocused && !event.defaultPrevented) {
-              navigation.navigate(route.name);
-            }
-          };
+  const activeRoute = state.routes[state.index];
+  const isVisible = getTabBarVisibility(activeRoute);
+  if (!isVisible) return null;
 
-          const color = isFocused
-            ? colors.primary
-            : colors.textSecondary;
+  const orderedRoutes = useMemo(() => {
+    return isRTL ? [...state.routes].reverse() : state.routes;
+  }, [isRTL, state.routes]);
+
+  const bottomPadding = Math.max(insets.bottom, TAB_METRICS.minBottomPadding);
+
+  const handleTabPress = useCallback((routeKey: string, routeName: string, isFocused: boolean, analyticsId: string) => {
+    const event = navigation.emit({
+      type: 'tabPress',
+      target: routeKey,
+      canPreventDefault: true,
+    });
+
+    if (!isFocused && !event.defaultPrevented) {
+      trackTabPress(analyticsId);
+      navigation.navigate(routeName as never);
+    }
+  }, [navigation]);
+
+  return (
+    <View style={[styles.wrapper, { paddingBottom: bottomPadding }]}>
+      <View style={styles.container}>
+
+        {orderedRoutes.map((route) => {
+          const routeName = route.name as TabRouteName;
+          const config = TAB_CONFIG[routeName];
+          const isFocused = activeRoute.key === route.key;
+          const label = t(config.labelKey);
+          const badgeCount = getBadgeCount(routeName);
 
           return (
-            <Pressable
+            <TabButton
               key={route.key}
-              onPress={onPress}
-              style={styles.tabButton}
-            >
-              <View
-  style={[
-    styles.activeContainer,
-    {
-      backgroundColor: isFocused
-        ? `${colors.primary}12`
-        : 'transparent',
-
-      borderWidth: isFocused ? 1 : 0,
-
-      borderColor: isFocused
-        ? `${colors.primary}20`
-        : 'transparent',
-    },
-  ]}
->
-                <View style={styles.iconContainer}>
-                  <Icon
-                    name={
-                      isFocused
-                        ? config.activeIcon
-                        : config.inactiveIcon
-                    }
-                    size={24}
-                    color={color}
-                  />
-
-                 
-                </View>
-
-                <Text
-                  style={[
-                    styles.label,
-                    {
-                      color,
-                      fontWeight: isFocused ? '800' : '600',
-                    },
-                  ]}
-                  numberOfLines={1}
-                >
-                  {t(config.label)}
-                </Text>
-              </View>
-            </Pressable>
+              routeName={routeName}
+              isFocused={isFocused}
+              label={label}
+              badgeCount={badgeCount}
+              onPress={() => handleTabPress(route.key, route.name, isFocused, config.analyticsId)}
+            />
           );
         })}
       </View>
@@ -210,21 +212,12 @@ export function CustomerTabs() {
           },
         }}
       >
-        <Tab.Screen
-          name={TAB_ROUTES.HOME_TAB}
-          component={HomeStack}
-        />
-
-        <Tab.Screen
-          name={TAB_ROUTES.CATEGORIES_TAB}
-          component={CategoriesScreen}
-        />
-
+        <Tab.Screen name={TAB_ROUTES.HOME_TAB} component={HomeStack} />
+        <Tab.Screen name={TAB_ROUTES.CATEGORIES_TAB} component={CategoriesScreen} />
         <Tab.Screen
           name={TAB_ROUTES.ORDERS_TAB}
           component={isGuest ? GuestLoginPromptScreen : OrdersStack}
         />
-
         <Tab.Screen
           name={TAB_ROUTES.PROFILE_TAB}
           component={isGuest ? GuestProfileScreen : ProfileStack}
@@ -235,70 +228,68 @@ export function CustomerTabs() {
     </>
   );
 }
+
 const styles = StyleSheet.create({
   wrapper: {
-    paddingHorizontal: 16,
-    paddingBottom: Platform.OS === 'ios' ? 10 : 6,
-    paddingTop: 2,
-
-    backgroundColor: 'transparent',
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
+    paddingTop: space.xs,
   },
-
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-
-    alignSelf: 'center',
-
-    width: '92%', // smaller width
-
-    borderRadius: 22,
-
+    justifyContent: 'space-around',
     borderWidth: 1,
-
-    paddingHorizontal: 6,
-    paddingVertical: 4, // smaller height
-
-    shadowColor: '#000',
-
-    shadowOffset: {
-      width: 0,
-      height: -2,
-    },
-
-    shadowOpacity: 0.04,
-    shadowRadius: 10,
-
-    elevation: 6,
+    borderColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: '#1A1A1A',
+    height: 62,
+    paddingTop: 6,
+    paddingBottom: 8,
   },
-
   tabButton: {
     flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-
   activeContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-
-    borderRadius: 14,
-
-    paddingVertical: 5, // reduced
-    paddingHorizontal: 4,
-
-    minHeight: 44, // smaller
+    minHeight: TAB_METRICS.minTabHeight,
+    gap: 1,
   },
-
-  iconContainer: {
-    alignItems: 'center',
+  iconWrap: {
+    position: 'relative',
+  },
+  badge: {
+    position: 'absolute',
+    top: -6,
+    end: -9,
+    minWidth: 14,
+    height: 14,
+    borderRadius: 7,
     justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 2,
   },
-
-  label: {
-    marginTop: 2,
-
-    fontSize: 10,
-
+  badgeText: {
+    fontSize: 9,
+    fontWeight: '700',
+    color: '#fff',
+    lineHeight: 10,
+  },
+  activeLabel: {
+    marginTop: 1,
+    fontSize: 11,
+    color: '#1DB954',
+    fontWeight: '600',
     textAlign: 'center',
+  },
+  activeDot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    marginTop: 2,
+    backgroundColor: '#1DB954',
   },
 });

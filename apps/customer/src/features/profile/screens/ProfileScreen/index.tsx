@@ -2,16 +2,16 @@ import React, { useMemo } from 'react';
 import { View, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useTranslation } from '@dawwar/i18n';
 import { ScrollScreenTemplate, Text, Avatar, Icon } from '@dawwar/ui';
-import { useTheme } from '@dawwar/theme';
+import { space, useTheme } from '@dawwar/theme';
 import { SettingsRow } from '../../components/SettingsRow';
 import { useController } from './useController';
 import { createStyles } from './styles';
-import { PROFILE_ROUTES } from '../../../../navigation/routes';
+import { PROFILE_ROUTES, WALLET_ROUTES } from '../../../../navigation/routes';
 import { Button } from '@dawwar/ui';
 
 export function ProfileScreen() {
   const { t } = useTranslation();
-  const { colors, spacing } = useTheme();
+  const { colors } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
   const ctrl = useController();
 
@@ -35,9 +35,9 @@ export function ProfileScreen() {
             <Avatar uri={ctrl.user?.avatar} name={ctrl.user?.name} size="xl" />
             <View style={styles.editIconContainer}>
               {ctrl.isUploading ? (
-                <ActivityIndicator size="small" color="#fff" />
+                <ActivityIndicator size="small" color={colors.surface} />
               ) : (
-                <Icon name="camera-outline" size={16} color="#fff" />
+                <Icon name="camera-outline" size={16} color={colors.surface} />
               )}
             </View>
           </TouchableOpacity>
@@ -45,16 +45,16 @@ export function ProfileScreen() {
           <Text style={styles.userPhone}>{ctrl.user?.phone}</Text>
         </View>
       ) : (
-        <View style={[styles.userCard, { paddingVertical: spacing.xl }]}>
+        <View style={[styles.userCard, { paddingVertical: space.xl }]}> 
           <View style={[styles.avatarContainer, { backgroundColor: colors.border }]}>
             <Icon name="account-outline" size={40} color={colors.textSecondary} />
           </View>
-          <Text style={[styles.userName, { marginBottom: spacing.m }]}>{t('home.greeting_guest')}</Text>
+          <Text style={[styles.userName, { marginBottom: space.md }]}>{t('home.greeting_guest')}</Text>
           <Button 
             label={t('auth.login_btn')} 
             onPress={ctrl.handleLogin}
             variant="primary"
-            size="small"
+            size="sm"
             style={{ minWidth: 120 }}
           />
         </View>
@@ -73,7 +73,7 @@ export function ProfileScreen() {
             <SettingsRow
               icon="wallet-outline"
               title={t('wallet.title')}
-              onPress={() => ctrl.navigate('WalletScreen' as any)}
+              onPress={() => ctrl.navigate(WALLET_ROUTES.WALLET)}
             />
             <SettingsRow
               icon="map-marker-outline"

@@ -1,9 +1,9 @@
 import React from 'react';
-import { View, TouchableOpacity, I18nManager } from 'react-native';
+import { View, I18nManager } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from '@dawwar/i18n';
-import { ScrollScreenTemplate, Text, Input, Button, Divider, Icon } from '@dawwar/ui';
-import { useTheme } from '@dawwar/theme';
+import { ScrollScreenTemplate, Text, Input, Button, Divider, Icon, AnimatedPressable } from '@dawwar/ui';
+import { useTheme, microInteractions } from '@dawwar/theme';
 import { PaymentMethod } from '@dawwar/types';
 import { useController } from './useController';
 import { createStyles } from './styles';
@@ -14,9 +14,9 @@ import { LoginGateModal } from '../../../../components/LoginGateModal';
 
 const getLocalizedLabel = (label: string, t: TFunction) => {
   const map: Record<string, string> = {
-    home: t('address_labels.home', 'المنزل'),
-    work: t('address_labels.work', 'العمل'),
-    other: t('address_labels.other', 'أخرى'),
+    home: t('address_labels.home'),
+    work: t('address_labels.work'),
+    other: t('address_labels.other'),
   };
   return map[label?.toLowerCase()] ?? label;
 };
@@ -80,13 +80,15 @@ export function CheckoutScreen() {
         <Text style={styles.sectionTitle}>{t('checkout.payment_title')}</Text>
 
         {/* Cash */}
-        <TouchableOpacity
+        <AnimatedPressable
           style={[
             styles.paymentOption,
             ctrl.paymentMethod === PaymentMethod.CASH && styles.paymentOptionSelected,
           ]}
           onPress={() => ctrl.setPaymentMethod(PaymentMethod.CASH)}
-          activeOpacity={0.8}
+          pressScale={microInteractions.cardPressScale}
+          pressOpacity={microInteractions.pressOpacity}
+          pressTranslateY={1}
         >
           <View style={styles.paymentIconWrap}>
             <Icon name="cash" size={24} color={colors.textSecondary} />
@@ -103,16 +105,18 @@ export function CheckoutScreen() {
           >
             {ctrl.paymentMethod === PaymentMethod.CASH && <View style={styles.radioDot} />}
           </View>
-        </TouchableOpacity>
+        </AnimatedPressable>
 
         {/* Wallet */}
-        <TouchableOpacity
+        <AnimatedPressable
           style={[
             styles.paymentOption,
             ctrl.paymentMethod === PaymentMethod.WALLET && styles.paymentOptionSelected,
           ]}
           onPress={() => ctrl.setPaymentMethod(PaymentMethod.WALLET)}
-          activeOpacity={0.8}
+          pressScale={microInteractions.cardPressScale}
+          pressOpacity={microInteractions.pressOpacity}
+          pressTranslateY={1}
         >
           <View style={styles.paymentIconWrap}>
             <Icon name="wallet-outline" size={24} color={colors.textSecondary} />
@@ -138,7 +142,7 @@ export function CheckoutScreen() {
           >
             {ctrl.paymentMethod === PaymentMethod.WALLET && <View style={styles.radioDot} />}
           </View>
-        </TouchableOpacity>
+        </AnimatedPressable>
       </View>
 
       {/* Order notes with character counter */}

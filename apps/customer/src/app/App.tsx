@@ -3,7 +3,6 @@ import { useLocalizationInitialization } from '@dawwar/i18n';
 
 import { enableScreens } from 'react-native-screens';
 import { NavigationContainer } from '@react-navigation/native';
-import RNBootSplash from "react-native-bootsplash";
 import { AppProviders } from './providers';
 import { RootNavigator } from '../navigation/RootNavigator';
 import { linking } from '../navigation/linking';
@@ -50,7 +49,6 @@ export function App() {
         }}
         onReady={() => {
           logger.log('[NavigationContainer] Ready');
-          void RNBootSplash.hide({ fade: true });
         }}
       >
         <RootNavigator />

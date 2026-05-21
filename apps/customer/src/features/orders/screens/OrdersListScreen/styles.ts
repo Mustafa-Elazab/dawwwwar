@@ -1,13 +1,14 @@
 import { StyleSheet } from 'react-native';
 import type { AppColors } from '@dawwar/theme';
-import { space, typography, radius } from '@dawwar/theme';
+import { space, typography, radius, layout } from '@dawwar/theme';
 
 export const createStyles = (colors: AppColors) =>
   StyleSheet.create({
     tabRow: {
       flexDirection: 'row',
       backgroundColor: colors.surfaceVariant,
-      margin: space.base,
+      marginHorizontal: layout.screenPaddingH,
+      marginVertical: space.md,
       borderRadius: radius.full,
       padding: 3,
     },
@@ -17,10 +18,11 @@ export const createStyles = (colors: AppColors) =>
       borderRadius: radius.full,
       alignItems: 'center',
     },
-    tabActive: { 
+    tabActive: {
       backgroundColor: colors.primary,
     },
-    tabLabel: { 
+    tabLabel: {
       ...typography.label,
+      fontWeight: '600',
     },
   });

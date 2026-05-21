@@ -1,7 +1,6 @@
 import React, { useRef } from 'react';
-import { View, TextInput, TouchableOpacity, Keyboard } from 'react-native';
+import { View, TextInput } from 'react-native';
 import { useTheme } from '@dawwar/theme';
-import { Text } from '@dawwar/ui';
 import { createStyles } from './styles';
 import type { OtpInputProps } from './types';
 
@@ -14,53 +13,63 @@ export function OtpInput({
 }: OtpInputProps & { length?: number }) {
   const { colors } = useTheme();
   const styles = createStyles(colors, hasError);
-  const inputRef = useRef<TextInput>(null);
+  const inputRefs = useRef<Array<TextInput | null>>([]);
+  const chars = Array.from({ length }, (_, idx) => value[idx] ?? '');
 
-  const focusInput = () => {
-    inputRef.current?.focus();
+  const focusIndex = (idx: number) => {
+    inputRefs.current[idx]?.focus();
   };
 
-  const renderBoxes = () => {
-    const boxes = [];
-    for (let i = 0; i < length; i++) {
-      const char = value[i] || '';
-      const isFocused = value.length === i;
+  const handleDigitChange = (idx: number, text: string) => {
+    const nextChar = text.replace(/\D/g, '').slice(-1);
+    const next = [...chars];
+    next[idx] = nextChar;
+    const joined = next.join('');
+    onChange?.(joined);
 
-      boxes.push(
-        <TouchableOpacity
-          key={i}
-          style={[
-            styles.box,
-            char ? styles.boxFilled : null,
-            isFocused ? styles.boxFocused : null,
-          ]}
-          onPress={focusInput}
-          activeOpacity={1}
-        >
-          <Text style={styles.digit}>{char}</Text>
-        </TouchableOpacity>
-      );
+    if (nextChar && idx < length - 1) {
+      focusIndex(idx + 1);
     }
-    return boxes;
   };
 
   return (
     <View style={styles.row} testID={testID}>
-      {renderBoxes()}
-      <TextInput
-        ref={inputRef}
-        style={styles.hiddenInput}
-        value={value}
-        onChangeText={(text) => {
-          const cleanText = text.replace(/\D/g, '').slice(0, length);
-          if (onChange) {
-            onChange(cleanText);
-          }
-        }}
-        keyboardType="number-pad"
-        maxLength={length}
-        autoFocus
-      />
+      {chars.map((char, idx) => {
+        const isFocused = value.length === idx && value.length < length;
+
+        return (
+          <TextInput
+            key={idx}
+            ref={(r) => {
+              inputRefs.current[idx] = r;
+            }}
+            value={char}
+            onChangeText={(text) => handleDigitChange(idx, text)}
+            onKeyPress={({ nativeEvent }) => {
+              if (nativeEvent.key !== 'Backspace') return;
+              if (char) {
+                const next = [...chars];
+                next[idx] = '';
+                onChange?.(next.join(''));
+                return;
+              }
+              if (idx > 0) {
+                focusIndex(idx - 1);
+              }
+            }}
+            keyboardType="number-pad"
+            textContentType={idx === 0 ? 'oneTimeCode' : 'none'}
+            autoComplete={idx === 0 ? 'sms-otp' : 'off'}
+            maxLength={1}
+            autoFocus={idx === 0}
+            style={[
+              styles.box,
+              char ? styles.boxFilled : null,
+              isFocused ? styles.boxFocused : null,
+            ]}
+          />
+        );
+      })}
     </View>
   );
 }
