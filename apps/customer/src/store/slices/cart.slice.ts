@@ -37,9 +37,9 @@ export const cartSlice = createSlice({
     addItem: (state, action: PayloadAction<CartItem>) => {
       const { merchantId, merchantName, merchantNameAr } = action.payload;
 
-      // If cart belongs to a different merchant, clear it first
+      // A basket can only belong to one merchant at a time.
       if (state.merchantId && state.merchantId !== merchantId) {
-        state.items = [];
+        return;
       }
 
       state.merchantId = merchantId;

@@ -1,8 +1,8 @@
-import { StyleSheet } from 'react-native';
+import { I18nManager, StyleSheet } from 'react-native';
 import type { AppColors } from '@dawwar/theme';
 import { typography } from '@dawwar/theme';
 
-export const createStyles = (colors: AppColors) =>
+export const createStyles = (colors: AppColors, isRTL = I18nManager.isRTL) =>
   StyleSheet.create({
     coverContainer: {
       height: 220,
@@ -38,14 +38,17 @@ export const createStyles = (colors: AppColors) =>
       ...typography.h2,
       color: '#fff',
       marginBottom: 8,
+      textAlign: isRTL ? 'right' : 'left',
+      writingDirection: isRTL ? 'rtl' : 'ltr',
     },
     metaRow: {
-      flexDirection: 'row',
+      flexDirection: isRTL ? 'row-reverse' : 'row',
       alignItems: 'center',
       marginBottom: 12,
+      alignSelf: isRTL ? 'flex-end' : 'flex-start',
     },
     ratingRow: {
-      flexDirection: 'row',
+      flexDirection: isRTL ? 'row-reverse' : 'row',
       alignItems: 'center',
       backgroundColor: 'rgba(0,0,0,0.4)',
       paddingHorizontal: 6,
@@ -64,6 +67,6 @@ export const createStyles = (colors: AppColors) =>
       marginHorizontal: 4,
     },
     badgeWrapper: {
-      alignSelf: 'flex-start',
+      alignSelf: isRTL ? 'flex-end' : 'flex-start',
     },
   });

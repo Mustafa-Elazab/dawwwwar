@@ -1,27 +1,32 @@
-import { useSendOtp as useBaseSendOtp, useVerifyOtp as useBaseVerifyOtp } from '@dawwar/api-client';
+import {
+  useSendCustomerOtp as useBaseSendCustomerOtp,
+  useVerifyCustomerOtp as useBaseVerifyCustomerOtp,
+} from '@dawwar/api-client';
 import { useAppDispatch } from '../../../store/hooks';
 import { setAuth } from '../../../store/slices/auth.slice';
 import { USE_MOCK_API } from '../../../core/api/config';
 import { api } from '../../../core/api/client';
 
 export function useSendOtp() {
-  return useBaseSendOtp();
+  return useBaseSendCustomerOtp();
 }
 
 export function useVerifyOtp() {
   const dispatch = useAppDispatch();
-  const mutation = useBaseVerifyOtp();
+  const mutation = useBaseVerifyCustomerOtp();
 
   return {
     ...mutation,
     mutateAsync: async (params: { phone: string; code: string }) => {
       const res = await mutation.mutateAsync(params);
+      const session =
+        res && typeof res === 'object' && 'data' in res ? res.data : res;
       
       dispatch(
         setAuth({
-          user: res.data.user,
-          accessToken: res.data.accessToken,
-          refreshToken: res.data.refreshToken,
+          user: session.user,
+          accessToken: session.accessToken,
+          refreshToken: session.refreshToken,
         }),
       );
 

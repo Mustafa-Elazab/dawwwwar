@@ -1,10 +1,12 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from '@dawwar/i18n';
 import { useAppDispatch, useAppSelector } from '../../../../store/hooks';
 import { selectLocation } from '../../../../store/slices/location.slice';
-import { addItem, selectCartMerchantId } from '../../../../store/slices/cart.slice';
+import { addItem, clearCart, selectCartMerchantId } from '../../../../store/slices/cart.slice';
+import { selectIsAuthenticated, startAuthFlow } from '../../../../store/slices/auth.slice';
 import { useFeaturedProducts } from '../../core/hooks';
+import { useLikedProducts, useToggleFavorite } from '../../../liked/core/hooks';
 import { HOME_ROUTES } from '../../../../navigation/routes';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { HomeStackParamList } from '../../../../navigation/types';
@@ -16,6 +18,10 @@ export function useController() {
   const location = useAppSelector(selectLocation);
   const dispatch = useAppDispatch();
   const cartMerchantId = useAppSelector(selectCartMerchantId);
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  const { data: liked = [] } = useLikedProducts();
+  const toggleFavorite = useToggleFavorite();
+  const likedProductIds = useMemo(() => new Set(liked.map((item) => item.productId)), [liked]);
   
   const {
     data: products,
@@ -52,7 +58,10 @@ export function useController() {
               {
                 text: t('cart.clear_and_add', 'Clear & Add'),
                 style: 'destructive',
-                onPress: doAdd,
+                onPress: () => {
+                  dispatch(clearCart());
+                  doAdd();
+                },
               },
             ],
           );
@@ -65,11 +74,24 @@ export function useController() {
     [dispatch, cartMerchantId, t],
   );
 
+  const handleToggleFavorite = useCallback(
+    (productId: string) => {
+      if (!isAuthenticated) {
+        dispatch(startAuthFlow());
+        return;
+      }
+      toggleFavorite.mutate({ productId, liked: likedProductIds.has(productId) });
+    },
+    [dispatch, isAuthenticated, likedProductIds, toggleFavorite],
+  );
+
   return {
     products: products ?? [],
     isLoading,
     isError,
     handleProductAdd,
+    handleToggleFavorite,
+    isProductLiked: (productId: string) => likedProductIds.has(productId),
     handleBack: () => navigation.goBack(),
     refetch,
     t,

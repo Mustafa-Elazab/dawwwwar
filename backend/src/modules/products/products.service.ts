@@ -12,6 +12,26 @@ import { MerchantsService } from '../merchants/merchants.service';
 import type { CreateProductDto } from './dto/create-product.dto';
 import type { UpdateProductDto } from './dto/update-product.dto';
 
+const CUSTOMER_MAX_RADIUS_KM = 10;
+
+const toNumber = (value: number | string | null | undefined): number | null => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
+const distanceKm = (fromLat: number, fromLng: number, toLat: number | string, toLng: number | string): number => {
+  const lat2 = toNumber(toLat);
+  const lng2 = toNumber(toLng);
+  if (lat2 == null || lng2 == null) return Number.POSITIVE_INFINITY;
+  const toRad = (degrees: number) => (degrees * Math.PI) / 180;
+  const dLat = toRad(lat2 - fromLat);
+  const dLng = toRad(lng2 - fromLng);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(fromLat)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+};
+
 @Injectable()
 export class ProductsService {
   constructor(
@@ -38,7 +58,22 @@ export class ProductsService {
     });
   }
 
-  async findFeatured(): Promise<ProductEntity[]> {
+  async findFeatured(lat?: number, lng?: number, radiusKm = CUSTOMER_MAX_RADIUS_KM): Promise<ProductEntity[]> {
+    if (lat != null && lng != null && Number.isFinite(lat) && Number.isFinite(lng)) {
+      const radius = Math.min(Math.max(radiusKm, 1), CUSTOMER_MAX_RADIUS_KM);
+      const products = await this.repo.find({
+        where: { isFeatured: true, isAvailable: true },
+        relations: ['merchant'],
+        order: { totalOrders: 'DESC' },
+      });
+      return products
+        .filter((product) =>
+          product.merchant?.isApproved &&
+          distanceKm(lat, lng, product.merchant.latitude, product.merchant.longitude) <= radius,
+        )
+        .slice(0, 20);
+    }
+
     return this.repo.find({
       where: { isFeatured: true, isAvailable: true },
       order: { totalOrders: 'DESC' },

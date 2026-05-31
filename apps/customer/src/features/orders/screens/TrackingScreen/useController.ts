@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from '@dawwar/i18n';
 import Toast from 'react-native-toast-message';
 import { ordersApi } from '../../core/api';
 import { OrderStatus } from '@dawwar/types';
 import type { RouteProp } from '@react-navigation/native';
+import type { StackNavigationProp } from '@react-navigation/stack';
 import type { OrdersStackParamList } from '../../../../navigation/types';
 import { ORDER_ROUTES } from '../../../../navigation/routes';
 import { socketManager } from '../../../../core/socket';
@@ -14,6 +15,7 @@ import { SOCKET_EVENTS } from '@dawwar/api-client';
 export function useController() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const navigation = useNavigation<StackNavigationProp<OrdersStackParamList>>();
   const route = useRoute<RouteProp<OrdersStackParamList, typeof ORDER_ROUTES.TRACKING>>();
   const { orderId } = route.params;
 
@@ -22,10 +24,10 @@ export function useController() {
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ['order', orderId],
+    queryKey: ['orders', orderId],
     queryFn: () => ordersApi.getById(orderId),
     staleTime: 30_000,
-    select: (res) => res.data,
+    select: (res) => (res && typeof res === 'object' && 'data' in res ? res.data : res),
   });
 
   const [driverLocation, setDriverLocation] = useState<{ latitude: number; longitude: number } | null>(null);
@@ -42,7 +44,7 @@ export function useController() {
     const handleStatusChange = (data: { orderId: string; status: string; order: any }) => {
       console.log('[Socket] Order status changed:', data.status);
       // Invalidate the query to fetch fresh data from REST
-      void queryClient.invalidateQueries({ queryKey: ['order', orderId] });
+      void queryClient.invalidateQueries({ queryKey: ['orders', orderId] });
       
       if (data.status === OrderStatus.COMPLETED) {
         Toast.show({ type: 'success', text1: t('tracking.delivered_success') });
@@ -59,7 +61,7 @@ export function useController() {
 
     const handleReconnect = () => {
       console.log('[Socket] Reconnected, invalidating order query');
-      void queryClient.invalidateQueries({ queryKey: ['order', orderId] });
+      void queryClient.invalidateQueries({ queryKey: ['orders', orderId] });
     };
 
     // Listen for events
@@ -79,6 +81,14 @@ export function useController() {
   const canCancel =
     order?.status === OrderStatus.PENDING || order?.status === OrderStatus.ACCEPTED;
 
+  const handleCancelOrder = () => {
+    navigation.navigate(ORDER_ROUTES.CANCEL_ORDER, { orderId });
+  };
+
+  const handleViewDetails = () => {
+    navigation.navigate(ORDER_ROUTES.ORDER_DETAIL, { orderId });
+  };
+
   return {
     order,
     isLoading,
@@ -86,6 +96,8 @@ export function useController() {
     driverLocation: hasDriver ? driverLocation : null,
     hasDriver,
     canCancel,
+    handleCancelOrder,
+    handleViewDetails,
     t,
   };
 }

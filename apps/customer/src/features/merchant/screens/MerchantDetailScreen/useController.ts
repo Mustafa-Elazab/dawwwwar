@@ -4,6 +4,7 @@ import { useTranslation } from '@dawwar/i18n';
 import { useAppDispatch, useAppSelector } from '../../../../store/hooks';
 import {
   addItem,
+  clearCart,
   removeItem,
   updateQuantity,
   selectCartItems,
@@ -14,12 +15,12 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { categoriesApi } from '../../../categories/core/api';
 import { useMerchantDetail, useMerchantProducts } from '../../core/hooks';
-import { MODAL_ROUTES } from '../../../../navigation/routes';
+import { TAB_ROUTES } from '../../../../navigation/routes';
 import type { MerchantDetailNavProp, MerchantDetailRouteProp, MerchantTab } from './types';
-import type { Product } from '@dawwar/types';
+import type { Category, Product } from '@dawwar/types';
 
 export function useController() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigation = useNavigation<MerchantDetailNavProp>();
   const route = useRoute<MerchantDetailRouteProp>();
   const dispatch = useAppDispatch();
@@ -37,7 +38,7 @@ export function useController() {
 
   const { data: categoriesRes } = useQuery({
     queryKey: ['categories'],
-    queryFn: categoriesApi.getAll,
+    queryFn: () => categoriesApi.getAll(),
     staleTime: 10 * 60_000,
   });
 
@@ -49,12 +50,14 @@ export function useController() {
   // Group products by category
   const groupedProducts = useMemo(() => {
     if (!products) return [];
-    const categories = categoriesRes?.data || [];
+    const categories: Category[] = categoriesRes || [];
     const groups: Record<string, { categoryId: string; categoryName: string; products: Product[] }> = {};
 
     products.forEach((product) => {
       const cat = categories.find((c) => c.id === product.categoryId);
-      const categoryName = cat ? cat.nameAr : t('categories.title');
+      const categoryName = cat
+        ? (i18n.language.startsWith('ar') ? cat.nameAr || cat.name : cat.name || cat.nameAr)
+        : t('categories.title');
       if (!groups[product.categoryId]) {
         groups[product.categoryId] = { categoryId: product.categoryId, categoryName, products: [] };
       }
@@ -62,7 +65,7 @@ export function useController() {
     });
 
     return Object.values(groups);
-  }, [products, categoriesRes, t]);
+  }, [products, categoriesRes, i18n.language, t]);
 
   const getProductQuantity = useCallback(
     (productId: string) => {
@@ -101,7 +104,10 @@ export function useController() {
               {
                 text: t('cart.clear_and_add', 'Clear & Add'),
                 style: 'destructive',
-                onPress: doAdd,
+                onPress: () => {
+                  dispatch(clearCart());
+                  doAdd();
+                },
               },
             ],
           );
@@ -128,7 +134,7 @@ export function useController() {
   );
 
   const handleCartBarPress = useCallback(() => {
-    navigation.navigate(MODAL_ROUTES.CART as any);
+    navigation.getParent()?.navigate(TAB_ROUTES.BASKET_TAB as never);
   }, [navigation]);
 
   const isLoading = merchantLoading || productsLoading;

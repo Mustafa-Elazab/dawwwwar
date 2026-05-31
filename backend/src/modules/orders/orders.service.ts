@@ -81,7 +81,7 @@ export class OrdersService {
   async getOrderById(id: string): Promise<OrderEntity> {
     const order = await this.orderRepo.findOne({
       where: { id },
-      relations: ['items', 'merchant', 'driver', 'driver.user', 'customer', 'events'],
+      relations: ['items', 'merchant', 'driver', 'customer', 'events'],
     });
     if (!order) throw new NotFoundException('ORDER_NOT_FOUND');
     return order;
@@ -522,7 +522,6 @@ export class OrdersService {
       const order = await manager.findOne(OrderEntity, {
         where: { id: orderId },
         lock: { mode: 'pessimistic_write' },
-        relations: ['merchant', 'customer', 'driver'],
       });
 
       if (!order) throw new NotFoundException('ORDER_NOT_FOUND');
@@ -538,10 +537,10 @@ export class OrdersService {
       // 3. Status-specific side effects
       const updateData: Partial<OrderEntity> = { status: nextStatus, ...additionalData };
 
-      // REJECTED or CANCELLED -> Handle Refunds
-      if ((nextStatus === OrderStatus.REJECTED || nextStatus === OrderStatus.CANCELLED) && order.isPaid) {
-        // Refund if paid via wallet
-        if (order.paymentMethod === PaymentMethod.WALLET) {
+      // REJECTED or CANCELLED -> stamp finalization and handle refunds when needed.
+      if (nextStatus === OrderStatus.REJECTED || nextStatus === OrderStatus.CANCELLED) {
+        updateData.cancelledAt = new Date();
+        if (order.isPaid && order.paymentMethod === PaymentMethod.WALLET) {
           await this.walletService.creditWallet(
             order.customerId,
             Number(order.total),
@@ -552,7 +551,6 @@ export class OrdersService {
             `REFUND_${order.id}_${nextStatus}`
           );
         }
-        updateData.cancelledAt = new Date();
       }
 
       // ACCEPTED
@@ -599,7 +597,7 @@ export class OrdersService {
 
       return manager.findOne(OrderEntity, {
         where: { id: orderId },
-        relations: ['items', 'merchant', 'driver', 'driver.user', 'customer'],
+        relations: ['items', 'merchant', 'driver', 'customer', 'events'],
       }) as Promise<OrderEntity>;
     });
   }
@@ -646,16 +644,22 @@ export class OrdersService {
   }
 
   // ── Customer: cancel order ──────────────────────────────────────────
-  async customerCancel(orderId: string, customerId: string, isAdmin = false): Promise<OrderEntity> {
+  async customerCancel(orderId: string, customerId: string, isAdmin = false, reason?: string): Promise<OrderEntity> {
     const order = await this.getOrderById(orderId);
     if (!isAdmin && order.customerId !== customerId) throw new ForbiddenException('NOT_YOUR_ORDER');
     
-    // Policy: Customers can only cancel while PENDING
-    if (order.status !== OrderStatus.PENDING && !isAdmin) {
-      throw new BadRequestException('CAN_ONLY_CANCEL_PENDING');
+    // Policy: Customers can cancel before the order has moved to delivery.
+    if (![OrderStatus.PENDING, OrderStatus.ACCEPTED].includes(order.status) && !isAdmin) {
+      throw new BadRequestException('CAN_ONLY_CANCEL_EARLY');
     }
 
-    const updated = await this.transitionTo(orderId, OrderStatus.CANCELLED, customerId);
+    const updated = await this.transitionTo(
+      orderId,
+      OrderStatus.CANCELLED,
+      customerId,
+      {},
+      reason ? { reason } : {},
+    );
 
     if (order.merchantId) {
       this.gatewayService.notifyOrderStatusChanged(orderId, OrderStatus.CANCELLED, updated);

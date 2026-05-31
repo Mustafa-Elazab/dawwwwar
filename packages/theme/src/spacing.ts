@@ -16,6 +16,7 @@ export const spacing = {
 
 // Named aliases for readability
 export const space = {
+  xxs: 2,
   xs: spacing[1],
   sm: spacing[2],
   md: spacing[3],

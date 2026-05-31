@@ -11,15 +11,15 @@ export const createStyles = (colors: AppColors) =>
     // ── Header ──────────────────────────────────────
     headerContainer: {
       paddingHorizontal: space.base,
-      paddingTop: space.sm,
-      paddingBottom: space.md,
+      paddingTop: space.base,
+      paddingBottom: space.sm,
       backgroundColor: colors.background,
     },
     headerTopRow: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      marginBottom: space.sm,
+      marginBottom: 0,
     },
     greetingWrapper: {
       flex: 1,
@@ -30,7 +30,7 @@ export const createStyles = (colors: AppColors) =>
       color: colors.text,
       fontWeight: '800',
     },
-    bellBtn: {
+    bagBtn: {
       width: 44,
       height: 44,
       borderRadius: 22,
@@ -45,16 +45,14 @@ export const createStyles = (colors: AppColors) =>
       position: 'absolute',
       top: 10,
       end: 12,
-      width: 10,
-      height: 10,
-      borderRadius: 5,
-      backgroundColor: colors.error,
-      borderWidth: 1.5,
-      borderColor: colors.surface,
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+      backgroundColor: colors.primary,
     },
     locationBlock: {
+      flex: 1,
       alignSelf: 'flex-start',
-      marginBottom: space.md,
       maxWidth: '100%',
     },
     deliveringLabel: {
@@ -79,7 +77,8 @@ export const createStyles = (colors: AppColors) =>
 
     // ── Search ──────────────────────────────────────
     searchWrapper: {
-      marginTop: space.xs,
+      paddingHorizontal: space.base,
+      marginBottom: space.lg,
     },
     searchTap: {
       height: 48,
@@ -95,9 +94,6 @@ export const createStyles = (colors: AppColors) =>
     },
     filterBtn: {
       padding: space.xs,
-      borderEndWidth: 1,
-      borderColor: colors.border,
-      marginEnd: space.xs,
     },
     searchPlaceholder: {
       ...typography.body2,
@@ -109,7 +105,7 @@ export const createStyles = (colors: AppColors) =>
     // ── Banner ──────────────────────────────────────
     bannerContainer: {
       paddingHorizontal: space.base,
-      marginBottom: space.lg,
+      marginBottom: space.md,
     },
     bannerWrapper: {
       borderRadius: radius.xl,
@@ -119,12 +115,21 @@ export const createStyles = (colors: AppColors) =>
     // ── Categories ──────────────────────────────────
     categoriesContent: {
       paddingHorizontal: space.base,
-      paddingBottom: space.lg,
+      paddingBottom: space.md,
       gap: space.md,
+    },
+    categoriesGrid: {
+      paddingHorizontal: space.base,
+      paddingBottom: space.md,
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      justifyContent: 'space-between',
+      rowGap: space.md,
+      direction: 'ltr',
     },
     categoryCard: {
       alignItems: 'center',
-      width: 72,
+      width: '23%',
     },
     categoryIconCircle: {
       width: 64,
@@ -141,6 +146,7 @@ export const createStyles = (colors: AppColors) =>
       fontWeight: '700',
       textAlign: 'center',
       maxWidth: 72,
+      writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr',
     },
     categoryEmoji: {
       fontSize: 28,

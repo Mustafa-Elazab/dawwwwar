@@ -3,7 +3,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from '@dawwar/i18n';
 import { useAppDispatch, useAppSelector } from '../../../../store/hooks';
 import { selectLocation } from '../../../../store/slices/location.slice';
-import { addItem } from '../../../../store/slices/cart.slice';
+import { addItem, clearCart } from '../../../../store/slices/cart.slice';
 import { searchApi, type SearchResults } from '../../core/api';
 import { HOME_ROUTES } from '../../../../navigation/routes';
 import type { SearchScreenNavProp } from './types';
@@ -83,7 +83,10 @@ export function useController() {
               {
                 text: t('cart.clear_and_add', 'Clear & Add'),
                 style: 'destructive',
-                onPress: doAdd,
+                onPress: () => {
+                  dispatch(clearCart());
+                  doAdd();
+                },
               },
             ],
           );

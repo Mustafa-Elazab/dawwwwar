@@ -6,6 +6,8 @@
     "retry": "حاول مرة أخرى",
     "cancel": "إلغاء",
     "confirm": "تأكيد",
+    "submit": "إرسال",
+    "apply": "تطبيق",
     "save": "حفظ",
     "back": "رجوع",
     "done": "تم",
@@ -44,6 +46,9 @@
   "notifications": {
     "title": "الإشعارات",
     "empty": "لا توجد إشعارات بعد",
+    "empty_subtitle": "عند وصول الطلبات أو العروض أو التحديثات ستظهر هنا.",
+    "explore_deals": "تصفح العروض",
+    "store": "المحل",
     "order_delivered": "تم توصيل الطلب",
     "order_delivered_body": "تم توصيل طلبك #{{orderId}} من {{merchant}} بنجاح. بالهناء والشفاء!",
     "weekend_sale": "خصم 50% عرض نهاية الأسبوع",
@@ -52,6 +57,10 @@
   },
 
   "auth": {
+    "splash_brand": "دوّار",
+    "splash_tagline": "توصيل محلي سريع",
+    "splash_version": "الإصدار {{version}}",
+    "customer_tagline": "كل اللي تحتاجه، في دقيقة",
     "auth_selection_title": "مرحباً بك في دوّار",
     "auth_selection_subtitle": "أسهل طريقة لإعادة التدوير والحصول على مكافآت.",
     "login_title": "تسجيل الدخول",
@@ -79,6 +88,7 @@
     "terms_required": "يرجى قبول الشروط للمتابعة",
 
     "otp_title": "أدخل الرمز",
+    "verify_phone": "تأكيد رقم الهاتف",
     "otp_subtitle": "لقد أرسلنا كوداً مكوناً من 6 أرقام إلى\n",
     "otp_sandbox_hint": "وضع الاختبار: استخدم الرمز 123456",
     "otp_expires": "ينتهي الرمز خلال {{seconds}} ثانية",
@@ -147,6 +157,7 @@
     "search_placeholder": "ابحث عن محلات أو منتجات...",
     "nearby_title": "محلات قريبة منك",
     "popular_title": "المنتجات الشائعة",
+    "special_offers": "عروض خاصة",
     "see_all": "عرض الكل",
     "custom_order_btn": "طلب مخصص",
     "custom_order_sub": "اطلب من أي مكان",
@@ -461,6 +472,8 @@
     "shop_address_label": "عنوان المحل *",
     "shop_address_placeholder": "اسم الشارع، المنطقة، معلم قريب...",
     "shop_address_required": "عنوان المحل مطلوب",
+    "shop_location_title": "موقع المحل",
+    "shop_location_hint": "اختر موقع المحل على الخريطة",
     "pick_on_map": "اختر على الخريطة",
     "use_my_location": "استخدم موقعي",
     "items_section": "ماذا تحتاج؟",
@@ -488,6 +501,8 @@
     "budget_positive": "يجب أن تكون الميزانية أكبر من صفر",
     "budget_cash_limit": "الطلبات التي تتجاوز 200 ج.م تتطلب الدفع عبر المحفظة",
     "delivery_section": "تفاصيل التوصيل",
+    "summary_address": "العنوان",
+    "summary_description": "الوصف",
     "place_order": "تأكيد الطلب المخصص",
     "placing": "جاري الطلب...",
     "success": "تم الطلب المخصص!"
@@ -501,6 +516,9 @@
     "call_driver": "اتصل بالسائق",
     "call_merchant": "اتصل بالمحل",
     "cancel_order": "إلغاء الطلب",
+    "title": "تتبع الطلب",
+    "estimated_delivery_time": "وقت التوصيل المتوقع",
+    "my_order": "طلبي",
     "cancel_confirm_title": "إلغاء الطلب؟",
     "cancel_confirm_body": "هل أنت متأكد من إلغاء هذا الطلب؟",
     "cant_cancel": "لا يمكن إلغاء هذا الطلب بعد الآن",
@@ -531,7 +549,10 @@
 
   "orders": {
     "title": "طلباتي",
+    "tab_all": "الكل",
     "tab_active": "الجارية",
+    "tab_completed": "المكتملة",
+    "tab_cancelled": "الملغاة",
     "tab_past": "السابقة",
     "empty_active": "لا توجد طلبات جارية",
     "empty_active_sub": "اطلب الآن لتتبع طلبك هنا",
@@ -547,7 +568,30 @@
     "total": "{{amount}} ج.م",
     "items_count": "{{count}} منتج",
     "items_count_plural": "{{count}} منتجات",
-    "placed_at": "طُلب {{time}}"
+    "placed_at": "طُلب {{time}}",
+    "order_summary": "ملخص الطلب",
+    "payment_method": "طريقة الدفع",
+    "promotions": "العروض",
+    "no_promotions": "لا يوجد عرض",
+    "discount": "الخصم",
+    "cancelled_reason": "سبب الإلغاء",
+    "cancelled_order": "طلب ملغي"
+  },
+
+  "cancel_order": {
+    "title": "إلغاء الطلب",
+    "other_placeholder": "سبب آخر...",
+    "done_title": "تم إلغاء طلبك",
+    "done_body": "نأسف لإلغاء الطلب، ونتمنى خدمتك بشكل أفضل في المرة القادمة.",
+    "reasons": {
+      "change_mind": "تغيير الرأي",
+      "better_price": "وجدت سعراً أفضل في مكان آخر",
+      "delivery_delay": "تأخير في التوصيل",
+      "wrong_item": "اخترت منتجاً بالخطأ",
+      "duplicate_order": "طلب مكرر",
+      "cannot_fulfill": "لا يمكن تنفيذ الطلب",
+      "other": "أسباب أخرى"
+    }
   },
 
   "wallet": {
@@ -581,6 +625,7 @@
 
   "profile": {
     "title": "الملف الشخصي",
+    "login_register": "تسجيل الدخول / إنشاء حساب",
     "edit_profile": "تعديل الملف الشخصي",
     "section_account": "الحساب",
     "section_preferences": "التفضيلات",
@@ -593,6 +638,16 @@
     "notifications": "الإشعارات",
     "help": "المساعدة والدعم",
     "contact_whatsapp": "تواصل معنا على واتساب",
+    "my_locations": "مواقعي",
+    "my_promotions": "عروضي",
+    "messages": "الرسائل",
+    "invite_friends": "دعوة الأصدقاء",
+    "security": "الأمان",
+    "help_center": "مركز المساعدة",
+    "transactions": "المعاملات",
+    "push_notification": "إشعارات التطبيق",
+    "dark_mode": "الوضع الداكن",
+    "sound": "الصوت",
     "terms": "الشروط والأحكام",
     "privacy": "سياسة الخصوصية",
     "about": "عن دوّار",
@@ -602,6 +657,65 @@
     "logout_confirm_body": "سيتم تسجيل خروجك من حسابك.",
     "logout_confirm_btn": "نعم، تسجيل الخروج",
     "version": "الإصدار {{version}}"
+  },
+
+  "liked": {
+    "title": "المفضلة",
+    "empty": "فارغة",
+    "empty_sub": "ستظهر هنا المنتجات التي تضيفها للمفضلة.",
+    "not_found": "لا توجد نتائج",
+    "not_found_sub": "جرّب بحثاً آخر.",
+    "store": "محل"
+  },
+
+  "product": {
+    "details_title": "تفاصيل المنتج",
+    "no_description": "لا يوجد وصف متاح.",
+    "price": "السعر",
+    "quantity": "الكمية",
+    "add_to_basket": "إضافة إلى السلة"
+  },
+
+  "payment_methods": {
+    "title": "طرق الدفع",
+    "cash": "كاش",
+    "wallet": "المحفظة",
+    "apple_pay": "Apple Pay",
+    "google_pay": "Google Pay",
+    "instapay": "إنستاباي",
+    "vodafone_cash": "فودافون كاش",
+    "card": "بطاقة",
+    "add_card": "إضافة بطاقة جديدة",
+    "cardholder_name": "اسم حامل البطاقة",
+    "card_number": "رقم البطاقة",
+    "expiry": "تاريخ الانتهاء",
+    "cvc": "CVV / CVC",
+    "success_title": "تمت إضافة وسيلة الدفع",
+    "success_body": "تم حفظ وسيلة الدفع بنجاح.",
+    "success_button": "تمام"
+  },
+
+  "invite_friends": {
+    "title": "دعوة الأصدقاء",
+    "heading": "ادعُ أصدقاءك",
+    "body": "شارك دوّار مع من تحب واجعل الطلب من الأماكن القريبة أسهل للجميع.",
+    "share_sheet": "مشاركة الدعوة",
+    "message": "جرّب دوّار للتوصيل السريع من الأماكن القريبة: {{link}}"
+  },
+
+  "onboarding": {
+    "wide_title": "اختيارات كثيرة",
+    "wide_body": "مطاعم ومحلات قريبة من موقعك.",
+    "fast_title": "توصيل سريع",
+    "fast_body": "استلم طلبك بسرعة من أقرب المحلات.",
+    "track_title": "تتبع الطلب",
+    "track_body": "تابع طلبك لحظة بلحظة.",
+    "offer_title": "عروض خاصة",
+    "offer_body": "خصومات وعروض أسبوعية.",
+    "next": "التالي",
+    "skip": "تخطي",
+    "start": "ابدأ الآن",
+    "login": "تسجيل الدخول / إنشاء حساب"
   },
 
   "addresses": {
@@ -684,6 +798,7 @@
     "microphone_denied": "تم رفض الوصول للميكروفون. يرجى تفعيله من الإعدادات.",
     "no_internet": "لا يوجد اتصال بالإنترنت",
     "cancel_failed": "تعذّر إلغاء الطلب",
+    "notification_permission": "لم يتم منح إذن الإشعارات",
     "roleMismatch": {
       "customerInMerchant": "هذا الرقم مسجّل كحساب عميل. للتسجيل كتاجر، يُرجى التواصل معنا.",
       "customerInDriver": "هذا الرقم مسجّل كحساب عميل. للتسجيل كسائق، يُرجى التواصل معنا.",
@@ -818,8 +933,9 @@
   },
   "mainTabs": {
     "home": "الرئيسية",
-    "categories": "التصنيفات",
+    "basket": "السلة",
     "orders": "الطلبات",
+    "liked": "المفضلة",
     "profile": "حسابي"
   }
 }

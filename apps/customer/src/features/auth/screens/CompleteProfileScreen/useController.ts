@@ -21,8 +21,10 @@ export function useController() {
     setNameError(null);
     saveMutation.mutate({ name }, {
       onSuccess: (res) => {
+        const user =
+          res && typeof res === 'object' && 'data' in res ? res.data : res;
         // Update local state
-        dispatch(updateUser({ name: res.data.name }));
+        dispatch(updateUser({ name: user.name }));
         Toast.show({
           type: 'success',
           text1: t('auth.profile_updated'),

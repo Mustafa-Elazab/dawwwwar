@@ -21,6 +21,12 @@ class AddFavoriteDto {
   merchantId: string;
 }
 
+class AddProductFavoriteDto {
+  @ApiProperty()
+  @IsString()
+  productId: string;
+}
+
 @ApiTags('Favorites')
 @ApiBearerAuth('access-token')
 @Controller('favorites')
@@ -31,6 +37,31 @@ export class FavoritesController {
   @ApiOperation({ summary: 'List my favorite merchants' })
   findAll(@CurrentUser() user: UserEntity) {
     return this.favoritesService.findAll(user.id);
+  }
+
+  @Get('products')
+  @ApiOperation({ summary: 'List my favorite products' })
+  findProducts(@CurrentUser() user: UserEntity) {
+    return this.favoritesService.findProducts(user.id);
+  }
+
+  @Post('products')
+  @ApiOperation({ summary: 'Add a product to favorites' })
+  addProduct(@CurrentUser() user: UserEntity, @Body() dto: AddProductFavoriteDto) {
+    return this.favoritesService.addProduct(user.id, dto.productId);
+  }
+
+  @Delete('products/:productId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Remove a product from favorites' })
+  removeProduct(@CurrentUser() user: UserEntity, @Param('productId') productId: string) {
+    return this.favoritesService.removeProduct(user.id, productId);
+  }
+
+  @Get('products/:productId/check')
+  @ApiOperation({ summary: 'Check if product is in favorites' })
+  checkProduct(@CurrentUser() user: UserEntity, @Param('productId') productId: string) {
+    return this.favoritesService.isProductFavorite(user.id, productId);
   }
 
   @Post()

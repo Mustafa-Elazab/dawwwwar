@@ -2,6 +2,7 @@ import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany } from 'typeorm
 import { BaseEntity } from './base.entity';
 import { UserEntity } from './user.entity';
 import { MerchantEntity } from './merchant.entity';
+import type { OrderEventEntity } from './order-event.entity';
 
 export enum OrderStatus {
   PENDING = 'PENDING',
@@ -170,4 +171,7 @@ export class OrderEntity extends BaseEntity {
 
   @OneToMany('OrderItemEntity', 'order', { cascade: true })
   items: unknown[];
+
+  @OneToMany('OrderEventEntity', 'order')
+  events: OrderEventEntity[];
 }

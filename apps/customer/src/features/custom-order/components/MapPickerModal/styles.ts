@@ -1,8 +1,8 @@
-import { StyleSheet } from 'react-native';
+import { I18nManager, StyleSheet } from 'react-native';
 import type { AppColors } from '@dawwar/theme';
 import { space, typography, radius, shadows } from '@dawwar/theme';
 
-export const createStyles = (colors: AppColors) =>
+export const createStyles = (colors: AppColors, isRTL = I18nManager.isRTL) =>
   StyleSheet.create({
     overlay: { flex: 1, backgroundColor: colors.background },
     
@@ -11,11 +11,11 @@ export const createStyles = (colors: AppColors) =>
       position: 'absolute',
       left: 0,
       right: 0,
-      flexDirection: 'row',
+      flexDirection: isRTL ? 'row-reverse' : 'row',
       alignItems: 'center',
       paddingHorizontal: space.base,
       paddingVertical: space.md,
-      backgroundColor: 'rgba(255, 255, 255, 0.9)',
+      backgroundColor: colors.surface,
       zIndex: 10,
       ...shadows.md,
     },
@@ -27,7 +27,8 @@ export const createStyles = (colors: AppColors) =>
       color: colors.text, 
       flex: 1, 
       textAlign: 'center',
-      marginRight: 32, // Offset for back button to center text
+      marginRight: isRTL ? 0 : 32,
+      marginLeft: isRTL ? 32 : 0,
     },
 
     map: { flex: 1 },
@@ -77,7 +78,8 @@ export const createStyles = (colors: AppColors) =>
       ...typography.body2, 
       color: colors.text,
       fontWeight: '600',
-      textAlign: 'left',
+      textAlign: isRTL ? 'right' : 'left',
+      writingDirection: isRTL ? 'rtl' : 'ltr',
     },
     confirmBtn: {
       height: 52,

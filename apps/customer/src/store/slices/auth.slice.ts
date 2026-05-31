@@ -32,6 +32,12 @@ export const authSlice = createSlice({
         state.guestCartId = `guest_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
       }
     },
+    startAuthFlow: (state) => {
+      state.status = 'idle';
+      state.user = null;
+      state.isAuthenticated = false;
+      state.isLoading = false;
+    },
     setAuth: (
       state,
       action: PayloadAction<{
@@ -49,12 +55,11 @@ export const authSlice = createSlice({
       storage.set(StorageKeys.REFRESH_TOKEN, action.payload.refreshToken);
     },
     logout: (state) => {
-      state.status = 'guest';
+      state.status = 'idle';
       state.user = null;
       state.isAuthenticated = false;
       state.isLoading = false;
-      // Generating a new anonymous cart id upon logout
-      state.guestCartId = `guest_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+      state.guestCartId = null;
       storage.delete(StorageKeys.ACCESS_TOKEN);
       storage.delete(StorageKeys.REFRESH_TOKEN);
     },
@@ -81,7 +86,7 @@ export const authSlice = createSlice({
   },
 });
 
-export const { setAuth, logout, finishLoading, updateUser, setUser, setGuestMode, clearGuestCartId } = authSlice.actions;
+export const { setAuth, logout, finishLoading, updateUser, setUser, setGuestMode, startAuthFlow, clearGuestCartId } = authSlice.actions;
 
 // Selectors
 export const selectUser = (state: { auth: AuthState }) => state.auth.user;

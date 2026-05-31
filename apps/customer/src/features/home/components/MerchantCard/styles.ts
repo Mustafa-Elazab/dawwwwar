@@ -35,6 +35,18 @@ export const createStyles = (colors: AppColors) =>
       top: 8,
       start: 8,
     },
+    likeButton: {
+      position: 'absolute',
+      top: 8,
+      end: 8,
+      width: 34,
+      height: 34,
+      borderRadius: 17,
+      backgroundColor: colors.surface,
+      alignItems: 'center',
+      justifyContent: 'center',
+      ...shadows.sm,
+    },
     body: {
       padding: space.sm,
     },

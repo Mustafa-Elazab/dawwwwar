@@ -1,43 +1,56 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from '@dawwar/i18n';
 import { useAppDispatch, useAppSelector } from '../../../../store/hooks';
-import { addItem } from '../../../../store/slices/cart.slice';
-import { selectUser } from '../../../../store/slices/auth.slice';
+import { addItem, clearCart } from '../../../../store/slices/cart.slice';
+import { selectIsAuthenticated, selectUser, startAuthFlow } from '../../../../store/slices/auth.slice';
 import { selectLocation } from '../../../../store/slices/location.slice';
 import { useNearbyMerchants, useFeaturedProducts, useHomeCategories } from '../../core/hooks';
 import { useHomeDeliveryLocation } from '../../../location/hooks/useHomeDeliveryLocation';
 import { HOME_ROUTES, MODAL_ROUTES, PROFILE_ROUTES } from '../../../../navigation/routes';
 import type { HomeScreenNavProp } from './types';
 import type { Category, Product } from '@dawwar/types';
+import { useLikedProducts, useToggleFavorite } from '../../../liked/core/hooks';
+import { requestPushNotificationPermission } from '../../../../utils/notifications';
+import { setPushNotifications } from '../../../../store/slices/ui.slice';
+import { storage, StorageKeys } from '../../../../core/storage/mmkv';
 
 export function useController() {
   const { t, i18n } = useTranslation();
   const navigation = useNavigation<HomeScreenNavProp>();
   const dispatch = useAppDispatch();
   const user = useAppSelector(selectUser);
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const location = useAppSelector(selectLocation);
 
   const delivery = useHomeDeliveryLocation();
-  const [discoveryMode, setDiscoveryMode] = useState<'nearby' | 'allEgypt'>('nearby');
-
   const {
     data: merchants,
     isLoading: merchantsLoading,
     refetch: refetchMerchants,
   } = useNearbyMerchants(
-    discoveryMode === 'nearby' ? delivery.merchantLat : undefined,
-    discoveryMode === 'nearby' ? delivery.merchantLng : undefined,
-    discoveryMode === 'allEgypt',
+    delivery.merchantLat,
+    delivery.merchantLng,
   );
   const { data: products } = useFeaturedProducts(delivery.merchantLat, delivery.merchantLng);
+  const { data: liked = [] } = useLikedProducts();
+  const toggleFavorite = useToggleFavorite();
   const {
     data: categories = [],
     isLoading: categoriesLoading,
     refetch: refetchCategories,
-  } = useHomeCategories();
+  } = useHomeCategories(delivery.merchantLat, delivery.merchantLng);
 
   const [sheetGpsBusy, setSheetGpsBusy] = useState(false);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    if (storage.getBoolean(StorageKeys.PUSH_NOTIFICATION_PROMPTED)) return;
+    storage.set(StorageKeys.PUSH_NOTIFICATION_PROMPTED, true);
+    void requestPushNotificationPermission().then((granted) => {
+      dispatch(setPushNotifications(granted));
+    });
+  }, [dispatch, isAuthenticated]);
 
   const handleMerchantPress = useCallback(
     (merchantId: string) => {
@@ -75,7 +88,10 @@ export function useController() {
               {
                 text: t('cart.clear_and_add', 'Clear & Add'),
                 style: 'destructive',
-                onPress: doAdd,
+                onPress: () => {
+                  dispatch(clearCart());
+                  doAdd();
+                },
               },
             ],
           );
@@ -111,9 +127,26 @@ export function useController() {
     [navigation],
   );
 
+  const handleSeeAllCategories = useCallback(() => {
+    navigation.navigate(HOME_ROUTES.CATEGORIES);
+  }, [navigation]);
+
   const handleNotificationsPress = useCallback(() => {
     navigation.navigate(PROFILE_ROUTES.NOTIFICATIONS);
   }, [navigation]);
+
+  const likedProductIds = useMemo(() => new Set(liked.map((item) => item.productId)), [liked]);
+
+  const handleToggleFavorite = useCallback(
+    (productId: string) => {
+      if (!isAuthenticated) {
+        dispatch(startAuthFlow());
+        return;
+      }
+      toggleFavorite.mutate({ productId, liked: likedProductIds.has(productId) });
+    },
+    [dispatch, isAuthenticated, likedProductIds, toggleFavorite],
+  );
 
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -156,13 +189,14 @@ export function useController() {
     handleCustomOrder,
     handleSearchPress,
     handleCategoryPress,
+    handleSeeAllCategories,
     handleNotificationsPress,
+    handleToggleFavorite,
+    isProductLiked: (productId: string) => likedProductIds.has(productId),
     openLocationPicker,
     selectSavedAddress: delivery.selectSavedAddress,
     runSheetCurrentLocation,
     sheetGpsBusy,
-    discoveryMode,
-    setDiscoveryMode,
     t,
   };
 }

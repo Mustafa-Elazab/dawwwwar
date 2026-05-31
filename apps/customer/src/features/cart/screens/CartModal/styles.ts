@@ -16,6 +16,9 @@ export const createStyles = (colors: AppColors) =>
       paddingHorizontal: space.base,
       paddingBottom: 40,
     },
+    scroll: {
+      flex: 1,
+    },
     list: { flexGrow: 0 }, // Prevent list from expanding too much if few items
     
     // ── Promo Code ──────────────────────────────────────

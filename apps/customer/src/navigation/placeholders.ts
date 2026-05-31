@@ -17,6 +17,7 @@ export { HomeScreen } from '../features/home/screens/HomeScreen';
 export { SearchScreen } from '../features/search/screens/SearchScreen';
 export { CategoryMerchantsScreen } from '../features/categories/screens/CategoryMerchantsScreen';
 export { MerchantDetailScreen } from '../features/merchant/screens/MerchantDetailScreen';
+export { ProductDetailScreen } from '../features/product/screens/ProductDetailScreen';
 export { LocationPickerScreen } from '../features/location/screens/LocationPickerScreen';
 export { NearbyMerchantsScreen } from '../features/home/screens/NearbyMerchantsScreen';
 export { PopularProductsScreen } from '../features/home/screens/PopularProductsScreen';
@@ -26,8 +27,9 @@ export { CategoriesScreen } from '../features/categories/screens/CategoriesScree
 
 // Orders
 export { OrdersListScreen } from '../features/orders/screens/OrdersListScreen';
-export { TrackingScreen as OrderDetailScreen } from '../features/orders/screens/TrackingScreen';
+export { OrderDetailScreen } from '../features/orders/screens/OrderDetailScreen';
 export { TrackingScreen } from '../features/orders/screens/TrackingScreen';
+export { CancelOrderScreen } from '../features/orders/screens/CancelOrderScreen';
 
 // Wallet
 export { WalletScreen } from '../features/wallet/screens/WalletScreen';
@@ -43,6 +45,9 @@ export { AppearanceScreen } from '../features/profile/screens/AppearanceScreen';
 export { TermsScreen } from '../features/profile/screens/TermsScreen';
 export { PrivacyScreen } from '../features/profile/screens/PrivacyScreen';
 export { NotificationsScreen } from '../features/notifications/screens/NotificationsScreen';
+export { PaymentMethodsScreen } from '../features/profile/screens/PaymentMethodsScreen';
+export { AddPaymentMethodScreen } from '../features/profile/screens/AddPaymentMethodScreen';
+export { InviteFriendsScreen } from '../features/profile/screens/InviteFriendsScreen';
 
 // Modals
 export { CartModal } from '../features/cart/screens/CartModal';

@@ -7,7 +7,7 @@ import { getDistanceKm, formatDistance } from '../../utils/distance';
 import { createStyles } from './styles';
 import type { MerchantCardProps } from './types';
 
-export const MerchantCard = React.memo(function MerchantCard({ merchant, onPress, style }: MerchantCardProps & { style?: any }) {
+export const MerchantCard = React.memo(function MerchantCard({ merchant, onPress, isLiked, onToggleLike, style }: MerchantCardProps & { style?: any }) {
   const { colors } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
   const { t } = useTranslation();
@@ -36,6 +36,11 @@ export const MerchantCard = React.memo(function MerchantCard({ merchant, onPress
             size="sm"
           />
         </View>
+        {onToggleLike ? (
+          <TouchableOpacity style={styles.likeButton} onPress={onToggleLike}>
+            <Icon name={isLiked ? 'heart' : 'heart-outline'} size={20} color={colors.primary} />
+          </TouchableOpacity>
+        ) : null}
       </View>
 
       <View style={styles.body}>

@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { View, Animated, TouchableOpacity, I18nManager, SectionList, FlatList } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from '@dawwar/i18n';
-import { ErrorState, Skeleton, Text, Icon } from '@dawwar/ui';
+import { AppScreenTemplate, Text, Icon } from '@dawwar/ui';
 import { useTheme } from '@dawwar/theme';
 import { MerchantHeader } from '../../components/MerchantHeader';
 import { MerchantTabBar } from '../../components/TabBar';
@@ -12,13 +12,15 @@ import { useController } from './useController';
 import { createStyles } from './styles';
 import { ALL_DAYS, formatHours } from '../../utils/hours';
 import type { OpeningHours } from '@dawwar/types';
+import { MerchantLoadingState } from './components/MerchantLoadingState';
 
 const AnimatedSectionList = Animated.createAnimatedComponent(SectionList);
 
 export function MerchantDetailScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { colors } = useTheme();
-  const styles = React.useMemo(() => createStyles(colors), [colors]);
+  const isRTL = i18n.language.startsWith('ar') || I18nManager.isRTL;
+  const styles = React.useMemo(() => createStyles(colors, isRTL), [colors, isRTL]);
   const ctrl = useController();
   const insets = useSafeAreaInsets();
   
@@ -102,12 +104,12 @@ export function MerchantDetailScreen() {
           onPress={() => handleCategoryPress(index, item.categoryId)}
           style={[
             styles.categoryChip,
-            isSelected && { backgroundColor: colors.primary, borderColor: colors.primary }
+            isSelected && styles.categoryChipSelected,
           ]}
         >
           <Text style={[
             styles.categoryChipText,
-            isSelected && { color: '#fff' }
+            isSelected && styles.categoryChipTextSelected,
           ]}>
             {item.categoryName}
           </Text>
@@ -117,36 +119,24 @@ export function MerchantDetailScreen() {
     [activeCategoryId, handleCategoryPress, styles.categoryChip, styles.categoryChipText, colors.primary]
   );
 
-  if (ctrl.isError) {
-    return <ErrorState onRetry={ctrl.retry} />;
-  }
-
   const renderHeader = () => (
     <View>
       <MerchantHeader merchant={ctrl.merchant!} onBack={ctrl.handleBack} />
       <MerchantTabBar active={ctrl.activeTab} onChange={ctrl.setActiveTab} />
       {/* Spacer for the sticky categories */}
-      {ctrl.activeTab === 'menu' && <View style={{ height: CATEGORIES_HEIGHT }} />}
+      {ctrl.activeTab === 'menu' && <View style={styles.categorySpacer} />}
     </View>
   );
 
   const renderContent = () => {
     if (ctrl.isLoading || !ctrl.merchant) {
-      return (
-        <View style={{ flex: 1, backgroundColor: colors.background }}>
-          <Skeleton width="100%" height={220} />
-          <View style={{ padding: 16, gap: 12 }}>
-            <Skeleton width="60%" height={24} />
-            <Skeleton width="80%" height={16} />
-          </View>
-        </View>
-      );
+      return <MerchantLoadingState colors={colors} isRTL={isRTL} />;
     }
 
     if (ctrl.activeTab === 'info') {
       return (
         <Animated.ScrollView
-          style={{ flex: 1, backgroundColor: colors.background }}
+          style={styles.tabScroll}
           onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: true })}
           scrollEventThrottle={16}
         >
@@ -178,7 +168,7 @@ export function MerchantDetailScreen() {
     if (ctrl.activeTab === 'reviews') {
       return (
         <Animated.ScrollView
-          style={{ flex: 1, backgroundColor: colors.background }}
+          style={styles.tabScroll}
           onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: true })}
           scrollEventThrottle={16}
         >
@@ -198,7 +188,7 @@ export function MerchantDetailScreen() {
     }));
 
     return (
-      <View style={{ flex: 1, backgroundColor: colors.background }}>
+      <View style={styles.screen}>
         <AnimatedSectionList
           ref={sectionListRef as any}
           sections={sections}
@@ -221,7 +211,7 @@ export function MerchantDetailScreen() {
           )}
           renderItem={renderProductRow}
           ListEmptyComponent={
-            <View style={{ padding: 64, alignItems: 'center' }}>
+            <View style={styles.emptyProducts}>
               <Text variant="body2" color={colors.textSecondary}>
                 {t('merchant.no_products')}
               </Text>
@@ -256,7 +246,13 @@ export function MerchantDetailScreen() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.background }}>
+    <AppScreenTemplate
+      edges={[]}
+      backgroundColor={colors.background}
+      contentStyle={styles.screen}
+      isError={ctrl.isError}
+      onRetry={ctrl.retry}
+    >
       {renderContent()}
 
       {/* Header Overlay (Back Button & Title Fade) */}
@@ -274,6 +270,6 @@ export function MerchantDetailScreen() {
       </View>
 
     
-    </View>
+    </AppScreenTemplate>
   );
 }

@@ -21,8 +21,6 @@ export function useController() {
   const categoryId = params.categoryId || '';
   const categoryName = params.categoryName || t('categories.title');
 
-  console.log('Fetching merchants for categoryId:', categoryId, 'categoryName:', categoryName);
-
   const {
     data: merchants,
     isLoading,
@@ -32,7 +30,7 @@ export function useController() {
     queryKey: ['merchants', 'category', categoryId, location.latitude, location.longitude],
     queryFn: () => categoriesApi.getMerchantsByCategory(categoryId, location.latitude ?? undefined, location.longitude ?? undefined),
     staleTime: 60_000,
-    select: (res) => res.data,
+    select: (res) => res,
     enabled: !!categoryId, // Prevent query if no ID
   });
 
@@ -48,9 +46,15 @@ export function useController() {
     merchants: merchants ?? [],
     isLoading,
     isError,
+    labels: {
+      open: t('merchant.open'),
+      closed: t('merchant.closed'),
+      minutes: t('common.min'),
+      emptyTitle: t('categories.no_results'),
+      emptySubtitle: t('categories.no_results_sub'),
+    },
     handleMerchantPress,
     handleBack: () => navigation.goBack(),
     refetch,
-    t,
   };
 }

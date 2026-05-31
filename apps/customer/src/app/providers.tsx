@@ -9,7 +9,7 @@ import { AppErrorBoundary } from '@dawwar/ui';
 import { ApiClientProvider } from '@dawwar/api-client';
 import { store, persistor } from '../store';
 import { storage, StorageKeys } from '../core/storage/mmkv';
-import { finishLoading, setUser, setGuestMode } from '../store/slices/auth.slice';
+import { finishLoading, logout, setUser } from '../store/slices/auth.slice';
 import { api } from '../core/api/client';
 import { authApi } from '../features/auth/core/api';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -51,21 +51,24 @@ export function AppProviders({ children }: AppProvidersProps) {
       logger.log('[AppProviders] Token exists:', !!token);
 
       if (!token) {
-        store.dispatch(setGuestMode());
+        store.dispatch(finishLoading());
         return;
       }
 
       try {
         const res = await authApi.getMe();
-        if (res.success && res.data) {
-          store.dispatch(setUser(res.data));
+        const user =
+          res && typeof res === 'object' && 'data' in res ? res.data : res;
+        if (user) {
+          store.dispatch(setUser(user));
         } else {
-          store.dispatch(setGuestMode());
+          store.dispatch(logout());
         }
       } catch (err: unknown) {
         logger.error('[AppProviders] restoreSession error:', err);
-        // On error (e.g. token expired), fall back to guest mode
-        store.dispatch(setGuestMode());
+        storage.delete(StorageKeys.ACCESS_TOKEN);
+        storage.delete(StorageKeys.REFRESH_TOKEN);
+        store.dispatch(logout());
       }
     };
 

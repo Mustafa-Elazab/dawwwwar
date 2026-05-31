@@ -17,6 +17,7 @@ import { Icon, Text } from '@dawwar/ui';
 import {
   TAB_ROUTES,
   HOME_ROUTES,
+  LIKED_ROUTES,
   ORDER_ROUTES,
   PROFILE_ROUTES,
 } from './routes';
@@ -26,9 +27,8 @@ import type { CustomerTabParamList } from './types';
 import { HomeStack } from './stacks/HomeStack';
 import { OrdersStack } from './stacks/OrdersStack';
 import { ProfileStack } from './stacks/ProfileStack';
-import { CategoriesScreen } from './placeholders';
-
-import { GlobalCartToast } from '../features/cart/components/GlobalCartToast';
+import { LikedStack } from './stacks/LikedStack';
+import { CartModal } from './placeholders';
 
 import { useTranslation } from 'react-i18next';
 
@@ -41,16 +41,22 @@ const TAB_CONFIG = {
     label: 'mainTabs.home',
   },
 
-  [TAB_ROUTES.CATEGORIES_TAB]: {
-    activeIcon: 'shape',
-    inactiveIcon: 'shape-outline',
-    label: 'mainTabs.categories',
+  [TAB_ROUTES.BASKET_TAB]: {
+    activeIcon: 'basket',
+    inactiveIcon: 'basket-outline',
+    label: 'mainTabs.basket',
   },
 
   [TAB_ROUTES.ORDERS_TAB]: {
     activeIcon: 'clipboard-text',
     inactiveIcon: 'clipboard-text-outline',
     label: 'mainTabs.orders',
+  },
+
+  [TAB_ROUTES.LIKED_TAB]: {
+    activeIcon: 'heart',
+    inactiveIcon: 'heart-outline',
+    label: 'mainTabs.liked',
   },
 
   [TAB_ROUTES.PROFILE_TAB]: {
@@ -62,8 +68,9 @@ const TAB_CONFIG = {
 
 const TAB_BAR_VISIBLE_ROUTES: string[] = [
   HOME_ROUTES.HOME,
-  TAB_ROUTES.CATEGORIES_TAB,
+  TAB_ROUTES.BASKET_TAB,
   ORDER_ROUTES.ORDERS_LIST,
+  LIKED_ROUTES.LIKED,
   PROFILE_ROUTES.PROFILE,
 ];
 
@@ -78,7 +85,6 @@ const getTabBarVisibility = (route: any) => {
 
 function CustomTabBar({
   state,
-  descriptors,
   navigation,
 }: BottomTabBarProps) {
   const { colors } = useTheme();
@@ -123,8 +129,24 @@ function CustomTabBar({
               canPreventDefault: true,
             });
 
-            if (!isFocused && !event.defaultPrevented) {
-              navigation.navigate(route.name);
+            if (!event.defaultPrevented) {
+              if (route.name === TAB_ROUTES.ORDERS_TAB) {
+                navigation.navigate(TAB_ROUTES.ORDERS_TAB, {
+                  screen: ORDER_ROUTES.ORDERS_LIST,
+                });
+                return;
+              }
+
+              if (route.name === TAB_ROUTES.HOME_TAB) {
+                navigation.navigate(TAB_ROUTES.HOME_TAB, {
+                  screen: HOME_ROUTES.HOME,
+                });
+                return;
+              }
+
+              if (!isFocused) {
+                navigation.navigate(route.name);
+              }
             }
           };
 
@@ -168,18 +190,20 @@ function CustomTabBar({
                  
                 </View>
 
-                <Text
-                  style={[
-                    styles.label,
-                    {
-                      color,
-                      fontWeight: isFocused ? '800' : '600',
-                    },
-                  ]}
-                  numberOfLines={1}
-                >
-                  {t(config.label)}
-                </Text>
+                {isFocused ? (
+                  <Text
+                    style={[
+                      styles.label,
+                      {
+                        color,
+                        fontWeight: '800',
+                      },
+                    ]}
+                    numberOfLines={1}
+                  >
+                    {t(config.label)}
+                  </Text>
+                ) : null}
               </View>
             </Pressable>
           );
@@ -193,45 +217,46 @@ export function CustomerTabs() {
   const { colors } = useTheme();
 
   return (
-    <>
-      <Tab.Navigator
-        tabBar={(props) => <CustomTabBar {...props} />}
-        screenOptions={{
-          headerShown: false,
-          tabBarHideOnKeyboard: true,
-          sceneStyle: {
-            backgroundColor: colors.background,
-          },
-        }}
-      >
-        <Tab.Screen
-          name={TAB_ROUTES.HOME_TAB}
-          component={HomeStack}
-        />
+    <Tab.Navigator
+      tabBar={(props) => <CustomTabBar {...props} />}
+      screenOptions={{
+        headerShown: false,
+        tabBarHideOnKeyboard: true,
+        sceneStyle: {
+          backgroundColor: colors.background,
+        },
+      }}
+    >
+      <Tab.Screen
+        name={TAB_ROUTES.HOME_TAB}
+        component={HomeStack}
+      />
 
-        <Tab.Screen
-          name={TAB_ROUTES.CATEGORIES_TAB}
-          component={CategoriesScreen}
-        />
+      <Tab.Screen
+        name={TAB_ROUTES.BASKET_TAB}
+        component={CartModal}
+      />
 
-        <Tab.Screen
-          name={TAB_ROUTES.ORDERS_TAB}
-          component={OrdersStack}
-        />
+      <Tab.Screen
+        name={TAB_ROUTES.ORDERS_TAB}
+        component={OrdersStack}
+      />
 
-        <Tab.Screen
-          name={TAB_ROUTES.PROFILE_TAB}
-          component={ProfileStack}
-        />
-      </Tab.Navigator>
+      <Tab.Screen
+        name={TAB_ROUTES.LIKED_TAB}
+        component={LikedStack}
+      />
 
-      <GlobalCartToast />
-    </>
+      <Tab.Screen
+        name={TAB_ROUTES.PROFILE_TAB}
+        component={ProfileStack}
+      />
+    </Tab.Navigator>
   );
 }
 const styles = StyleSheet.create({
   wrapper: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 12,
     paddingBottom: Platform.OS === 'ios' ? 10 : 6,
     paddingTop: 2,
 
@@ -245,24 +270,21 @@ const styles = StyleSheet.create({
 
     alignSelf: 'center',
 
-    width: '92%', // smaller width
+    width: '94%',
 
-    borderRadius: 22,
+    borderRadius: 10,
 
     borderWidth: 1,
 
-    paddingHorizontal: 6,
-    paddingVertical: 4, // smaller height
+    paddingHorizontal: 8,
+    paddingVertical: 6,
 
     shadowColor: '#000',
 
-    shadowOffset: {
-      width: 0,
-      height: -2,
-    },
+    shadowOffset: { width: 0, height: 0 },
 
-    shadowOpacity: 0.04,
-    shadowRadius: 10,
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
 
     elevation: 6,
   },
@@ -275,12 +297,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
 
-    borderRadius: 14,
+    borderRadius: 999,
 
-    paddingVertical: 5, // reduced
+    paddingVertical: 4,
     paddingHorizontal: 4,
 
-    minHeight: 44, // smaller
+    minHeight: 46,
   },
 
   iconContainer: {

@@ -8,7 +8,7 @@ import {
 } from '../store/slices/auth.slice';
 import { AuthNavigator } from './AuthNavigator';
 import { CustomerTabs } from './CustomerTabs';
-import { CartModal, CheckoutModal, CustomOrderModal } from './placeholders';
+import { CheckoutModal, CustomOrderModal } from './placeholders';
 import { MODAL_ROUTES } from './routes';
 import type { RootParamList } from './types';
 import { CompleteProfileScreen } from '../features/auth/screens/CompleteProfileScreen';
@@ -37,13 +37,12 @@ export function RootNavigator() {
     return <JS_SplashScreen />;
   }
 
-  // Not authenticated → show auth flow (Phone -> OTP)
   if (!isAuthenticated) {
     return <AuthNavigator />;
   }
 
   // Authenticated but missing name → Complete Profile
-  if (!hasName) {
+  if (isAuthenticated && !hasName) {
     return <CompleteProfileScreen />;
   }
 
@@ -51,7 +50,6 @@ export function RootNavigator() {
   return (
     <Root.Navigator screenOptions={{ headerShown: false, presentation: 'modal' }}>
       <Root.Screen name="CustomerTabs" component={CustomerTabs} />
-      <Root.Screen name={MODAL_ROUTES.CART} component={CartModal} />
       <Root.Screen name={MODAL_ROUTES.CHECKOUT} component={CheckoutModal} />
       <Root.Screen name={MODAL_ROUTES.CUSTOM_ORDER} component={CustomOrderModal} />
     </Root.Navigator>

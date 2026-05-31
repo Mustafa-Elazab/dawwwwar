@@ -1,11 +1,11 @@
-import { StyleSheet } from 'react-native';
+import { I18nManager, StyleSheet } from 'react-native';
 import type { AppColors } from '@dawwar/theme';
 import { space, typography, radius, shadows } from '@dawwar/theme';
 
-export const createStyles = (colors: AppColors) =>
+export const createStyles = (colors: AppColors, isRTL = I18nManager.isRTL) =>
   StyleSheet.create({
     row: {
-      flexDirection: 'row',
+      flexDirection: isRTL ? 'row-reverse' : 'row',
       padding: space.md,
       backgroundColor: colors.surface,
       borderRadius: radius.lg,
@@ -25,27 +25,30 @@ export const createStyles = (colors: AppColors) =>
     info: {
       flex: 1,
       gap: 4,
-      alignItems: 'flex-start',
+      alignItems: isRTL ? 'flex-end' : 'flex-start',
     },
     name: {
       ...typography.label,
       color: colors.text,
       fontWeight: '700',
-      textAlign: 'left',
+      textAlign: isRTL ? 'right' : 'left',
+      writingDirection: isRTL ? 'rtl' : 'ltr',
     },
     description: {
       ...typography.caption,
       color: colors.textSecondary,
-      textAlign: 'left',
+      textAlign: isRTL ? 'right' : 'left',
+      writingDirection: isRTL ? 'rtl' : 'ltr',
     },
     price: {
       ...typography.body2,
       color: colors.primary,
       fontWeight: '800',
+      textAlign: isRTL ? 'right' : 'left',
     },
     unavailableBadge: { marginTop: 4 },
     stepper: {
-      flexDirection: 'row',
+      flexDirection: isRTL ? 'row-reverse' : 'row',
       alignItems: 'center',
       gap: space.xs,
     },

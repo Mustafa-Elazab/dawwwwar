@@ -3,8 +3,8 @@ import type { ApiResponse, Order } from '@dawwar/types';
 
 // ── Phase 2 real implementations ─────────────────────────────────────
 const realOrdersApi = {
-  getMyOrders: async (customerId: string): Promise<ApiResponse<Order[]>> => {
-    const { data } = await api.get(`/orders?customerId=${customerId}`);
+  getMyOrders: async (): Promise<ApiResponse<Order[]> | Order[]> => {
+    const { data } = await api.get('/orders/my');
     return data;
   },
   getById: async (id: string): Promise<ApiResponse<Order>> => {
@@ -17,6 +17,10 @@ const realOrdersApi = {
   },
   placeCustomOrder: async (payload: object): Promise<ApiResponse<Order>> => {
     const { data } = await api.post('/orders/custom', payload);
+    return data;
+  },
+  cancelOrder: async (id: string, reason?: string): Promise<ApiResponse<Order>> => {
+    const { data } = await api.post(`/orders/${id}/cancel`, { reason });
     return data;
   },
 };

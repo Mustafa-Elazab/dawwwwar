@@ -15,6 +15,11 @@ export class AuthService {
     return data;
   }
 
+  async sendCustomerOtp(phone: string): Promise<ApiResponse<SendOtpResponse>> {
+    const { data } = await this.client.post('/auth/customer/send-otp', { phone });
+    return data;
+  }
+
   async verifyCustomerOtp(phone: string, code: string): Promise<ApiResponse<VerifyOtpResponse>> {
     const { data } = await this.client.post('/auth/customer/verify-otp', { phone, code });
     return data;

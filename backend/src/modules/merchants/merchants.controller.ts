@@ -20,6 +20,13 @@ export class MerchantsController {
   ) {}
 
   @Public()
+  @Get()
+  @ApiOperation({ summary: 'Get nearby merchants, optionally filtered' })
+  findAll(@Query() filter: NearbyFilterDto) {
+    return this.merchantsService.findNearby(filter);
+  }
+
+  @Public()
   @Get('nearby')
   @ApiOperation({ summary: 'Get nearby merchants, optionally filtered' })
   findNearby(@Query() filter: NearbyFilterDto) {

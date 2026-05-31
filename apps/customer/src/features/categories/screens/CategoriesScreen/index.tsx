@@ -1,56 +1,31 @@
 import React from 'react';
-import { View, StyleSheet, FlatList } from 'react-native';
-import { useTranslation } from '@dawwar/i18n';
-import { ListScreenTemplate, Text, Icon } from '@dawwar/ui';
-import { useTheme } from '@dawwar/theme';
-import { CategoryCard } from '../../components/CategoryCard';
+import { ListScreenTemplate } from '@dawwar/ui';
+import { CategoryGridItem } from './components/CategoryGridItem';
 import { useController } from './useController';
 import type { Category } from '@dawwar/types';
 
 export function CategoriesScreen() {
-  const { t, i18n } = useTranslation();
-  const { colors } = useTheme();
   const ctrl = useController();
 
-  const categories = ctrl.categories ?? [];
-  const paddedData = [...categories];
-  while (paddedData.length % 3 !== 0) {
-    paddedData.push({
-      id: `__empty_${paddedData.length}`,
-      name: '',
-      nameAr: '',
-      icon: '',
-      sortOrder: 0,
-      isActive: true,
-    } as Category);
-  }
-
   const renderItem = React.useCallback(
-    ({ item }: { item: Category }) => {
-      if (item.id.startsWith('__empty_')) {
-        return <View style={{ flex: 1, margin: 6 }} />;
-      }
-      const displayName = i18n.language.startsWith('ar')
-        ? item.nameAr || item.name
-        : item.name || item.nameAr;
-      return (
-        <CategoryCard
-          category={item}
-          onPress={() => ctrl.handleCategoryPress(item.id, displayName)}
-        />
-      );
-    },
-    [ctrl.handleCategoryPress, i18n.language],
+    ({ item }: { item: Category }) => (
+      <CategoryGridItem
+        category={item}
+        displayName={ctrl.getDisplayName(item)}
+        onPress={ctrl.handleCategoryPress}
+      />
+    ),
+    [ctrl.getDisplayName, ctrl.handleCategoryPress],
   );
 
   return (
-      <ListScreenTemplate<Category>
+    <ListScreenTemplate<Category>
       edges={['top']}
       headerProps={{ 
-        title: t('categories.title'),
-        type: 'none'
+        title: ctrl.headerTitle,
+        onBackPress: ctrl.handleBack,
       }}
-      data={paddedData}
+      data={ctrl.categories}
       renderItem={renderItem}
       keyExtractor={(item) => item.id}
       numColumns={3}
@@ -59,7 +34,7 @@ export function CategoriesScreen() {
       onRetry={ctrl.refetch}
       onRefresh={ctrl.refetch}
       refreshing={false}
-      emptyTitle={t('categories.no_results')}
+      emptyTitle={ctrl.emptyTitle}
     />
   );
 }

@@ -8,12 +8,13 @@ export const HOME_KEYS = {
   categories: ['home', 'categories'] as const,
 };
 
-export function useNearbyMerchants(lat?: number, lng?: number, allEgypt?: boolean) {
+export function useNearbyMerchants(lat?: number, lng?: number) {
   return useQuery({
-    queryKey: [...HOME_KEYS.nearbyMerchants, lat, lng, allEgypt],
-    queryFn: () => homeApi.getNearbyMerchants(lat, lng, allEgypt),
+    queryKey: [...HOME_KEYS.nearbyMerchants, lat, lng],
+    queryFn: () => homeApi.getNearbyMerchants(lat, lng),
+    enabled: lat != null && lng != null,
     staleTime: 60_000,
-    select: (res) => res.data,
+    select: (res) => (Array.isArray(res) ? res : res.data),
   });
 }
 
@@ -22,17 +23,18 @@ export function useFeaturedProducts(lat?: number, lng?: number) {
     queryKey: [...HOME_KEYS.featuredProducts, lat, lng],
     queryFn: () => homeApi.getFeaturedProducts(lat, lng),
     staleTime: 120_000,
-    select: (res) => res.data,
+    select: (res) => (Array.isArray(res) ? res : res.data),
   });
 }
 
-export function useHomeCategories() {
+export function useHomeCategories(lat?: number, lng?: number) {
   return useQuery({
-    queryKey: HOME_KEYS.categories,
-    queryFn: homeApi.getCategories,
+    queryKey: [...HOME_KEYS.categories, lat, lng],
+    queryFn: () => homeApi.getCategories(lat, lng),
+    enabled: lat != null && lng != null,
     staleTime: 10 * 60_000,
     select: (res) =>
-      [...res.data]
+      [...(Array.isArray(res) ? res : res.data)]
         .filter((c: Category) => c.isActive)
         .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0)),
   });

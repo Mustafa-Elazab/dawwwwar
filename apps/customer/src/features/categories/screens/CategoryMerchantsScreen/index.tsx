@@ -1,32 +1,23 @@
 import React from 'react';
-import { useTranslation } from '@dawwar/i18n';
-import { ListScreenTemplate, ListItem, Avatar, Badge } from '@dawwar/ui';
-import { useTheme } from '@dawwar/theme';
+import { ListScreenTemplate } from '@dawwar/ui';
+import { MerchantListRow } from './components/MerchantListRow';
 import { useController } from './useController';
 import type { Merchant } from '@dawwar/types';
 
 export function CategoryMerchantsScreen() {
-  const { t } = useTranslation();
-  const { colors } = useTheme();
   const ctrl = useController();
 
   const renderItem = React.useCallback(
     ({ item }: { item: Merchant }) => (
-      <ListItem
-        title={item.businessName}
-        subtitle={`★ ${Number(item.rating || 0).toFixed(1)}  ·  ${item.deliveryTimeMin}–${item.deliveryTimeMax} min`}
-        leftElement={<Avatar uri={item.logo} name={item.businessName} size="md" />}
-        rightElement={
-          <Badge
-            label={item.isOpen ? t('merchant.open') : t('merchant.closed')}
-            variant={item.isOpen ? 'success' : 'error'}
-            size="sm"
-          />
-        }
-        onPress={() => ctrl.handleMerchantPress(item.id)}
+      <MerchantListRow
+        merchant={item}
+        openLabel={ctrl.labels.open}
+        closedLabel={ctrl.labels.closed}
+        minutesLabel={ctrl.labels.minutes}
+        onPress={ctrl.handleMerchantPress}
       />
     ),
-    [ctrl.handleMerchantPress, t]
+    [ctrl.handleMerchantPress, ctrl.labels.closed, ctrl.labels.minutes, ctrl.labels.open],
   );
 
   return (
@@ -34,6 +25,7 @@ export function CategoryMerchantsScreen() {
       edges={['top']}
       headerProps={{
         title: ctrl.categoryName,
+        onBackPress: ctrl.handleBack,
       }}
       data={ctrl.merchants}
       renderItem={renderItem}
@@ -43,8 +35,8 @@ export function CategoryMerchantsScreen() {
       onRetry={ctrl.refetch}
       onRefresh={ctrl.refetch}
       refreshing={false}
-      emptyTitle={t('categories.no_results')}
-      emptySubtitle={t('categories.no_results_sub')}
+      emptyTitle={ctrl.labels.emptyTitle}
+      emptySubtitle={ctrl.labels.emptySubtitle}
     />
   );
 }

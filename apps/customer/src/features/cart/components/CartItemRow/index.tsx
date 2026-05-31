@@ -9,7 +9,11 @@ import type { CartItemRowProps } from './types';
 export const CartItemRow = React.memo(function CartItemRow({ item, onAdd, onRemove }: CartItemRowProps) {
   const { colors } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const itemName = i18n.language.startsWith('ar') ? item.nameAr || item.name : item.name || item.nameAr;
+  const merchantName = i18n.language.startsWith('ar')
+    ? item.merchantNameAr || item.merchantName
+    : item.merchantName || item.merchantNameAr;
 
   return (
     <View style={styles.row}>
@@ -20,8 +24,8 @@ export const CartItemRow = React.memo(function CartItemRow({ item, onAdd, onRemo
       />
       
       <View style={styles.info}>
-        <Text style={styles.name}>{item.nameAr}</Text>
-        <Text style={styles.merchantName}>{item.merchantNameAr || item.merchantName}</Text>
+        <Text style={styles.name}>{itemName}</Text>
+        <Text style={styles.merchantName}>{merchantName}</Text>
         <Text style={styles.price}>
           {item.price * item.quantity} {t('common.egp')}
         </Text>

@@ -9,7 +9,7 @@ import {
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { Observable, of } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { finalize, tap } from 'rxjs/operators';
 import { Reflector } from '@nestjs/core';
 import { IS_IDEMPOTENT_KEY } from '../decorators/idempotent.decorator';
 
@@ -61,8 +61,9 @@ export class IdempotencyInterceptor implements NestInterceptor {
       tap(async (data) => {
         // 4. On success, cache the result for 24 hours
         await this.cacheManager.set(cacheKey, data, 24 * 60 * 60 * 1000);
-        // 5. Remove the processing flag
-        await this.cacheManager.del(processingKey);
+      }),
+      finalize(() => {
+        void this.cacheManager.del(processingKey);
       }),
     );
   }

@@ -58,10 +58,12 @@ export class PlaceOrderDto {
   deliveryAddress: string;
 
   @ApiProperty()
+  @Type(() => Number)
   @IsNumber()
   deliveryLatitude: number;
 
   @ApiProperty()
+  @Type(() => Number)
   @IsNumber()
   deliveryLongitude: number;
 
@@ -75,6 +77,7 @@ export class PlaceOrderDto {
   deliveryNotes?: string;
 
   @ApiProperty()
+  @Type(() => Number)
   @IsNumber()
   @IsPositive()
   deliveryFee: number;

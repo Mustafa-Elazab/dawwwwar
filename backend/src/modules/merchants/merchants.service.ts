@@ -1,11 +1,31 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource, In } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { MerchantEntity } from '../../database/entities/merchant.entity';
 import { CategoryEntity } from '../../database/entities/category.entity';
 import type { NearbyFilterDto } from './dto/nearby-filter.dto';
 import { CreateMerchantDto } from './dto/create-merchant.dto';
 import { UpdateMerchantDto } from './dto/update-merchant.dto';
+
+const CUSTOMER_MAX_RADIUS_KM = 10;
+
+const toNumber = (value: number | string | null | undefined): number | null => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
+const distanceKm = (fromLat: number, fromLng: number, toLat: number | string, toLng: number | string): number => {
+  const lat2 = toNumber(toLat);
+  const lng2 = toNumber(toLng);
+  if (lat2 == null || lng2 == null) return Number.POSITIVE_INFINITY;
+  const toRad = (degrees: number) => (degrees * Math.PI) / 180;
+  const dLat = toRad(lat2 - fromLat);
+  const dLng = toRad(lng2 - fromLng);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(fromLat)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+};
 
 @Injectable()
 export class MerchantsService {
@@ -14,73 +34,82 @@ export class MerchantsService {
     private readonly repo: Repository<MerchantEntity>,
     @InjectRepository(CategoryEntity)
     private readonly categoryRepo: Repository<CategoryEntity>,
-    private readonly dataSource: DataSource,
   ) {}
 
   async findNearby(filter: NearbyFilterDto): Promise<MerchantEntity[]> {
     const {
       latitude: latInput,
       longitude: lngInput,
+      lat: latAlias,
+      lng: lngAlias,
       radius: radiusInput,
       radiusKm,
       categoryId,
       search,
-      allEgypt,
       filter: openFilter,
       limit = 20,
       offset = 0,
     } = filter;
 
-    const radius = radiusKm ?? radiusInput ?? 50;
+    const requestedRadius = radiusKm ?? radiusInput ?? CUSTOMER_MAX_RADIUS_KM;
+    const radius = Math.min(Math.max(requestedRadius, 1), CUSTOMER_MAX_RADIUS_KM);
 
-    let query = this.repo
-      .createQueryBuilder('merchant')
-      .where('merchant.isApproved = true');
+    const lat = latInput ?? latAlias;
+    const lng = lngInput ?? lngAlias;
+    const parsedLat = toNumber(lat);
+    const parsedLng = toNumber(lng);
 
-    if (allEgypt) {
-      // All Egypt mode — sort by city, then name
-      query = query.orderBy('merchant.city', 'ASC').addOrderBy('merchant.businessName', 'ASC');
-    } else if (latInput != null && lngInput != null) {
-      const radiusMetres = radius * 1000;
-      // PostGIS ST_DWithin — uses spatial index
-      query = query
-        .andWhere(
-          `ST_DWithin(
-            merchant.location,
-            ST_SetSRID(ST_MakePoint(:lng, :lat), 4326)::geography,
-            :radius
-          )`,
-          { lat: latInput, lng: lngInput, radius: radiusMetres },
-        )
-        .orderBy(
-          `ST_Distance(
-            merchant.location,
-            ST_SetSRID(ST_MakePoint(:lng2, :lat2), 4326)::geography
-          )`,
-          'ASC',
-        )
-        .setParameters({ lat2: latInput, lng2: lngInput });
-    } else {
-      // No coordinates provided and not allEgypt — default to allEgypt sorting or throw error
-      // Let's default to allEgypt sorting to avoid blank results
-      query = query.orderBy('merchant.city', 'ASC').addOrderBy('merchant.businessName', 'ASC');
+    if (parsedLat == null || parsedLng == null) {
+      return [];
     }
+
+    const merchants = await this.repo.find({
+      where: { isApproved: true },
+      relations: ['categories'],
+    });
+
+    let filtered = merchants
+      .map((merchant) => ({
+        merchant,
+        distance: distanceKm(parsedLat, parsedLng, merchant.latitude, merchant.longitude),
+      }))
+      .filter((entry) => entry.distance <= radius);
 
     if (openFilter === 'open') {
-      query = query.andWhere('merchant.isOpen = true');
+      filtered = filtered.filter(({ merchant }) => merchant.isOpen);
     }
-    
+
     if (categoryId) {
-      query = query.andWhere('merchant.parentCategoryId = :categoryId', { categoryId });
+      const productMerchants = await this.repo.query(
+        `
+          SELECT DISTINCT merchant_id
+          FROM products
+          WHERE category_id = $1
+            AND is_available = true
+        `,
+        [categoryId],
+      );
+      const merchantIdsWithProducts = new Set(
+        productMerchants.map((row: { merchant_id: string }) => row.merchant_id),
+      );
+      filtered = filtered.filter(({ merchant }) =>
+        merchant.parentCategoryId === categoryId ||
+        merchant.categories?.some((category) => category.id === categoryId) ||
+        merchantIdsWithProducts.has(merchant.id),
+      );
     }
 
     if (search) {
-      query = query.andWhere('LOWER(merchant.businessName) LIKE LOWER(:search)', {
-        search: `%${search}%`,
-      });
+      const normalizedSearch = search.trim().toLowerCase();
+      filtered = filtered.filter(({ merchant }) =>
+        merchant.businessName.toLowerCase().includes(normalizedSearch),
+      );
     }
 
-    return query.take(limit).skip(offset).getMany();
+    return filtered
+      .sort((a, b) => a.distance - b.distance)
+      .slice(offset, offset + limit)
+      .map(({ merchant }) => merchant);
   }
 
   async findById(id: string): Promise<MerchantEntity> {

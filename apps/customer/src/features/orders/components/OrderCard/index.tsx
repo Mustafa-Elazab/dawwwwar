@@ -1,9 +1,9 @@
-import React, { useMemo } from 'react';
-import { View } from 'react-native';
+import React from 'react';
+import { Image, TouchableOpacity, View } from 'react-native';
 import { useTheme } from '@dawwar/theme';
-import { Text, Badge, Button } from '@dawwar/ui';
+import { Text, Badge, Icon } from '@dawwar/ui';
 import { useTranslation } from '@dawwar/i18n';
-import { OrderType, ACTIVE_ORDER_STATUSES } from '@dawwar/types';
+import { OrderType } from '@dawwar/types';
 import { createStyles } from './styles';
 import type { OrderCardProps } from './types';
 
@@ -14,57 +14,50 @@ function getStatusVariant(status: string) {
   return 'info';
 }
 
-export const OrderCard = React.memo(function OrderCard({ order, onTrack, onViewDetail }: OrderCardProps) {
+export const OrderCard = React.memo(function OrderCard({ order, onPress }: OrderCardProps) {
   const { colors } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
-  const isActive = ACTIVE_ORDER_STATUSES.includes(order.status);
   const isCustom = order.type === OrderType.CUSTOM;
+  const firstItem = order.items?.[0];
+  const itemName = firstItem
+    ? (i18n.language.startsWith('ar') ? firstItem.productNameAr || firstItem.productName : firstItem.productName)
+    : isCustom
+      ? order.itemsDescription || t('orders.custom_order')
+      : t('orders.regular_order');
+  const imageUri =
+    order.merchant?.logo ||
+    order.merchant?.coverImage ||
+    order.itemsImages?.[0] ||
+    'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=1000';
 
   return (
-    <View style={styles.card}>
-      <View style={styles.topRow}>
-        <Text style={styles.orderNum}>{t('orders.order_number', { number: order.orderNumber })}</Text>
-        <Badge
-          label={t(`tracking.status.${order.status}`)}
-          variant={getStatusVariant(order.status)}
-          size="sm"
-        />
-      </View>
-
-      <View style={styles.metaRow}>
-        <Badge
-          label={isCustom ? t('orders.custom_order') : t('orders.regular_order')}
-          variant="neutral"
-          size="sm"
-        />
-        <Text style={styles.metaText}>·</Text>
-        <Text style={styles.totalText}>{order.total} {t('common.egp')}</Text>
-        <Text style={styles.metaText}>·</Text>
-        <Text style={styles.metaText}>
-          {new Date(order.createdAt).toLocaleDateString('ar-EG')}
-        </Text>
-      </View>
-
-      <View style={styles.actionRow}>
-        {isActive ? (
-          <Button
-            label={t('orders.track')}
-            onPress={onTrack}
-            variant="primary"
+    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.86}>
+      <Image source={{ uri: imageUri }} style={styles.image} resizeMode="cover" />
+      <View style={styles.content}>
+        <View style={styles.topRow}>
+          <Text style={styles.orderNum}>{t('orders.order_number', { number: order.orderNumber })}</Text>
+          <Badge
+            label={t(`tracking.status.${order.status}`)}
+            variant={getStatusVariant(order.status)}
             size="sm"
-            style={styles.trackBtn}
           />
-        ) : null}
-        <Button
-          label={t('orders.view_details')}
-          onPress={onViewDetail}
-          variant="outline"
-          size="sm"
-          style={styles.detailBtn}
-        />
+        </View>
+
+        <Text style={styles.itemName} numberOfLines={1}>{itemName}</Text>
+
+        <View style={styles.metaRow}>
+          <Text style={styles.totalText}>{order.total} {t('common.egp')}</Text>
+          <Text style={styles.metaText}>·</Text>
+          <Text style={styles.metaText}>
+            {new Date(order.createdAt).toLocaleDateString(i18n.language.startsWith('ar') ? 'ar-EG' : 'en-US')}
+          </Text>
+        </View>
       </View>
-    </View>
+      <View style={styles.chevron}>
+        <Icon name="chevron-right" size={22} color={colors.textTertiary} />
+      </View>
+    </TouchableOpacity>
   );
 });

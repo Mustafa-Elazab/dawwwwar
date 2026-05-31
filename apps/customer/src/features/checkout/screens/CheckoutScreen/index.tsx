@@ -1,14 +1,11 @@
 import React from 'react';
 import { View, TouchableOpacity, I18nManager } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from '@dawwar/i18n';
 import { ScrollScreenTemplate, Text, Input, Button, Divider, Icon } from '@dawwar/ui';
 import { useTheme } from '@dawwar/theme';
 import { PaymentMethod } from '@dawwar/types';
 import { useController } from './useController';
 import { createStyles } from './styles';
-import type { StackNavigationProp } from '@react-navigation/stack';
-import type { RootParamList } from '../../../../navigation/types';
 import type { TFunction } from 'i18next';
 
 const getLocalizedLabel = (label: string, t: TFunction) => {
@@ -23,7 +20,6 @@ const getLocalizedLabel = (label: string, t: TFunction) => {
 export function CheckoutScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
-  const navigation = useNavigation<StackNavigationProp<RootParamList>>();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
   const ctrl = useController();
 

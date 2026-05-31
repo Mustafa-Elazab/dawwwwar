@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import { IsEnum, IsNumber, IsOptional, IsPositive, IsString } from 'class-validator';
 import { PaymentMethod } from '../../../database/entities/order.entity';
 
@@ -13,10 +14,12 @@ export class PlaceCustomOrderDto {
   shopAddress: string;
 
   @ApiProperty()
+  @Type(() => Number)
   @IsNumber()
   shopLatitude: number;
 
   @ApiProperty()
+  @Type(() => Number)
   @IsNumber()
   shopLongitude: number;
 
@@ -35,6 +38,7 @@ export class PlaceCustomOrderDto {
   itemsImages?: string[];
 
   @ApiProperty()
+  @Type(() => Number)
   @IsNumber()
   @IsPositive()
   estimatedBudget: number;
@@ -48,10 +52,12 @@ export class PlaceCustomOrderDto {
   deliveryAddress: string;
 
   @ApiProperty()
+  @Type(() => Number)
   @IsNumber()
   deliveryLatitude: number;
 
   @ApiProperty()
+  @Type(() => Number)
   @IsNumber()
   deliveryLongitude: number;
 
@@ -60,6 +66,7 @@ export class PlaceCustomOrderDto {
   deliveryPhone: string;
 
   @ApiProperty()
+  @Type(() => Number)
   @IsNumber()
   @IsPositive()
   deliveryFee: number;

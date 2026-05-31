@@ -1,7 +1,10 @@
 import React from 'react';
-import { StatusBar, KeyboardAvoidingView, Platform, ScrollView, RefreshControl } from 'react-native';
+import { StatusBar, KeyboardAvoidingView, Platform, ScrollView, RefreshControl, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@dawwar/theme';
+import { EmptyState } from '../../molecules/EmptyState';
+import { ErrorState } from '../../molecules/ErrorState';
+import { LoadingSpinner } from '../../molecules/LoadingSpinner';
 import { NetworkBanner } from '../../molecules/NetworkBanner';
 import { Header } from '../../organisms/Header';
 import { createStyles } from './styles';
@@ -24,10 +27,36 @@ export function ScrollScreenTemplate({
   bounces = true,
   stickyHeaderIndices,
   testID,
+  isLoading = false,
+  loadingMessage,
+  isError = false,
+  errorMessage,
+  onRetry,
+  isEmpty = false,
+  emptyState,
 }: ScrollScreenTemplateProps) {
   const { colors } = useTheme();
   const styles = createStyles(colors);
   const resolvedBg = backgroundColor ?? colors.background;
+  const renderContent = () => {
+    if (isError) {
+      return (
+        <View style={styles.stateContainer}>
+          <ErrorState message={errorMessage} onRetry={onRetry} />
+        </View>
+      );
+    }
+
+    if (isEmpty && emptyState) {
+      return (
+        <View style={styles.stateContainer}>
+          <EmptyState {...emptyState} />
+        </View>
+      );
+    }
+
+    return children;
+  };
 
   return (
     <SafeAreaView
@@ -64,10 +93,15 @@ export function ScrollScreenTemplate({
             ) : undefined
           }
         >
-          {children}
+          {renderContent()}
         </ScrollView>
       </KeyboardAvoidingView>
       {footer}
+      {isLoading ? (
+        <View style={styles.loadingOverlay} pointerEvents="auto">
+          <LoadingSpinner message={loadingMessage} />
+        </View>
+      ) : null}
       <NetworkBanner />
     </SafeAreaView>
   );

@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CategoriesService } from './categories.service';
 import { Public } from '../../common/decorators/public.decorator';
@@ -12,8 +12,16 @@ export class CategoriesController {
   @Get()
   @Public()
   @ApiOperation({ summary: 'Get all active categories' })
-  findAll() {
-    return this.categoriesService.findAll();
+  findAll(
+    @Query('lat') lat?: string,
+    @Query('lng') lng?: string,
+    @Query('radiusKm') radiusKm?: string,
+  ) {
+    return this.categoriesService.findAll(
+      lat ? parseFloat(lat) : undefined,
+      lng ? parseFloat(lng) : undefined,
+      radiusKm ? parseFloat(radiusKm) : undefined,
+    );
   }
 
   @Get('tree')

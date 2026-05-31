@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native';
+import { I18nManager, StyleSheet } from 'react-native';
 import type { AppColors } from '@dawwar/theme';
 import { space, typography, radius, shadows } from '@dawwar/theme';
 
@@ -73,22 +73,44 @@ export const createStyles = (colors: AppColors) =>
       textAlign: 'left',
     },
 
-    mapPickerBtn: {
-      height: 48,
-      flexDirection: 'row',
+    mapCard: {
+      minHeight: 96,
+      borderRadius: radius.lg,
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.borderLight,
+      padding: space.md,
+      flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
+      alignItems: 'center',
+      gap: space.md,
+      marginBottom: space.md,
+      ...shadows.sm,
+    },
+    mapIcon: {
+      width: 52,
+      height: 52,
+      borderRadius: 26,
+      backgroundColor: colors.primaryLight,
       alignItems: 'center',
       justifyContent: 'center',
-      borderWidth: 1.5,
-      borderRadius: radius.md,
-      borderColor: colors.primary,
-      backgroundColor: colors.surface,
-      gap: space.sm,
-      marginTop: space.sm,
     },
-    mapPickerText: { 
-      ...typography.label, 
-      color: colors.primary,
-      fontWeight: '700',
+    mapText: {
+      flex: 1,
+    },
+    mapTitle: {
+      ...typography.label,
+      color: colors.text,
+      fontWeight: '900',
+      marginBottom: 4,
+      textAlign: I18nManager.isRTL ? 'right' : 'left',
+      writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr',
+    },
+    mapSubtitle: {
+      ...typography.body2,
+      color: colors.textSecondary,
+      lineHeight: 20,
+      textAlign: I18nManager.isRTL ? 'right' : 'left',
+      writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr',
     },
 
     textArea: {

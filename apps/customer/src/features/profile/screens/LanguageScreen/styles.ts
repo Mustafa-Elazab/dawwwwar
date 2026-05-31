@@ -10,6 +10,9 @@ export const createStyles = (colors: AppColors) =>
       paddingHorizontal: space.base, paddingVertical: space.lg,
       borderBottomWidth: 1, borderBottomColor: colors.borderLight,
     },
+    optionRowLast: {
+      borderBottomWidth: 0,
+    },
     optionLeft: { flexDirection: 'row', alignItems: 'center', gap: space.md },
     flag: { fontSize: 28 },
     optionLabel: { ...typography.body1, color: colors.text },

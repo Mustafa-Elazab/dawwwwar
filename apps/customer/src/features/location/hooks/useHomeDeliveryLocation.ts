@@ -15,6 +15,8 @@ import {
 import type { Address } from '@dawwar/types';
 
 const CAIRO_FALLBACK = { lat: 30.0444, lng: 31.2357 };
+const unwrap = <T,>(res: T | { data: T }): T =>
+  res && typeof res === 'object' && 'data' in res ? res.data : (res as T);
 
 /**
  * Home-only delivery location: backend addresses, GPS fallback, permission prompt (Android),
@@ -29,7 +31,7 @@ export function useHomeDeliveryLocation() {
     useAppSelector(selectLocation);
 
   const { data: addressesRes, isFetching: addressesFetching } = useAddresses(user?.id);
-  const addresses = addressesRes?.data ?? [];
+  const addresses = addressesRes ? unwrap<Address[]>(addressesRes) : [];
 
   const [gpsPermissionDenied, setGpsPermissionDenied] = useState(false);
   const [androidFineGranted, setAndroidFineGranted] = useState<boolean | null>(

@@ -16,6 +16,7 @@ import { BannerSlider } from '../../components/BannerSlider';
 import { MerchantCard } from '../../components/MerchantCard';
 import { ProductCard } from '../../../home/components/ProductCard';
 import { SectionHeader } from '../../components/SectionHeader';
+import { HomeScreenHeader } from './components/HomeScreenHeader';
 import { useController } from './useController';
 import { createStyles } from './styles';
 import type { Merchant, Product, Category } from '@dawwar/types';
@@ -45,49 +46,28 @@ export function HomeScreen() {
   };
 
   const renderHeader = () => (
-    <View style={styles.headerContainer}>
-      <View style={styles.headerTopRow}>
-        <View style={styles.greetingWrapper}>
-          <Text style={styles.greetingText} numberOfLines={1}>
-            {t('home.greeting', { name: ctrl.user?.name ? ctrl.user.name.split(' ')[0] : '' })}
-          </Text>
-        </View>
+    <HomeScreenHeader
+      colors={colors}
+      deliverToLabel={t('home.deliver_to')}
+      locationText={ctrl.isLocationLoading ? t('home.location_loading') : ctrl.headerLocationText}
+      onLocationPress={openLocationModal}
+      onNotificationsPress={ctrl.handleNotificationsPress}
+    />
+  );
 
-        <TouchableOpacity style={styles.bellBtn} onPress={ctrl.handleNotificationsPress}>
-          <Icon name="bell-outline" size={24} color={colors.text} />
-          <View style={styles.badgeDot} />
-        </TouchableOpacity>
-      </View>
-
+  const renderSearch = () => (
+    <View style={styles.searchWrapper}>
       <TouchableOpacity
-        style={styles.locationBlock}
-        onPress={openLocationModal}
-        activeOpacity={0.7}
-        hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+        style={styles.searchTap}
+        onPress={ctrl.handleSearchPress}
+        activeOpacity={0.9}
       >
-        <Text style={styles.deliveringLabel}>{t('home.delivering_to_label')}</Text>
-        <View style={styles.locationRow}>
-          <Icon name="chevron-down" size={16} color={colors.primary} />
-          <Text style={styles.locationPrimary} numberOfLines={1}>
-            {ctrl.isLocationLoading ? t('home.location_loading') : ctrl.headerLocationText}
-          </Text>
-          <Icon name="map-marker-outline" size={16} color={colors.primary} />
+        <Icon name="magnify" size={22} color={colors.placeholder} />
+        <Text style={styles.searchPlaceholder}>{t('home.search_placeholder')}</Text>
+        <View style={styles.filterBtn}>
+          <Icon name="tune-variant" size={20} color={colors.text} />
         </View>
       </TouchableOpacity>
-
-      <View style={styles.searchWrapper}>
-        <TouchableOpacity
-          style={styles.searchTap}
-          onPress={ctrl.handleSearchPress}
-          activeOpacity={0.9}
-        >
-          <View style={styles.filterBtn}>
-            <Icon name="tune-vertical" size={20} color={colors.primary} />
-          </View>
-          <Text style={styles.searchPlaceholder}>{t('home.search_placeholder')}</Text>
-          <Icon name="magnify" size={22} color={colors.placeholder} />
-        </TouchableOpacity>
-      </View>
     </View>
   );
 
@@ -102,7 +82,7 @@ export function HomeScreen() {
     [ctrl.handleMerchantPress],
   );
 
-  const homeCategories = ctrl.categories.slice(0, 12);
+  const homeCategories = ctrl.categories.slice(0, 7);
 
   return (
     <>
@@ -129,31 +109,9 @@ export function HomeScreen() {
             )}
           </View>
 
-          {/* Discovery mode toggle */}
-          <View style={styles.toggleRow}>
-            <TouchableOpacity
-              style={[styles.toggleBtn, ctrl.discoveryMode === 'nearby' && styles.toggleBtnActive]}
-              onPress={() => ctrl.setDiscoveryMode('nearby')}
-            >
-              <Text style={[styles.toggleLabel, ctrl.discoveryMode === 'nearby' && styles.toggleLabelActive]}>
-                📍 {t('home.nearMe', 'Nearby')}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.toggleBtn, ctrl.discoveryMode === 'allEgypt' && styles.toggleBtnActive]}
-              onPress={() => ctrl.setDiscoveryMode('allEgypt')}
-            >
-              <Text style={[styles.toggleLabel, ctrl.discoveryMode === 'allEgypt' && styles.toggleLabelActive]}>
-                🇪🇬 {t('home.allEgypt', 'All Egypt')}
-              </Text>
-            </TouchableOpacity>
-          </View>
+          {renderSearch()}
 
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.categoriesContent}
-          >
+          <View style={styles.categoriesGrid}>
             {ctrl.categoriesLoading ? (
               <>
                 {[1, 2, 3, 4, 5].map((i) => (
@@ -168,45 +126,77 @@ export function HomeScreen() {
                 <Text style={styles.categoriesEmptyText}>{t('categories.no_results')}</Text>
               </View>
             ) : (
-              homeCategories.map((cat: Category, index: number) => {
-                const bg = PASTEL[index % PASTEL.length];
-                const iconRaw = (cat.icon || '').trim();
-                return (
-                  <TouchableOpacity
-                    key={cat.id}
-                    style={styles.categoryCard}
-                    onPress={() =>
-                      ctrl.handleCategoryPress(cat.id, ctrl.categoryDisplayName(cat))
-                    }
-                  >
-                    <View style={[styles.categoryIconCircle, { backgroundColor: bg }]}>
-                      {iconRaw && isMaterialStyleIcon(iconRaw) ? (
-                        <Icon name={iconRaw as any} size={28} color={colors.primary} />
-                      ) : (
-                        <Text style={styles.categoryEmoji}>{iconRaw || '📦'}</Text>
-                      )}
-                    </View>
-                    <Text style={styles.categoryLabel} numberOfLines={2}>
-                      {ctrl.categoryDisplayName(cat)}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })
+              <>
+                {homeCategories.map((cat: Category, index: number) => {
+                  const bg = PASTEL[index % PASTEL.length];
+                  const iconRaw = (cat.icon || '').trim();
+                  return (
+                    <TouchableOpacity
+                      key={cat.id}
+                      style={styles.categoryCard}
+                      onPress={() =>
+                        ctrl.handleCategoryPress(cat.id, ctrl.categoryDisplayName(cat))
+                      }
+                    >
+                      <View style={[styles.categoryIconCircle, { backgroundColor: bg }]}>
+                        {iconRaw && isMaterialStyleIcon(iconRaw) ? (
+                          <Icon name={iconRaw as any} size={28} color={colors.primary} />
+                        ) : (
+                          <Text style={styles.categoryEmoji}>{iconRaw || '📦'}</Text>
+                        )}
+                      </View>
+                      <Text style={styles.categoryLabel} numberOfLines={2}>
+                        {ctrl.categoryDisplayName(cat)}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+                <TouchableOpacity
+                  style={styles.categoryCard}
+                  onPress={ctrl.handleSeeAllCategories}
+                >
+                  <View style={[styles.categoryIconCircle, { backgroundColor: colors.surfaceVariant }]}>
+                    <Icon
+                      name={I18nManager.isRTL ? 'arrow-left' : 'arrow-right'}
+                      size={24}
+                      color={colors.primary}
+                    />
+                  </View>
+                  <Text style={styles.categoryLabel}>{t('home.see_all')}</Text>
+                </TouchableOpacity>
+              </>
             )}
-            <TouchableOpacity
-              style={styles.categoryCard}
-              onPress={() => ctrl.navigate('CategoriesTab')}
-            >
-              <View style={[styles.categoryIconCircle, { backgroundColor: colors.surfaceVariant }]}>
-                <Icon
-                  name={I18nManager.isRTL ? 'arrow-left' : 'arrow-right'}
-                  size={24}
-                  color={colors.primary}
+          </View>
+
+          <SectionHeader
+            title={t('home.special_offers', 'Special Offers')}
+            onSeeAll={() => ctrl.navigate('PopularProductsScreen')}
+          />
+          {ctrl.isLoading ? (
+            <View style={styles.skeletonRow}>
+              {[1, 2].map((i) => (
+                <Skeleton
+                  key={i}
+                  width={SCREEN_WIDTH * 0.7}
+                  height={180}
+                  style={{ borderRadius: 12, marginEnd: 12 }}
                 />
-              </View>
-              <Text style={styles.categoryLabel}>{t('home.see_all')}</Text>
-            </TouchableOpacity>
-          </ScrollView>
+              ))}
+            </View>
+          ) : (
+            <View style={styles.productsGrid}>
+              {ctrl.products.slice(0, 4).map((product: Product) => (
+                <View key={product.id} style={styles.productGridItem}>
+                  <ProductCard
+                    product={product}
+                    onAdd={() => ctrl.handleProductAdd(product)}
+                    isLiked={ctrl.isProductLiked(product.id)}
+                    onToggleLike={() => ctrl.handleToggleFavorite(product.id)}
+                  />
+                </View>
+              ))}
+            </View>
+          )}
 
           <SectionHeader
             title={t('home.nearby_title')}
@@ -235,25 +225,6 @@ export function HomeScreen() {
               snapToInterval={SCREEN_WIDTH * 0.75 + 12}
               decelerationRate="fast"
             />
-          )}
-
-          <SectionHeader title={t('home.popular_title')} onSeeAll={() => ctrl.navigate('PopularProductsScreen')} />
-          {ctrl.isLoading ? (
-            <View style={styles.skeletonGrid}>
-              {[1, 2, 3, 4].map((i) => (
-                <View key={i} style={styles.skeletonGridItem}>
-                  <Skeleton width="100%" height={210} />
-                </View>
-              ))}
-            </View>
-          ) : (
-            <View style={styles.productsGrid}>
-              {ctrl.products.map((product: Product) => (
-                <View key={product.id} style={styles.productGridItem}>
-                  <ProductCard product={product} onAdd={() => ctrl.handleProductAdd(product)} />
-                </View>
-              ))}
-            </View>
           )}
         </ScrollView>
       </ScreenTemplate>

@@ -1,16 +1,23 @@
 import { AxiosInstance } from 'axios';
 import { ApiResponse, Address, User } from '@dawwar/types';
 
+export type SaveAddressPayload = Omit<Address, 'id' | 'userId' | 'createdAt' | 'updatedAt'> & {
+  id?: string;
+};
+
 export class ProfileService {
   constructor(private client: AxiosInstance) {}
 
-  async getAddresses(userId: string): Promise<ApiResponse<Address[]>> {
-    const { data } = await this.client.get(`/addresses?userId=${userId}`);
+  async getAddresses(_userId: string): Promise<ApiResponse<Address[]>> {
+    const { data } = await this.client.get('/addresses');
     return data;
   }
 
-  async saveAddress(address: Omit<Address, 'id' | 'createdAt' | 'updatedAt'> & { id?: string }): Promise<ApiResponse<Address>> {
-    const { data } = await this.client.post('/addresses', address);
+  async saveAddress(address: SaveAddressPayload): Promise<ApiResponse<Address>> {
+    const { id, ...payload } = address;
+    const { data } = id
+      ? await this.client.patch(`/addresses/${id}`, payload)
+      : await this.client.post('/addresses', payload);
     return data;
   }
 

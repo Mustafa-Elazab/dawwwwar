@@ -1,7 +1,9 @@
 import { useCallback } from 'react';
 import { Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from '@dawwar/i18n';
+import { useAddresses } from '@dawwar/api-client';
 import { useAppDispatch, useAppSelector } from '../../../../store/hooks';
 import {
   selectCartItems,
@@ -12,24 +14,54 @@ import {
   updateQuantity,
   clearCart,
 } from '../../../../store/slices/cart.slice';
-import { MODAL_ROUTES } from '../../../../navigation/routes';
+import { selectUser } from '../../../../store/slices/auth.slice';
+import { selectLocation } from '../../../../store/slices/location.slice';
+import { MODAL_ROUTES, TAB_ROUTES } from '../../../../navigation/routes';
+import api from '../../../../core/api/client';
 
-import type { StackNavigationProp } from '@react-navigation/stack';
-import type { RootParamList } from '../../../../navigation/types';
-
-const DELIVERY_FEE = 12;
+const unwrap = <T,>(res: T | { data: T }): T =>
+  res && typeof res === 'object' && 'data' in res ? res.data : (res as T);
 
 export function useController() {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
-  const navigation = useNavigation<StackNavigationProp<RootParamList>>();
+  const navigation = useNavigation<any>();
 
   const items = useAppSelector(selectCartItems);
   const subtotal = useAppSelector(selectCartTotal);
   const count = useAppSelector(selectCartCount);
   const merchantId = useAppSelector(selectCartMerchantId);
+  const user = useAppSelector(selectUser);
+  const location = useAppSelector(selectLocation);
+  const { data: addressesRes } = useAddresses(user?.id);
+  const addresses = addressesRes ? unwrap<any[]>(addressesRes) : [];
+  const selectedAddress = location.selectedAddressId
+    ? addresses.find((address) => address.id === location.selectedAddressId)
+    : addresses.find((address) => address.isDefault) || addresses[0];
 
-  const total = subtotal + DELIVERY_FEE;
+  const deliveryLat = selectedAddress?.latitude ?? location.latitude;
+  const deliveryLng = selectedAddress?.longitude ?? location.longitude;
+
+  const { data: feeRes, isFetching: isFeeLoading } = useQuery({
+    queryKey: ['cartDeliveryFee', merchantId, deliveryLat, deliveryLng, subtotal],
+    queryFn: async () => {
+      if (!merchantId || deliveryLat == null || deliveryLng == null) return null;
+      const { data } = await api.get('/orders/delivery-fee', {
+        params: {
+          merchantId,
+          latitude: Number(deliveryLat),
+          longitude: Number(deliveryLng),
+          subtotal,
+        },
+      });
+      return unwrap<{ fee: number; distanceKm: number; isFree: boolean }>(data);
+    },
+    enabled: !!merchantId && deliveryLat != null && deliveryLng != null && subtotal > 0,
+    staleTime: 30_000,
+  });
+
+  const deliveryFee = Number(feeRes?.fee ?? 0);
+  const total = subtotal + deliveryFee;
 
   const handleAdd = useCallback(
     (productId: string) => {
@@ -69,13 +101,15 @@ export function useController() {
   }, [navigation]);
 
   const handleClose = useCallback(() => {
-    navigation.goBack();
+    navigation.navigate(TAB_ROUTES.HOME_TAB);
   }, [navigation]);
 
   return {
     items,
     subtotal,
-    deliveryFee: DELIVERY_FEE,
+    deliveryFee,
+    distanceKm: feeRes?.distanceKm,
+    isFeeLoading,
     total,
     count,
     merchantId,

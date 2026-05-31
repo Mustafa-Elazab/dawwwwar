@@ -1,6 +1,7 @@
 // ─── Auth Stack ──────────────────────────────────────────
 export const AUTH_ROUTES = {
   SPLASH: 'SplashScreen',
+  ONBOARDING: 'OnboardingScreen',
   PHONE: 'PhoneScreen',
   OTP: 'OtpScreen',
   COMPLETE_PROFILE: 'CompleteProfileScreen',
@@ -9,20 +10,31 @@ export const AUTH_ROUTES = {
 // ─── Customer Tab Names ───────────────────────────────────
 export const TAB_ROUTES = {
   HOME_TAB: 'HomeTab',
-  CATEGORIES_TAB: 'CategoriesTab',
+  BASKET_TAB: 'BasketTab',
   ORDERS_TAB: 'OrdersTab',
+  LIKED_TAB: 'LikedTab',
   PROFILE_TAB: 'ProfileTab',
 } as const;
 
 // ─── Home Stack ───────────────────────────────────────────
 export const HOME_ROUTES = {
   HOME: 'HomeScreen',
+  CATEGORIES: 'CategoriesScreen',
   SEARCH: 'SearchScreen',
   CATEGORY_MERCHANTS: 'CategoryMerchantsScreen',
   MERCHANT_DETAIL: 'MerchantDetailScreen',
+  PRODUCT_DETAIL: 'ProductDetailScreen',
   LOCATION_PICKER: 'LocationPickerScreen',
   NEARBY_MERCHANTS: 'NearbyMerchantsScreen',
   POPULAR_PRODUCTS: 'PopularProductsScreen',
+} as const;
+
+export const LIKED_ROUTES = {
+  LIKED: 'LikedScreen',
+} as const;
+
+export const CATEGORY_ROUTES = {
+  CATEGORIES: 'CategoriesScreen',
 } as const;
 
 // ─── Orders Stack ─────────────────────────────────────────
@@ -30,6 +42,7 @@ export const ORDER_ROUTES = {
   ORDERS_LIST: 'OrdersListScreen',
   ORDER_DETAIL: 'OrderDetailScreen',
   TRACKING: 'TrackingScreen',
+  CANCEL_ORDER: 'CancelOrderScreen',
 } as const;
 
 // ─── Wallet Stack ─────────────────────────────────────────
@@ -49,11 +62,13 @@ export const PROFILE_ROUTES = {
   TERMS: 'TermsScreen',
   PRIVACY: 'PrivacyScreen',
   NOTIFICATIONS: 'NotificationsScreen',
+  PAYMENT_METHODS: 'PaymentMethodsScreen',
+  ADD_PAYMENT_METHOD: 'AddPaymentMethodScreen',
+  INVITE_FRIENDS: 'InviteFriendsScreen',
 } as const;
 
 // ─── Modals (presented over tabs) ────────────────────────
 export const MODAL_ROUTES = {
-  CART: 'CartModal',
   CHECKOUT: 'CheckoutModal',
   CUSTOM_ORDER: 'CustomOrderModal',
 } as const;

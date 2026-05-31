@@ -8,8 +8,9 @@ import type { MerchantHeaderProps } from './types';
 
 export function MerchantHeader({ merchant }: MerchantHeaderProps) {
   const { colors } = useTheme();
-  const styles = React.useMemo(() => createStyles(colors), [colors]);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language.startsWith('ar') || I18nManager.isRTL;
+  const styles = React.useMemo(() => createStyles(colors, isRTL), [colors, isRTL]);
 
   return (
     <View style={styles.coverContainer}>

@@ -2,8 +2,31 @@ import { StyleSheet, I18nManager } from 'react-native';
 import type { AppColors } from '@dawwar/theme';
 import { space, typography, radius, shadows } from '@dawwar/theme';
 
-export const createStyles = (colors: AppColors) =>
+export const createStyles = (colors: AppColors, isRTL = I18nManager.isRTL) =>
   StyleSheet.create({
+    screen: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    categorySpacer: {
+      height: 60,
+    },
+    loadingContainer: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    loadingContent: {
+      padding: space.base,
+      gap: space.md,
+    },
+    tabScroll: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    emptyProducts: {
+      padding: space['4xl'] + space.base,
+      alignItems: 'center',
+    },
     headerOverlay: {
       position: 'absolute',
       top: 0,
@@ -73,15 +96,24 @@ export const createStyles = (colors: AppColors) =>
       paddingHorizontal: space.md,
       paddingVertical: space.sm,
       backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.surface,
       borderRadius: radius.full,
       ...shadows.sm,
       shadowColor: '#000',
       elevation: 2,
     },
+    categoryChipSelected: {
+      backgroundColor: colors.primary,
+      borderColor: colors.primary,
+    },
     categoryChipText: {
       ...typography.label,
       color: colors.text,
       fontWeight: '600',
+    },
+    categoryChipTextSelected: {
+      color: colors.primaryText,
     },
     categoryTitleContainer: {
       backgroundColor: colors.background,
@@ -89,7 +121,9 @@ export const createStyles = (colors: AppColors) =>
       paddingVertical: space.sm,
     },
     categoryTitle: {
-      alignSelf: 'flex-start',
+      alignSelf: isRTL ? 'flex-end' : 'flex-start',
+      textAlign: isRTL ? 'right' : 'left',
+      writingDirection: isRTL ? 'rtl' : 'ltr',
     },
     productGrid: {
       flexDirection: 'row',
@@ -106,19 +140,25 @@ export const createStyles = (colors: AppColors) =>
     },
     infoRow: {
       gap: space.sm,
+      alignItems: isRTL ? 'flex-end' : 'flex-start',
     },
     infoLabel: {
       ...typography.label,
       color: colors.textSecondary,
+      textAlign: isRTL ? 'right' : 'left',
+      writingDirection: isRTL ? 'rtl' : 'ltr',
     },
     infoValue: {
       ...typography.body1,
       color: colors.text,
+      textAlign: isRTL ? 'right' : 'left',
+      writingDirection: isRTL ? 'rtl' : 'ltr',
     },
     hoursTable: { gap: space.sm },
     hoursRow: {
-      flexDirection: 'row',
+      flexDirection: isRTL ? 'row-reverse' : 'row',
       justifyContent: 'space-between',
+      width: '100%',
     },
     reviewsPlaceholder: {
       padding: space.xl,

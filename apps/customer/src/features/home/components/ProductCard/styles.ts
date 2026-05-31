@@ -34,6 +34,18 @@ export const createStyles = (colors: AppColors) =>
       flexDirection: 'row',
       gap: space.xs,
     },
+    likeBtn: {
+      position: 'absolute',
+      top: 8,
+      right: 8,
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      backgroundColor: colors.surface,
+      alignItems: 'center',
+      justifyContent: 'center',
+      ...shadows.sm,
+    },
     badge: {
       paddingHorizontal: space.sm,
       paddingVertical: 2,

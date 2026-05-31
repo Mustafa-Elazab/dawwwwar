@@ -84,11 +84,11 @@ export function CustomOrderScreen() {
             <View style={styles.summaryRow}>
               <View style={styles.summaryItem}>
                 <Icon name={ctrl.shopAddress ? "check-circle" : "circle-outline"} size={16} color={ctrl.shopAddress ? colors.success : colors.textDisabled} />
-                <Text style={[styles.summaryText, { color: ctrl.shopAddress ? colors.text : colors.textDisabled }]}>العنوان</Text>
+                <Text style={[styles.summaryText, { color: ctrl.shopAddress ? colors.text : colors.textDisabled }]}>{t('custom_order.summary_address')}</Text>
               </View>
               <View style={styles.summaryItem}>
                 <Icon name={(ctrl.textDescription || ctrl.voiceUri) ? "check-circle" : "circle-outline"} size={16} color={(ctrl.textDescription || ctrl.voiceUri) ? colors.success : colors.textDisabled} />
-                <Text style={[styles.summaryText, { color: (ctrl.textDescription || ctrl.voiceUri) ? colors.text : colors.textDisabled }]}>الوصف</Text>
+                <Text style={[styles.summaryText, { color: (ctrl.textDescription || ctrl.voiceUri) ? colors.text : colors.textDisabled }]}>{t('custom_order.summary_description')}</Text>
               </View>
             </View>
             <Button
@@ -108,6 +108,19 @@ export function CustomOrderScreen() {
         >
           {/* Section 1: Shop Location */}
           <Section icon="store" title={t('custom_order.shop_section')}>
+            <TouchableOpacity style={styles.mapCard} onPress={() => ctrl.setShowMapPicker(true)} activeOpacity={0.85}>
+              <View style={styles.mapIcon}>
+                <Icon name="map-marker-radius-outline" size={28} color={colors.primary} />
+              </View>
+              <View style={styles.mapText}>
+                <Text style={styles.mapTitle}>{t('custom_order.shop_location_title')}</Text>
+                <Text style={styles.mapSubtitle} numberOfLines={2}>
+                  {ctrl.shopAddress || t('custom_order.shop_location_hint')}
+                </Text>
+              </View>
+              <Icon name="chevron-right" size={22} color={colors.textTertiary} />
+            </TouchableOpacity>
+
             <StyledInput
               icon="store-outline"
               placeholder={t('custom_order.shop_name_placeholder')}
@@ -121,14 +134,6 @@ export function CustomOrderScreen() {
               onChangeText={ctrl.setShopAddress}
               error={ctrl.errors.shopAddress}
             />
-            <TouchableOpacity 
-              style={styles.mapPickerBtn} 
-              onPress={() => ctrl.setShowMapPicker(true)}
-              activeOpacity={0.8}
-            >
-              <Icon name="map-search-outline" size={20} color={colors.primary} />
-              <Text style={styles.mapPickerText}>{t('custom_order.pick_on_map')}</Text>
-            </TouchableOpacity>
           </Section>
 
           {/* Section 2: What to Buy */}
@@ -170,12 +175,13 @@ export function CustomOrderScreen() {
               onAdd={ctrl.handleAddPhoto}
               onRemove={ctrl.handleRemovePhoto}
             />
+            {ctrl.errors.items ? <Text style={styles.errorText}>{ctrl.errors.items}</Text> : null}
           </Section>
 
           {/* Section 3: Budget & Payment */}
           <Section icon="cash-multiple" title={t('custom_order.budget_section')}>
             <Text style={styles.sectionSubtitle}>{t('custom_order.budget_label')}</Text>
-            <View style={styles.budgetRow}>
+            <View style={[styles.budgetRow, (ctrl.errors.budget || ctrl.errors.payment) ? { borderColor: colors.error } : null]}>
               <RTLTextInput
                 style={styles.budgetInput}
                 value={ctrl.budget}
@@ -200,11 +206,13 @@ export function CustomOrderScreen() {
                     {ctrl.paymentMethod === method && <View style={styles.radioDot} />}
                   </View>
                   <Text variant="label" color={colors.text}>
-                    {method === 'CASH' ? t('checkout.cash') : t('checkout.wallet')}
+                {method === 'CASH' ? t('checkout.cash') : t('checkout.wallet')}
                   </Text>
                 </TouchableOpacity>
               ))}
             </View>
+            {ctrl.errors.budget ? <Text style={styles.errorText}>{ctrl.errors.budget}</Text> : null}
+            {ctrl.errors.payment ? <Text style={styles.errorText}>{ctrl.errors.payment}</Text> : null}
           </Section>
 
         </ScrollView>
@@ -213,8 +221,8 @@ export function CustomOrderScreen() {
       {/* Map picker modal */}
       <MapPickerModal
         visible={ctrl.showMapPicker}
-        initialLatitude={30.8704}
-        initialLongitude={31.4741}
+        initialLatitude={ctrl.shopLat}
+        initialLongitude={ctrl.shopLng}
         onConfirm={ctrl.handleMapConfirm}
         onClose={() => ctrl.setShowMapPicker(false)}
       />

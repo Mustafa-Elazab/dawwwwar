@@ -25,6 +25,9 @@ import { useQuery } from '@tanstack/react-query';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { RootParamList } from '../../../../navigation/types';
 
+const unwrap = <T,>(res: T | { data: T }): T =>
+  res && typeof res === 'object' && 'data' in res ? res.data : (res as T);
+
 export function useController() {
   const { t } = useTranslation();
   const navigation = useNavigation<StackNavigationProp<RootParamList>>();
@@ -41,8 +44,8 @@ export function useController() {
   const { data: addressesRes } = useAddresses(user?.id);
   const { data: walletRes } = useWallet();
   
-  const addresses = addressesRes?.data || [];
-  const wallet = walletRes?.data;
+  const addresses = addressesRes ? unwrap<any[]>(addressesRes) : [];
+  const wallet = walletRes ? unwrap<any>(walletRes) : undefined;
   const walletBalance = Number(wallet?.balance || 0);
 
   // Match global selected location, or fallback to default
@@ -108,11 +111,12 @@ export function useController() {
       dispatch(clearCart());
       // Invalidate orders list
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.orders.list('all') });
-      navigation.navigate('CustomerTabs', { 
+      const order = unwrap<any>(res);
+      navigation.navigate('CustomerTabs', {
         screen: 'OrdersTab',
         params: { 
           screen: 'TrackingScreen',
-          params: { orderId: res.data.id }
+          params: { orderId: order.id }
         }
       });
     } catch {

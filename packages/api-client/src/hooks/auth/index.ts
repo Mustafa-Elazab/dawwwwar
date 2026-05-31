@@ -17,6 +17,13 @@ export function useSendOtp() {
   });
 }
 
+export function useSendCustomerOtp() {
+  const { auth } = useApiClient();
+  return useMutation({
+    mutationFn: (phone: string) => auth.sendCustomerOtp(phone),
+  });
+}
+
 export function useVerifyCustomerOtp() {
   const { auth } = useApiClient();
   return useMutation({

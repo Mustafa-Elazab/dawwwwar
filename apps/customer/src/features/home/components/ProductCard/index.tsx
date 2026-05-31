@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { View, TouchableOpacity, ViewStyle } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import { useTheme } from '@dawwar/theme';
@@ -7,10 +7,10 @@ import { useTranslation } from '@dawwar/i18n';
 import { createStyles } from './styles';
 import type { ProductCardProps } from './types';
 
-export const ProductCard = React.memo(function ProductCard({ product, merchantName, onAdd, style }: ProductCardProps & { style?: ViewStyle }) {
+export const ProductCard = React.memo(function ProductCard({ product, merchantName, onAdd, isLiked, onToggleLike, style }: ProductCardProps & { style?: ViewStyle }) {
   const { colors } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const handleAdd = () => {
     if (product.isAvailable) onAdd();
@@ -20,6 +20,9 @@ export const ProductCard = React.memo(function ProductCard({ product, merchantNa
   const comparePrice = (product as any).comparePrice;
   const hasDiscount = comparePrice && comparePrice > product.price;
   const isFeatured = (product as any).isFeatured;
+  const productName = i18n.language.startsWith('ar')
+    ? product.nameAr || product.name
+    : product.name || product.nameAr;
 
   return (
     <View style={[styles.card, !product.isAvailable && styles.unavailable, style]}>
@@ -42,12 +45,17 @@ export const ProductCard = React.memo(function ProductCard({ product, merchantNa
             </View>
           )}
         </View>
+        {onToggleLike ? (
+          <TouchableOpacity style={styles.likeBtn} onPress={onToggleLike}>
+            <Icon name={isLiked ? 'heart' : 'heart-outline'} size={20} color={colors.primary} />
+          </TouchableOpacity>
+        ) : null}
       </View>
 
       <View style={styles.body}>
         <View>
           <Text style={styles.name} numberOfLines={2}>
-            {product.nameAr}
+            {productName}
           </Text>
           {merchantName != null && (
             <Text style={styles.merchantName} numberOfLines={1}>

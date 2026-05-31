@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { View, TouchableOpacity, Image } from 'react-native';
+import { View, TouchableOpacity, Image, I18nManager } from 'react-native';
 import { useTheme } from '@dawwar/theme';
 import { Text, Icon, Badge } from '@dawwar/ui';
 import { useTranslation } from '@dawwar/i18n';
@@ -8,8 +8,15 @@ import type { ProductRowProps } from './types';
 
 export const ProductRow = React.memo(function ProductRow({ product, quantity = 0, onAdd, onRemove }: ProductRowProps) {
   const { colors } = useTheme();
-  const styles = React.useMemo(() => createStyles(colors), [colors]);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language.startsWith('ar') || I18nManager.isRTL;
+  const styles = React.useMemo(() => createStyles(colors, isRTL), [colors, isRTL]);
+  const productName = i18n.language.startsWith('ar')
+    ? product.nameAr || product.name
+    : product.name || product.nameAr;
+  const description = i18n.language.startsWith('ar')
+    ? product.descriptionAr || product.description
+    : product.description || product.descriptionAr;
 
   return (
     <View style={[styles.row, !product.isAvailable && { opacity: 0.5 }]}>
@@ -19,10 +26,10 @@ export const ProductRow = React.memo(function ProductRow({ product, quantity = 0
         resizeMode="cover"
       />
       <View style={styles.info}>
-        <Text style={styles.name}>{product.nameAr}</Text>
-        {product.description != null && product.description !== '' && (
+        <Text style={styles.name}>{productName}</Text>
+        {description != null && description !== '' && (
           <Text style={styles.description} numberOfLines={2}>
-            {product.description}
+            {description}
           </Text>
         )}
         <Text style={styles.price}>

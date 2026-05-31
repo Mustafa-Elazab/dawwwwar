@@ -149,6 +149,10 @@ export const createStyles = (colors: AppColors) =>
       borderRadius: radius.lg,
       marginBottom: space.md,
     },
+    sendButtonDisabled: {
+      backgroundColor: colors.border,
+      opacity: 0.8,
+    },
     termsHint: {
       ...typography.caption,
       color: colors.error,

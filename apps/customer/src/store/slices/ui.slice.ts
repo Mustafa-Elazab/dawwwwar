@@ -5,6 +5,7 @@ import { ThemeMode, Language } from '@dawwar/types';
 export interface UiState {
   themeMode: ThemeMode;
   language: Language;
+  pushNotifications: boolean;
 }
 
 const initialState: UiState = {
@@ -14,6 +15,7 @@ const initialState: UiState = {
   language:
     (storage.getString(StorageKeys.APP_LANGUAGE) as Language | undefined) ??
     Language.AR,
+  pushNotifications: storage.getBoolean(StorageKeys.PUSH_NOTIFICATIONS) ?? false,
 };
 
 export const uiSlice = createSlice({
@@ -28,9 +30,14 @@ export const uiSlice = createSlice({
       state.language = action.payload;
       storage.set(StorageKeys.APP_LANGUAGE, action.payload);
     },
+    setPushNotifications: (state, action: PayloadAction<boolean>) => {
+      state.pushNotifications = action.payload;
+      storage.set(StorageKeys.PUSH_NOTIFICATIONS, action.payload);
+    },
   },
 });
 
-export const { setThemeMode, setLanguage } = uiSlice.actions;
+export const { setThemeMode, setLanguage, setPushNotifications } = uiSlice.actions;
 export const selectThemeMode = (state: { ui: UiState }) => state.ui.themeMode;
 export const selectLanguage = (state: { ui: UiState }) => state.ui.language;
+export const selectPushNotifications = (state: { ui: UiState }) => state.ui.pushNotifications;

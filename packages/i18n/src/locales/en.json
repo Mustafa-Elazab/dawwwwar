@@ -6,6 +6,8 @@
     "retry": "Try Again",
     "cancel": "Cancel",
     "confirm": "Confirm",
+    "submit": "Submit",
+    "apply": "Apply",
     "save": "Save",
     "back": "Back",
     "done": "Done",
@@ -44,6 +46,9 @@
   "notifications": {
     "title": "Notifications",
     "empty": "No notifications yet",
+    "empty_subtitle": "When you get orders, promos, or updates, they will appear here.",
+    "explore_deals": "Explore Deals",
+    "store": "Store",
     "order_delivered": "Order Delivered",
     "order_delivered_body": "Your order #{{orderId}} from {{merchant}} has been delivered. Enjoy!",
     "weekend_sale": "50% OFF Weekend Sale",
@@ -52,6 +57,10 @@
   },
 
   "auth": {
+    "splash_brand": "Dawwar",
+    "splash_tagline": "Hyperlocal Delivery",
+    "splash_version": "Version {{version}}",
+    "customer_tagline": "Everything you need, in a minute",
     "auth_selection_title": "Welcome to Dawwar",
     "auth_selection_subtitle": "The easiest way to recycle and earn rewards.",
     "login_title": "Login",
@@ -79,6 +88,7 @@
     "terms_required": "Please accept the terms to continue",
 
     "otp_title": "Enter the Code",
+    "verify_phone": "Verify Phone",
     "otp_subtitle": "We sent a 6-digit code to\n",
     "otp_sandbox_hint": "Sandbox mode: use code 123456",
     "otp_expires": "Code expires in {{seconds}}s",
@@ -147,6 +157,7 @@
     "search_placeholder": "Search shops or products...",
     "nearby_title": "Nearby Shops",
     "popular_title": "Popular Items",
+    "special_offers": "Special Offers",
     "see_all": "See all",
     "custom_order_btn": "Custom Order",
     "custom_order_sub": "Order from anywhere",
@@ -461,6 +472,8 @@
     "shop_address_label": "Shop address *",
     "shop_address_placeholder": "Street name, area, landmark...",
     "shop_address_required": "Shop address is required",
+    "shop_location_title": "Shop location",
+    "shop_location_hint": "Choose the shop location on the map",
     "pick_on_map": "Pick on Map",
     "use_my_location": "Use My Location",
     "items_section": "What do you need?",
@@ -488,6 +501,8 @@
     "budget_positive": "Budget must be greater than 0",
     "budget_cash_limit": "Orders over 200 EGP require wallet payment",
     "delivery_section": "Delivery details",
+    "summary_address": "Address",
+    "summary_description": "Description",
     "place_order": "Place Custom Order",
     "placing": "Placing Order...",
     "success": "Custom order placed!"
@@ -501,6 +516,9 @@
     "call_driver": "Call Driver",
     "call_merchant": "Call Shop",
     "cancel_order": "Cancel Order",
+    "title": "Order Tracking",
+    "estimated_delivery_time": "Estimated Delivery Time",
+    "my_order": "My Order",
     "cancel_confirm_title": "Cancel Order?",
     "cancel_confirm_body": "Are you sure you want to cancel this order?",
     "cant_cancel": "This order can no longer be cancelled",
@@ -530,7 +548,10 @@
   },
   "orders": {
     "title": "Orders",
+    "tab_all": "All",
     "tab_active": "Active",
+    "tab_completed": "Completed",
+    "tab_cancelled": "Cancelled",
     "tab_past": "Past",
     "no_past_orders": "No past orders",
     "no_past_orders_sub": "Your completed orders will appear here",
@@ -548,7 +569,30 @@
     "total": "{{amount}} EGP",
     "items_count": "{{count}} item",
     "items_count_plural": "{{count}} items",
-    "placed_at": "Placed {{time}}"
+    "placed_at": "Placed {{time}}",
+    "order_summary": "Order Summary",
+    "payment_method": "Payment method",
+    "promotions": "Promotions",
+    "no_promotions": "No promotion",
+    "discount": "Discount",
+    "cancelled_reason": "Reason for Cancellation",
+    "cancelled_order": "Cancelled order"
+  },
+
+  "cancel_order": {
+    "title": "Cancel Order",
+    "other_placeholder": "Other reason...",
+    "done_title": "Your Order Canceled",
+    "done_body": "We're sorry to see your order go. We hope to serve you better next time.",
+    "reasons": {
+      "change_mind": "Change of mind",
+      "better_price": "Found better price elsewhere",
+      "delivery_delay": "Delivery delay",
+      "wrong_item": "Incorrect item selected",
+      "duplicate_order": "Duplicate order",
+      "cannot_fulfill": "Unable to fulfill order",
+      "other": "Other reasons"
+    }
   },
 
   "wallet": {
@@ -582,6 +626,7 @@
 
   "profile": {
     "title": "Profile",
+    "login_register": "Login / Register",
     "section_account": "Account",
     "section_preferences": "Preferences",
     "section_support": "Help & Support",
@@ -593,6 +638,16 @@
     "notifications": "Notifications",
     "help": "Help & Support",
     "contact_whatsapp": "Contact us on WhatsApp",
+    "my_locations": "My Locations",
+    "my_promotions": "My Promotions",
+    "messages": "Messages",
+    "invite_friends": "Invite Friends",
+    "security": "Security",
+    "help_center": "Help Center",
+    "transactions": "Transactions",
+    "push_notification": "Push Notification",
+    "dark_mode": "Dark Mode",
+    "sound": "Sound",
     "terms": "Terms & Conditions",
     "privacy": "Privacy Policy",
     "about": "About Dawwar",
@@ -602,6 +657,65 @@
     "logout_confirm_body": "You will be logged out of your account.",
     "logout_confirm_btn": "Yes, Logout",
     "version": "Version {{version}}"
+  },
+
+  "liked": {
+    "title": "Liked",
+    "empty": "Empty",
+    "empty_sub": "Products you like will appear here.",
+    "not_found": "Not Found",
+    "not_found_sub": "Try another search.",
+    "store": "Store"
+  },
+
+  "product": {
+    "details_title": "Product Details",
+    "no_description": "No description available.",
+    "price": "Price",
+    "quantity": "Quantity",
+    "add_to_basket": "Add to Basket"
+  },
+
+  "payment_methods": {
+    "title": "Payment Methods",
+    "cash": "Cash",
+    "wallet": "Wallet",
+    "apple_pay": "Apple Pay",
+    "google_pay": "Google Pay",
+    "instapay": "Instapay",
+    "vodafone_cash": "Vodafone Cash",
+    "card": "Card",
+    "add_card": "Add New Card",
+    "cardholder_name": "Cardholder Name",
+    "card_number": "Card Number",
+    "expiry": "Expiry Date",
+    "cvc": "CVV / CVC",
+    "success_title": "Payment Successful",
+    "success_body": "Your payment method has been saved successfully.",
+    "success_button": "Ok, Great!"
+  },
+
+  "invite_friends": {
+    "title": "Invite Friends",
+    "heading": "Invite your friends",
+    "body": "Share Dawwar with people you love and make ordering nearby easier for everyone.",
+    "share_sheet": "Share invite",
+    "message": "Try Dawwar for fast nearby delivery: {{link}}"
+  },
+
+  "onboarding": {
+    "wide_title": "Wide Selection",
+    "wide_body": "Nearby restaurants and stores in your area.",
+    "fast_title": "Fast Delivery",
+    "fast_body": "Receive your order quickly from nearby stores.",
+    "track_title": "Order Tracking",
+    "track_body": "Track your orders in real time.",
+    "offer_title": "Special Offers",
+    "offer_body": "Weekly deals and discounts.",
+    "next": "Next",
+    "skip": "Skip",
+    "start": "Start enjoying",
+    "login": "Login / Registration"
   },
 
   "addresses": {
@@ -684,6 +798,7 @@
     "microphone_denied": "Microphone access was denied. Please enable it in settings.",
     "no_internet": "No internet connection",
     "cancel_failed": "Failed to cancel order",
+    "notification_permission": "Notification permission was not granted",
     "roleMismatch": {
       "customerInMerchant": "This number is registered as a customer account. To register as a merchant, please contact us.",
       "customerInDriver": "This number is registered as a customer account. To register as a driver, please contact us.",
@@ -818,8 +933,9 @@
   },
   "mainTabs": {
     "home": "Home",
-    "categories": "Categories",
+    "basket": "Basket",
     "orders": "Orders",
+    "liked": "Liked",
     "profile": "Profile"
   }
 }

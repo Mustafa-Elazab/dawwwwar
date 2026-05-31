@@ -9,7 +9,7 @@ import { RootNavigator } from '../navigation/RootNavigator';
 import { linking } from '../navigation/linking';
 import { navigationRef } from '../navigation/navigationRef';
 import { SafeAreaProviderCompat } from '@react-navigation/elements';
-import { requestPushNotificationPermission, setupForegroundNotifications } from '../utils/notifications';
+import { setupForegroundNotifications } from '../utils/notifications';
 import { USE_MOCK_API } from '../core/api/config';
 console.log('Nav Elements loaded check:', !!SafeAreaProviderCompat);
 import '../utils/reactotron'; // Initialize Reactotron
@@ -26,9 +26,8 @@ export function App() {
   useEffect(() => {
     logger.log('[App] Mounted');
 
-    // Request push notification permission and setup foreground handler
+    // Setup foreground handler; permission is requested after customer login.
     if (!USE_MOCK_API) {
-      void requestPushNotificationPermission();
       setupForegroundNotifications();
     }
   }, []);

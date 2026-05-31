@@ -9,6 +9,9 @@ import type { ProfileStackParamList } from '../../../../navigation/types';
 import Toast from 'react-native-toast-message';
 import { useQueryClient } from '@tanstack/react-query';
 
+const unwrap = <T,>(res: T | { data: T }): T =>
+  res && typeof res === 'object' && 'data' in res ? res.data : (res as T);
+
 export function useController() {
   const { t } = useTranslation();
   const navigation = useNavigation<StackNavigationProp<ProfileStackParamList>>();
@@ -16,7 +19,7 @@ export function useController() {
   const queryClient = useQueryClient();
 
   const { data: res, isLoading, isError, refetch } = useAddresses(user?.id);
-  const addresses = res?.data;
+  const addresses = res ? unwrap(res) : [];
 
   const deleteMutation = useDeleteAddress();
 

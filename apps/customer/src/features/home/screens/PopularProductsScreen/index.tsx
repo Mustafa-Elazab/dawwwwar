@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import { View, Dimensions, StyleSheet } from 'react-native';
 import { useTranslation } from '@dawwar/i18n';
 import { ListScreenTemplate } from '@dawwar/ui';
-import { useTheme, space } from '@dawwar/theme';
+import { space } from '@dawwar/theme';
 import { useController } from './useController';
 import type { Product } from '@dawwar/types';
 import { ProductCard } from '../../components/ProductCard';
@@ -12,7 +12,6 @@ const CARD_WIDTH = (SCREEN_WIDTH - space.base * 2 - space.md) / 2;
 
 export function PopularProductsScreen() {
   const { t } = useTranslation();
-  const { colors } = useTheme();
   const ctrl = useController();
 
   const renderItem = useCallback(
@@ -21,11 +20,13 @@ export function PopularProductsScreen() {
         <ProductCard
           product={item}
           onAdd={() => ctrl.handleProductAdd(item)}
+          isLiked={ctrl.isProductLiked(item.id)}
+          onToggleLike={() => ctrl.handleToggleFavorite(item.id)}
           style={{ width: CARD_WIDTH }}
         />
       </View>
     ),
-    [ctrl.handleProductAdd]
+    [ctrl.handleProductAdd, ctrl.handleToggleFavorite, ctrl.isProductLiked]
   );
 
   return (

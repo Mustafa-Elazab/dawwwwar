@@ -6,13 +6,13 @@ import { selectCartCount, selectCartTotal } from '../../../../store/slices/cart.
 import { Text } from '@dawwar/ui';
 import { useTheme, space, radius, shadows } from '@dawwar/theme';
 import { useTranslation } from '@dawwar/i18n';
-import { MODAL_ROUTES, HOME_ROUTES, TAB_ROUTES } from '../../../../navigation/routes';
+import { MODAL_ROUTES, TAB_ROUTES } from '../../../../navigation/routes';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 // Screens where the cart toast should be HIDDEN
 const HIDE_ON_SCREENS = [
-  MODAL_ROUTES.CART,
+  TAB_ROUTES.BASKET_TAB,
   MODAL_ROUTES.CHECKOUT,
   MODAL_ROUTES.CUSTOM_ORDER,
   'CheckoutScreen',
@@ -46,7 +46,7 @@ export function GlobalCartToast() {
     <View style={styles.container}>
       <TouchableOpacity 
         style={[styles.toast, { backgroundColor: colors.primary }]} 
-        onPress={() => navigation.navigate(MODAL_ROUTES.CART)}
+        onPress={() => navigation.navigate('CustomerTabs', { screen: TAB_ROUTES.BASKET_TAB })}
         activeOpacity={0.9}
       >
         <View style={styles.left}>

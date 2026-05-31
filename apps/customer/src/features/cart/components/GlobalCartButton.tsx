@@ -5,7 +5,7 @@ import { useAppSelector } from '../../../store/hooks';
 import { selectCartCount, selectCartTotal } from '../../../store/slices/cart.slice';
 import { useTheme } from '@dawwar/theme';
 import { Icon, Text } from '@dawwar/ui';
-import { MODAL_ROUTES } from '../../../navigation/routes';
+import { TAB_ROUTES } from '../../../navigation/routes';
 
 export function GlobalCartButton() {
   const { colors } = useTheme();
@@ -20,7 +20,7 @@ export function GlobalCartButton() {
       <TouchableOpacity
         style={[styles.button, { backgroundColor: colors.primary }]}
         activeOpacity={0.9}
-        onPress={() => navigation.navigate(MODAL_ROUTES.CART)}
+        onPress={() => navigation.navigate('CustomerTabs', { screen: TAB_ROUTES.BASKET_TAB })}
       >
         <View style={styles.left}>
           <View style={[styles.badge, { backgroundColor: colors.surface }]}>

@@ -1,6 +1,6 @@
 import type { LinkingOptions } from '@react-navigation/native';
 import type { RootParamList } from './types';
-import { MODAL_ROUTES } from './routes';
+import { MODAL_ROUTES, TAB_ROUTES } from './routes';
 
 export const linking: LinkingOptions<RootParamList> = {
   prefixes: ['dawwar://', 'https://dawwar.com'],
@@ -19,9 +19,9 @@ export const linking: LinkingOptions<RootParamList> = {
               MerchantDetailScreen: 'merchant/:merchantId',
             },
           },
+          [TAB_ROUTES.BASKET_TAB]: 'cart',
         },
       },
-      [MODAL_ROUTES.CART]: 'cart',
       [MODAL_ROUTES.CHECKOUT]: 'checkout',
       [MODAL_ROUTES.CUSTOM_ORDER]: 'custom-order',
     },

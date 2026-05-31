@@ -80,8 +80,8 @@ export class OrdersController {
   @Post(':id/cancel')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Customer cancels a PENDING order' })
-  cancelOrder(@Param('id') id: string, @CurrentUser() user: UserEntity) {
-    return this.ordersService.customerCancel(id, user.id);
+  cancelOrder(@Param('id') id: string, @CurrentUser() user: UserEntity, @Body('reason') reason?: string) {
+    return this.ordersService.customerCancel(id, user.id, false, reason);
   }
 
   // ── Merchant ─────────────────────────────────────────────────────

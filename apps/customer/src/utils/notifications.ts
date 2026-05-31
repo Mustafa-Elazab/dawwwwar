@@ -1,4 +1,4 @@
-import { Alert, Platform } from 'react-native';
+import { PermissionsAndroid, Platform } from 'react-native';
 import { USE_MOCK_API } from '../core/api/config';
 import Toast from 'react-native-toast-message';
 import api from '../core/api/client';
@@ -13,10 +13,28 @@ export async function requestPushNotificationPermission(): Promise<boolean> {
   if (USE_MOCK_API) return false;
 
   try {
+    if (Platform.OS === 'android' && Number(Platform.Version) >= 33) {
+      const alreadyGranted = await PermissionsAndroid.check(
+        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+      );
+      if (!alreadyGranted) {
+        const result = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+        );
+        if (result !== PermissionsAndroid.RESULTS.GRANTED) {
+          console.log('[FCM] Android notification permission denied');
+          return false;
+        }
+      }
+    }
+
+    if (Platform.OS === 'android') {
+      return true;
+    }
+
     const messaging = await import('@react-native-firebase/messaging');
     const authStatus = await messaging.default().requestPermission();
-    
-    // AuthorizationStatus is an export from the library
+
     const enabled =
       authStatus === (messaging as any).AuthorizationStatus.AUTHORIZED ||
       authStatus === (messaging as any).AuthorizationStatus.PROVISIONAL;

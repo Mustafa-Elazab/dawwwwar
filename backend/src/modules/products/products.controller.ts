@@ -27,8 +27,16 @@ export class ProductsController {
   @Public()
   @Get('featured')
   @ApiOperation({ summary: 'Get featured products for home screen' })
-  findFeatured() {
-    return this.productsService.findFeatured();
+  findFeatured(
+    @Query('lat') lat?: string,
+    @Query('lng') lng?: string,
+    @Query('radiusKm') radiusKm?: string,
+  ) {
+    return this.productsService.findFeatured(
+      lat ? parseFloat(lat) : undefined,
+      lng ? parseFloat(lng) : undefined,
+      radiusKm ? parseFloat(radiusKm) : undefined,
+    );
   }
 
   @Get()

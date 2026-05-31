@@ -23,7 +23,8 @@ const TAB_WIDTH = width / TABS.length;
 
 export function MerchantTabBar({ active, onChange }: TabBarProps) {
   const { colors } = useTheme();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language.startsWith('ar') || I18nManager.isRTL;
   
   const activeIdx = TABS.findIndex(t => t.key === active);
   const indicatorAnim = useRef(new Animated.Value(activeIdx)).current;
@@ -39,11 +40,11 @@ export function MerchantTabBar({ active, onChange }: TabBarProps) {
 
   const translateX = indicatorAnim.interpolate({
     inputRange: [0, 1, 2],
-    outputRange: [0, TAB_WIDTH, TAB_WIDTH * 2],
+    outputRange: isRTL ? [TAB_WIDTH * 2, TAB_WIDTH, 0] : [0, TAB_WIDTH, TAB_WIDTH * 2],
   });
 
   return (
-    <View style={[styles.row, { borderBottomColor: colors.border, backgroundColor: colors.surface }]}>
+    <View style={[styles.row, { borderBottomColor: colors.border, backgroundColor: colors.surface, flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
       {TABS.map((tab) => (
         <TouchableOpacity
           key={tab.key}

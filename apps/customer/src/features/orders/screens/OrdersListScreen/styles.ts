@@ -23,4 +23,22 @@ export const createStyles = (colors: AppColors) =>
     tabLabel: { 
       ...typography.label,
     },
+    tabLabelActive: {
+      fontWeight: '700',
+    },
+    tabLabelInactive: {
+      fontWeight: '400',
+    },
+    skeletonList: {
+      gap: space.md,
+      paddingTop: space.sm,
+    },
+    skeletonCard: {
+      alignSelf: 'center',
+      borderRadius: radius.xl,
+    },
+    listContent: {
+      paddingTop: space.sm,
+      paddingBottom: space.xl,
+    },
   });

@@ -12,5 +12,5 @@ export type { HeaderProps, HeaderAction, BottomSheetProps, BottomSheetRef } from
 export { ChatInterface } from './organisms/Chat';
 
 // ─── Templates ───────────────────────────────────────────
-export { ScreenTemplate, ScrollScreenTemplate, ListScreenTemplate, TabScreenTemplate, AppErrorBoundary } from './templates';
-export type { ScreenTemplateProps, ScrollScreenTemplateProps, ListScreenTemplateProps } from './templates';
+export { AppScreenTemplate, ScreenTemplate, ScrollScreenTemplate, ListScreenTemplate, HeaderTemplate, ModalSheetTemplate, TabScreenTemplate, AppErrorBoundary } from './templates';
+export type { AppScreenTemplateProps, ScreenTemplateProps, ScrollScreenTemplateProps, ListScreenTemplateProps, HeaderTemplateProps, ModalSheetTemplateProps } from './templates';

@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { View, Modal, TouchableOpacity, I18nManager } from 'react-native';
 import MapView, { PROVIDER_GOOGLE, type Region } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@dawwar/theme';
 import { Text, Button, Icon } from '@dawwar/ui';
 import { useTranslation } from '@dawwar/i18n';
+import { geocodingApi } from '../../../location/core/api/geocoding';
 import { createStyles } from './styles';
 import type { MapPickerModalProps } from './types';
 
@@ -19,9 +20,12 @@ export function MapPickerModal({
   onClose,
 }: MapPickerModalProps) {
   const { colors } = useTheme();
-  const styles = React.useMemo(() => createStyles(colors), [colors]);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language.startsWith('ar') || I18nManager.isRTL;
+  const styles = React.useMemo(() => createStyles(colors, isRTL), [colors, isRTL]);
   const insets = useSafeAreaInsets();
+  const fallbackAddress = (lat: number, lng: number): string =>
+    `${Number(lat || 0).toFixed(4)}, ${Number(lng || 0).toFixed(4)} — سنبلاوين`;
 
   const [region, setRegion] = useState<Region>({
     latitude: initialLatitude,
@@ -29,12 +33,41 @@ export function MapPickerModal({
     latitudeDelta: 0.01,
     longitudeDelta: 0.01,
   });
+  const [address, setAddress] = useState(() => fallbackAddress(initialLatitude, initialLongitude));
+  const [isGeocoding, setIsGeocoding] = useState(false);
 
-  const getAddressFromCoords = (lat: number, lng: number): string =>
-    `${Number(lat || 0).toFixed(4)}, ${Number(lng || 0).toFixed(4)} — سنبلاوين`;
+  const resolveAddress = useCallback(async (nextRegion: Region) => {
+    setIsGeocoding(true);
+    try {
+      const resolved = await geocodingApi.reverse(
+        nextRegion.latitude,
+        nextRegion.longitude,
+        i18n.language,
+      );
+      setAddress(resolved || fallbackAddress(nextRegion.latitude, nextRegion.longitude));
+    } finally {
+      setIsGeocoding(false);
+    }
+  }, [i18n.language]);
+
+  useEffect(() => {
+    if (!visible) return;
+    const nextRegion = {
+      latitude: initialLatitude,
+      longitude: initialLongitude,
+      latitudeDelta: 0.01,
+      longitudeDelta: 0.01,
+    };
+    setRegion(nextRegion);
+    void resolveAddress(nextRegion);
+  }, [initialLatitude, initialLongitude, resolveAddress, visible]);
+
+  const handleRegionChangeComplete = (nextRegion: Region) => {
+    setRegion(nextRegion);
+    void resolveAddress(nextRegion);
+  };
 
   const handleConfirm = () => {
-    const address = getAddressFromCoords(region.latitude, region.longitude);
     onConfirm(region.latitude, region.longitude, address);
   };
 
@@ -50,14 +83,14 @@ export function MapPickerModal({
               color={colors.text}
             />
           </TouchableOpacity>
-          <Text style={styles.mapTitle}>{'اختر موقعك'}</Text>
+          <Text style={styles.mapTitle}>{t('addresses.map_title')}</Text>
         </View>
 
         <MapView
           style={styles.map}
           provider={PROVIDER_GOOGLE}
           initialRegion={region}
-          onRegionChangeComplete={setRegion}
+          onRegionChangeComplete={handleRegionChangeComplete}
         />
 
         {/* Fixed Center Crosshair */}
@@ -73,13 +106,14 @@ export function MapPickerModal({
         <View style={[styles.bottomContainer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
           <View style={styles.addressPreview}>
             <Text style={styles.addressText}>
-              {getAddressFromCoords(region.latitude, region.longitude)}
+              {isGeocoding ? t('common.loading', 'Loading...') : address}
             </Text>
           </View>
 
           <Button
             label={t('location.confirm')}
             onPress={handleConfirm}
+            loading={isGeocoding}
             fullWidth
             style={styles.confirmBtn}
           />

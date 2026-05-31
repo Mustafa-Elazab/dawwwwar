@@ -12,4 +12,13 @@ export const createStyles = (colors: AppColors) =>
       flexGrow: 1,
       paddingBottom: space.xl,
     },
+    stateContainer: {
+      flex: 1,
+    },
+    loadingOverlay: {
+      ...StyleSheet.absoluteFillObject,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: `${colors.background}CC`,
+    },
   });

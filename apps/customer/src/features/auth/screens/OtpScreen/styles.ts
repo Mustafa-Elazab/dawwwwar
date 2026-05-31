@@ -70,6 +70,9 @@ export const createStyles = (colors: AppColors) =>
       color: colors.primary,
       fontWeight: '700',
     },
+    timerValueExpired: {
+      color: colors.error,
+    },
     
     resendRow: {
       flexDirection: 'row',

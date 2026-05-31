@@ -83,4 +83,5 @@ export const FINAL_STATUSES = [
  */
 export const ALLOW_CUSTOMER_CANCEL = [
   OrderStatus.PENDING,
+  OrderStatus.ACCEPTED,
 ];

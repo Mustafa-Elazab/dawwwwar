@@ -13,7 +13,15 @@ export class SearchController {
   @Public()
   @ApiOperation({ summary: 'Search merchants, products, categories' })
   @ApiQuery({ name: 'q', required: true })
-  search(@Query('q') query: string) {
-    return this.searchService.search(query);
+  search(
+    @Query('q') query: string,
+    @Query('lat') lat?: string,
+    @Query('lng') lng?: string,
+  ) {
+    return this.searchService.search(
+      query,
+      lat ? parseFloat(lat) : undefined,
+      lng ? parseFloat(lng) : undefined,
+    );
   }
 }

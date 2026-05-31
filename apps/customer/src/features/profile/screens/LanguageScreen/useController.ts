@@ -6,6 +6,11 @@ import { useAppDispatch, useAppSelector } from '../../../../store/hooks';
 import { setLanguage, selectLanguage } from '../../../../store/slices/ui.slice';
 import { Language } from '@dawwar/types';
 
+const LANGUAGES = [
+  { value: Language.AR, flag: '🇪🇬', label: 'العربية' },
+  { value: Language.EN, flag: '🇬🇧', label: 'English' },
+] as const;
+
 export function useController() {
   const { t } = useTranslation();
   const navigation = useNavigation<any>();
@@ -38,6 +43,8 @@ export function useController() {
   );
 
   return {
+    headerTitle: t('language.title'),
+    languages: LANGUAGES,
     currentLanguage,
     handleSelect,
     handleBack: () => navigation.goBack(),

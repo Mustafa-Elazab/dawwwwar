@@ -114,7 +114,8 @@ export const setupInterceptors = (
           if (!refreshToken) throw new Error('No refresh token');
 
           const { data } = await instance.post('/auth/refresh', { refreshToken });
-          const { accessToken, refreshToken: newRefreshToken } = data.data;
+          const authPayload = data && typeof data === 'object' && 'data' in data ? data.data : data;
+          const { accessToken, refreshToken: newRefreshToken } = authPayload;
 
           tokenManager.accessToken = accessToken;
           tokenManager.refreshToken = newRefreshToken;

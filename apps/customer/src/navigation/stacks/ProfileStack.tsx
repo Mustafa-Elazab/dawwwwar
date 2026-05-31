@@ -11,6 +11,9 @@ import {
   AppearanceScreen, 
   WalletScreen, 
   TransactionsScreen,
+  PaymentMethodsScreen,
+  AddPaymentMethodScreen,
+  InviteFriendsScreen,
   TermsScreen,
   PrivacyScreen,
   NotificationsScreen
@@ -32,6 +35,9 @@ export function ProfileStack() {
       <Stack.Screen name={WALLET_ROUTES.WALLET} component={WalletScreen} />
       <Stack.Screen name={WALLET_ROUTES.TRANSACTIONS} component={TransactionsScreen} />
       <Stack.Screen name={PROFILE_ROUTES.NOTIFICATIONS} component={NotificationsScreen} />
+      <Stack.Screen name={PROFILE_ROUTES.PAYMENT_METHODS} component={PaymentMethodsScreen} />
+      <Stack.Screen name={PROFILE_ROUTES.ADD_PAYMENT_METHOD} component={AddPaymentMethodScreen} />
+      <Stack.Screen name={PROFILE_ROUTES.INVITE_FRIENDS} component={InviteFriendsScreen} />
     </Stack.Navigator>
   );
 }

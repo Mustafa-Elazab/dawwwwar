@@ -24,6 +24,15 @@ export class AuthController {
     return this.authService.sendOtp(dto.phone);
   }
 
+  @Post('customer/send-otp')
+  @Public()
+  @UseGuards(ThrottlerGuard)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Send OTP to phone number (Customer)' })
+  sendCustomerOtp(@Body() dto: SendOtpDto) {
+    return this.authService.sendOtp(dto.phone);
+  }
+
   @Post('customer/verify-otp')
   @Public()
   @HttpCode(HttpStatus.OK)

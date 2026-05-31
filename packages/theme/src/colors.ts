@@ -1,12 +1,12 @@
 // Brand palette — raw values, not used directly by components
 export const palette = {
-  brand: '#1DB954',         // Green
-  brandDark: '#17A348',     // Darker green
-  brandLight: '#E8F8EF',    // Lightest green tint
-  brandMuted: '#A8E6C3',    // Muted green
+  brand: '#FF6048',
+  brandDark: '#E64E39',
+  brandLight: '#FFECE8',
+  brandMuted: '#FFB4A8',
 
-  green: '#1DB954',
-  greenLight: '#E8F8EF',
+  green: '#22C55E',
+  greenLight: '#DCFCE7',
   red: '#EF4444',
   redLight: '#FEE2E2',
   orange: '#F59E0B',
@@ -113,7 +113,7 @@ export const darkColors = {
   primary: palette.brand,
   primaryDark: palette.brandDark,
   primaryLight: palette.brandLight,
-  primaryMuted: '#0F5132',
+  primaryMuted: '#4A1E18',
   primaryText: palette.white,
 
   // Status

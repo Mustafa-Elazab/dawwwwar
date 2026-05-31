@@ -10,6 +10,9 @@ import type { RouteProp } from '@react-navigation/native';
 import type { ProfileStackParamList } from '../../../../navigation/types';
 import { PROFILE_ROUTES } from '../../../../navigation/routes';
 
+const unwrap = <T,>(res: T | { data: T }): T =>
+  res && typeof res === 'object' && 'data' in res ? res.data : (res as T);
+
 export function useController() {
   const { t } = useTranslation();
   const { profile } = useApiClient();
@@ -36,7 +39,7 @@ export function useController() {
     enabled: !!editId && !!user?.id,
   });
 
-  const existingAddress = addressesRes?.data.find((a) => a.id === editId);
+  const existingAddress = addressesRes ? unwrap<any[]>(addressesRes).find((a) => a.id === editId) : undefined;
 
   useEffect(() => {
     if (existingAddress) {
@@ -54,7 +57,6 @@ export function useController() {
 
   const handleSave = () => {
     const payload = {
-      userId: user?.id ?? '',
       label,
       address,
       latitude: Number(lat) || 30.8704,

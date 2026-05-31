@@ -4,4 +4,6 @@ export interface ProductCardProps {
   product: Product;
   merchantName?: string;
   onAdd: () => void;
+  isLiked?: boolean;
+  onToggleLike?: () => void;
 }

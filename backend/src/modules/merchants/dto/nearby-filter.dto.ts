@@ -1,19 +1,33 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsOptional, Max, Min, IsBoolean } from 'class-validator';
+import { IsNumber, IsOptional, Max, Min } from 'class-validator';
 import { Type, Transform } from 'class-transformer';
 
 export class NearbyFilterDto {
   @ApiProperty({ required: false, default: 30.8704 })
   @IsOptional()
+  @Transform(({ value, obj }) => value ?? obj.lat)
   @Type(() => Number)
   @IsNumber()
   latitude?: number;
 
-  @ApiProperty({ required: false, default: 31.4741 })
+  @ApiProperty({ required: false, description: 'Alias for latitude' })
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
+  lat?: number;
+
+  @ApiProperty({ required: false, default: 31.4741 })
+  @IsOptional()
+  @Transform(({ value, obj }) => value ?? obj.lng)
+  @Type(() => Number)
+  @IsNumber()
   longitude?: number;
+
+  @ApiProperty({ required: false, description: 'Alias for longitude' })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  lng?: number;
 
   @ApiProperty({ required: false, default: 50, description: 'Radius in km' })
   @IsOptional()
@@ -29,12 +43,6 @@ export class NearbyFilterDto {
   @IsNumber()
   @Transform(({ value }) => parseFloat(value))
   radiusKm?: number;
-
-  @ApiProperty({ required: false, description: 'Skip location filter to show all Egypt' })
-  @IsOptional()
-  @Transform(({ value }) => value === 'true' || value === true)
-  @IsBoolean()
-  allEgypt?: boolean;
 
   @ApiProperty({ required: false })
   @IsOptional()
@@ -60,4 +68,3 @@ export class NearbyFilterDto {
   @IsNumber()
   offset?: number = 0;
 }
-

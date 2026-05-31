@@ -40,30 +40,36 @@ export function useController() {
 
   const verifyMutation = useVerifyOtp();
   const sendOtpMutation = useSendOtp();
-const submitOtp = useCallback(
-  async (code: string) => {
-    if (code.length < 6) return;
+  const submitOtp = useCallback(
+    async (code: string) => {
+      if (code.length < 6) return;
 
-    setOtpError(null);
-    try {
-      await verifyMutation.mutateAsync({ phone, code });
-      // verifyOtp onSuccess dispatches setAuth → RootNavigator re-renders
-    } catch (err) {
-      console.error('[OtpScreen] verifyOtp error:', err);
-      const error = err as Error;
-      triggerShake();
-        if (error.message === 'INVALID_OTP') {
-          setOtpError(t('auth.otp_invalid'));
-        } else if (error.message === 'OTP_EXPIRED') {
+      setOtpError(null);
+      try {
+        await verifyMutation.mutateAsync({ phone, code });
+        // verifyOtp onSuccess dispatches setAuth -> RootNavigator re-renders
+      } catch (err) {
+        console.error('[OtpScreen] verifyOtp error:', err);
+        const error = err as {
+          message?: string;
+          response?: { data?: { error?: { errorCode?: string; remainingAttempts?: number } } };
+        };
+        const errorCode = error.response?.data?.error?.errorCode ?? error.message;
+        const remainingAttempts = error.response?.data?.error?.remainingAttempts;
+        triggerShake();
+        if (errorCode === 'INVALID_OTP') {
+          setOtpError(t('auth.otp_invalid', { remaining: remainingAttempts ?? 0 }));
+        } else if (errorCode === 'OTP_EXPIRED') {
           setOtpError(t('auth.otp_expired'));
+        } else if (errorCode === 'OTP_LOCKED') {
+          setOtpError(t('auth.otp_locked'));
         } else {
           setOtpError(t('errors.server'));
         }
-        // Clear digits on error
         setDigits('');
       }
     },
-    [phone, verifyMutation, navigation, triggerShake, t],
+    [phone, verifyMutation, triggerShake, t],
   );
 
   const handleOtpChange = useCallback(

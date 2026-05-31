@@ -9,14 +9,14 @@ const realAuthApi = {
     return data;
   },
   sendOtp: async (phone: string): Promise<ApiResponse<SendOtpResponse>> => {
-    const { data } = await api.post('/auth/send-otp', { phone });
+    const { data } = await api.post('/auth/customer/send-otp', { phone });
     return data;
   },
   verifyOtp: async (
     phone: string,
     code: string,
   ): Promise<ApiResponse<VerifyOtpResponse>> => {
-    const { data } = await api.post('/auth/verify-otp', { phone, code });
+    const { data } = await api.post('/auth/customer/verify-otp', { phone, code });
     return data;
   },
 };
