@@ -22,5 +22,15 @@ export const createStyles = (colors: AppColors) =>
       minWidth: 100,
     },
     confirmBtn: { marginTop: space.md },
+    confirmBtnDisabled: {
+      backgroundColor: colors.border,
+      opacity: 0.5,
+    },
     note: { ...typography.caption, color: colors.textSecondary, marginTop: space.sm, textAlign: 'center' },
+    errorText: {
+      ...typography.caption,
+      color: colors.error,
+      marginTop: space.sm,
+      textAlign: 'auto',
+    },
   });

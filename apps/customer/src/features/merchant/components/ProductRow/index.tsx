@@ -6,7 +6,7 @@ import { useTranslation } from '@dawwar/i18n';
 import { createStyles } from './styles';
 import type { ProductRowProps } from './types';
 
-export const ProductRow = React.memo(function ProductRow({ product, quantity = 0, onAdd, onRemove }: ProductRowProps) {
+export const ProductRow = React.memo(function ProductRow({ product, quantity = 0, onAdd, onRemove, onPress }: ProductRowProps) {
   const { colors } = useTheme();
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language.startsWith('ar') || I18nManager.isRTL;
@@ -19,12 +19,12 @@ export const ProductRow = React.memo(function ProductRow({ product, quantity = 0
     : product.description || product.descriptionAr;
 
   return (
-    <View style={[styles.row, !product.isAvailable && { opacity: 0.5 }]}>
-      <Image
-        source={{ uri: product.images[0] || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=1000' }}
-        style={styles.image}
-        resizeMode="cover"
-      />
+    <TouchableOpacity
+      style={[styles.row, !product.isAvailable && { opacity: 0.5 }]}
+      activeOpacity={0.9}
+      onPress={onPress}
+      disabled={!onPress}
+    >
       <View style={styles.info}>
         <Text style={styles.name}>{productName}</Text>
         {description != null && description !== '' && (
@@ -44,6 +44,11 @@ export const ProductRow = React.memo(function ProductRow({ product, quantity = 0
           />
         )}
       </View>
+      <Image
+        source={{ uri: product.images[0] || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=1000' }}
+        style={styles.image}
+        resizeMode="cover"
+      />
 
       {product.isAvailable ? (
         quantity > 0 ? (
@@ -62,6 +67,6 @@ export const ProductRow = React.memo(function ProductRow({ product, quantity = 0
           </TouchableOpacity>
         )
       ) : null}
-    </View>
+    </TouchableOpacity>
   );
 });

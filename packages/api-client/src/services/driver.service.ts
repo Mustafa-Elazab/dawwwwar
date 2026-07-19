@@ -47,4 +47,9 @@ export class DriverService {
     const { data } = await this.client.get('/driver/wallet');
     return data;
   }
+
+  async getTransactions(): Promise<ApiResponse<WalletTransaction[]>> {
+    const { data } = await this.client.get('/driver/transactions');
+    return data;
+  }
 }

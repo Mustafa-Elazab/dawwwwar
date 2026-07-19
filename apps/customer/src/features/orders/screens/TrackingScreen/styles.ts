@@ -66,7 +66,7 @@ export const createStyles = (colors: AppColors) =>
     },
     routeBase: {
       position: 'absolute',
-      left: '33%',
+      start: '33%',
       top: '22%',
       width: 7,
       height: '58%',
@@ -76,7 +76,7 @@ export const createStyles = (colors: AppColors) =>
     },
     routeActive: {
       position: 'absolute',
-      left: '45%',
+      start: '45%',
       bottom: '24%',
       width: 7,
       borderRadius: 4,
@@ -85,7 +85,7 @@ export const createStyles = (colors: AppColors) =>
     },
     storePin: {
       position: 'absolute',
-      left: '24%',
+      start: '24%',
       bottom: '24%',
       width: 42,
       height: 42,
@@ -98,7 +98,7 @@ export const createStyles = (colors: AppColors) =>
     },
     driverPin: {
       position: 'absolute',
-      right: '30%',
+      end: '30%',
       top: '16%',
       width: 42,
       height: 42,
@@ -111,7 +111,7 @@ export const createStyles = (colors: AppColors) =>
     },
     locateBtn: {
       position: 'absolute',
-      right: 12,
+      end: 12,
       top: 12,
       width: 38,
       height: 38,

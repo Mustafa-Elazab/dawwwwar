@@ -79,7 +79,9 @@ export function useController() {
 
   const hasDriver = !!order?.driverId;
   const canCancel =
-    order?.status === OrderStatus.PENDING || order?.status === OrderStatus.ACCEPTED;
+    order?.status === OrderStatus.PENDING ||
+    order?.status === OrderStatus.ACCEPTED ||
+    order?.status === OrderStatus.WAITING_DRIVER_ACCEPT;
 
   const handleCancelOrder = () => {
     navigation.navigate(ORDER_ROUTES.CANCEL_ORDER, { orderId });

@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from '@dawwar/i18n';
 import { useAppDispatch, useAppSelector } from '../../../../store/hooks';
-import { addItem, clearCart } from '../../../../store/slices/cart.slice';
 import { selectIsAuthenticated, selectUser, startAuthFlow } from '../../../../store/slices/auth.slice';
 import { selectLocation } from '../../../../store/slices/location.slice';
 import { useNearbyMerchants, useFeaturedProducts, useHomeCategories } from '../../core/hooks';
@@ -27,17 +26,19 @@ export function useController() {
   const {
     data: merchants,
     isLoading: merchantsLoading,
+    isError: merchantsError,
     refetch: refetchMerchants,
   } = useNearbyMerchants(
     delivery.merchantLat,
     delivery.merchantLng,
   );
-  const { data: products } = useFeaturedProducts(delivery.merchantLat, delivery.merchantLng);
+  const { data: products, isError: productsError } = useFeaturedProducts(delivery.merchantLat, delivery.merchantLng);
   const { data: liked = [] } = useLikedProducts();
   const toggleFavorite = useToggleFavorite();
   const {
     data: categories = [],
     isLoading: categoriesLoading,
+    isError: categoriesError,
     refetch: refetchCategories,
   } = useHomeCategories(delivery.merchantLat, delivery.merchantLng);
 
@@ -59,49 +60,18 @@ export function useController() {
     [navigation],
   );
 
-  const cartMerchantId = useAppSelector((state: any) => state.cart.merchantId);
-
   const handleProductAdd = useCallback(
     (product: Product) => {
-      const doAdd = () => {
-        dispatch(
-          addItem({
-            productId: product.id,
-            name: product.name,
-            nameAr: product.nameAr,
-            price: product.price,
-            quantity: 1,
-            image: product.images[0] ?? 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=1000',
-            merchantId: product.merchantId,
-            merchantName: 'Dawwar Merchant', // UI Fallback
-          }),
-        );
-      };
-
-      if (cartMerchantId && cartMerchantId !== product.merchantId) {
-        import('react-native').then(({ Alert }) => {
-          Alert.alert(
-            t('cart.conflict_title', 'Replace Cart?'),
-            t('cart.conflict_body', 'Your cart contains items from another store. Do you want to clear it and add this item?'),
-            [
-              { text: t('common.cancel', 'Cancel'), style: 'cancel' },
-              {
-                text: t('cart.clear_and_add', 'Clear & Add'),
-                style: 'destructive',
-                onPress: () => {
-                  dispatch(clearCart());
-                  doAdd();
-                },
-              },
-            ],
-          );
-        });
-        return;
-      }
-
-      doAdd();
+      navigation.navigate(HOME_ROUTES.PRODUCT_DETAIL, { productId: product.id });
     },
-    [dispatch, cartMerchantId, t],
+    [navigation],
+  );
+
+  const handleProductPress = useCallback(
+    (productId: string) => {
+      navigation.navigate(HOME_ROUTES.PRODUCT_DETAIL, { productId });
+    },
+    [navigation],
   );
 
   const handleCustomOrder = useCallback(() => {
@@ -182,10 +152,20 @@ export function useController() {
     merchants: merchants ?? [],
     products: products ?? [],
     isLoading: merchantsLoading,
+    screenState: {
+      isError: merchantsError || productsError || categoriesError,
+      isEmpty: !merchantsLoading && (merchants ?? []).length === 0 && (products ?? []).length === 0,
+      emptyState: {
+        icon: 'store-search-outline',
+        title: t('home.empty_title', 'No nearby stores'),
+        subtitle: t('home.empty_subtitle', 'Try another delivery location.'),
+      },
+    },
     isRefreshing,
     handleRefresh,
     handleMerchantPress,
     handleProductAdd,
+    handleProductPress,
     handleCustomOrder,
     handleSearchPress,
     handleCategoryPress,

@@ -6,6 +6,7 @@
     "retry": "Try Again",
     "cancel": "Cancel",
     "confirm": "Confirm",
+    "choose_delivery_location": "Choose delivery location",
     "submit": "Submit",
     "apply": "Apply",
     "save": "Save",
@@ -124,6 +125,22 @@
     "logout": "Logout",
     "complete_profile_title": "One Last Step",
     "complete_profile_subtitle": "Please enter your full name to continue.",
+    "complete_profile": {
+      "title": "Your Profile",
+      "country_flag": "🇪🇬",
+      "email_label": "Email",
+      "email_placeholder": "Email address",
+      "date_of_birth": "Date of birth",
+      "birthday_placeholder": "--/--/----",
+      "gender": "Gender",
+      "gender_male": "Male",
+      "gender_female": "Female",
+      "location_placeholder": "Your Location",
+      "location_hint": "You can update your saved locations from Profile > My Locations.",
+      "skip": "Skip",
+      "change_photo": "Change photo",
+      "default_name": "Dawwar Customer"
+    },
     "name_placeholder": "e.g. Mostafa Mohamed",
     "name_required": "Full name is required",
     "profile_updated": "Profile updated successfully!"
@@ -171,7 +188,11 @@
     "deliverToDifferentLocation": "Deliver to a different location",
     "chooseLocationOnMap": "Choose location on map",
     "deliverToCurrentLocation": "Deliver to current location",
-    "locationUnavailable": "Location unavailable — tap to choose"
+    "locationUnavailable": "Location unavailable — tap to choose",
+    "empty_title": "Nothing nearby yet",
+    "empty_subtitle": "Try another delivery location or check again later.",
+    "no_products": "No products nearby",
+    "no_products_sub": "Products available in your area will appear here."
   },
 
   "categories": {
@@ -409,6 +430,7 @@
     "tab_info": "Info",
     "tab_reviews": "Reviews",
     "reviews_soon": "Reviews coming soon",
+    "fallbackName": "Store",
     "address": "Address",
     "phone": "Phone",
     "hours": "Opening Hours",
@@ -433,6 +455,11 @@
     "total": "Total",
     "checkout": "Proceed to Checkout",
     "continue_shopping": "Continue Shopping",
+    "view_cart": "View Cart",
+    "apply": "Apply",
+    "promo_placeholder": "Have a promo code?",
+    "conflict_title": "Replace basket?",
+    "conflict_body": "Your basket has items from another store. Clear it before adding this item.",
     "remove": "Remove",
     "clear_cart_title": "Replace Cart?",
     "clear_cart_body": "Your cart has items from {{merchant}}. Do you want to clear it and add from {{newMerchant}}?",
@@ -446,6 +473,7 @@
     "change_address": "Change",
     "no_address": "Add a delivery address",
     "add_address": "Add Address",
+    "add_address_hint": "Choose a saved address or add a new one.",
     "payment_title": "Payment Method",
     "cash": "Cash on Delivery",
     "cash_sub": "Pay when your order arrives",
@@ -460,7 +488,9 @@
     "summary_title": "Order Summary",
     "place_order": "Place Order",
     "placing": "Placing Order...",
-    "order_placed": "Order placed successfully!"
+    "order_placed": "Order placed successfully!",
+    "selected_payment": "Selected payment",
+    "free_delivery": "Free Delivery"
   },
 
   "custom_order": {
@@ -474,6 +504,7 @@
     "shop_address_required": "Shop address is required",
     "shop_location_title": "Shop location",
     "shop_location_hint": "Choose the shop location on the map",
+    "shop_location_required": "Choose the shop location on the map",
     "pick_on_map": "Pick on Map",
     "use_my_location": "Use My Location",
     "items_section": "What do you need?",
@@ -531,9 +562,11 @@
     "price_approval_body": "The actual total ({{actual}} EGP) is higher than your estimate ({{estimate}} EGP). Do you approve?",
     "price_approve": "Approve {{amount}} EGP",
     "price_reject": "Reject",
+    "delivered_success": "Order delivered successfully",
     "status": {
       "PENDING": "Waiting for shop",
       "ACCEPTED": "Shop accepted your order",
+      "WAITING_DRIVER_ACCEPT": "Waiting for driver",
       "DRIVER_ASSIGNED": "Driver is on the way",
       "AT_SHOP": "Driver arrived at shop",
       "SHOPPING": "Driver is shopping for you",
@@ -605,11 +638,20 @@
     "empty_history_sub": "Your transaction history will appear here.",
     "recharge_title": "Recharge Wallet",
     "select_amount": "Select amount",
+    "select_amount_first": "Select an amount first",
     "custom_amount": "Custom amount",
     "custom_placeholder": "Enter amount in EGP",
     "custom_min": "Minimum 10 EGP",
+    "rechargeTitle": "Recharge Wallet",
+    "rechargeSuccess": "Wallet recharged successfully!",
+    "rechargeAmount": "{{amount}} EGP has been added to your wallet",
+    "selectAmount": "Select amount",
+    "customAmount": "Custom amount",
+    "minAmount": "Minimum recharge: 10 EGP",
+    "rechargeButton": "Recharge Wallet",
+    "payment_error": "Could not open the payment page. Please try again.",
     "confirm_recharge": "Confirm Recharge",
-    "recharge_note": "Your recharge will be processed by our team within 24 hours.",
+    "recharge_note": "A secure payment page will open to complete your recharge.",
     "recharge_submitted": "Recharge request submitted!",
     "credit": "Credit",
     "debit": "Debit",
@@ -627,6 +669,7 @@
   "profile": {
     "title": "Profile",
     "login_register": "Login / Register",
+    "edit_profile": "Edit Profile",
     "section_account": "Account",
     "section_preferences": "Preferences",
     "section_support": "Help & Support",
@@ -656,7 +699,65 @@
     "logout_confirm_title": "Logout?",
     "logout_confirm_body": "You will be logged out of your account.",
     "logout_confirm_btn": "Yes, Logout",
+    "wallet_balance": "Wallet balance",
     "version": "Version {{version}}"
+  },
+
+  "promotions": {
+    "title": "Promotions",
+    "promo_code": "Promo Code",
+    "promo_code_label": "Promo Code",
+    "shipping_offers": "Shipping Offers",
+    "order_offers": "Order Offers",
+    "free_shipping": "FREE SHIPPING",
+    "percent_off": "{{percent}}% OFF",
+    "get_more": "Get More Promotions",
+    "get_more_title": "Get More Promotions",
+    "information": "Promotion Information",
+    "description": "Description",
+    "duration": "Duration",
+    "applicable_scope": "Applicable Scope",
+    "discount_amount": "Discount Amount",
+    "terms": "Terms and Conditions",
+    "free_shipping_desc": "Enjoy free shipping on all orders throughout this month!",
+    "percent_shipping_desc": "Get {{percent}}% off delivery fees during the promotion period.",
+    "percent_order_desc": "Get {{percent}}% off eligible orders during the promotion period.",
+    "scope_all_orders": "Applicable to all orders on our website or app.",
+    "scope_shipping": "Applicable to standard delivery fees.",
+    "scope_order": "Applicable to eligible order totals.",
+    "free_shipping_discount": "100% off shipping (Free shipping).",
+    "percent_discount": "{{percent}}% discount.",
+    "standard_shipping_terms": "No minimum order requirement. Applicable for standard shipping within the country.",
+    "minimum_order_terms": "Valid on eligible orders while the offer is active.",
+    "choose_offer": "Choose a promotion or enter a promo code",
+    "enter_code": "Enter a promo code",
+    "invalid_code": "Promo code is invalid or unavailable",
+    "expired": "Promo code has expired",
+    "exhausted": "Promo code has already been used up",
+    "min_order_error": "Minimum order amount is {{amount}} EGP",
+    "fixed_off": "{{amount}} EGP OFF",
+    "backend_success_desc": "This promotion was validated from Dawwar offers.",
+    "expires_on": "Expires on {{date}}",
+    "no_expiry": "No expiry date",
+    "discount_amount_value": "{{amount}} EGP discount",
+    "min_order_terms": "Minimum order amount: {{amount}} EGP.",
+    "no_shipping_offers": "Apply a shipping promo code to see it here.",
+    "no_order_offers": "Apply an order promo code to see it here.",
+    "applied": "Promotion applied",
+    "share_message": "Try Dawwar for fast local delivery and promotions.",
+    "earn": {
+      "share_app": "Share App",
+      "invite_friends": "Invite Friends",
+      "complete_purchases": "Complete Purchases",
+      "watch_ads": "Watch Ads",
+      "participate_events": "Participate in Events",
+      "complete_profile": "Complete Profile",
+      "follow_social": "Follow Social Media",
+      "take_surveys": "Take Surveys",
+      "achieve_levels": "Achieve Levels",
+      "daily_logins": "Daily Logins",
+      "coming_soon": "This promotion task is coming soon"
+    }
   },
 
   "liked": {
@@ -668,12 +769,26 @@
     "store": "Store"
   },
 
+  "chat": {
+    "order_title": "Order chat"
+  },
+
   "product": {
     "details_title": "Product Details",
+    "not_found": "Product not found",
+    "not_found_sub": "This item may no longer be available.",
     "no_description": "No description available.",
     "price": "Price",
     "quantity": "Quantity",
-    "add_to_basket": "Add to Basket"
+    "add_to_basket": "Add to Basket",
+    "options": "Options",
+    "required": "Required",
+    "optional": "Optional",
+    "choose_one": "Choose one",
+    "choose_up_to": "Choose up to",
+    "variants": "Choose size",
+    "modifier_required": "Please choose {{name}}",
+    "modifier_max": "Choose up to {{count}} from {{name}}"
   },
 
   "payment_methods": {
@@ -692,7 +807,28 @@
     "cvc": "CVV / CVC",
     "success_title": "Payment Successful",
     "success_body": "Your payment method has been saved successfully.",
-    "success_button": "Ok, Great!"
+    "success_button": "Ok, Great!",
+    "coming_soon": "Coming soon"
+  },
+
+  "paymentMethods": {
+    "title": "Payment Methods",
+    "cash": "Cash",
+    "wallet": "Wallet",
+    "apple_pay": "Apple Pay",
+    "google_pay": "Google Pay",
+    "instapay": "Instapay",
+    "vodafone_cash": "Vodafone Cash",
+    "card": "Card",
+    "add_card": "Add New Card",
+    "cardholder_name": "Cardholder Name",
+    "card_number": "Card Number",
+    "expiry": "Expiry Date",
+    "cvc": "CVV / CVC",
+    "success_title": "Payment Successful",
+    "success_body": "Your payment method has been saved successfully.",
+    "success_button": "Ok, Great!",
+    "coming_soon": "Coming soon"
   },
 
   "invite_friends": {
@@ -735,12 +871,14 @@
     "label_label": "Label",
     "address_label": "Address",
     "map_title": "Pick Location",
+    "location": "Location",
     "map_instructions": "Drag the map to position your pin",
     "confirm_location": "Confirm Location",
     "building": "Building / Villa number",
     "floor": "Floor",
     "apartment": "Apartment",
     "phone_label": "Phone for delivery",
+    "phone_required": "Phone number is required to save this address",
     "notes_label": "Delivery notes",
     "notes_placeholder": "Gate code, landmarks, special instructions...",
     "is_default": "Set as default address",
@@ -749,8 +887,29 @@
     "delete_confirm_title": "Delete Address?",
     "delete_confirm_body": "This address will be permanently removed.",
     "delete": "Delete",
+    "edit": "Edit address",
+    "other": "Other",
+    "deleted": "Address deleted!",
     "saved": "Address saved!",
     "updated": "Address updated!"
+  },
+
+  "locationPicker": {
+    "title": "Add New Location",
+    "locationLabel": "Location",
+    "dragToSelect": "Drag the map to select the location",
+    "labelPlaceholder": "Label (for example: Home)",
+    "defaultLabel": "My location",
+    "save": "Save Address",
+    "geocodeError": "Could not detect this address",
+    "gpsError": "Could not get your current location",
+    "networkError": "Check your internet connection"
+  },
+
+  "address_labels": {
+    "home": "Home",
+    "work": "Work",
+    "other": "Other"
   },
 
   "language": {
@@ -797,8 +956,10 @@
     "camera_denied": "Camera access was denied. Please enable it in settings.",
     "microphone_denied": "Microphone access was denied. Please enable it in settings.",
     "no_internet": "No internet connection",
+    "internet_back": "Connection restored",
     "cancel_failed": "Failed to cancel order",
     "notification_permission": "Notification permission was not granted",
+    "required": "This field is required",
     "roleMismatch": {
       "customerInMerchant": "This number is registered as a customer account. To register as a merchant, please contact us.",
       "customerInDriver": "This number is registered as a customer account. To register as a driver, please contact us.",
@@ -844,6 +1005,7 @@
     "actual_amount": "Actual total amount (EGP)",
     "actual_amount_placeholder": "How much did you pay?",
     "items_purchased": "Items Purchased — Ready to Deliver",
+    "start_delivery": "Start Delivery",
     "navigate_customer": "Navigate to Customer",
     "arrived_customer": "I've Arrived at Customer",
     "collect_cash": "Collect {{amount}} EGP from customer",
@@ -863,6 +1025,18 @@
     "commission_paid": "Commission",
     "net_earnings_today": "Net Earnings",
     "low_balance_warning": "Low balance — recharge to keep receiving orders",
+    "waiting_for_orders": "Waiting for nearby orders",
+    "offline_message": "Go online to start receiving delivery requests.",
+    "new_order_alert": "New order nearby",
+    "location_permission_required": "Location permission is required to go online",
+    "custom_order_warning": "Custom order: shop from the requested place, then upload the receipt before delivery.",
+    "items_count": "{{count}} items",
+    "more_items": "+{{count}} more",
+    "photos_sent": "Photos sent to customer",
+    "photos_sent_short": "Photos sent to customer",
+    "estimated_budget": "Estimated: {{amount}} {{currency}}",
+    "over_budget_warning": "Amount is over 20% above estimate. Customer approval may be needed.",
+    "receipt_captured": "Receipt captured",
     "vehicle_type": {
       "MOTORCYCLE": "Motorcycle",
       "BICYCLE": "Bicycle",
@@ -933,6 +1107,7 @@
   },
   "mainTabs": {
     "home": "Home",
+    "categories": "Categories",
     "basket": "Basket",
     "orders": "Orders",
     "liked": "Liked",

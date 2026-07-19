@@ -26,7 +26,7 @@ export const createStyles = (colors: AppColors) =>
       ...typography.label, 
       color: colors.text,
       fontWeight: '800', // Bold product name
-      textAlign: 'left',
+      textAlign: 'auto',
     },
     merchantName: {
       ...typography.caption,
@@ -37,7 +37,7 @@ export const createStyles = (colors: AppColors) =>
       ...typography.body2, 
       color: colors.primary, // Primary orange price
       fontWeight: '800',
-      textAlign: 'left',
+      textAlign: 'auto',
     },
     stepper: {
       flexDirection: 'row',

@@ -43,7 +43,7 @@ export const createStyles = (colors: AppColors) =>
     removeBtn: {
       position: 'absolute',
       top: -8,
-      right: -8,
+      end: -8,
       backgroundColor: '#fff',
       borderRadius: 12,
       shadowColor: '#000',

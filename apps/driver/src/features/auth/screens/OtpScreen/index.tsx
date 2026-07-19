@@ -1,8 +1,10 @@
-import React, { useEffect } from 'react';
-import { View, TouchableOpacity, ActivityIndicator, Animated } from 'react-native';
-import { ScrollScreenTemplate, Text, Icon } from '@dawwar/ui';
+import React from 'react';
+import { Animated, TouchableOpacity, View } from 'react-native';
+import { Text } from '../../../../../../../packages/ui/src/atoms/Text';
+import { AppScreenTemplate } from '../../../../../../../packages/ui/src/templates/AppScreenTemplate';
 import { useTheme } from '@dawwar/theme';
 import { OtpInput } from '../../components/OtpInput';
+import { AuthButton } from '../../components/AuthButton';
 import { useController } from './useController';
 import { createStyles } from './styles';
 
@@ -11,83 +13,67 @@ export function OtpScreen() {
   const styles = createStyles(colors);
   const ctrl = useController();
 
-  useEffect(() => {
-    console.log('[OtpScreen] Mounted');
-  }, []);
-
-  console.log('[OtpScreen] Render:', { digits: ctrl.digits, isLoading: ctrl.isLoading, otpError: ctrl.otpError });
-
   return (
-    <ScrollScreenTemplate
-      edges={['top', 'bottom']}
-      keyboardShouldPersistTaps="handled"
+    <AppScreenTemplate
+      headerProps={{
+        title: ctrl.t('auth.verify_phone'),
+        onBackPress: ctrl.handleBack,
+      }}
+      footer={
+        <View style={styles.bottomAction}>
+          <AuthButton
+            label={ctrl.t('common.confirm', 'تأكيد')}
+            onPress={() => ctrl.handleOtpChange(ctrl.digits)}
+            disabled={ctrl.digits.length < 6 || ctrl.isLoading}
+            loading={ctrl.isLoading}
+            style={styles.confirmBtn}
+          />
+          <Text style={styles.hintText}>{ctrl.t('auth.otp_sandbox_hint')}</Text>
+        </View>
+      }
     >
       <View style={styles.container}>
-
-        {/* Back button */}
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => { /* navigation.goBack() handled by stack */ }}
-        >
-          <Icon name="arrow-left" size={24} color={colors.text} />
-        </TouchableOpacity>
-
-        {/* Title */}
-        <Text style={styles.title}>{ctrl.t('auth.otp_title')}</Text>
-        <Text style={styles.subtitle}>
-          {ctrl.t('auth.otp_subtitle')}
-          <Text style={styles.phoneHighlight}>{ctrl.phone}</Text>
-        </Text>
-
-        {/* OTP boxes — wrapped in shake animation */}
-        <Animated.View style={[styles.otpWrapper, { transform: [{ translateX: ctrl.shakeX }] }]}>
-          <OtpInput
-            value={ctrl.digits}
-            onChange={ctrl.handleDigitChange}
-            onBackspace={ctrl.handleBackspace}
-            hasError={ctrl.otpError != null}
-          />
-          {ctrl.otpError != null && (
-            <Text style={styles.errorText}>{ctrl.otpError}</Text>
-          )}
-        </Animated.View>
-
-        {/* Loading indicator while verifying */}
-        {ctrl.isLoading && (
-          <View style={styles.loadingRow}>
-            <ActivityIndicator color={colors.primary} />
-          </View>
-        )}
-
-        {/* Timer */}
-        {!ctrl.isOtpExpired ? (
-          <View style={styles.timerRow}>
-            <Text style={[styles.timerText, ctrl.timerSeconds < 30 && { color: colors.error }]}>
-              {ctrl.t('auth.otp_expires')} {ctrl.timerSeconds}s
+        <View style={styles.content}>
+          <View style={styles.header}>
+            <Text style={styles.subtitle}>
+              {ctrl.t('auth.otp_subtitle')}{' '}
+              <Text style={styles.phoneHighlight}>{ctrl.phone}</Text>
             </Text>
           </View>
-        ) : (
-          <View style={styles.timerRow}>
-            <Text style={[styles.timerText, { color: colors.error }]}>
-              {ctrl.t('auth.otp_expired')}
-            </Text>
+
+          <Animated.View style={[styles.otpWrapper, { transform: [{ translateX: ctrl.shakeX }] }]}>
+            <OtpInput
+              value={ctrl.digits}
+              onChange={ctrl.handleOtpChange}
+              hasError={ctrl.otpError != null}
+            />
+            {ctrl.otpError ? <Text style={styles.errorText}>{ctrl.otpError}</Text> : null}
+          </Animated.View>
+
+          <View style={styles.timerContainer}>
+            <View style={[styles.circleTimer, ctrl.isOtpExpired && styles.circleTimerExpired]}>
+              <Text style={[styles.timerValue, ctrl.isOtpExpired && styles.timerValueExpired]}>
+                {ctrl.isOtpExpired ? '0' : ctrl.timerSeconds}
+              </Text>
+            </View>
+
+            <View style={styles.resendRow}>
+              <Text style={styles.resendText}>{ctrl.t('auth.didnt_receive_code')}</Text>
+              <TouchableOpacity
+                style={styles.resendBtn}
+                onPress={ctrl.handleResend}
+                disabled={!ctrl.canResend}
+              >
+                <Text style={ctrl.canResend ? styles.resendActive : styles.resendDisabled}>
+                  {ctrl.canResend
+                    ? ctrl.t('auth.resend_otp')
+                    : ctrl.t('auth.resend_in', { seconds: ctrl.resendSeconds })}
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        )}
-
-        {/* Resend button */}
-        <TouchableOpacity
-          style={styles.resendButton}
-          onPress={ctrl.handleResend}
-          disabled={!ctrl.canResend}
-        >
-          <Text style={ctrl.canResend ? styles.resendActive : styles.resendDisabled}>
-            {ctrl.canResend
-              ? ctrl.t('auth.resend_otp')
-              : `${ctrl.t('auth.resend_in')} ${ctrl.resendSeconds}s`}
-          </Text>
-        </TouchableOpacity>
-
+        </View>
       </View>
-    </ScrollScreenTemplate>
+    </AppScreenTemplate>
   );
 }

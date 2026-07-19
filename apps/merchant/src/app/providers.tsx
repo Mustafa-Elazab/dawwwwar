@@ -7,7 +7,7 @@ import { ThemeProvider } from '@dawwar/theme';
 import { I18nextProvider } from 'react-i18next';
 import { i18n } from '@dawwar/i18n';
 import Toast from 'react-native-toast-message';
-import { AppErrorBoundary } from '@dawwar/ui';
+import { AppErrorBoundary } from '../../../../packages/ui/src/templates/AppErrorBoundary';
 import { store } from '../store';
 import { storage, StorageKeys } from '../core/storage/mmkv';
 import { setThemeMode } from '../store/slices/ui.slice';

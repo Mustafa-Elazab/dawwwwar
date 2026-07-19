@@ -1,7 +1,9 @@
 import { createSlice, createSelector, type PayloadAction } from '@reduxjs/toolkit';
-import { storage } from '../../core/storage/mmkv';
+import type { ProductVariant, SelectedModifierGroup, User } from '@dawwar/types';
+import { logout, setAuth, setUser, startAuthFlow } from './auth.slice';
 
 export interface CartItem {
+  lineKey?: string;
   productId: string;
   name: string;
   nameAr: string;
@@ -11,24 +13,49 @@ export interface CartItem {
   merchantId: string;
   merchantName: string;
   merchantNameAr?: string;
+  selectedModifiers?: SelectedModifierGroup[];
+  variant?: ProductVariant;
 }
 
 export interface CartState {
+  ownerUserId: string | null;
   items: CartItem[];
   merchantId: string | null;
   merchantName: string | null;
   merchantNameAr?: string | null;
 }
 
-const loadPersistedCart = (): CartState => {
-  try {
-    const raw = storage.getString('cart-storage');
-    if (raw) return JSON.parse(raw);
-  } catch {}
-  return { items: [], merchantId: null, merchantName: null, merchantNameAr: null };
+const createEmptyCartState = (ownerUserId: string | null = null): CartState => ({
+  ownerUserId,
+  items: [],
+  merchantId: null,
+  merchantName: null,
+  merchantNameAr: null,
+});
+
+const resetCartState = (state: CartState, ownerUserId: string | null = null) => {
+  state.ownerUserId = ownerUserId;
+  state.items = [];
+  state.merchantId = null;
+  state.merchantName = null;
+  state.merchantNameAr = null;
 };
 
-const initialState: CartState = loadPersistedCart();
+const bindCartToUser = (state: CartState, userId: string | null | undefined) => {
+  if (!userId) {
+    resetCartState(state);
+    return;
+  }
+
+  if (state.ownerUserId !== userId) {
+    resetCartState(state, userId);
+    return;
+  }
+
+  state.ownerUserId = userId;
+};
+
+const initialState: CartState = createEmptyCartState();
 
 export const cartSlice = createSlice({
   name: 'cart',
@@ -46,37 +73,36 @@ export const cartSlice = createSlice({
       state.merchantName = merchantName;
       state.merchantNameAr = merchantNameAr;
 
+      const lineKey = action.payload.lineKey ?? action.payload.productId;
+      const quantity = Math.max(1, action.payload.quantity ?? 1);
       const existing = state.items.find(
-        (i) => i.productId === action.payload.productId,
+        (i) => (i.lineKey ?? i.productId) === lineKey,
       );
       if (existing) {
-        existing.quantity += 1;
+        existing.quantity += quantity;
       } else {
-        state.items.push({ ...action.payload, quantity: 1 });
+        state.items.push({ ...action.payload, lineKey, quantity });
       }
-
-      storage.set('cart-storage', JSON.stringify(state));
     },
     removeItem: (state, action: PayloadAction<string>) => {
-      state.items = state.items.filter((i) => i.productId !== action.payload);
+      state.items = state.items.filter((i) => i.productId !== action.payload && i.lineKey !== action.payload);
       if (state.items.length === 0) {
         state.merchantId = null;
         state.merchantName = null;
         state.merchantNameAr = null;
       }
-      storage.set('cart-storage', JSON.stringify(state));
     },
     updateQuantity: (
       state,
       action: PayloadAction<{ productId: string; quantity: number }>,
     ) => {
       const item = state.items.find(
-        (i) => i.productId === action.payload.productId,
+        (i) => i.productId === action.payload.productId || i.lineKey === action.payload.productId,
       );
       if (item) {
         if (action.payload.quantity <= 0) {
           state.items = state.items.filter(
-            (i) => i.productId !== action.payload.productId,
+            (i) => i.productId !== action.payload.productId && i.lineKey !== action.payload.productId,
           );
         } else {
           item.quantity = action.payload.quantity;
@@ -87,15 +113,25 @@ export const cartSlice = createSlice({
         state.merchantName = null;
         state.merchantNameAr = null;
       }
-      storage.set('cart-storage', JSON.stringify(state));
     },
     clearCart: (state) => {
-      state.items = [];
-      state.merchantId = null;
-      state.merchantName = null;
-      state.merchantNameAr = null;
-      storage.delete('cart-storage');
+      resetCartState(state, state.ownerUserId);
     },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(logout, (state) => {
+        resetCartState(state);
+      })
+      .addCase(startAuthFlow, (state) => {
+        resetCartState(state);
+      })
+      .addCase(setAuth, (state, action) => {
+        bindCartToUser(state, action.payload.user.id);
+      })
+      .addCase(setUser, (state, action: PayloadAction<User>) => {
+        bindCartToUser(state, action.payload.id);
+      });
   },
 });
 

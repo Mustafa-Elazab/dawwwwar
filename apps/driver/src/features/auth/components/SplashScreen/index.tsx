@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Animated, StyleSheet, Dimensions } from 'react-native';
 import { useTheme } from '@dawwar/theme';
-import { Text, Icon } from '@dawwar/ui';
+import { Icon } from '../../../../../../../packages/ui/src/atoms/Icon';
+import { Text } from '../../../../../../../packages/ui/src/atoms/Text';
 
 const { width } = Dimensions.get('window');
 

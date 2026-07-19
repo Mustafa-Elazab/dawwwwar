@@ -70,7 +70,7 @@ export const createStyles = (colors: AppColors) =>
       flex: 1,
       ...typography.body2,
       color: colors.text,
-      textAlign: 'left',
+      textAlign: 'auto',
     },
 
     mapCard: {
@@ -80,7 +80,7 @@ export const createStyles = (colors: AppColors) =>
       borderWidth: 1,
       borderColor: colors.borderLight,
       padding: space.md,
-      flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
+      flexDirection: 'row',
       alignItems: 'center',
       gap: space.md,
       marginBottom: space.md,
@@ -102,14 +102,14 @@ export const createStyles = (colors: AppColors) =>
       color: colors.text,
       fontWeight: '900',
       marginBottom: 4,
-      textAlign: I18nManager.isRTL ? 'right' : 'left',
+      textAlign: 'auto',
       writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr',
     },
     mapSubtitle: {
       ...typography.body2,
       color: colors.textSecondary,
       lineHeight: 20,
-      textAlign: I18nManager.isRTL ? 'right' : 'left',
+      textAlign: 'auto',
       writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr',
     },
 
@@ -123,7 +123,7 @@ export const createStyles = (colors: AppColors) =>
       color: colors.text,
       textAlignVertical: 'top',
       backgroundColor: colors.background,
-      textAlign: 'left',
+      textAlign: 'auto',
     },
 
     // ── Components Redesign ─────────────────────────────
@@ -152,7 +152,7 @@ export const createStyles = (colors: AppColors) =>
       color: colors.text,
       paddingHorizontal: space.md,
       fontWeight: '700',
-      textAlign: 'left',
+      textAlign: 'auto',
     },
     budgetSuffix: {
       paddingHorizontal: space.md,
@@ -179,8 +179,8 @@ export const createStyles = (colors: AppColors) =>
     stickyFooter: {
       position: 'absolute',
       bottom: 0,
-      left: 0,
-      right: 0,
+      start: 0,
+      end: 0,
       backgroundColor: colors.surface,
       borderTopWidth: 1,
       borderTopColor: colors.borderLight,
@@ -211,7 +211,7 @@ export const createStyles = (colors: AppColors) =>
     errorText: { 
       ...typography.caption, 
       color: colors.error,
-      textAlign: 'left',
+      textAlign: 'auto',
       marginTop: 4,
     },
   });

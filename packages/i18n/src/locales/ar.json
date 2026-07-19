@@ -6,6 +6,7 @@
     "retry": "حاول مرة أخرى",
     "cancel": "إلغاء",
     "confirm": "تأكيد",
+    "choose_delivery_location": "اختر عنوان التوصيل",
     "submit": "إرسال",
     "apply": "تطبيق",
     "save": "حفظ",
@@ -124,6 +125,22 @@
     "logout": "تسجيل الخروج",
     "complete_profile_title": "خطوة أخيرة",
     "complete_profile_subtitle": "يرجى إدخال اسمك بالكامل للمتابعة.",
+    "complete_profile": {
+      "title": "ملفك الشخصي",
+      "country_flag": "🇪🇬",
+      "email_label": "البريد الإلكتروني",
+      "email_placeholder": "البريد الإلكتروني",
+      "date_of_birth": "تاريخ الميلاد",
+      "birthday_placeholder": "--/--/----",
+      "gender": "النوع",
+      "gender_male": "ذكر",
+      "gender_female": "أنثى",
+      "location_placeholder": "موقعك",
+      "location_hint": "يمكنك تعديل مواقعك المحفوظة من الملف الشخصي > مواقعي.",
+      "skip": "تخطي",
+      "change_photo": "تغيير الصورة",
+      "default_name": "عميل دوّار"
+    },
     "name_placeholder": "مثل: مصطفى محمد",
     "name_required": "الاسم بالكامل مطلوب",
     "profile_updated": "تم تحديث الملف الشخصي بنجاح!"
@@ -171,7 +188,11 @@
     "deliverToDifferentLocation": "التوصيل إلى موقع مختلف",
     "chooseLocationOnMap": "اختر الموقع على الخريطة",
     "deliverToCurrentLocation": "التوصيل إلى موقعي الحالي",
-    "locationUnavailable": "الموقع غير متاح — اضغط للاختيار"
+    "locationUnavailable": "الموقع غير متاح — اضغط للاختيار",
+    "empty_title": "لا توجد نتائج قريبة حالياً",
+    "empty_subtitle": "جرّب موقع توصيل آخر أو تحقق لاحقاً.",
+    "no_products": "لا توجد منتجات قريبة",
+    "no_products_sub": "ستظهر المنتجات المتاحة في منطقتك هنا."
   },
 
   "categories": {
@@ -409,6 +430,7 @@
     "tab_info": "المعلومات",
     "tab_reviews": "التقييمات",
     "reviews_soon": "التقييمات قريباً",
+    "fallbackName": "محل",
     "address": "العنوان",
     "phone": "الهاتف",
     "hours": "مواعيد العمل",
@@ -433,6 +455,11 @@
     "total": "الإجمالي",
     "checkout": "المتابعة للدفع",
     "continue_shopping": "مواصلة التسوق",
+    "view_cart": "عرض السلة",
+    "apply": "تطبيق",
+    "promo_placeholder": "هل لديك كود خصم؟",
+    "conflict_title": "استبدال السلة؟",
+    "conflict_body": "سلتك تحتوي على منتجات من متجر آخر. امسحها قبل إضافة هذا المنتج.",
     "remove": "إزالة",
     "clear_cart_title": "استبدال السلة؟",
     "clear_cart_body": "سلتك تحتوي على منتجات من {{merchant}}. هل تريد مسحها وإضافة من {{newMerchant}}؟",
@@ -446,6 +473,7 @@
     "change_address": "تغيير",
     "no_address": "أضف عنوان توصيل",
     "add_address": "إضافة عنوان",
+    "add_address_hint": "اختر عنواناً محفوظاً أو أضف عنواناً جديداً.",
     "payment_title": "طريقة الدفع",
     "cash": "الدفع عند الاستلام",
     "cash_sub": "ادفع عند وصول طلبك",
@@ -460,7 +488,9 @@
     "summary_title": "ملخص الطلب",
     "place_order": "تأكيد الطلب",
     "placing": "جاري الطلب...",
-    "order_placed": "تم الطلب بنجاح!"
+    "order_placed": "تم الطلب بنجاح!",
+    "selected_payment": "طريقة الدفع المختارة",
+    "free_delivery": "توصيل مجاني"
   },
 
   "custom_order": {
@@ -474,6 +504,7 @@
     "shop_address_required": "عنوان المحل مطلوب",
     "shop_location_title": "موقع المحل",
     "shop_location_hint": "اختر موقع المحل على الخريطة",
+    "shop_location_required": "اختر موقع المحل على الخريطة",
     "pick_on_map": "اختر على الخريطة",
     "use_my_location": "استخدم موقعي",
     "items_section": "ماذا تحتاج؟",
@@ -531,9 +562,11 @@
     "price_approval_body": "الإجمالي الفعلي ({{actual}} ج.م) أعلى من تقديرك ({{estimate}} ج.م). هل توافق؟",
     "price_approve": "موافقة على {{amount}} ج.م",
     "price_reject": "رفض",
+    "delivered_success": "تم تسليم الطلب بنجاح",
     "status": {
       "PENDING": "في انتظار موافقة المحل",
       "ACCEPTED": "قبل المحل طلبك",
+      "WAITING_DRIVER_ACCEPT": "في انتظار قبول السائق",
       "DRIVER_ASSIGNED": "السائق في الطريق",
       "AT_SHOP": "السائق وصل للمحل",
       "SHOPPING": "السائق يتسوق لك",
@@ -604,11 +637,20 @@
     "empty_history_sub": "سيظهر سجل معاملاتك هنا.",
     "recharge_title": "شحن المحفظة",
     "select_amount": "اختر المبلغ",
+    "select_amount_first": "اختر مبلغاً أولاً",
     "custom_amount": "مبلغ مخصص",
     "custom_placeholder": "أدخل المبلغ بالجنيه",
     "custom_min": "الحد الأدنى 10 ج.م",
+    "rechargeTitle": "شحن المحفظة",
+    "rechargeSuccess": "تم شحن المحفظة بنجاح!",
+    "rechargeAmount": "تم إضافة {{amount}} ج.م إلى محفظتك",
+    "selectAmount": "اختر المبلغ",
+    "customAmount": "مبلغ مخصص",
+    "minAmount": "الحد الأدنى للشحن: 10 ج.م",
+    "rechargeButton": "شحن المحفظة",
+    "payment_error": "تعذّر فتح صفحة الدفع. يرجى المحاولة مرة أخرى.",
     "confirm_recharge": "تأكيد الشحن",
-    "recharge_note": "سيتم معالجة طلب الشحن من فريقنا خلال 24 ساعة.",
+    "recharge_note": "سيتم فتح صفحة دفع آمنة لإكمال الشحن.",
     "recharge_submitted": "تم تقديم طلب الشحن!",
     "credit": "إيداع",
     "debit": "خصم",
@@ -656,7 +698,65 @@
     "logout_confirm_title": "تسجيل الخروج؟",
     "logout_confirm_body": "سيتم تسجيل خروجك من حسابك.",
     "logout_confirm_btn": "نعم، تسجيل الخروج",
+    "wallet_balance": "رصيد المحفظة",
     "version": "الإصدار {{version}}"
+  },
+
+  "promotions": {
+    "title": "العروض",
+    "promo_code": "كود الخصم",
+    "promo_code_label": "كود العرض",
+    "shipping_offers": "عروض الشحن",
+    "order_offers": "عروض الطلبات",
+    "free_shipping": "شحن مجاني",
+    "percent_off": "خصم {{percent}}%",
+    "get_more": "احصل على عروض أكثر",
+    "get_more_title": "احصل على عروض أكثر",
+    "information": "معلومات العرض",
+    "description": "الوصف",
+    "duration": "المدة",
+    "applicable_scope": "نطاق التطبيق",
+    "discount_amount": "قيمة الخصم",
+    "terms": "الشروط والأحكام",
+    "free_shipping_desc": "استمتع بشحن مجاني على جميع الطلبات طوال هذا الشهر!",
+    "percent_shipping_desc": "احصل على خصم {{percent}}% على رسوم التوصيل خلال فترة العرض.",
+    "percent_order_desc": "احصل على خصم {{percent}}% على الطلبات المؤهلة خلال فترة العرض.",
+    "scope_all_orders": "ينطبق على جميع الطلبات داخل التطبيق.",
+    "scope_shipping": "ينطبق على رسوم التوصيل القياسية.",
+    "scope_order": "ينطبق على إجمالي الطلبات المؤهلة.",
+    "free_shipping_discount": "خصم 100% على رسوم التوصيل.",
+    "percent_discount": "خصم {{percent}}%.",
+    "standard_shipping_terms": "لا يوجد حد أدنى للطلب. ينطبق على الشحن القياسي داخل الدولة.",
+    "minimum_order_terms": "صالح على الطلبات المؤهلة أثناء فترة العرض.",
+    "choose_offer": "اختر عرضاً أو أدخل كود خصم",
+    "enter_code": "أدخل كود الخصم",
+    "invalid_code": "كود الخصم غير صحيح أو غير متاح",
+    "expired": "انتهت صلاحية كود الخصم",
+    "exhausted": "تم استخدام كود الخصم بالكامل",
+    "min_order_error": "الحد الأدنى للطلب {{amount}} ج.م",
+    "fixed_off": "خصم {{amount}} ج.م",
+    "backend_success_desc": "تم التحقق من هذا العرض من عروض دوّار.",
+    "expires_on": "ينتهي في {{date}}",
+    "no_expiry": "لا يوجد تاريخ انتهاء",
+    "discount_amount_value": "خصم {{amount}} ج.م",
+    "min_order_terms": "الحد الأدنى للطلب: {{amount}} ج.م.",
+    "no_shipping_offers": "أدخل كود شحن ليظهر هنا.",
+    "no_order_offers": "أدخل كود طلب ليظهر هنا.",
+    "applied": "تم تطبيق العرض",
+    "share_message": "جرّب دوّار للتوصيل المحلي السريع والعروض.",
+    "earn": {
+      "share_app": "مشاركة التطبيق",
+      "invite_friends": "دعوة الأصدقاء",
+      "complete_purchases": "إكمال عمليات الشراء",
+      "watch_ads": "مشاهدة الإعلانات",
+      "participate_events": "المشاركة في الفعاليات",
+      "complete_profile": "إكمال الملف الشخصي",
+      "follow_social": "متابعة وسائل التواصل",
+      "take_surveys": "إجراء الاستبيانات",
+      "achieve_levels": "تحقيق المستويات",
+      "daily_logins": "تسجيل الدخول اليومي",
+      "coming_soon": "هذه مهمة عروض قادمة قريباً"
+    }
   },
 
   "liked": {
@@ -668,12 +768,26 @@
     "store": "محل"
   },
 
+  "chat": {
+    "order_title": "محادثة الطلب"
+  },
+
   "product": {
     "details_title": "تفاصيل المنتج",
+    "not_found": "المنتج غير موجود",
+    "not_found_sub": "قد يكون هذا المنتج غير متاح الآن.",
     "no_description": "لا يوجد وصف متاح.",
     "price": "السعر",
     "quantity": "الكمية",
-    "add_to_basket": "إضافة إلى السلة"
+    "add_to_basket": "إضافة إلى السلة",
+    "options": "الاختيارات",
+    "required": "مطلوب",
+    "optional": "اختياري",
+    "choose_one": "اختر واحداً",
+    "choose_up_to": "اختر حتى",
+    "variants": "اختر الحجم",
+    "modifier_required": "يرجى اختيار {{name}}",
+    "modifier_max": "اختر حتى {{count}} من {{name}}"
   },
 
   "payment_methods": {
@@ -692,7 +806,28 @@
     "cvc": "CVV / CVC",
     "success_title": "تمت إضافة وسيلة الدفع",
     "success_body": "تم حفظ وسيلة الدفع بنجاح.",
-    "success_button": "تمام"
+    "success_button": "تمام",
+    "coming_soon": "قريباً"
+  },
+
+  "paymentMethods": {
+    "title": "طرق الدفع",
+    "cash": "كاش",
+    "wallet": "المحفظة",
+    "apple_pay": "Apple Pay",
+    "google_pay": "Google Pay",
+    "instapay": "إنستاباي",
+    "vodafone_cash": "فودافون كاش",
+    "card": "بطاقة",
+    "add_card": "إضافة بطاقة جديدة",
+    "cardholder_name": "اسم حامل البطاقة",
+    "card_number": "رقم البطاقة",
+    "expiry": "تاريخ الانتهاء",
+    "cvc": "CVV / CVC",
+    "success_title": "تمت إضافة وسيلة الدفع",
+    "success_body": "تم حفظ وسيلة الدفع بنجاح.",
+    "success_button": "تمام",
+    "coming_soon": "قريباً"
   },
 
   "invite_friends": {
@@ -735,12 +870,14 @@
     "label_label": "التسمية",
     "address_label": "العنوان",
     "map_title": "اختر الموقع",
+    "location": "الموقع",
     "map_instructions": "اسحب الخريطة لتحديد الموقع",
     "confirm_location": "تأكيد الموقع",
     "building": "رقم المبنى / الفيلا",
     "floor": "الطابق",
     "apartment": "رقم الشقة",
     "phone_label": "هاتف للتوصيل",
+    "phone_required": "رقم الهاتف مطلوب لحفظ العنوان",
     "notes_label": "ملاحظات التوصيل",
     "notes_placeholder": "كود البوابة، معالم، تعليمات خاصة...",
     "is_default": "تعيين كعنوان افتراضي",
@@ -749,8 +886,29 @@
     "delete_confirm_title": "حذف العنوان؟",
     "delete_confirm_body": "سيتم حذف هذا العنوان نهائياً.",
     "delete": "حذف",
+    "edit": "تعديل العنوان",
+    "other": "أخرى",
+    "deleted": "تم حذف العنوان!",
     "saved": "تم حفظ العنوان!",
     "updated": "تم تحديث العنوان!"
+  },
+
+  "locationPicker": {
+    "title": "إضافة عنوان جديد",
+    "locationLabel": "الموقع",
+    "dragToSelect": "اسحب الخريطة لتحديد الموقع",
+    "labelPlaceholder": "تسمية (مثل: المنزل)",
+    "defaultLabel": "موقعي",
+    "save": "حفظ العنوان",
+    "geocodeError": "تعذّر تحديد العنوان",
+    "gpsError": "تعذّر تحديد موقعك",
+    "networkError": "تحقق من الاتصال بالإنترنت"
+  },
+
+  "address_labels": {
+    "home": "المنزل",
+    "work": "العمل",
+    "other": "أخرى"
   },
 
   "language": {
@@ -797,8 +955,10 @@
     "camera_denied": "تم رفض الوصول للكاميرا. يرجى تفعيله من الإعدادات.",
     "microphone_denied": "تم رفض الوصول للميكروفون. يرجى تفعيله من الإعدادات.",
     "no_internet": "لا يوجد اتصال بالإنترنت",
+    "internet_back": "عاد الاتصال بالإنترنت",
     "cancel_failed": "تعذّر إلغاء الطلب",
     "notification_permission": "لم يتم منح إذن الإشعارات",
+    "required": "هذا الحقل مطلوب",
     "roleMismatch": {
       "customerInMerchant": "هذا الرقم مسجّل كحساب عميل. للتسجيل كتاجر، يُرجى التواصل معنا.",
       "customerInDriver": "هذا الرقم مسجّل كحساب عميل. للتسجيل كسائق، يُرجى التواصل معنا.",
@@ -844,6 +1004,7 @@
     "actual_amount": "المبلغ الفعلي (ج.م)",
     "actual_amount_placeholder": "كم دفعت؟",
     "items_purchased": "تم الشراء — جاهز للتوصيل",
+    "start_delivery": "بدء التوصيل",
     "navigate_customer": "الملاحة للعميل",
     "arrived_customer": "وصلت للعميل",
     "collect_cash": "اجمع {{amount}} ج.م من العميل",
@@ -863,6 +1024,18 @@
     "commission_paid": "العمولة المدفوعة",
     "net_earnings_today": "الأرباح الصافية",
     "low_balance_warning": "رصيد منخفض — اشحن للاستمرار في استقبال الطلبات",
+    "waiting_for_orders": "في انتظار طلبات قريبة",
+    "offline_message": "ابدأ استقبال الطلبات لتظهر لك طلبات التوصيل.",
+    "new_order_alert": "طلب جديد قريب",
+    "location_permission_required": "إذن الموقع مطلوب لبدء استقبال الطلبات",
+    "custom_order_warning": "طلب مخصص: اشترِ من المكان المطلوب ثم ارفع الإيصال قبل التوصيل.",
+    "items_count": "{{count}} عناصر",
+    "more_items": "+{{count}} أخرى",
+    "photos_sent": "تم إرسال الصور للعميل",
+    "photos_sent_short": "تم إرسال الصور للعميل",
+    "estimated_budget": "المقدر: {{amount}} {{currency}}",
+    "over_budget_warning": "المبلغ أعلى من التقدير بأكثر من ٢٠٪. قد يحتاج إلى موافقة العميل.",
+    "receipt_captured": "تم التقاط الإيصال",
     "vehicle_type": {
       "MOTORCYCLE": "دراجة نارية",
       "BICYCLE": "دراجة هوائية",
@@ -933,6 +1106,7 @@
   },
   "mainTabs": {
     "home": "الرئيسية",
+    "categories": "التصنيفات",
     "basket": "السلة",
     "orders": "الطلبات",
     "liked": "المفضلة",

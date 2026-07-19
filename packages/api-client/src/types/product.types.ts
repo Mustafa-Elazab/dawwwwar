@@ -1,3 +1,5 @@
+import type { ModifierGroup, ProductVariant } from '@dawwar/types';
+
 export interface CreateProductDto {
   name: string;
   nameAr: string;
@@ -8,6 +10,8 @@ export interface CreateProductDto {
   isAvailable: boolean;
   categoryId: string;
   isFeatured: boolean;
+  modifierGroups?: ModifierGroup[];
+  variants?: ProductVariant[];
 }
 
 export interface UpdateProductDto {
@@ -20,4 +24,6 @@ export interface UpdateProductDto {
   isAvailable?: boolean;
   categoryId?: string;
   isFeatured?: boolean;
+  modifierGroups?: ModifierGroup[];
+  variants?: ProductVariant[];
 }

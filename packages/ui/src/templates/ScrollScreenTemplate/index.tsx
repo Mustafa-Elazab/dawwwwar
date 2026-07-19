@@ -34,23 +34,30 @@ export function ScrollScreenTemplate({
   onRetry,
   isEmpty = false,
   emptyState,
+  state,
 }: ScrollScreenTemplateProps) {
   const { colors } = useTheme();
   const styles = createStyles(colors);
   const resolvedBg = backgroundColor ?? colors.background;
+  const resolvedIsLoading = state?.isLoading ?? isLoading;
+  const resolvedLoadingMessage = state?.loadingMessage ?? loadingMessage;
+  const resolvedIsError = state?.isError ?? isError;
+  const resolvedErrorMessage = state?.errorMessage ?? errorMessage;
+  const resolvedIsEmpty = state?.isEmpty ?? isEmpty;
+  const resolvedEmptyState = state?.emptyState ?? emptyState;
   const renderContent = () => {
-    if (isError) {
+    if (resolvedIsError) {
       return (
         <View style={styles.stateContainer}>
-          <ErrorState message={errorMessage} onRetry={onRetry} />
+          <ErrorState message={resolvedErrorMessage} onRetry={onRetry} />
         </View>
       );
     }
 
-    if (isEmpty && emptyState) {
+    if (resolvedIsEmpty && resolvedEmptyState) {
       return (
         <View style={styles.stateContainer}>
-          <EmptyState {...emptyState} />
+          <EmptyState {...resolvedEmptyState} />
         </View>
       );
     }
@@ -97,12 +104,11 @@ export function ScrollScreenTemplate({
         </ScrollView>
       </KeyboardAvoidingView>
       {footer}
-      {isLoading ? (
+      {resolvedIsLoading ? (
         <View style={styles.loadingOverlay} pointerEvents="auto">
-          <LoadingSpinner message={loadingMessage} />
+          <LoadingSpinner message={resolvedLoadingMessage} />
         </View>
       ) : null}
-      <NetworkBanner />
     </SafeAreaView>
   );
 }

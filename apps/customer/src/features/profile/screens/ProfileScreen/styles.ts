@@ -47,6 +47,7 @@ export const createStyles = (colors: AppColors) =>
     userTextCol: {
       flex: 1,
       gap: 3,
+      alignItems: 'flex-start',
     },
     userMetaRow: {
       flexDirection: 'row',
@@ -59,7 +60,7 @@ export const createStyles = (colors: AppColors) =>
     editIconContainer: {
       position: 'absolute',
       bottom: 0,
-      right: 0,
+      end: 0,
       backgroundColor: colors.primary,
       width: 28,
       height: 28,
@@ -87,6 +88,43 @@ export const createStyles = (colors: AppColors) =>
       paddingBottom: space.sm,
       flex:1,
       alignSelf:"flex-start",
+    },
+    walletBalanceCard: {
+      marginHorizontal: space.base,
+      marginBottom: space.base,
+      minHeight: 74,
+      borderRadius: radius.lg,
+      borderWidth: 1,
+      borderColor: colors.borderLight,
+      backgroundColor: colors.card,
+      paddingHorizontal: space.base,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: space.md,
+    },
+    walletIconBubble: {
+      width: 46,
+      height: 46,
+      borderRadius: 23,
+      backgroundColor: colors.primaryLight,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    walletTextCol: {
+      flex: 1,
+      gap: 2,
+    },
+    walletTitle: {
+      ...typography.body2,
+      color: colors.textSecondary,
+      fontWeight: '700',
+      textAlign: 'auto',
+    },
+    walletAmount: {
+      ...typography.h4,
+      color: colors.text,
+      fontWeight: '900',
+      textAlign: 'auto',
     },
     sectionCard: {
       backgroundColor: colors.background,

@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useTheme } from '@dawwar/theme';
-import { Text, Icon } from '@dawwar/ui';
+import { Icon } from '../../../../../../../packages/ui/src/atoms/Icon';
+import { Text } from '../../../../../../../packages/ui/src/atoms/Text';
 import { TransactionType } from '@dawwar/types';
 import { space, typography } from '@dawwar/theme';
 import { useTranslation } from '@dawwar/i18n';

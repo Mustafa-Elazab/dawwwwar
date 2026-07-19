@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { I18nManager, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { useTranslation } from '@dawwar/i18n';
 import { Button, Icon, ScreenTemplate, Text } from '@dawwar/ui';
@@ -7,15 +7,18 @@ import { useTheme, radius, space, typography } from '@dawwar/theme';
 import { PROFILE_ROUTES } from '../../../navigation/routes';
 import {
   DEFAULT_PAYMENT_METHODS,
+  isSupportedPaymentMethod,
   readSavedPaymentMethods,
   readSelectedPaymentMethod,
   writeSelectedPaymentMethod,
   type SavedPaymentMethod,
+  type SupportedPaymentMethodId,
 } from '../core/paymentMethods';
 
 function getIcon(kind: string) {
   const icons: Record<string, string> = {
     cash: 'cash',
+    wallet: 'wallet-outline',
     google_pay: 'google',
     apple_pay: 'apple',
     instapay: 'bank-transfer',
@@ -30,7 +33,7 @@ export function PaymentMethodsScreen() {
   const { colors } = useTheme();
   const navigation = useNavigation<any>();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
-  const [selected, setSelected] = React.useState(readSelectedPaymentMethod());
+  const [selected, setSelected] = React.useState<SupportedPaymentMethodId>(readSelectedPaymentMethod());
   const [cards, setCards] = React.useState<SavedPaymentMethod[]>([]);
 
   useFocusEffect(
@@ -43,6 +46,7 @@ export function PaymentMethodsScreen() {
   const methods = React.useMemo(() => [...DEFAULT_PAYMENT_METHODS, ...cards], [cards]);
 
   const handleApply = () => {
+    if (!isSupportedPaymentMethod(selected)) return;
     writeSelectedPaymentMethod(selected);
     navigation.goBack();
   };
@@ -50,7 +54,7 @@ export function PaymentMethodsScreen() {
   return (
     <ScreenTemplate
       headerProps={{
-        title: t('payment_methods.title'),
+        title: t('paymentMethods.title'),
         onBackPress: () => navigation.goBack(),
       }}
       footer={
@@ -62,21 +66,37 @@ export function PaymentMethodsScreen() {
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {methods.map((method) => {
           const checked = selected === method.id;
+          const supported = method.supported !== false && isSupportedPaymentMethod(method.id);
           return (
             <TouchableOpacity
               key={method.id}
-              style={[styles.methodRow, checked && styles.methodSelected]}
-              onPress={() => setSelected(method.id)}
+              style={[
+                styles.methodRow,
+                checked && styles.methodSelected,
+                !supported && styles.methodDisabled,
+              ]}
+              onPress={() => {
+                if (supported) setSelected(method.id as SupportedPaymentMethodId);
+              }}
               activeOpacity={0.85}
             >
               <View style={styles.methodIcon}>
-                <Icon name={getIcon(method.kind)} size={22} color={colors.primary} />
+                <Icon
+                  name={getIcon(method.kind)}
+                  size={22}
+                  color={supported ? colors.primary : colors.textDisabled}
+                />
               </View>
               <View style={styles.methodText}>
-                <Text style={styles.methodLabel}>{t(method.label)}</Text>
+                <Text style={[styles.methodLabel, !supported && styles.methodLabelDisabled]}>
+                  {t(method.label)}
+                </Text>
                 {method.masked ? <Text style={styles.methodSub}>{method.masked}</Text> : null}
+                {!supported ? (
+                  <Text style={styles.methodSub}>{t('paymentMethods.coming_soon')}</Text>
+                ) : null}
               </View>
-              <View style={[styles.radio, checked && styles.radioSelected]}>
+              <View style={[styles.radio, checked && styles.radioSelected, !supported && styles.radioDisabled]}>
                 {checked ? <View style={styles.radioDot} /> : null}
               </View>
             </TouchableOpacity>
@@ -89,7 +109,7 @@ export function PaymentMethodsScreen() {
           activeOpacity={0.85}
         >
           <Icon name="plus" size={20} color={colors.primary} />
-          <Text style={styles.addCardText}>{t('payment_methods.add_card')}</Text>
+          <Text style={styles.addCardText}>{t('paymentMethods.add_card')}</Text>
         </TouchableOpacity>
       </ScrollView>
     </ScreenTemplate>
@@ -118,6 +138,9 @@ const createStyles = (colors: any) =>
       borderColor: colors.primary,
       backgroundColor: colors.primaryLight,
     },
+    methodDisabled: {
+      opacity: 0.52,
+    },
     methodIcon: {
       width: 34,
       alignItems: 'center',
@@ -130,6 +153,9 @@ const createStyles = (colors: any) =>
       color: colors.text,
       fontWeight: '800',
       textAlign: 'auto',
+    },
+    methodLabelDisabled: {
+      color: colors.textSecondary,
     },
     methodSub: {
       ...typography.caption,
@@ -149,6 +175,9 @@ const createStyles = (colors: any) =>
     },
     radioSelected: {
       borderColor: colors.primary,
+    },
+    radioDisabled: {
+      borderColor: colors.textDisabled,
     },
     radioDot: {
       width: 10,

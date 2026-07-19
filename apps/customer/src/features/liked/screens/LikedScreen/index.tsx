@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { FlatList, StyleSheet, TouchableOpacity, View, type GestureResponderEvent } from 'react-native';
+import { FlatList, I18nManager, StyleSheet, TouchableOpacity, View, type GestureResponderEvent } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import { useTranslation } from '@dawwar/i18n';
 import { useTheme } from '@dawwar/theme';
@@ -45,6 +45,7 @@ export function LikedScreen() {
           contentContainerStyle={styles.listContent}
           onRefresh={refetch}
           refreshing={false}
+          key={I18nManager.isRTL ? 'liked-rtl' : 'liked-ltr'}
           renderItem={({ item }) => (
             <TouchableOpacity
               style={styles.card}
@@ -109,10 +110,11 @@ const createStyles = (colors: any) =>
     },
     row: {
       justifyContent: 'space-between',
+      gap: 16,
       marginBottom: 28,
     },
     card: {
-      width: '47%',
+      flex: 1,
       borderRadius: 8,
       backgroundColor: colors.surface,
       borderWidth: 1,
@@ -132,7 +134,7 @@ const createStyles = (colors: any) =>
     heart: {
       position: 'absolute',
       top: 8,
-      right: 8,
+      end: 8,
       width: 28,
       height: 28,
       borderRadius: 14,
@@ -146,6 +148,7 @@ const createStyles = (colors: any) =>
       color: colors.text,
       fontWeight: '800',
       fontSize: 13,
+      textAlign: 'auto',
     },
     ratingRow: {
       flexDirection: 'row',

@@ -20,9 +20,6 @@ export function NotificationRow({ item, colors, onPress }: NotificationRowProps)
       onPress={() => onPress(item.id)}
       activeOpacity={0.7}
     >
-      <View style={styles.iconContainer}>
-        <Icon name={item.iconName} size={24} color={item.iconColor} />
-      </View>
       <View style={styles.content}>
         <View style={styles.titleRow}>
           <Text
@@ -39,6 +36,9 @@ export function NotificationRow({ item, colors, onPress }: NotificationRowProps)
         <Text variant="caption" style={styles.time}>
           {item.relativeTime}
         </Text>
+      </View>
+      <View style={styles.iconContainer}>
+        <Icon name={item.iconName} size={24} color={item.iconColor} />
       </View>
     </TouchableOpacity>
   );

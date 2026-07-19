@@ -1,6 +1,9 @@
 import React from 'react';
 import { View, TouchableOpacity } from 'react-native';
-import { ScreenTemplate, Text, Icon, Button } from '@dawwar/ui';
+import { Icon } from '../../../../../../../packages/ui/src/atoms/Icon';
+import { Text } from '../../../../../../../packages/ui/src/atoms/Text';
+import { ScreenTemplate } from '../../../../../../../packages/ui/src/templates/ScreenTemplate';
+import { AuthButton } from '../../components/AuthButton';
 import { useTheme } from '@dawwar/theme';
 import { useController } from './useController';
 import { createStyles } from './styles';
@@ -49,12 +52,11 @@ export function RoleScreen() {
 
         <View style={styles.spacer} />
 
-        <Button
+        <AuthButton
           label={ctrl.t('auth.continue')}
           onPress={ctrl.handleContinue}
           loading={ctrl.isLoading}
           disabled={ctrl.isButtonDisabled}
-          fullWidth
           style={styles.continueButton}
         />
       </View>

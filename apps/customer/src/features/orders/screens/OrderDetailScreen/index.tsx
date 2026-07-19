@@ -15,8 +15,10 @@ export function OrderDetailScreen() {
         onBackPress: controller.handlers.handleBack,
         type: 'default',
       }}
-      isLoading={controller.isLoading}
-      isError={controller.isError || (!controller.isLoading && !controller.order)}
+      state={{
+        isLoading: controller.isLoading,
+        isError: controller.isError || (!controller.isLoading && !controller.order),
+      }}
       onRetry={controller.refetch}
       footer={
         shouldShowContent ? (

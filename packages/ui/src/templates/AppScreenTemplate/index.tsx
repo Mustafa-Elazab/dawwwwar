@@ -28,25 +28,32 @@ export function AppScreenTemplate({
   onRetry,
   isEmpty = false,
   emptyState,
+  state,
   testID,
 }: AppScreenTemplateProps) {
   const { colors } = useTheme();
   const styles = createStyles(colors);
   const resolvedBg = backgroundColor ?? colors.background;
+  const resolvedIsLoading = state?.isLoading ?? isLoading;
+  const resolvedLoadingMessage = state?.loadingMessage ?? loadingMessage;
+  const resolvedIsError = state?.isError ?? isError;
+  const resolvedErrorMessage = state?.errorMessage ?? errorMessage;
+  const resolvedIsEmpty = state?.isEmpty ?? isEmpty;
+  const resolvedEmptyState = state?.emptyState ?? emptyState;
 
   const renderContent = () => {
-    if (isError) {
+    if (resolvedIsError) {
       return (
         <View style={styles.stateContainer}>
-          <ErrorState message={errorMessage} onRetry={onRetry} />
+          <ErrorState message={resolvedErrorMessage} onRetry={onRetry} />
         </View>
       );
     }
 
-    if (isEmpty && emptyState) {
+    if (resolvedIsEmpty && resolvedEmptyState) {
       return (
         <View style={styles.stateContainer}>
-          <EmptyState {...emptyState} />
+          <EmptyState {...resolvedEmptyState} />
         </View>
       );
     }
@@ -68,12 +75,11 @@ export function AppScreenTemplate({
       {headerProps ? <Header {...headerProps} /> : header}
       <View style={[styles.content, contentStyle]}>{renderContent()}</View>
       {footer}
-      {isLoading ? (
+      {resolvedIsLoading ? (
         <View style={styles.loadingOverlay} pointerEvents="auto">
-          <LoadingSpinner message={loadingMessage} />
+          <LoadingSpinner message={resolvedLoadingMessage} />
         </View>
       ) : null}
-      <NetworkBanner />
     </SafeAreaView>
   );
 }

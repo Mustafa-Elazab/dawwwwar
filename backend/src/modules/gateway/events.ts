@@ -7,6 +7,7 @@ export const SOCKET_EVENTS = {
   MERCHANT_ORDER_ALERT: 'merchant:order_alert',
   CHAT_NEW_MESSAGE: 'CHAT_NEW_MESSAGE',
   CHAT_USER_TYPING: 'CHAT_USER_TYPING',
+  WALLET_RECHARGED: 'wallet:recharged',
   ERROR: 'error',
 
   // Client → Server
@@ -28,4 +29,6 @@ export const Rooms = {
   merchant: (merchantId: string) => `merchant:${merchantId}`,
   driver: (driverId: string) => `driver:${driverId}`,
   customer: (customerId: string) => `customer:${customerId}`,
+  availableDrivers: () => 'drivers/available',
+  adminLive: () => 'admin/live',
 };

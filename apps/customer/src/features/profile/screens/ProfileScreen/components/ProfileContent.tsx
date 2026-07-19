@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActivityIndicator, Switch, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, I18nManager, Switch, TouchableOpacity, View } from 'react-native';
 import type { TFunction } from 'i18next';
 import type { AppColors } from '@dawwar/theme';
 import { Avatar, Icon, Text } from '@dawwar/ui';
@@ -26,16 +26,6 @@ export function ProfileContent({
 
   return (
     <>
-      {!ctrl.user ? (
-        <View style={styles.loginCard}>
-          <ProfileLoginPrompt
-            colors={colors}
-            onPress={ctrl.handleLogin}
-            label={t('profile.login_register', 'Login / Register')}
-          />
-        </View>
-      ) : null}
-
       {ctrl.user ? (
         <View style={styles.userCard}>
           <TouchableOpacity
@@ -74,6 +64,27 @@ export function ProfileContent({
         </View>
       ) : null}
 
+      {/* {ctrl.user ? (
+        <TouchableOpacity
+          style={styles.walletBalanceCard}
+          onPress={() => ctrl.navigate(WALLET_ROUTES.WALLET)}
+          activeOpacity={0.86}
+        >
+          <View style={styles.walletIconBubble}>
+            <Icon name="wallet-outline" size={22} color={colors.primary} />
+          </View>
+          <View style={styles.walletTextCol}>
+            <Text style={styles.walletTitle}>{t('profile.wallet_balance')}</Text>
+            <Text style={styles.walletAmount}>{ctrl.walletBalanceLabel}</Text>
+          </View>
+          <Icon
+            name={I18nManager.isRTL ? 'chevron-left' : 'chevron-right'}
+            size={22}
+            color={colors.textTertiary}
+          />
+        </TouchableOpacity>
+      ) : null} */}
+
       {ctrl.user ? (
         <TouchableOpacity style={styles.logoutPill} onPress={ctrl.handleLogout}>
           <Icon name="logout" size={20} color={colors.primary} />
@@ -90,9 +101,9 @@ export function ProfileContent({
         <SettingsRow
           icon="ticket-percent-outline"
           title={t('profile.my_promotions', 'My Promotions')}
-          onPress={() => {}}
+          onPress={() => ctrl.navigate(PROFILE_ROUTES.PROMOTIONS)}
         />
-        <SettingsRow
+        {/* <SettingsRow
           icon="wallet-outline"
           title={t('profile.payment_methods', 'Payment Methods')}
           onPress={() => ctrl.navigate(PROFILE_ROUTES.PAYMENT_METHODS)}
@@ -101,7 +112,7 @@ export function ProfileContent({
           icon="receipt-text-outline"
           title={t('profile.transactions', 'Transactions')}
           onPress={() => ctrl.navigate(WALLET_ROUTES.TRANSACTIONS)}
-        />
+        /> */}
         <SettingsRow
           icon="account-multiple-plus-outline"
           title={t('profile.invite_friends', 'Invite Friends')}

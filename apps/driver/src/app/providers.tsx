@@ -7,15 +7,18 @@ import { ThemeProvider } from '@dawwar/theme';
 import { I18nextProvider } from 'react-i18next';
 import { i18n } from '@dawwar/i18n';
 import Toast from 'react-native-toast-message';
-import { AppErrorBoundary } from '@dawwar/ui';
+import { AppErrorBoundary } from '../../../../packages/ui/src/templates/AppErrorBoundary';
 import { ApiClientProvider } from '@dawwar/api-client';
 import { store } from '../store';
 import { storage, StorageKeys } from '../core/storage/mmkv';
 import { setThemeMode } from '../store/slices/ui.slice';
-import { setUser, setLoading } from '../store/slices/auth.slice';
+import { logout, setUser, setLoading } from '../store/slices/auth.slice';
 import { authApi } from '../features/auth/core/api';
 import { api } from '../core/api/client';
 import { ThemeMode } from '@dawwar/types';
+
+const unwrapApiData = <T,>(res: T | { data: T }): T =>
+  res && typeof res === 'object' && 'data' in res ? res.data : (res as T);
 
 // Initialize theme from storage
 const storedMode = storage.getString(StorageKeys.THEME_MODE);
@@ -56,11 +59,13 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
 
       try {
         const res = await authApi.getMe();
-        if (res.success && res.data) {
-          store.dispatch(setUser(res.data));
+        const user = unwrapApiData(res);
+        if (user) {
+          store.dispatch(setUser(user));
         }
       } catch (err) {
         console.error('[AppProviders] restoreSession error:', err);
+        store.dispatch(logout());
       } finally {
         store.dispatch(setLoading(false));
       }

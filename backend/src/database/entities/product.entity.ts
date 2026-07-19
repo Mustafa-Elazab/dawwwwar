@@ -2,6 +2,39 @@ import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { MerchantEntity } from './merchant.entity';
 
+export enum ProductModifierGroupType {
+  SINGLE = 'SINGLE',
+  MULTI = 'MULTI',
+}
+
+export interface ProductModifierOption {
+  id: string;
+  name: string;
+  nameAr?: string;
+  priceDelta: number;
+  isAvailable?: boolean;
+}
+
+export interface ProductModifierGroup {
+  id: string;
+  name: string;
+  nameAr?: string;
+  type: ProductModifierGroupType;
+  required: boolean;
+  min?: number;
+  max?: number;
+  options: ProductModifierOption[];
+}
+
+export interface ProductVariant {
+  id: string;
+  name: string;
+  nameAr?: string;
+  price?: number;
+  priceDelta?: number;
+  isAvailable?: boolean;
+}
+
 @Entity('products')
 @Index(['merchantId'])
 export class ProductEntity extends BaseEntity {
@@ -44,4 +77,10 @@ export class ProductEntity extends BaseEntity {
 
   @Column({ name: 'total_orders', default: 0 })
   totalOrders: number;
+
+  @Column({ name: 'modifier_groups', type: 'jsonb', default: () => "'[]'::jsonb" })
+  modifierGroups: ProductModifierGroup[];
+
+  @Column({ type: 'jsonb', default: () => "'[]'::jsonb" })
+  variants: ProductVariant[];
 }

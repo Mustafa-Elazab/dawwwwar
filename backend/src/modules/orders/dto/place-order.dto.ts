@@ -36,6 +36,57 @@ class OrderItemDto {
   @IsPositive()
   @Type(() => Number)
   price: number;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => SelectedModifierGroupDto)
+  selectedModifiers?: SelectedModifierGroupDto[];
+}
+
+class SelectedModifierOptionDto {
+  @ApiProperty()
+  @IsString()
+  optionId: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  name?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  nameAr?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  priceDelta?: number;
+}
+
+class SelectedModifierGroupDto {
+  @ApiProperty()
+  @IsString()
+  groupId: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  groupName?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  groupNameAr?: string;
+
+  @ApiProperty({ type: [SelectedModifierOptionDto] })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => SelectedModifierOptionDto)
+  options: SelectedModifierOptionDto[];
 }
 
 export class PlaceOrderDto {

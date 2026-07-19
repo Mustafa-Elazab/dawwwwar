@@ -26,7 +26,7 @@ export const createStyles = (colors: AppColors) =>
       paddingTop: space.base,
       paddingBottom: space.sm,
       backgroundColor: colors.surface,
-      textAlign: 'left',
+      textAlign: 'auto',
     },
     loadingRow: {
       alignItems: 'center',
@@ -83,17 +83,17 @@ export const createStyles = (colors: AppColors) =>
     merchantLogo: { width: 48, height: 48, borderRadius: radius.md },
     merchantInfo: { 
       flex: 1,
-      alignItems: 'flex-start',
+      alignItems: 'stretch',
     },
     merchantName: { 
       ...typography.label, 
       color: colors.text,
-      textAlign: 'left',
+      textAlign: 'auto',
     },
     merchantMeta: { 
       ...typography.caption, 
       color: colors.textSecondary,
-      textAlign: 'left',
+      textAlign: 'auto',
     },
     searchContainer: {
       padding: space.base,
@@ -115,7 +115,7 @@ export const createStyles = (colors: AppColors) =>
       ...typography.body2,
       color: colors.text,
       paddingVertical: 0,
-      textAlign: 'left',
+      textAlign: 'auto',
     },
     // Product result row
     productRow: {
@@ -130,18 +130,18 @@ export const createStyles = (colors: AppColors) =>
     productImage: { width: 56, height: 56, borderRadius: radius.md },
     productInfo: { 
       flex: 1,
-      alignItems: 'flex-start',
+      alignItems: 'stretch',
     },
     productName: { 
       ...typography.label, 
       color: colors.text,
-      textAlign: 'left',
+      textAlign: 'auto',
     },
     productPrice: { 
       ...typography.body2, 
       color: colors.primary, 
       marginTop: 2,
-      textAlign: 'left',
+      textAlign: 'auto',
     },
     addBtn: {
       width: 32,

@@ -3,27 +3,67 @@ import { View, StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useTheme } from '@dawwar/theme';
-import { Icon, Text } from '@dawwar/ui';
+import { Icon } from '../../../../packages/ui/src/atoms/Icon';
+import { Text } from '../../../../packages/ui/src/atoms/Text';
 import { useTranslation } from '@dawwar/i18n';
 import { TAB_ROUTES, DRIVER_ROUTES } from './routes';
 import type { DriverTabParamList, OrdersStackParamList } from './types';
-import {
-  AvailableOrdersScreen,
-  OrdersHistoryScreen,
-  ActiveDeliveryScreen,
-  EarningsScreen,
-  DriverProfileScreen,
-} from './placeholders';
 import { useAppSelector } from '../store/hooks';
 import { selectActiveOrderId, selectIsOnline } from '../store/slices/driver.slice';
 
 const Tab = createBottomTabNavigator<DriverTabParamList>();
 const OrdersStack = createStackNavigator<OrdersStackParamList>();
 
+type ScreenComponent = React.ComponentType<any>;
+type ScreenModule = Record<string, ScreenComponent | undefined> | undefined;
+
+const createScreenLoader = (
+  load: () => ScreenModule,
+  exportName: string,
+): ScreenComponent => {
+  const LoadedScreen = (props: Record<string, unknown>) => {
+    const Screen = React.useMemo(() => {
+      const mod = load();
+      return mod?.[exportName] ?? mod?.default;
+    }, []);
+
+    if (!Screen) {
+      console.error(`[DriverTabs] Unable to load ${exportName}`);
+      return null;
+    }
+
+    return <Screen {...props} />;
+  };
+
+  LoadedScreen.displayName = exportName;
+  return LoadedScreen;
+};
+
+const AvailableOrdersTabScreen = createScreenLoader(
+  () => require('../features/available-orders/screens/AvailableOrdersScreen'),
+  'AvailableOrdersScreen',
+);
+const ActiveDeliveryTabScreen = createScreenLoader(
+  () => require('../features/active-delivery/screens/ActiveDeliveryScreen'),
+  'ActiveDeliveryScreen',
+);
+const OrdersHistoryStackScreen = createScreenLoader(
+  () => require('../features/orders/screens/OrdersHistoryScreen'),
+  'OrdersHistoryScreen',
+);
+const EarningsTabScreen = createScreenLoader(
+  () => require('../features/earnings/screens/EarningsScreen'),
+  'EarningsScreen',
+);
+const DriverProfileTabScreen = createScreenLoader(
+  () => require('../features/profile/screens/DriverProfileScreen'),
+  'DriverProfileScreen',
+);
+
 function OrdersStackNav() {
   return (
     <OrdersStack.Navigator screenOptions={{ headerShown: false }}>
-      <OrdersStack.Screen name={DRIVER_ROUTES.ORDERS} component={OrdersHistoryScreen} />
+      <OrdersStack.Screen name={DRIVER_ROUTES.ORDERS} component={OrdersHistoryStackScreen} />
     </OrdersStack.Navigator>
   );
 }
@@ -105,7 +145,7 @@ export function DriverTabs() {
     >
       <Tab.Screen
         name={TAB_ROUTES.AVAILABLE_ORDERS_TAB}
-        component={AvailableOrdersScreen}
+        component={AvailableOrdersTabScreen}
         options={{
           tabBarLabel: t('tabs.home'),
           tabBarIcon: ({ focused, color, size }) => (
@@ -115,7 +155,7 @@ export function DriverTabs() {
       />
       <Tab.Screen
         name={TAB_ROUTES.ACTIVE_DELIVERY_TAB}
-        component={activeOrderId ? ActiveDeliveryScreen : AvailableOrdersScreen}
+        component={activeOrderId ? ActiveDeliveryTabScreen : AvailableOrdersTabScreen}
         options={{
           tabBarLabel: t('driver.tabs.delivery', 'Delivery'),
           tabBarIcon: ({ focused, color, size }) => (
@@ -135,7 +175,7 @@ export function DriverTabs() {
       />
       <Tab.Screen
         name={TAB_ROUTES.EARNINGS_TAB}
-        component={EarningsScreen}
+        component={EarningsTabScreen}
         options={{
           tabBarLabel: t('driver.tabs.earnings', 'Earnings'),
           tabBarIcon: ({ focused, color, size }) => (
@@ -145,7 +185,7 @@ export function DriverTabs() {
       />
       <Tab.Screen
         name={TAB_ROUTES.PROFILE_TAB}
-        component={DriverProfileScreen}
+        component={DriverProfileTabScreen}
         options={{
           tabBarLabel: t('tabs.profile'),
           tabBarIcon: ({ focused, color, size }) => (

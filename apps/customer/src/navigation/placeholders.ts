@@ -39,7 +39,7 @@ export { TransactionsScreen } from '../features/wallet/screens/TransactionsScree
 export { ProfileScreen } from '../features/profile/screens/ProfileScreen';
 export { EditProfileScreen } from '../features/profile/screens/EditProfileScreen';
 export { AddressesScreen } from '../features/profile/screens/AddressesScreen';
-export { AddAddressScreen } from '../features/profile/screens/AddAddressScreen';
+export { LocationPickerScreen as AddAddressScreen } from '../features/profile/LocationPicker';
 export { LanguageScreen } from '../features/profile/screens/LanguageScreen';
 export { AppearanceScreen } from '../features/profile/screens/AppearanceScreen';
 export { TermsScreen } from '../features/profile/screens/TermsScreen';
@@ -48,8 +48,12 @@ export { NotificationsScreen } from '../features/notifications/screens/Notificat
 export { PaymentMethodsScreen } from '../features/profile/screens/PaymentMethodsScreen';
 export { AddPaymentMethodScreen } from '../features/profile/screens/AddPaymentMethodScreen';
 export { InviteFriendsScreen } from '../features/profile/screens/InviteFriendsScreen';
+export { PromotionsScreen } from '../features/promotions/screens/PromotionsScreen';
+export { GetMorePromotionsScreen } from '../features/promotions/screens/GetMorePromotionsScreen';
 
 // Modals
 export { CartModal } from '../features/cart/screens/CartModal';
 export { CheckoutScreen as CheckoutModal } from '../features/checkout/screens/CheckoutScreen';
 export { CustomOrderScreen as CustomOrderModal } from '../features/custom-order/screens/CustomOrderScreen';
+export { CustomOrderMapPickerScreen } from '../features/custom-order/components/MapPickerModal';
+export { PaymentWebViewScreen } from '../features/payment/PaymentWebView';

@@ -1,7 +1,7 @@
 import React from 'react';
 import { TextInput, TouchableOpacity, View } from 'react-native';
 import { useTheme } from '@dawwar/theme';
-import { Icon } from '../../atoms';
+import { Icon } from '../../atoms/Icon';
 import { createStyles } from './styles';
 import type { SearchBarProps } from './types';
 

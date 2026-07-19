@@ -91,6 +91,7 @@ export function MerchantDetailScreen() {
         quantity={ctrl.getProductQuantity(item.id)}
         onAdd={() => ctrl.handleAddProduct(item)}
         onRemove={() => ctrl.handleRemoveProduct(item.id)}
+        onPress={() => ctrl.handleProductPress(item.id)}
       />
     ),
     [ctrl.getProductQuantity, ctrl.handleAddProduct, ctrl.handleRemoveProduct]

@@ -13,6 +13,7 @@ export function useMerchantDetail(id: string) {
   return useQuery({
     queryKey: MERCHANT_KEYS.detail(id),
     queryFn: () => merchantApi.getById(id),
+    enabled: !!id,
     staleTime: 2 * 60_000,
     select: (res) => unwrap(res),
   });
@@ -22,6 +23,7 @@ export function useMerchantProducts(merchantId: string) {
   return useQuery({
     queryKey: MERCHANT_KEYS.products(merchantId),
     queryFn: () => merchantApi.getProducts(merchantId),
+    enabled: !!merchantId,
     staleTime: 2 * 60_000,
     select: (res) => unwrap(res),
   });

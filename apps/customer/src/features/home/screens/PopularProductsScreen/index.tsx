@@ -19,6 +19,7 @@ export function PopularProductsScreen() {
       <View style={styles.gridItem}>
         <ProductCard
           product={item}
+          onPress={() => ctrl.handleProductPress(item.id)}
           onAdd={() => ctrl.handleProductAdd(item)}
           isLiked={ctrl.isProductLiked(item.id)}
           onToggleLike={() => ctrl.handleToggleFavorite(item.id)}
@@ -40,8 +41,10 @@ export function PopularProductsScreen() {
       renderItem={renderItem}
       keyExtractor={(item) => item.id}
       numColumns={2}
-      isLoading={ctrl.isLoading}
-      isError={ctrl.isError}
+      state={{
+        isLoading: ctrl.isLoading,
+        isError: ctrl.isError,
+      }}
       onRetry={ctrl.refetch}
       onRefresh={ctrl.refetch}
       refreshing={false}

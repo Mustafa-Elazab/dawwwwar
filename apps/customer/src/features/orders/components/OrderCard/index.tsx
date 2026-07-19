@@ -1,5 +1,5 @@
 import React from 'react';
-import { Image, TouchableOpacity, View } from 'react-native';
+import { I18nManager, Image, TouchableOpacity, View } from 'react-native';
 import { useTheme } from '@dawwar/theme';
 import { Text, Badge, Icon } from '@dawwar/ui';
 import { useTranslation } from '@dawwar/i18n';
@@ -42,6 +42,7 @@ export const OrderCard = React.memo(function OrderCard({ order, onPress }: Order
             label={t(`tracking.status.${order.status}`)}
             variant={getStatusVariant(order.status)}
             size="sm"
+            style={styles.statusBadge}
           />
         </View>
 
@@ -56,7 +57,11 @@ export const OrderCard = React.memo(function OrderCard({ order, onPress }: Order
         </View>
       </View>
       <View style={styles.chevron}>
-        <Icon name="chevron-right" size={22} color={colors.textTertiary} />
+        <Icon
+          name={I18nManager.isRTL ? 'chevron-left' : 'chevron-right'}
+          size={22}
+          color={colors.textTertiary}
+        />
       </View>
     </TouchableOpacity>
   );

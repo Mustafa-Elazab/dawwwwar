@@ -15,7 +15,7 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { categoriesApi } from '../../../categories/core/api';
 import { useMerchantDetail, useMerchantProducts } from '../../core/hooks';
-import { TAB_ROUTES } from '../../../../navigation/routes';
+import { HOME_ROUTES, TAB_ROUTES } from '../../../../navigation/routes';
 import type { MerchantDetailNavProp, MerchantDetailRouteProp, MerchantTab } from './types';
 import type { Category, Product } from '@dawwar/types';
 
@@ -133,6 +133,13 @@ export function useController() {
     [dispatch, cartItems],
   );
 
+  const handleProductPress = useCallback(
+    (productId: string) => {
+      navigation.navigate(HOME_ROUTES.PRODUCT_DETAIL, { productId });
+    },
+    [navigation],
+  );
+
   const handleCartBarPress = useCallback(() => {
     navigation.getParent()?.navigate(TAB_ROUTES.BASKET_TAB as never);
   }, [navigation]);
@@ -152,6 +159,7 @@ export function useController() {
     getProductQuantity,
     handleAddProduct,
     handleRemoveProduct,
+    handleProductPress,
     handleCartBarPress,
     handleBack: () => navigation.goBack(),
     showCartBar,

@@ -12,6 +12,6 @@ export const createStyles = (colors: AppColors) =>
     value: {
       ...typography.label,
       color: colors.text,
-      marginLeft: space.sm,
+      marginStart: space.sm,
     },
   });

@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from '@dawwar/theme';
 import { getStoredLanguage } from '@dawwar/i18n';
 import Toast from 'react-native-toast-message';
-import { AppErrorBoundary } from '@dawwar/ui';
+import { AppErrorBoundary } from '../../../../packages/ui/src/templates/AppErrorBoundary';
 import { ApiClientProvider } from '@dawwar/api-client';
 import { store, persistor } from '../store';
 import { storage, StorageKeys } from '../core/storage/mmkv';

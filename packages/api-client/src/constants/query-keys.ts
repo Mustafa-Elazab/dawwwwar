@@ -20,6 +20,9 @@ export const QUERY_KEYS = {
     detail: (id: string) => ['merchants', 'detail', id] as const,
     products: (merchantId: string) => ['merchants', 'products', merchantId] as const,
   },
+  products: {
+    detail: (id: string) => ['products', 'detail', id] as const,
+  },
   categories: {
     all: ['categories', 'all'] as const,
   },
@@ -27,6 +30,7 @@ export const QUERY_KEYS = {
     profile: ['driver', 'profile'] as const,
     earnings: ['driver', 'earnings'] as const,
     wallet: ['driver', 'wallet'] as const,
+    transactions: ['driver', 'transactions'] as const,
   },
   admin: {
     merchants: (status?: string) => ['admin', 'merchants', { status }] as const,

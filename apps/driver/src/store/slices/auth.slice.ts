@@ -1,5 +1,6 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import type { User, Role } from '@dawwar/types';
+import { storage, StorageKeys } from '../../core/storage/mmkv';
 
 export interface AuthState {
   user: User | null;
@@ -21,12 +22,17 @@ export const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    setAuth: (state, action: PayloadAction<{ user: User; token: string }>) => {
+    setAuth: (
+      state,
+      action: PayloadAction<{ user: User; accessToken: string; refreshToken: string }>,
+    ) => {
       state.user = action.payload.user;
       state.isAuthenticated = true;
       state.isLoading = false;
       state.isApproved = action.payload.user.isApproved ?? false;
       state.role = action.payload.user.role;
+      storage.set(StorageKeys.ACCESS_TOKEN, action.payload.accessToken);
+      storage.set(StorageKeys.REFRESH_TOKEN, action.payload.refreshToken);
     },
     logout: (state) => {
       state.user = null;
@@ -34,6 +40,8 @@ export const authSlice = createSlice({
       state.isLoading = false;
       state.isApproved = false;
       state.role = null;
+      storage.delete(StorageKeys.ACCESS_TOKEN);
+      storage.delete(StorageKeys.REFRESH_TOKEN);
     },
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.isLoading = action.payload;
@@ -45,6 +53,8 @@ export const authSlice = createSlice({
     },
     setUser: (state, action: PayloadAction<User>) => {
       state.user = action.payload;
+      state.isAuthenticated = true;
+      state.isLoading = false;
       state.isApproved = action.payload.isApproved ?? false;
       state.role = action.payload.role;
     },

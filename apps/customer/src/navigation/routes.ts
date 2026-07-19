@@ -10,6 +10,7 @@ export const AUTH_ROUTES = {
 // ─── Customer Tab Names ───────────────────────────────────
 export const TAB_ROUTES = {
   HOME_TAB: 'HomeTab',
+  CATEGORY_TAB: 'CategoryTab',
   BASKET_TAB: 'BasketTab',
   ORDERS_TAB: 'OrdersTab',
   LIKED_TAB: 'LikedTab',
@@ -51,6 +52,10 @@ export const WALLET_ROUTES = {
   TRANSACTIONS: 'TransactionsScreen',
 } as const;
 
+export const PAYMENT_ROUTES = {
+  PAYMENT_WEBVIEW: 'PaymentWebView',
+} as const;
+
 // ─── Profile Stack ────────────────────────────────────────
 export const PROFILE_ROUTES = {
   PROFILE: 'ProfileScreen',
@@ -65,10 +70,13 @@ export const PROFILE_ROUTES = {
   PAYMENT_METHODS: 'PaymentMethodsScreen',
   ADD_PAYMENT_METHOD: 'AddPaymentMethodScreen',
   INVITE_FRIENDS: 'InviteFriendsScreen',
+  PROMOTIONS: 'PromotionsScreen',
+  GET_MORE_PROMOTIONS: 'GetMorePromotionsScreen',
 } as const;
 
 // ─── Modals (presented over tabs) ────────────────────────
 export const MODAL_ROUTES = {
   CHECKOUT: 'CheckoutModal',
   CUSTOM_ORDER: 'CustomOrderModal',
+  CUSTOM_ORDER_MAP_PICKER: 'CustomOrderMapPickerScreen',
 } as const;

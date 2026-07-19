@@ -16,6 +16,7 @@ import Toast from 'react-native-toast-message';
 import { socketManager } from '../../../../core/socket';
 import { USE_MOCK_API } from '../../../../core/api/config';
 import { locationService } from '../../../../core/location/location.service';
+import type { Order } from '@dawwar/types';
 
 export function useController() {
   const { t } = useTranslation();
@@ -46,7 +47,7 @@ export function useController() {
     socketManager.connect();
 
     // Listen for new orders
-    const handleNewOrder = (order: any) => {
+    const handleNewOrder = (order: Order) => {
       console.log('[Socket] New available order:', order.orderNumber);
       void queryClient.invalidateQueries({ queryKey: ['driver', 'available-orders'] });
       Toast.show({ type: 'info', text1: t('driver.new_order_alert'), text2: `#${order.orderNumber}` });
@@ -76,7 +77,7 @@ export function useController() {
     onSuccess: (res, orderId) => {
       dispatch(setActiveOrder(orderId));
       // Navigate to Active Delivery tab
-      (navigation as any).navigate(TAB_ROUTES.ACTIVE_DELIVERY_TAB, {
+      navigation.navigate(TAB_ROUTES.ACTIVE_DELIVERY_TAB, {
         screen: DRIVER_ROUTES.ACTIVE_DELIVERY,
         params: { orderId },
       });
@@ -96,7 +97,7 @@ export function useController() {
       // Request location permission first
       const granted = await locationService.requestPermission();
       if (!granted) {
-        Toast.show({ type: 'error', text1: 'Location permission required to go online' });
+        Toast.show({ type: 'error', text1: t('driver.location_permission_required') });
         return;
       }
       dispatch(setLocationPermission(true));
@@ -105,7 +106,7 @@ export function useController() {
       locationService.stopWatching();
       dispatch(setOnline(false));
     }
-  }, [isOnline, dispatch]);
+  }, [isOnline, dispatch, t]);
 
   const handleAccept = useCallback(
     (orderId: string) => {

@@ -25,8 +25,8 @@ export const createStyles = (colors: AppColors) =>
     gradient: {
       position: 'absolute',
       bottom: 0,
-      left: 0,
-      right: 0,
+      start: 0,
+      end: 0,
       height: '40%',
       backgroundColor: 'rgba(0,0,0,0.1)',
     },

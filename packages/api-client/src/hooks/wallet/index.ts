@@ -2,11 +2,12 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useApiClient } from '../../client/provider';
 import { QUERY_KEYS } from '../../constants/query-keys';
 
-export function useWallet() {
+export function useWallet(options?: { enabled?: boolean }) {
   const { wallet } = useApiClient();
   return useQuery({
     queryKey: QUERY_KEYS.wallet.balance,
     queryFn: () => wallet.getWallet(),
+    enabled: options?.enabled ?? true,
   });
 }
 

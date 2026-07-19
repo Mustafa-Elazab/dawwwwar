@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, TouchableOpacity, I18nManager } from 'react-native';
+import { View, TouchableOpacity } from 'react-native';
 import { useTranslation } from '@dawwar/i18n';
 import { ScrollScreenTemplate, Text, Input, Button, Divider, Icon } from '@dawwar/ui';
 import { useTheme } from '@dawwar/theme';
@@ -31,6 +31,10 @@ export function CheckoutScreen() {
         title: t('checkout.title'),
         onBackPress: ctrl.handleBack,
       }}
+      state={{
+        isLoading: ctrl.isLoading,
+        isError: ctrl.isError,
+      }}
       footer={
         <View style={styles.footer}>
           <Button
@@ -51,7 +55,7 @@ export function CheckoutScreen() {
       {/* Delivery Address */}
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>{t('checkout.delivery_title')}</Text>
+          <Text style={styles.sectionTitle}>{t('checkout.delivery_title')}</Text>
 
           {/* <TouchableOpacity onPress={() => navigation.navigate('CustomerTabs', { screen: 'ProfileTab', params: { screen: 'AddAddressScreen', params: {} } })}>
             <Text variant="label" color={colors.primary} style={{ fontWeight: '800' }}>
@@ -60,25 +64,34 @@ export function CheckoutScreen() {
           </TouchableOpacity> */}
         </View>
         <View style={styles.addressRow}>
-          <View style={styles.iconCircle}>
-            <Icon name={ctrl.address?.label?.toLowerCase() === 'home' ? 'home' : 'map-marker'} size={22} color={colors.primary} />
-          </View>
           <View style={{ flex: 1 }}>
             <Text style={styles.addressLabel}>{displayLabel}</Text>
             <Text style={styles.addressText} numberOfLines={2}>{ctrl.address?.address ?? t('checkout.add_address_hint')}</Text>
+          </View>
+          <View style={styles.iconCircle}>
+            <Icon name={ctrl.address?.label?.toLowerCase() === 'home' ? 'home' : 'map-marker'} size={22} color={colors.primary} />
           </View>
         </View>
       </View>
 
       {/* Payment Method */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t('checkout.payment_title')}</Text>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>{t('checkout.payment_title')}</Text>
+          <Text style={styles.selectedPaymentLabel} numberOfLines={1}>
+            {ctrl.selectedPaymentLabel}
+          </Text>
+        </View>
 
         {/* Cash */}
         <TouchableOpacity
           style={styles.paymentOption}
           onPress={() => ctrl.setPaymentMethod(PaymentMethod.CASH)}
         >
+          <View style={styles.paymentInfo}>
+            <Text style={styles.paymentLabel}>{t('checkout.cash')}</Text>
+            <Text style={styles.paymentSub}>{t('checkout.cash_sub')}</Text>
+          </View>
           <View
             style={[
               styles.radio,
@@ -87,46 +100,14 @@ export function CheckoutScreen() {
           >
             {ctrl.paymentMethod === PaymentMethod.CASH && <View style={styles.radioDot} />}
           </View>
-          <View style={styles.paymentInfo}>
-            <Text style={styles.paymentLabel}>{t('checkout.cash')}</Text>
-            <Text style={styles.paymentSub}>{t('checkout.cash_sub')}</Text>
-          </View>
         </TouchableOpacity>
 
-        {/* Wallet */}
-        <TouchableOpacity
-          style={styles.paymentOption}
-          onPress={() => ctrl.setPaymentMethod(PaymentMethod.WALLET)}
-        >
-          <View
-            style={[
-              styles.radio,
-              ctrl.paymentMethod === PaymentMethod.WALLET && styles.radioSelected,
-            ]}
-          >
-            {ctrl.paymentMethod === PaymentMethod.WALLET && <View style={styles.radioDot} />}
-          </View>
-          <View style={[styles.paymentInfo, { flex: 1 }]}>
-            <Text style={styles.paymentLabel}>{t('checkout.wallet')}</Text>
-            <Text style={styles.paymentSub}>
-              {t('checkout.wallet_balance', { amount: ctrl.walletBalance })}
-            </Text>
-            {ctrl.isWalletInsufficient && (
-              <Text style={styles.paymentError}>
-                {t('checkout.wallet_low', {
-                  amount: ctrl.total - ctrl.walletBalance,
-                })}
-              </Text>
-            )}
-          </View>
-        </TouchableOpacity>
       </View>
 
       {/* Order notes with character counter */}
       <View style={styles.section}>
         <View style={styles.notesHeader}>
-        <Text style={styles.sectionTitle}>{t('checkout.notes_label')}</Text>
-
+          <Text style={styles.sectionTitle}>{t('checkout.notes_label')}</Text>
           <Text style={styles.charCount}>{ctrl.notes.length}/200</Text>
         </View>
         <Input
@@ -150,7 +131,7 @@ export function CheckoutScreen() {
         </View>
         <View style={styles.summaryRow}>
           <Text style={styles.summaryLabel}>{t('cart.delivery_fee')}</Text>
-          <View style={{ alignItems: 'flex-end' }}>
+          <View style={styles.deliveryFeeValue}>
             {ctrl.isFree ? (
               <Text style={[styles.summaryValue, { color: colors.success }]}>
                 {t('checkout.free_delivery', 'Free Delivery')} 🎉

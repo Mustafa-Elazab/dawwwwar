@@ -14,7 +14,11 @@ import Geolocation from '@react-native-community/geolocation';
 import { useTranslation } from '@dawwar/i18n';
 import { Text, Icon, Button, ScreenTemplate } from '@dawwar/ui';
 import { useTheme, space, typography, radius, shadows } from '@dawwar/theme';
-import { geocodingApi, GeocodingResult } from '../../core/api/geocoding';
+import {
+  geocodingApi,
+  GeocodingResult,
+  REVERSE_GEOCODE_MIN_INTERVAL_MS,
+} from '../../core/api/geocoding';
 import { useAppDispatch, useAppSelector } from '../../../../store/hooks';
 import { selectLocation, setLocation, setSelectedAddressId } from '../../../../store/slices/location.slice';
 
@@ -49,17 +53,33 @@ export function LocationPickerScreen() {
   const [searchResults, setSearchResults] = useState<GeocodingResult[]>([]);
 
   const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const reverseTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const reverseRequestId = useRef(0);
 
   const handleReverseGeocode = useCallback(async (lat: number, lon: number) => {
+    const requestId = reverseRequestId.current + 1;
+    reverseRequestId.current = requestId;
     setIsGeocoding(true);
     const addr = await geocodingApi.reverse(lat, lon, i18n.language);
-    setAddress(addr);
-    setIsGeocoding(false);
+    if (requestId === reverseRequestId.current) {
+      setAddress(addr);
+      setIsGeocoding(false);
+    }
   }, [i18n.language]);
+
+  const scheduleReverseGeocode = useCallback(
+    (lat: number, lon: number) => {
+      if (reverseTimeout.current) clearTimeout(reverseTimeout.current);
+      reverseTimeout.current = setTimeout(() => {
+        void handleReverseGeocode(lat, lon);
+      }, REVERSE_GEOCODE_MIN_INTERVAL_MS);
+    },
+    [handleReverseGeocode],
+  );
 
   const handleRegionChangeComplete = (newRegion: Region) => {
     setRegion(newRegion);
-    void handleReverseGeocode(newRegion.latitude, newRegion.longitude);
+    scheduleReverseGeocode(newRegion.latitude, newRegion.longitude);
   };
 
   const handleSearch = useCallback(
@@ -84,6 +104,14 @@ export function LocationPickerScreen() {
     void handleReverseGeocode(initialRegion.latitude, initialRegion.longitude);
   }, [handleReverseGeocode, initialRegion.latitude, initialRegion.longitude]);
 
+  useEffect(
+    () => () => {
+      if (searchTimeout.current) clearTimeout(searchTimeout.current);
+      if (reverseTimeout.current) clearTimeout(reverseTimeout.current);
+    },
+    [],
+  );
+
   const handleSelectSearch = useCallback(
     (item: GeocodingResult) => {
       const lat = parseFloat(item.lat);
@@ -96,6 +124,7 @@ export function LocationPickerScreen() {
       const newRegion = { latitude: lat, longitude: lon, latitudeDelta: 0.01, longitudeDelta: 0.01 };
       setRegion(newRegion);
       mapRef.current?.animateToRegion(newRegion, 1000);
+      if (reverseTimeout.current) clearTimeout(reverseTimeout.current);
       void handleReverseGeocode(lat, lon);
     },
     [handleReverseGeocode],
@@ -120,6 +149,7 @@ export function LocationPickerScreen() {
         const newRegion = { latitude, longitude, latitudeDelta: 0.01, longitudeDelta: 0.01 };
         setRegion(newRegion);
         mapRef.current?.animateToRegion(newRegion, 1000);
+        if (reverseTimeout.current) clearTimeout(reverseTimeout.current);
         void handleReverseGeocode(latitude, longitude);
       },
       () => undefined,
@@ -230,8 +260,8 @@ const styles = StyleSheet.create({
   centerPinWrapper: {
     position: 'absolute',
     top: '50%',
-    left: '50%',
-    marginLeft: -24,
+    start: '50%',
+    transform: [{ translateX: -24 }],
     marginTop: -48,
     zIndex: 1,
   },
@@ -300,8 +330,8 @@ const styles = StyleSheet.create({
   footer: {
     position: 'absolute',
     bottom: 0,
-    left: 0,
-    right: 0,
+    start: 0,
+    end: 0,
     padding: space.lg,
     borderTopLeftRadius: radius.xl,
     borderTopRightRadius: radius.xl,

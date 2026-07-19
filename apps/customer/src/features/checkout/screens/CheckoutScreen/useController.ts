@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from 'react';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from '@dawwar/i18n';
 import { useAppSelector, useAppDispatch } from '../../../../store/hooks';
@@ -14,13 +14,16 @@ import { selectLocation } from '../../../../store/slices/location.slice';
 import { 
   usePlaceOrder, 
   useAddresses, 
-  useWallet, 
   QUERY_KEYS 
 } from '@dawwar/api-client';
 import { ORDER_ROUTES } from '../../../../navigation/routes';
 import { PaymentMethod } from '@dawwar/types';
 import api from '../../../../core/api/client';
 import { useQuery } from '@tanstack/react-query';
+import {
+  getPaymentMethodLabelKey,
+  writeSelectedPaymentMethod,
+} from '../../../profile/core/paymentMethods';
 
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { RootParamList } from '../../../../navigation/types';
@@ -42,11 +45,8 @@ export function useController() {
 
   // Real Data Hooks
   const { data: addressesRes } = useAddresses(user?.id);
-  const { data: walletRes } = useWallet();
   
   const addresses = addressesRes ? unwrap<any[]>(addressesRes) : [];
-  const wallet = walletRes ? unwrap<any>(walletRes) : undefined;
-  const walletBalance = Number(wallet?.balance || 0);
 
   // Match global selected location, or fallback to default
   const selectedAddress = useMemo(() => {
@@ -59,6 +59,13 @@ export function useController() {
 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(PaymentMethod.CASH);
   const [notes, setNotes] = useState('');
+
+  useFocusEffect(
+    useCallback(() => {
+      setPaymentMethod(PaymentMethod.CASH);
+      writeSelectedPaymentMethod('cash');
+    }, []),
+  );
 
   // Fetch delivery fee dynamically
   const { data: feeRes } = useQuery({
@@ -77,10 +84,13 @@ export function useController() {
 
   const deliveryFee = feeRes?.fee ?? 0;
   const total = subtotal + deliveryFee;
-  const isWalletInsufficient =
-    paymentMethod === PaymentMethod.WALLET && walletBalance < total;
 
   const placeOrderMutation = usePlaceOrder();
+
+  const handleSetPaymentMethod = useCallback((_method: PaymentMethod) => {
+    setPaymentMethod(PaymentMethod.CASH);
+    writeSelectedPaymentMethod('cash');
+  }, []);
 
   const handlePlaceOrder = useCallback(async () => {
     // Determine delivery coordinates safely
@@ -93,7 +103,7 @@ export function useController() {
     try {
       const res = await placeOrderMutation.mutateAsync({
         merchantId: merchantId ?? '',
-        paymentMethod,
+        paymentMethod: PaymentMethod.CASH,
         deliveryAddress: deliveryAddr,
         deliveryLatitude: deliveryLat,
         deliveryLongitude: deliveryLng,
@@ -103,8 +113,10 @@ export function useController() {
         items: items.map((i) => ({
           productId: i.productId,
           productName: i.nameAr || i.name,
+          productNameAr: i.nameAr,
           quantity: i.quantity,
           price: Number(i.price),
+          selectedModifiers: i.selectedModifiers,
         })),
       });
 
@@ -122,10 +134,10 @@ export function useController() {
     } catch {
       // Error handled by mutation or global interceptor
     }
-  }, [selectedAddress, location, user, merchantId, paymentMethod, subtotal, deliveryFee, notes, items, placeOrderMutation, dispatch, queryClient, navigation]);
+  }, [selectedAddress, location, user, merchantId, subtotal, deliveryFee, notes, items, placeOrderMutation, dispatch, queryClient, navigation]);
 
   const isButtonDisabled =
-    items.length === 0 || (!selectedAddress && !location.latitude) || isWalletInsufficient || placeOrderMutation.isPending;
+    items.length === 0 || (!selectedAddress && !location.latitude) || placeOrderMutation.isPending;
 
   return {
     items,
@@ -135,11 +147,12 @@ export function useController() {
     isFree: feeRes?.isFree,
     total,
     paymentMethod,
-    setPaymentMethod,
+    setPaymentMethod: handleSetPaymentMethod,
+    selectedPaymentLabel: t(getPaymentMethodLabelKey('cash')),
     notes,
     setNotes,
-    walletBalance,
-    isWalletInsufficient,
+    walletBalance: 0,
+    isWalletInsufficient: false,
     address: selectedAddress || { label: 'map', address: location.currentAddress || t('checkout.add_address_hint') },
     isLoading: placeOrderMutation.isPending,
     isError: placeOrderMutation.isError,

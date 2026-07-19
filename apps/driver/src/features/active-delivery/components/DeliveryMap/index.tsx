@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { StyleSheet } from 'react-native';
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import MapView, { Marker } from 'react-native-maps';
+import { mapProvider } from '../../../../core/maps/provider';
 import type { DeliveryMapProps } from './types';
 
 export function DeliveryMap({
@@ -29,7 +30,7 @@ export function DeliveryMap({
     <MapView
       ref={mapRef}
       style={styles.map}
-      provider={PROVIDER_GOOGLE}
+      provider={mapProvider}
       initialRegion={{
         latitude: driverLatitude,
         longitude: driverLongitude,

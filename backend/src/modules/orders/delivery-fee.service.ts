@@ -6,6 +6,8 @@ export interface DeliveryFeeConfig {
   longDistanceSurcharge: number;
   longDistanceThresholdKm: number;
   maxDistanceKm: number;
+  minFee?: number;
+  maxFee?: number;
   freeDeliveryThreshold?: number; // order total above this = free delivery
 }
 
@@ -16,6 +18,8 @@ const DEFAULT_CONFIG: DeliveryFeeConfig = {
   longDistanceSurcharge: 10,
   longDistanceThresholdKm: 7,
   maxDistanceKm: 30,
+  minFee: 15,
+  maxFee: 120,
   freeDeliveryThreshold: undefined, // set to e.g. 300 EGP for free delivery promo
 };
 
@@ -71,6 +75,13 @@ export class DeliveryFeeService {
 
     if (distanceKm > config.longDistanceThresholdKm) {
       fee += config.longDistanceSurcharge;
+    }
+
+    if (config.minFee != null) {
+      fee = Math.max(fee, config.minFee);
+    }
+    if (config.maxFee != null) {
+      fee = Math.min(fee, config.maxFee);
     }
 
     // Round to nearest 0.5 EGP for clean display

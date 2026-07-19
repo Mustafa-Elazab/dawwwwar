@@ -30,7 +30,7 @@ export function HomeScreenHeader({
           style={styles.locationBlock}
           onPress={onLocationPress}
           activeOpacity={0.7}
-          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+          hitSlop={12}
         >
           <Text style={styles.deliveringLabel}>{deliverToLabel}</Text>
           <View style={styles.locationRow}>

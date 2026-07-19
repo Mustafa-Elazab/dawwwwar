@@ -15,14 +15,14 @@ import { useController } from './useController';
 import { createStyles } from './styles';
 
 const MAP_ROADS = [
-  { left: '-18%', top: '8%', rotate: '-18deg' },
-  { left: '-12%', top: '24%', rotate: '-18deg' },
-  { left: '-22%', top: '42%', rotate: '-18deg' },
-  { left: '-8%', top: '61%', rotate: '-18deg' },
-  { left: '-18%', top: '78%', rotate: '-18deg' },
-  { left: '24%', top: '-12%', rotate: '68deg' },
-  { left: '46%', top: '-8%', rotate: '68deg' },
-  { left: '68%', top: '-12%', rotate: '68deg' },
+  { start: '-18%', top: '8%', rotate: '-18deg' },
+  { start: '-12%', top: '24%', rotate: '-18deg' },
+  { start: '-22%', top: '42%', rotate: '-18deg' },
+  { start: '-8%', top: '61%', rotate: '-18deg' },
+  { start: '-18%', top: '78%', rotate: '-18deg' },
+  { start: '24%', top: '-12%', rotate: '68deg' },
+  { start: '46%', top: '-8%', rotate: '68deg' },
+  { start: '68%', top: '-12%', rotate: '68deg' },
 ] as const;
 
 export function TrackingScreen() {
@@ -52,7 +52,7 @@ export function TrackingScreen() {
               style={[
                 styles.mapRoad,
                 {
-                  left: road.left,
+                  start: road.start,
                   top: road.top,
                   transform: [{ rotate: road.rotate }],
                 },

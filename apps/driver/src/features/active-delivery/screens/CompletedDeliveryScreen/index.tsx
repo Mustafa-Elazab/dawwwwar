@@ -1,7 +1,9 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
-import { ScreenTemplate, Text, Button } from '@dawwar/ui';
+import { DriverButton as Button } from '../../../../components/DriverButton';
+import { Text } from '../../../../../../../packages/ui/src/atoms/Text';
+import { ScreenTemplate } from '../../../../../../../packages/ui/src/templates/ScreenTemplate';
 import { useTheme } from '@dawwar/theme';
 import { space, typography } from '@dawwar/theme';
 import { useTranslation } from '@dawwar/i18n';

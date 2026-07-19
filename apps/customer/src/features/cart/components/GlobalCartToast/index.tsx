@@ -49,7 +49,7 @@ export function GlobalCartToast() {
         onPress={() => navigation.navigate('CustomerTabs', { screen: TAB_ROUTES.BASKET_TAB })}
         activeOpacity={0.9}
       >
-        <View style={styles.left}>
+        <View style={styles.leading}>
           <View style={styles.badge}>
             <Text style={styles.badgeText}>{count}</Text>
           </View>
@@ -65,8 +65,8 @@ const styles = StyleSheet.create({
   container: {
     position: 'absolute',
     bottom: 90, // Above tab bar
-    left: space.base,
-    right: space.base,
+    start: space.base,
+    end: space.base,
     zIndex: 1000,
   },
   toast: {
@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
     ...shadows.lg,
     elevation: 8,
   },
-  left: {
+  leading: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: space.sm,

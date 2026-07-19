@@ -1,6 +1,9 @@
 import React from 'react';
 import { View, FlatList } from 'react-native';
-import { TabScreenTemplate, Header, Text, LoadingSpinner } from '@dawwar/ui';
+import { Text } from '../../../../../../../packages/ui/src/atoms/Text';
+import { LoadingSpinner } from '../../../../../../../packages/ui/src/molecules/LoadingSpinner';
+import { Header } from '../../../../../../../packages/ui/src/organisms/Header';
+import { TabScreenTemplate } from '../../../../../../../packages/ui/src/templates/TabScreenTemplate';
 import { useTheme } from '@dawwar/theme';
 import { EarningsSummaryCard } from '../../components/EarningsSummaryCard';
 import { WeeklyChart } from '../../components/WeeklyChart';

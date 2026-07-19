@@ -21,16 +21,16 @@ const DAYS_AR = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأرب
 
 // ── Phase 2 real implementations ─────────────────────────────────────
 const realEarningsApi = {
-  getSummary: async (driverId: string) => {
-    const { data } = await api.get(`/driver/earnings?driverId=${driverId}`);
+  getSummary: async (): Promise<EarningsSummary> => {
+    const { data } = await api.get('/driver/earnings');
     return data;
   },
-  getTransactions: async (driverId: string) => {
-    const { data } = await api.get(`/driver/transactions?driverId=${driverId}`);
+  getTransactions: async (): Promise<WalletTransaction[]> => {
+    const { data } = await api.get('/driver/transactions');
     return data;
   },
-  getWalletBalance: async (driverId: string) => {
-    const { data } = await api.get(`/driver/wallet?driverId=${driverId}`);
+  getWalletBalance: async (): Promise<number> => {
+    const { data } = await api.get('/driver/wallet');
     return data;
   },
 };

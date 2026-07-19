@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { View, TextInput, TouchableOpacity } from 'react-native';
 import { launchCamera } from 'react-native-image-picker';
 import { useTheme } from '@dawwar/theme';
-import { Text, Icon, Button } from '@dawwar/ui';
+import { DriverButton as Button } from '../../../../components/DriverButton';
+import { Icon } from '../../../../../../../packages/ui/src/atoms/Icon';
+import { Text } from '../../../../../../../packages/ui/src/atoms/Text';
 import { useTranslation } from '@dawwar/i18n';
 import { createStyles } from './styles';
 import type { ShoppingFlowPanelProps } from './types';
-import { USE_MOCK_API } from '../../../../core/api/config';
-import apiClient from '../../../../core/api/client';
 
 const MAX_PHOTOS = 5;
 const OVERBUDGET_THRESHOLD = 1.2; // 20% over estimate triggers warning
@@ -81,7 +81,9 @@ export function ShoppingFlowPanel({
           />
         )}
         {photosSent && (
-          <Text variant="caption" color={colors.success}>✓ Photos sent to customer</Text>
+          <Text variant="caption" color={colors.success}>
+            {t('driver.photos_sent_short')}
+          </Text>
         )}
       </View>
 
@@ -89,7 +91,10 @@ export function ShoppingFlowPanel({
       <View>
         <Text style={styles.stepTitle}>{t('driver.actual_amount')}</Text>
         <Text style={styles.stepSubtitle}>
-          Estimated: {estimatedBudget} {t('common.egp')}
+          {t('driver.estimated_budget', {
+            amount: estimatedBudget,
+            currency: t('common.egp'),
+          })}
         </Text>
         <View style={styles.amountRow}>
           <TextInput
@@ -106,7 +111,7 @@ export function ShoppingFlowPanel({
           <View style={styles.warningBox}>
             <Icon name="alert" size={16} color={colors.warning} />
             <Text style={styles.warningText}>
-              Amount is over 20% above estimate. Customer approval may be needed.
+              {t('driver.over_budget_warning')}
             </Text>
           </View>
         )}
@@ -116,7 +121,7 @@ export function ShoppingFlowPanel({
       <View>
         <Text style={styles.stepTitle}>{t('driver.photo_receipt')}</Text>
         <Button
-          label={receiptUri ? '✓ Receipt captured' : t('driver.photo_receipt')}
+          label={receiptUri ? t('driver.receipt_captured') : t('driver.photo_receipt')}
           onPress={captureReceipt}
           variant={receiptUri ? 'secondary' : 'outline'}
           size="sm"

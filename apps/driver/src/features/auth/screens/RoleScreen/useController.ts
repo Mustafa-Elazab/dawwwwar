@@ -6,7 +6,6 @@ import { useAppDispatch, useAppSelector } from '../../../../store/hooks';
 import { updateUser, selectUser } from '../../../../store/slices/auth.slice';
 import { AUTH_ROUTES } from '../../../../navigation/routes';
 import { Role } from '@dawwar/types';
-import { useSelectRole } from '@dawwar/api-client';
 import type { RoleScreenNavProp, RoleOption } from './types';
 
 const ROLE_OPTIONS: RoleOption[] = [
@@ -40,7 +39,9 @@ export function useController() {
     null,
   );
 
-  const selectRoleMutation = useSelectRole();
+  const selectRoleMutation = useMutation({
+    mutationFn: async (role: 'CUSTOMER' | 'MERCHANT' | 'DRIVER') => role,
+  });
 
   const handleContinue = useCallback(async () => {
     if (!selectedRole) return;

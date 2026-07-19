@@ -9,6 +9,7 @@ export enum OrderStatus {
   PENDING = 'PENDING',
   ACCEPTED = 'ACCEPTED',
   READY = 'READY',             // regular order: prepared by merchant, waiting for pickup
+  WAITING_DRIVER_ACCEPT = 'WAITING_DRIVER_ACCEPT',
   DRIVER_ASSIGNED = 'DRIVER_ASSIGNED',
   AT_SHOP = 'AT_SHOP',         // custom order: driver arrived at shop
   SHOPPING = 'SHOPPING',       // custom order: driver is buying items
@@ -82,6 +83,7 @@ export const ACTIVE_ORDER_STATUSES: OrderStatus[] = [
   OrderStatus.PENDING,
   OrderStatus.ACCEPTED,
   OrderStatus.READY,
+  OrderStatus.WAITING_DRIVER_ACCEPT,
   OrderStatus.DRIVER_ASSIGNED,
   OrderStatus.AT_SHOP,
   OrderStatus.SHOPPING,

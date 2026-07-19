@@ -9,6 +9,7 @@ export function Text({
   color,
   align,
   numberOfLines,
+  ellipsizeMode,
   selectable = false,
   style,
   children,
@@ -27,10 +28,15 @@ export function Text({
       style={[
         styles.base,
         styles[variant],
-        { color: color ?? colors.text, textAlign: resolvedAlign },
+        {
+          color: color ?? colors.text,
+          textAlign: resolvedAlign,
+          writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr',
+        },
         style,
       ]}
       numberOfLines={numberOfLines}
+      ellipsizeMode={ellipsizeMode}
       selectable={selectable}
       onPress={onPress}
       testID={testID}

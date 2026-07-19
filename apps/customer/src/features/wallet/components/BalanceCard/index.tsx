@@ -17,10 +17,9 @@ export function BalanceCard({ balance }: BalanceCardProps) {
   return (
     <View style={styles.card}>
       <Text style={styles.label}>{t('wallet.balance_label')}</Text>
-      <View style={styles.amountRow}>
-        <Text style={styles.amount}>{Number(balance || 0).toFixed(2)}</Text>
-        <Text style={styles.currency}>{t('common.egp')}</Text>
-      </View>
+      <Text style={styles.amount}>
+        {Number(balance || 0).toFixed(2)} {t('common.egp')}
+      </Text>
     </View>
   );
 }

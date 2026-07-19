@@ -1,6 +1,10 @@
 import React from 'react';
 import { View, ScrollView } from 'react-native';
-import { ScreenTemplate, Header, LoadingSpinner, Badge, Text } from '@dawwar/ui';
+import { Badge } from '../../../../../../../packages/ui/src/atoms/Badge';
+import { Text } from '../../../../../../../packages/ui/src/atoms/Text';
+import { LoadingSpinner } from '../../../../../../../packages/ui/src/molecules/LoadingSpinner';
+import { Header } from '../../../../../../../packages/ui/src/organisms/Header';
+import { ScreenTemplate } from '../../../../../../../packages/ui/src/templates/ScreenTemplate';
 import { useTheme } from '@dawwar/theme';
 import { OrderType, OrderStatus } from '@dawwar/types';
 import { DeliveryMap } from '../../components/DeliveryMap';

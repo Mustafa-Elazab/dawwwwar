@@ -14,7 +14,7 @@ const REGULAR_STEPS: OrderStatus[] = [
 ];
 
 const CUSTOM_STEPS: OrderStatus[] = [
-  OrderStatus.PENDING,
+  OrderStatus.WAITING_DRIVER_ACCEPT,
   OrderStatus.DRIVER_ASSIGNED,
   OrderStatus.AT_SHOP,
   OrderStatus.SHOPPING,
@@ -34,7 +34,7 @@ export function StatusTimeline({ status, orderType }: StatusTimelineProps) {
 
   const stepLabels = isCustom
     ? [
-        t('tracking.status.PENDING'),
+        t('tracking.status.WAITING_DRIVER_ACCEPT'),
         t('tracking.status.DRIVER_ASSIGNED'),
         t('tracking.status.AT_SHOP'),
         t('tracking.status.SHOPPING'),

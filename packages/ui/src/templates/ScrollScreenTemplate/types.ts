@@ -1,6 +1,7 @@
 import type { StyleProp, ViewStyle, ScrollViewProps } from 'react-native';
 import type { ScreenTemplateProps } from '../ScreenTemplate/types';
 import type { EmptyStateProps } from '../../molecules/EmptyState/types';
+import type { ScreenStateConfig } from '../AppScreenTemplate/types';
 
 export interface ScrollScreenTemplateProps extends ScreenTemplateProps {
   isLoading?: boolean;
@@ -10,6 +11,7 @@ export interface ScrollScreenTemplateProps extends ScreenTemplateProps {
   onRetry?: () => void;
   isEmpty?: boolean;
   emptyState?: EmptyStateProps;
+  state?: ScreenStateConfig;
   refreshing?: boolean;
   onRefresh?: () => void;
   keyboardShouldPersistTaps?: ScrollViewProps['keyboardShouldPersistTaps'];

@@ -3,7 +3,8 @@ import { I18nManager, TouchableOpacity, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '@dawwar/theme';
 
-import { Text, Icon } from '../../atoms';
+import { Icon } from '../../atoms/Icon';
+import { Text } from '../../atoms/Text';
 import { createStyles } from './styles';
 import type { HeaderProps } from './types';
 
@@ -40,7 +41,7 @@ export function Header({
    * - no custom action/component passed on that side
    */
   const shouldShowBack =
-    type === 'default' && canGoBack;
+    type === 'default' && (canGoBack || !!onBackPress);
 
   const handleBack = () => {
     if (onBackPress) {

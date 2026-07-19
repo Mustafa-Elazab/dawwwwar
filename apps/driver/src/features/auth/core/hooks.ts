@@ -4,6 +4,11 @@ import { useAppDispatch } from '../../../store/hooks';
 import { setAuth } from '../../../store/slices/auth.slice';
 import { USE_MOCK_API } from '../../../core/api/config';
 import apiClient from '../../../core/api/client';
+import type { ApiResponse } from '@dawwar/types';
+import type { VerifyOtpResponse } from './response';
+
+const unwrap = (res: ApiResponse<VerifyOtpResponse> | VerifyOtpResponse): VerifyOtpResponse =>
+  res && typeof res === 'object' && 'data' in res ? res.data : res;
 
 export function useSendOtp() {
   return useMutation({
@@ -18,10 +23,12 @@ export function useVerifyOtp() {
     mutationFn: ({ phone, code }: { phone: string; code: string }) =>
       authApi.verifyOtp(phone, code),
     onSuccess: async (res) => {
+      const payload = unwrap(res);
       dispatch(
         setAuth({
-          user: res.user,
-          token: res.accessToken,
+          user: payload.user,
+          accessToken: payload.accessToken,
+          refreshToken: payload.refreshToken,
         }),
       );
 

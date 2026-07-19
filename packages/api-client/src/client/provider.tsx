@@ -12,6 +12,8 @@ import { ChatService } from '../services/chat.service';
 import { PayoutService } from '../services/payout.service';
 import { SupportService } from '../services/support.service';
 import { CategoriesService } from '../services/categories.service';
+import { ProductsService } from '../services/products.service';
+import { PromotionsService } from '../services/promotions.service';
 
 interface ApiClientContextValue {
   client: AxiosInstance;
@@ -28,6 +30,8 @@ interface ApiClientContextValue {
   payout: PayoutService;
   support: SupportService;
   categories: CategoriesService;
+  products: ProductsService;
+  promotions: PromotionsService;
 }
 
 const ApiClientContext = createContext<ApiClientContextValue | null>(null);
@@ -53,6 +57,8 @@ export const ApiClientProvider: React.FC<{
       payout: new PayoutService(client),
       support: new SupportService(client),
       categories: new CategoriesService(publicClient),
+      products: new ProductsService(publicClient),
+      promotions: new PromotionsService(client),
     }),
     [client, publicClient]
   );

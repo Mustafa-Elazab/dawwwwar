@@ -151,6 +151,17 @@ export class DriversService {
     return Number(wallet?.balance ?? 0);
   }
 
+  async getTransactions(userId: string): Promise<WalletTransactionEntity[]> {
+    const wallet = await this.walletRepo.findOne({ where: { userId } });
+    if (!wallet) return [];
+
+    return this.txRepo.find({
+      where: { walletId: wallet.id },
+      order: { createdAt: 'DESC' },
+      take: 100,
+    });
+  }
+
   /** Returns all online drivers — used by order assignment logic */
   async getOnlineDrivers(): Promise<DriverProfileEntity[]> {
     return this.driverRepo.find({

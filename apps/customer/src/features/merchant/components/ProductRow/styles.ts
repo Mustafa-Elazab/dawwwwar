@@ -5,7 +5,7 @@ import { space, typography, radius, shadows } from '@dawwar/theme';
 export const createStyles = (colors: AppColors, isRTL = I18nManager.isRTL) =>
   StyleSheet.create({
     row: {
-      flexDirection: isRTL ? 'row-reverse' : 'row',
+      flexDirection: 'row',
       padding: space.md,
       backgroundColor: colors.surface,
       borderRadius: radius.lg,
@@ -31,24 +31,24 @@ export const createStyles = (colors: AppColors, isRTL = I18nManager.isRTL) =>
       ...typography.label,
       color: colors.text,
       fontWeight: '700',
-      textAlign: isRTL ? 'right' : 'left',
+      textAlign: 'auto',
       writingDirection: isRTL ? 'rtl' : 'ltr',
     },
     description: {
       ...typography.caption,
       color: colors.textSecondary,
-      textAlign: isRTL ? 'right' : 'left',
+      textAlign: 'auto',
       writingDirection: isRTL ? 'rtl' : 'ltr',
     },
     price: {
       ...typography.body2,
       color: colors.primary,
       fontWeight: '800',
-      textAlign: isRTL ? 'right' : 'left',
+      textAlign: 'auto',
     },
     unavailableBadge: { marginTop: 4 },
     stepper: {
-      flexDirection: isRTL ? 'row-reverse' : 'row',
+      flexDirection: 'row',
       alignItems: 'center',
       gap: space.xs,
     },

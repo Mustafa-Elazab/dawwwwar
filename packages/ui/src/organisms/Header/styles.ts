@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native';
+import { I18nManager, StyleSheet } from 'react-native';
 import { AppColors } from '@dawwar/theme';
 
 export const createStyles = (colors: AppColors) =>
@@ -49,13 +49,15 @@ export const createStyles = (colors: AppColors) =>
       fontWeight: 'bold',
       color: colors.text,
       lineHeight: 34,
-      textAlign: 'left',
+      textAlign: 'auto',
+      writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr',
     },
     subtitle: {
       fontSize: 14,
       color: colors.textSecondary,
       marginTop: 4,
-      textAlign: 'left',
+      textAlign: 'auto',
+      writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr',
       lineHeight: 20,
     },
   });

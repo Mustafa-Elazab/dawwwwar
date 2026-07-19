@@ -5,7 +5,7 @@ import { space, radius, typography } from '@dawwar/theme';
 export const createStyles = (colors: AppColors) =>
   StyleSheet.create({
     container: {
-      flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
+      flexDirection: 'row',
       alignItems: 'center',
       backgroundColor: colors.surfaceVariant,
       borderRadius: radius.full,
@@ -17,7 +17,7 @@ export const createStyles = (colors: AppColors) =>
       flex: 1,
       ...typography.body1,
       color: colors.text,
-      textAlign: I18nManager.isRTL ? 'right' : 'left',
+      textAlign: 'auto',
       paddingVertical: 0,   // remove default Android padding
     },
     clearButton: { padding: space.xs },

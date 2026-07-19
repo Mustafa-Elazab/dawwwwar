@@ -22,11 +22,35 @@ const nominatimLang = (locale?: string): GeocodingLocale =>
 
 /** In-memory throttle: avoid hammering Nominatim (usage policy). */
 const reverseCache = new Map<string, string>();
-const lastReverseAt = new Map<string, number>();
-const REVERSE_MIN_INTERVAL_MS = 1100;
+let lastReverseRequestAt = 0;
+let reverseQueue: Promise<void> = Promise.resolve();
+export const REVERSE_GEOCODE_MIN_INTERVAL_MS = 10_000;
 
 function reverseCacheKey(lat: number, lon: number, lang: GeocodingLocale) {
-  return `${lat.toFixed(5)},${lon.toFixed(5)},${lang}`;
+  return `${lat.toFixed(4)},${lon.toFixed(4)},${lang}`;
+}
+
+function delay(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function waitForReverseSlot() {
+  const waitTurn = reverseQueue.then(async () => {
+    const elapsed = Date.now() - lastReverseRequestAt;
+    if (lastReverseRequestAt > 0 && elapsed < REVERSE_GEOCODE_MIN_INTERVAL_MS) {
+      await delay(REVERSE_GEOCODE_MIN_INTERVAL_MS - elapsed);
+    }
+    lastReverseRequestAt = Date.now();
+  });
+
+  reverseQueue = waitTurn.catch(() => undefined);
+  await waitTurn;
+}
+
+export function __resetGeocodingApiForTests() {
+  reverseCache.clear();
+  lastReverseRequestAt = 0;
+  reverseQueue = Promise.resolve();
 }
 
 export const geocodingApi = {
@@ -39,14 +63,8 @@ export const geocodingApi = {
     const cached = reverseCache.get(ck);
     if (cached) return cached;
 
-    const now = Date.now();
-    const last = lastReverseAt.get(ck) ?? 0;
-    if (now - last < REVERSE_MIN_INTERVAL_MS) {
-      await new Promise((r) => setTimeout(r, REVERSE_MIN_INTERVAL_MS - (now - last)));
-    }
-    lastReverseAt.set(ck, Date.now());
-
     try {
+      await waitForReverseSlot();
       const { data } = await axios.get(`${NOMINATIM_BASE_URL}/reverse`, {
         params: {
           format: 'jsonv2',

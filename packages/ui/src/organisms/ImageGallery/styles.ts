@@ -15,7 +15,7 @@ export const createStyles = (colors: AppColors) =>
     closeBtn: {
       position: 'absolute',
       top: space['2xl'],
-      right: space.base,
+      end: space.base,
       zIndex: 10,
       width: 40,
       height: 40,
@@ -56,7 +56,7 @@ export const createStyles = (colors: AppColors) =>
       width: 56,
       height: 56,
       borderRadius: 6,
-      marginRight: 6,
+      marginEnd: 6,
       opacity: 0.6,
     },
     thumbnailActive: {

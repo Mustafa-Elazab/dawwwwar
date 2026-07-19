@@ -70,6 +70,39 @@ export interface Merchant {
 
 // ─── PRODUCT ─────────────────────────────────────────────────────────────────
 
+export enum ProductModifierGroupType {
+  SINGLE = 'SINGLE',
+  MULTI = 'MULTI',
+}
+
+export interface ModifierOption {
+  id: string;
+  name: string;
+  nameAr?: string;
+  priceDelta: number;
+  isAvailable?: boolean;
+}
+
+export interface ModifierGroup {
+  id: string;
+  name: string;
+  nameAr?: string;
+  type: ProductModifierGroupType;
+  required: boolean;
+  min?: number;
+  max?: number;
+  options: ModifierOption[];
+}
+
+export interface ProductVariant {
+  id: string;
+  name: string;
+  nameAr?: string;
+  price?: number;
+  priceDelta?: number;
+  isAvailable?: boolean;
+}
+
 export interface Product {
   id: string;
   merchantId: string;
@@ -84,6 +117,8 @@ export interface Product {
   categoryId: string;
   isFeatured: boolean;
   totalOrders: number;
+  modifierGroups?: ModifierGroup[];
+  variants?: ProductVariant[];
   createdAt: string;
   updatedAt: string;
 }
@@ -151,6 +186,21 @@ export interface OrderItem {
   quantity: number;
   price: number;
   notes?: string;
+  selectedModifiers?: SelectedModifierGroup[];
+}
+
+export interface SelectedModifierOption {
+  optionId: string;
+  name: string;
+  nameAr?: string;
+  priceDelta: number;
+}
+
+export interface SelectedModifierGroup {
+  groupId: string;
+  groupName: string;
+  groupNameAr?: string;
+  options: SelectedModifierOption[];
 }
 
 export interface Order {
@@ -158,7 +208,7 @@ export interface Order {
   orderNumber: string;          // human readable: "ORD-12345"
   customerId: string;
   customer?: User;
-  merchantId?: string;
+  merchantId?: string | null;
   driverId?: string;
   type: OrderType;
   status: OrderStatus;

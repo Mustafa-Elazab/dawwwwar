@@ -30,8 +30,8 @@ export const createStyles = (colors: AppColors, isRTL = I18nManager.isRTL) =>
     headerOverlay: {
       position: 'absolute',
       top: 0,
-      left: 0,
-      right: 0,
+      start: 0,
+      end: 0,
       zIndex: 10,
     },
     headerBackground: {
@@ -70,12 +70,13 @@ export const createStyles = (colors: AppColors, isRTL = I18nManager.isRTL) =>
       color: colors.text,
       flex: 1,
       textAlign: 'center',
+      writingDirection: isRTL ? 'rtl' : 'ltr',
       marginHorizontal: space.md,
     },
     stickyCategoriesWrapper: {
       position: 'absolute',
-      left: 0,
-      right: 0,
+      start: 0,
+      end: 0,
       height: 60,
       backgroundColor: colors.background,
       zIndex: 5,
@@ -122,7 +123,7 @@ export const createStyles = (colors: AppColors, isRTL = I18nManager.isRTL) =>
     },
     categoryTitle: {
       alignSelf: isRTL ? 'flex-end' : 'flex-start',
-      textAlign: isRTL ? 'right' : 'left',
+      textAlign: 'auto',
       writingDirection: isRTL ? 'rtl' : 'ltr',
     },
     productGrid: {
@@ -145,18 +146,18 @@ export const createStyles = (colors: AppColors, isRTL = I18nManager.isRTL) =>
     infoLabel: {
       ...typography.label,
       color: colors.textSecondary,
-      textAlign: isRTL ? 'right' : 'left',
+      textAlign: 'auto',
       writingDirection: isRTL ? 'rtl' : 'ltr',
     },
     infoValue: {
       ...typography.body1,
       color: colors.text,
-      textAlign: isRTL ? 'right' : 'left',
+      textAlign: 'auto',
       writingDirection: isRTL ? 'rtl' : 'ltr',
     },
     hoursTable: { gap: space.sm },
     hoursRow: {
-      flexDirection: isRTL ? 'row-reverse' : 'row',
+      flexDirection: 'row',
       justifyContent: 'space-between',
       width: '100%',
     },

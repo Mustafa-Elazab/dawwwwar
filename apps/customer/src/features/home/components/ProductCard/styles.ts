@@ -28,16 +28,14 @@ export const createStyles = (colors: AppColors) =>
     badges: {
       position: 'absolute',
       top: space.xs,
-      // Use logical positioning for RTL
-      left: space.xs,
-      right: undefined,
+      start: space.xs,
       flexDirection: 'row',
       gap: space.xs,
     },
     likeBtn: {
       position: 'absolute',
       top: 8,
-      right: 8,
+      end: 8,
       width: 32,
       height: 32,
       borderRadius: 16,
@@ -72,13 +70,13 @@ export const createStyles = (colors: AppColors) =>
       fontWeight: '700',
       marginBottom: space.xs,
       lineHeight: 20,
-      textAlign: 'left',
+      textAlign: 'auto',
     },
     merchantName: {
       ...typography.caption,
       color: colors.textSecondary,
       marginBottom: space.sm,
-      textAlign: 'left',
+      textAlign: 'auto',
     },
     footer: {
       flexDirection: 'row', // Will flip automatically in RTL

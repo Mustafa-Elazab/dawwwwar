@@ -20,7 +20,7 @@ export const createStyles = (colors: AppColors) =>
       ...typography.body1,
       color: colors.text,
       fontWeight: '900',
-      alignSelf:"flex-start"
+      textAlign: 'auto',
     },
     
     // ── Address ────────────────────────────────────────
@@ -59,7 +59,8 @@ export const createStyles = (colors: AppColors) =>
       borderBottomColor: colors.borderLight,
     },
     paymentInfo: {
-      alignItems: 'flex-start',
+      flex: 1,
+      alignItems: I18nManager.isRTL ? 'flex-end' : 'flex-start',
     },
     radio: {
       width: 22,
@@ -83,10 +84,19 @@ export const createStyles = (colors: AppColors) =>
       ...typography.body1,
       color: colors.text,
       fontWeight: '700',
+      textAlign: 'auto',
     },
     paymentSub: {
       ...typography.caption,
       color: colors.textSecondary,
+      textAlign: 'auto',
+    },
+    selectedPaymentLabel: {
+      ...typography.caption,
+      color: colors.primary,
+      fontWeight: '800',
+      maxWidth: 160,
+      textAlign: 'auto',
     },
     paymentError: {
       ...typography.caption,
@@ -116,11 +126,16 @@ export const createStyles = (colors: AppColors) =>
     summaryLabel: {
       ...typography.body2,
       color: colors.textSecondary,
+      textAlign: 'auto',
     },
     summaryValue: {
       ...typography.body1,
       color: colors.text,
       fontWeight: '600',
+      textAlign: 'auto',
+    },
+    deliveryFeeValue: {
+      alignItems: I18nManager.isRTL ? 'flex-start' : 'flex-end',
     },
     totalLabel: {
       ...typography.body1,

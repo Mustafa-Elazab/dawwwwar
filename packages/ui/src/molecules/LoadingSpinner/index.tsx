@@ -1,7 +1,7 @@
 import React from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { useTheme } from '@dawwar/theme';
-import { Text } from '../../atoms';
+import { Text } from '../../atoms/Text';
 import { createStyles } from './styles';
 import type { LoadingSpinnerProps } from './types';
 

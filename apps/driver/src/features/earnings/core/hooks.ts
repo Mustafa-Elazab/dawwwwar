@@ -13,7 +13,7 @@ export function useEarningsSummary() {
   const user = useAppSelector(selectUser);
   return useQuery({
     queryKey: EARNINGS_KEYS.summary(user?.id ?? ''),
-    queryFn: () => earningsApi.getSummary(user?.id ?? ''),
+    queryFn: () => earningsApi.getSummary(),
     enabled: !!user?.id,
     staleTime: 60_000,
   });
@@ -23,7 +23,7 @@ export function useDriverTransactions() {
   const user = useAppSelector(selectUser);
   return useQuery({
     queryKey: EARNINGS_KEYS.transactions(user?.id ?? ''),
-    queryFn: () => earningsApi.getTransactions(user?.id ?? ''),
+    queryFn: () => earningsApi.getTransactions(),
     enabled: !!user?.id,
     staleTime: 60_000,
   });
@@ -33,7 +33,7 @@ export function useDriverWalletBalance() {
   const user = useAppSelector(selectUser);
   return useQuery({
     queryKey: EARNINGS_KEYS.balance(user?.id ?? ''),
-    queryFn: () => earningsApi.getWalletBalance(user?.id ?? ''),
+    queryFn: () => earningsApi.getWalletBalance(),
     enabled: !!user?.id,
     staleTime: 30_000,
   });

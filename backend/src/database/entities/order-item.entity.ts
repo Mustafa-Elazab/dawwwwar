@@ -28,4 +28,7 @@ export class OrderItemEntity extends BaseEntity {
 
   @Column({ nullable: true })
   notes?: string;
+
+  @Column({ name: 'selected_modifiers', type: 'jsonb', default: () => "'[]'::jsonb" })
+  selectedModifiers: unknown[];
 }

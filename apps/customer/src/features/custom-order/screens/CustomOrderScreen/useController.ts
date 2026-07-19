@@ -25,12 +25,13 @@ export function useController() {
   const [shopAddress, setShopAddress] = useState('');
   const [shopLat, setShopLat] = useState(30.8704);
   const [shopLng, setShopLng] = useState(31.4741);
+  const [hasPickedShopLocation, setHasPickedShopLocation] = useState(false);
   const [textDescription, setTextDescription] = useState('');
   const [voiceUri, setVoiceUri] = useState<string | null>(null);
   const [voiceDuration, setVoiceDuration] = useState(0);
   const [photos, setPhotos] = useState<string[]>([]);
   const [budget, setBudget] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState<'CASH' | 'WALLET'>('CASH');
+  const paymentMethod = 'CASH' as const;
   const [showMapPicker, setShowMapPicker] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -67,6 +68,7 @@ export function useController() {
     setShopLat(lat);
     setShopLng(lng);
     setShopAddress(address);
+    setHasPickedShopLocation(true);
     setShowMapPicker(false);
   }, []);
 
@@ -77,6 +79,9 @@ export function useController() {
     };
     
     const validationErrors = validateCustomOrder(draft, t);
+    if (!hasPickedShopLocation) {
+      validationErrors.shopAddress = t('custom_order.shop_location_required');
+    }
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors as Record<string, string>);
       const firstError = Object.values(validationErrors)[0];
@@ -126,7 +131,7 @@ export function useController() {
         itemsImages: uploadedPhotoUrls,
         estimatedBudget: parseFloat(budget),
         deliveryFee: DELIVERY_FEE,
-        paymentMethod: paymentMethod as PaymentMethod,
+        paymentMethod: PaymentMethod.CASH,
         deliveryAddress: selectedAddress?.address || 'شارع الجمهورية، سنبلاوين',
         deliveryLatitude,
         deliveryLongitude,
@@ -148,19 +153,20 @@ export function useController() {
     } finally {
       setIsUploading(false);
     }
-  }, [shopAddress, shopLat, shopLng, shopName, textDescription, voiceUri, photos, budget, paymentMethod, t, user, selectedAddress, uploadFile, placeMutation, queryClient, navigation]);
+  }, [hasPickedShopLocation, shopAddress, shopLat, shopLng, shopName, textDescription, voiceUri, photos, budget, t, user, selectedAddress, uploadFile, placeMutation, queryClient, navigation]);
 
   return {
     shopName, setShopName,
     shopAddress, setShopAddress,
     shopLat,
     shopLng,
+    hasPickedShopLocation,
     textDescription, setTextDescription,
     voiceUri,
     voiceDuration,
     photos,
     budget, setBudget,
-    paymentMethod, setPaymentMethod,
+    paymentMethod,
     showMapPicker, setShowMapPicker,
     errors,
     isBudgetOverLimit: parseFloat(budget) > CASH_LIMIT && paymentMethod === 'CASH',

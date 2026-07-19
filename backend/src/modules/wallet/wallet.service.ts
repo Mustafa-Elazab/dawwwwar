@@ -7,6 +7,11 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, EntityManager, Repository } from 'typeorm';
 import { WalletEntity } from '../../database/entities/wallet.entity';
+import { UserEntity } from '../../database/entities/user.entity';
+import {
+  WalletRechargeEntity,
+  WalletRechargeStatus,
+} from '../../database/entities/wallet-recharge.entity';
 import {
   WalletTransactionEntity,
   TransactionType,
@@ -16,6 +21,27 @@ import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
 import axios from 'axios';
 import { PaymobWebhookDto } from './dto/paymob-webhook.dto';
+import { GatewayService } from '../gateway/gateway.service';
+
+type PaymobAuthResponse = {
+  token: string;
+};
+
+type PaymobOrderResponse = {
+  id: number;
+};
+
+type PaymobPaymentKeyResponse = {
+  token: string;
+};
+
+export interface WalletRechargeCheckout {
+  paymentKey: string;
+  iframeId?: string;
+  checkoutUrl: string;
+  paymobOrderId: string;
+  requestedAmount: number;
+}
 
 @Injectable()
 export class WalletService {
@@ -25,8 +51,13 @@ export class WalletService {
     private readonly walletRepo: Repository<WalletEntity>,
     @InjectRepository(WalletTransactionEntity)
     private readonly txRepo: Repository<WalletTransactionEntity>,
+    @InjectRepository(WalletRechargeEntity)
+    private readonly rechargeRepo: Repository<WalletRechargeEntity>,
+    @InjectRepository(UserEntity)
+    private readonly userRepo: Repository<UserEntity>,
     private readonly config: ConfigService,
     private readonly dataSource: DataSource,
+    private readonly gatewayService: GatewayService,
   ) {}
 
   async getWallet(userId: string): Promise<WalletEntity> {
@@ -274,71 +305,144 @@ export class WalletService {
   async requestRecharge(
     userId: string,
     amount: number,
-  ): Promise<{ paymentKey: string; requestedAmount: number }> {
+  ): Promise<WalletRechargeCheckout> {
     if (amount < 10) {
       throw new BadRequestException('MIN_RECHARGE_AMOUNT');
     }
 
-    const apiKey = this.config.get<string>('app.paymobApiKey');
-    const integrationId = this.config.get<string>('app.paymobIntegrationId');
+    const user = await this.userRepo.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('USER_NOT_FOUND');
+    }
 
-    if (!apiKey || !integrationId) {
-      this.logger.warn('Paymob not configured, falling back to dummy response');
-      if (process.env.NODE_ENV !== 'production') {
-        const fakeOrderId = `${userId}_${Date.now()}`;
-        setTimeout(() => {
-          this.handlePaymobWebhook({
-            type: 'TRANSACTION',
-            obj: { success: true, order: { merchant_order_id: fakeOrderId }, amount_cents: amount * 100, id: Date.now() },
-          } as any).catch((e) => this.logger.error('Dev recharge simulation failed', e));
-        }, 1000);
+    const apiKey =
+      this.config.get<string>('paymob.apiKey') ||
+      this.config.get<string>('app.paymobApiKey');
+    const integrationId =
+      this.config.get<string>('paymob.integrationIdCard') ||
+      this.config.get<string>('app.paymobIntegrationId');
+    const iframeId = this.config.get<string>('paymob.iframeId');
+
+    if (!apiKey || !integrationId || !iframeId) {
+      if (process.env.NODE_ENV === 'production') {
+        this.logger.error('Paymob recharge requested but Paymob is not configured');
+        throw new BadRequestException('PAYMENT_GATEWAY_NOT_CONFIGURED');
       }
-      return { paymentKey: 'dummy_key_because_paymob_not_configured', requestedAmount: amount };
+
+      this.logger.warn('Paymob not configured, falling back to dummy response');
+      const merchantOrderId = `RECHARGE_${userId}_${Date.now()}`;
+      const fakeOrderId = Date.now().toString();
+      const checkoutUrl = `https://dawwar.com/payment/success?success=true&order=${fakeOrderId}`;
+
+      await this.rechargeRepo.save(
+        this.rechargeRepo.create({
+          userId,
+          paymobOrderId: fakeOrderId,
+          amount,
+          currency: 'EGP',
+          status: WalletRechargeStatus.PENDING,
+          paymentKey: 'dev_payment_key',
+          checkoutUrl,
+          metadata: { merchantOrderId, mode: 'development' },
+        }),
+      );
+
+      setTimeout(() => {
+        this.handlePaymobWebhook({
+          type: 'TRANSACTION',
+          obj: {
+            success: true,
+            order: { id: Number(fakeOrderId), merchant_order_id: merchantOrderId },
+            amount_cents: Math.round(amount * 100),
+            id: Date.now(),
+          },
+        }).catch((e) => this.logger.error('Dev recharge simulation failed', e));
+      }, 1000);
+
+      return {
+        paymentKey: 'dev_payment_key',
+        iframeId: 'dev',
+        checkoutUrl,
+        paymobOrderId: fakeOrderId,
+        requestedAmount: amount,
+      };
     }
 
     try {
-      // 1. Auth payload
-      const authRes = await axios.post('https://accept.paymob.com/api/auth/tokens', {
+      const merchantOrderId = `RECHARGE_${userId}_${Date.now()}`;
+      const amountCents = Math.round(amount * 100);
+      const [firstName = 'Dawwar', ...lastParts] = user.name?.split(' ') ?? [];
+      const lastName = lastParts.join(' ') || 'Customer';
+
+      const authRes = await axios.post<PaymobAuthResponse>('https://accept.paymob.com/api/auth/tokens', {
         api_key: apiKey,
       });
       const token = authRes.data.token;
 
-      // 2. Order Registration
-      const orderRes = await axios.post('https://accept.paymob.com/api/ecommerce/orders', {
+      const orderRes = await axios.post<PaymobOrderResponse>('https://accept.paymob.com/api/ecommerce/orders', {
         auth_token: token,
         delivery_needed: 'false',
-        amount_cents: amount * 100,
+        amount_cents: amountCents,
         currency: 'EGP',
-        merchant_order_id: `${userId}_${Date.now()}`,
+        merchant_order_id: merchantOrderId,
+        items: [
+          {
+            name: 'Dawwar Wallet Recharge',
+            amount_cents: amountCents,
+            description: `Wallet recharge for ${user.phone}`,
+            quantity: 1,
+          },
+        ],
       });
       const orderId = orderRes.data.id;
 
-      // 3. Payment Key Generation
-      const keyRes = await axios.post('https://accept.paymob.com/api/acceptance/payment_keys', {
+      const keyRes = await axios.post<PaymobPaymentKeyResponse>('https://accept.paymob.com/api/acceptance/payment_keys', {
         auth_token: token,
-        amount_cents: amount * 100,
+        amount_cents: amountCents,
         expiration: 3600,
         order_id: orderId,
         billing_data: {
           apartment: 'NA',
-          email: 'user@dawwar.app',
+          email: `${user.id}@dawwar.app`,
           floor: 'NA',
-          first_name: 'Dawwar',
+          first_name: firstName,
           street: 'NA',
           building: 'NA',
-          phone_number: '+201000000000',
+          phone_number: user.phone,
           shipping_method: 'NA',
           postal_code: 'NA',
-          city: 'NA',
+          city: 'Cairo',
           country: 'EG',
-          last_name: 'User',
-          state: 'NA',
+          last_name: lastName,
+          state: 'Cairo',
         },
         currency: 'EGP',
-        integration_id: integrationId,
+        integration_id: Number(integrationId),
       });
 
-      return { paymentKey: keyRes.data.token, requestedAmount: amount };
+      const paymentKey = keyRes.data.token;
+      const checkoutUrl = `https://accept.paymob.com/api/acceptance/iframes/${iframeId}?payment_token=${paymentKey}`;
+
+      await this.rechargeRepo.save(
+        this.rechargeRepo.create({
+          userId,
+          paymobOrderId: orderId.toString(),
+          amount,
+          currency: 'EGP',
+          status: WalletRechargeStatus.PENDING,
+          paymentKey,
+          checkoutUrl,
+          metadata: { merchantOrderId },
+        }),
+      );
+
+      return {
+        paymentKey,
+        iframeId,
+        checkoutUrl,
+        paymobOrderId: orderId.toString(),
+        requestedAmount: amount,
+      };
     } catch (err: unknown) {
       this.logger.error('Paymob API error', err);
       throw new BadRequestException('PAYMENT_GATEWAY_ERROR');
@@ -347,12 +451,22 @@ export class WalletService {
 
   // ── Webhook handling ──────────────────────────────────────────────
 
-  verifyPaymobHmac(payload: any, hmacHeader: string): boolean {
-    const secret = this.config.get<string>('app.paymobHmacSecret');
-    if (!secret) return true; // skip validation if not configured in dev
+  verifyPaymobHmac(payload: PaymobWebhookDto, hmacHeader?: string): boolean {
+    const secret =
+      this.config.get<string>('paymob.hmacSecret') ||
+      this.config.get<string>('app.paymobHmacSecret');
 
-    const { obj } = payload;
-    // Lexicographical order according to Paymob docs
+    if (!secret) {
+      return process.env.NODE_ENV !== 'production';
+    }
+
+    if (!hmacHeader) {
+      return false;
+    }
+
+    const obj = payload.obj;
+    const orderId = obj.order?.id;
+    const sourceData = obj.source_data ?? {};
     const concatenatedString = [
       obj.amount_cents,
       obj.created_at,
@@ -367,21 +481,23 @@ export class WalletService {
       obj.is_refunded,
       obj.is_standalone_payment,
       obj.is_voided,
-      obj.order.id,
+      orderId,
       obj.owner,
       obj.pending,
-      obj.source_data.pan,
-      obj.source_data.sub_type,
-      obj.source_data.type,
+      sourceData.pan,
+      sourceData.sub_type,
+      sourceData.type,
       obj.success,
-    ].join('');
+    ].map((value) => value ?? '').join('');
 
     const hash = crypto
       .createHmac('sha512', secret)
       .update(concatenatedString)
       .digest('hex');
 
-    return hash === hmacHeader;
+    const expected = Buffer.from(hash, 'hex');
+    const received = Buffer.from(hmacHeader, 'hex');
+    return expected.length === received.length && crypto.timingSafeEqual(expected, received);
   }
 
   async handlePaymobWebhook(dto: PaymobWebhookDto): Promise<void> {
@@ -389,24 +505,45 @@ export class WalletService {
       return;
     }
 
-    const merchantOrderId = dto.obj.order.merchant_order_id;
-    if (!merchantOrderId) return;
+    const paymobOrderId = dto.obj.order?.id?.toString();
+    const transactionId = dto.obj.id?.toString();
+    if (!paymobOrderId || !transactionId) {
+      return;
+    }
 
-    // extract userId back
-    const userId = merchantOrderId.split('_')[0];
-    if (!userId) return;
+    const referenceId = `PAYMOB_TX_${transactionId}`;
+    const existingTx = await this.txRepo.findOne({ where: { referenceId } });
+    if (existingTx) {
+      return;
+    }
 
-    const amountEGP = Math.floor(dto.obj.amount_cents / 100);
+    const pending = await this.rechargeRepo.findOne({ where: { paymobOrderId } });
+    if (!pending) {
+      this.logger.warn(`Unknown Paymob recharge order: ${paymobOrderId}`);
+      return;
+    }
 
-    // Give balance using the new safe transactional method
-    await this.creditWallet(
-      userId,
-      amountEGP,
-      TransactionReason.WALLET_RECHARGE,
-      `Online payment (Tx: ${dto.obj.id})`,
-      undefined,
-      undefined,
-      `PAYMOB_${dto.obj.id}`
-    );
+    if (pending.status === WalletRechargeStatus.COMPLETED) {
+      return;
+    }
+
+    await this.dataSource.transaction(async (manager) => {
+      await this.creditWallet(
+        pending.userId,
+        Number(pending.amount),
+        TransactionReason.WALLET_RECHARGE,
+        `Online payment (Paymob tx: ${transactionId})`,
+        undefined,
+        manager,
+        referenceId,
+      );
+
+      await manager.update(WalletRechargeEntity, pending.id, {
+        status: WalletRechargeStatus.COMPLETED,
+        paymobTransactionId: transactionId,
+      });
+    });
+
+    this.gatewayService.notifyWalletRecharged(pending.userId, Number(pending.amount));
   }
 }

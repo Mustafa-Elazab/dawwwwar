@@ -8,7 +8,6 @@ export const createStyles = (colors: AppColors) =>
       flex: 1,
       aspectRatio: 0.9,
       borderRadius: 16,
-      margin: 6, // Reduced margin for 3 columns
       alignItems: 'center',
       justifyContent: 'center',
       padding: space.sm,

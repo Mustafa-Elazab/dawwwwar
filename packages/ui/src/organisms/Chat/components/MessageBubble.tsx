@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
   },
   statusIcon: {
-    marginLeft: 4,
+    marginStart: 4,
   },
   systemContainer: {
     alignItems: 'center',

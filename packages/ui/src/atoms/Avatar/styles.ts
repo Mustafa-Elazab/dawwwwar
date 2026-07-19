@@ -20,7 +20,7 @@ export const createStyles = (colors: AppColors, size: keyof typeof SIZES) => {
     initials: {
       ...typography.label,
       color: colors.primary,
-      fontSize: dim * 0.35,
+      fontSize: dim * 0.2,
       fontWeight: '700',
     },
   });

@@ -27,7 +27,18 @@ export function WalletScreen() {
       refreshing={false}
     >
       <BalanceCard balance={ctrl.balance} />
-      <RechargeChips />
+      <RechargeChips
+        selectedAmount={ctrl.selectedAmount}
+        customAmount={ctrl.customAmount}
+        showCustomInput={ctrl.showCustomInput}
+        effectiveAmount={ctrl.effectiveAmount}
+        rechargeError={ctrl.rechargeError}
+        isRecharging={ctrl.isRecharging}
+        onAmountSelect={ctrl.handleAmountSelect}
+        onCustomAmountSelect={ctrl.handleCustomAmountSelect}
+        onCustomAmountChange={ctrl.handleCustomAmountChange}
+        onRecharge={ctrl.handleRecharge}
+      />
 
       <View style={styles.divider} />
 

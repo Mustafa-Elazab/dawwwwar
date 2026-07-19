@@ -6,8 +6,8 @@ export const createStyles = (colors: AppColors) =>
     container: {
       padding: space.base,
       backgroundColor: colors.card,
-      borderLeftWidth: 4,
-      borderLeftColor: colors.primary,
+      borderStartWidth: 4,
+      borderStartColor: colors.primary,
     },
     header: {
       flexDirection: 'row',
@@ -15,7 +15,7 @@ export const createStyles = (colors: AppColors) =>
       marginBottom: space.sm,
     },
     iconContainer: {
-      marginRight: space.sm,
+      marginEnd: space.sm,
     },
     title: {
       flex: 1,
@@ -37,6 +37,6 @@ export const createStyles = (colors: AppColors) =>
       ...typography.label,
       color: colors.primary,
       fontWeight: 'bold',
-      marginRight: space.xs,
+      marginEnd: space.xs,
     },
   });

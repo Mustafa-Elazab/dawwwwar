@@ -4,14 +4,12 @@ import { useAppSelector } from '../store/hooks';
 import {
   selectIsAuthenticated,
   selectIsLoading,
-  selectUser,
 } from '../store/slices/auth.slice';
 import { AuthNavigator } from './AuthNavigator';
 import { CustomerTabs } from './CustomerTabs';
-import { CheckoutModal, CustomOrderModal } from './placeholders';
-import { MODAL_ROUTES } from './routes';
+import { CheckoutModal, CustomOrderMapPickerScreen, CustomOrderModal, PaymentWebViewScreen } from './placeholders';
+import { MODAL_ROUTES, PAYMENT_ROUTES } from './routes';
 import type { RootParamList } from './types';
-import { CompleteProfileScreen } from '../features/auth/screens/CompleteProfileScreen';
 import { JS_SplashScreen } from '../features/auth/components/SplashScreen';
 
 const Root = createStackNavigator<RootParamList>();
@@ -19,18 +17,13 @@ const Root = createStackNavigator<RootParamList>();
 export function RootNavigator() {
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const isLoading = useAppSelector(selectIsLoading);
-  const user = useAppSelector(selectUser);
-
-  const hasName = !!user?.name;
-
   // Debug logging
   useEffect(() => {
     console.log('[RootNavigator] Auth state:', {
       isAuthenticated,
       isLoading,
-      hasName,
     });
-  }, [isAuthenticated, isLoading, hasName]);
+  }, [isAuthenticated, isLoading]);
 
   // Show loading while session is being restored
   if (isLoading) {
@@ -41,17 +34,14 @@ export function RootNavigator() {
     return <AuthNavigator />;
   }
 
-  // Authenticated but missing name → Complete Profile
-  if (isAuthenticated && !hasName) {
-    return <CompleteProfileScreen />;
-  }
-
-  // Authenticated and has name → Main App
+  // Profile fields are optional for the launch MVP, so authenticated users enter the app.
   return (
-    <Root.Navigator screenOptions={{ headerShown: false, presentation: 'modal' }}>
+    <Root.Navigator screenOptions={{ headerShown: false }}>
       <Root.Screen name="CustomerTabs" component={CustomerTabs} />
       <Root.Screen name={MODAL_ROUTES.CHECKOUT} component={CheckoutModal} />
       <Root.Screen name={MODAL_ROUTES.CUSTOM_ORDER} component={CustomOrderModal} />
+      <Root.Screen name={MODAL_ROUTES.CUSTOM_ORDER_MAP_PICKER} component={CustomOrderMapPickerScreen} />
+      <Root.Screen name={PAYMENT_ROUTES.PAYMENT_WEBVIEW} component={PaymentWebViewScreen} />
     </Root.Navigator>
   );
 }

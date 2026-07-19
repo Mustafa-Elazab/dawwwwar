@@ -1,4 +1,4 @@
-import type { StyleProp, TextStyle } from 'react-native';
+import type { StyleProp, TextProps as RNTextProps, TextStyle } from 'react-native';
 import type { TypographyVariant } from '@dawwar/theme';
 
 export interface TextProps {
@@ -6,6 +6,7 @@ export interface TextProps {
   color?: string;
   align?: 'auto' | 'left' | 'right' | 'center' | 'justify';
   numberOfLines?: number;
+  ellipsizeMode?: RNTextProps['ellipsizeMode'];
   selectable?: boolean;
   onPress?: () => void;
   style?: StyleProp<TextStyle>;

@@ -1,56 +1,43 @@
-import React, { useState } from 'react';
-import { View, TouchableOpacity, Alert } from 'react-native';
+import React from 'react';
+import { View, TouchableOpacity } from 'react-native';
 import { useTheme } from '@dawwar/theme';
 import { Text, Button } from '@dawwar/ui';
 import { useTranslation } from '@dawwar/i18n';
 import RTLTextInput from '../../../../components/RTLTextInput';
-import { useRecharge } from '../../core/hooks';
 import { createStyles } from './styles';
 
 const PRESET_AMOUNTS = [50, 100, 200, 500];
 
-export function RechargeChips() {
+interface RechargeChipsProps {
+  selectedAmount: number | null;
+  customAmount: string;
+  showCustomInput: boolean;
+  effectiveAmount: number | null;
+  rechargeError: string | null;
+  isRecharging: boolean;
+  onAmountSelect: (amount: number) => void;
+  onCustomAmountSelect: () => void;
+  onCustomAmountChange: (amount: string) => void;
+  onRecharge: () => void;
+}
+
+export function RechargeChips({
+  selectedAmount,
+  customAmount,
+  showCustomInput,
+  effectiveAmount,
+  rechargeError,
+  isRecharging,
+  onAmountSelect,
+  onCustomAmountSelect,
+  onCustomAmountChange,
+  onRecharge,
+}: RechargeChipsProps) {
   const { colors } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
   const { t } = useTranslation();
-  const rechargeMutation = useRecharge();
-
-  const [selected, setSelected] = useState<number | null>(null);
-  const [customAmount, setCustomAmount] = useState('');
-  const [showCustom, setShowCustom] = useState(false);
-
-  const handleChipPress = (amount: number | 'custom') => {
-    if (amount === 'custom') {
-      setSelected(null);
-      setShowCustom(true);
-    } else {
-      setSelected(amount);
-      setShowCustom(false);
-      setCustomAmount('');
-    }
-  };
-
-  const handleConfirm = () => {
-    const amount = showCustom ? parseFloat(customAmount) : (selected ?? 0);
-    if (!amount || amount < 10) {
-      Alert.alert(t('wallet.custom_min'));
-      return;
-    }
-    Alert.alert(
-      t('wallet.recharge_title'),
-      `${amount} ${t('common.egp')}`,
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('wallet.confirm_recharge'),
-          onPress: () => rechargeMutation.mutate(amount),
-        },
-      ],
-    );
-  };
-
-  const isSelected = selected !== null || (showCustom && customAmount);
-  const currentAmount = showCustom ? customAmount : selected;
+  const hasAmount = effectiveAmount !== null;
+  const currentAmount = showCustomInput ? customAmount : effectiveAmount;
 
   return (
     <View style={styles.container}>
@@ -59,27 +46,27 @@ export function RechargeChips() {
         {PRESET_AMOUNTS.map((amount) => (
           <TouchableOpacity
             key={amount}
-            style={[styles.chip, selected === amount && styles.chipSelected]}
-            onPress={() => handleChipPress(amount)}
+            style={[styles.chip, selectedAmount === amount && styles.chipSelected]}
+            onPress={() => onAmountSelect(amount)}
           >
-            <Text style={[styles.chipLabel, selected === amount && styles.chipLabelSelected]}>
+            <Text style={[styles.chipLabel, selectedAmount === amount && styles.chipLabelSelected]}>
               {amount} {t('common.egp')}
             </Text>
           </TouchableOpacity>
         ))}
         <TouchableOpacity
-          style={[styles.chip, showCustom && styles.chipSelected]}
-          onPress={() => handleChipPress('custom')}
+          style={[styles.chip, showCustomInput && styles.chipSelected]}
+          onPress={onCustomAmountSelect}
         >
-          <Text style={[styles.chipLabel, showCustom && styles.chipLabelSelected]}>
+          <Text style={[styles.chipLabel, showCustomInput && styles.chipLabelSelected]}>
             {t('wallet.custom_amount')}
           </Text>
         </TouchableOpacity>
-        {showCustom && (
+        {showCustomInput && (
           <RTLTextInput
             style={styles.customInput}
             value={customAmount}
-            onChangeText={setCustomAmount}
+            onChangeText={onCustomAmountChange}
             placeholder={t('wallet.custom_placeholder')}
             placeholderTextColor={colors.placeholder}
             keyboardType="numeric"
@@ -88,21 +75,21 @@ export function RechargeChips() {
         )}
       </View>
       <Button
-        label={isSelected
+        label={hasAmount
           ? `${t('wallet.recharge')} ${currentAmount} ${t('common.egp')}`
           : t('wallet.select_amount_first')}
-        onPress={handleConfirm}
-        loading={rechargeMutation.isPending}
-        disabled={!isSelected}
+        onPress={onRecharge}
+        loading={isRecharging}
+        disabled={!hasAmount}
         fullWidth
-        style={[
-          styles.confirmBtn,
-          !isSelected && { backgroundColor: colors.border, opacity: 0.5 }
-        ]}
+        style={[styles.confirmBtn, !hasAmount && styles.confirmBtnDisabled]}
       />
-      {isSelected && (
+      {hasAmount ? (
         <Text style={styles.note}>{t('wallet.recharge_note')}</Text>
-      )}
+      ) : null}
+      {rechargeError ? (
+        <Text style={styles.errorText}>{rechargeError}</Text>
+      ) : null}
     </View>
   );
 }

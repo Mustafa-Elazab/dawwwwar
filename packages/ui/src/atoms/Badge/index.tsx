@@ -32,7 +32,11 @@ export function Badge({
       style={[styles.base, styles[size], styles[variant], style]}
       testID={testID}
     >
-      <Text style={styles[`label${variantKey}` as keyof typeof styles]}>
+      <Text
+        style={styles[`label${variantKey}` as keyof typeof styles]}
+        numberOfLines={1}
+        ellipsizeMode="tail"
+      >
         {label}
       </Text>
     </View>

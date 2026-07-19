@@ -1,47 +1,47 @@
-import React, { useMemo } from 'react';
-import { View } from 'react-native';
-import { useTranslation } from '@dawwar/i18n';
-import { ScreenTemplate, Text, Input, Button } from '@dawwar/ui';
-import { useTheme } from '@dawwar/theme';
+import React from 'react';
+import { ScrollScreenTemplate } from '@dawwar/ui';
+import { CompleteProfileFooter, CompleteProfileForm } from './components/CompleteProfileForm';
+import { ProfileFormHeader } from './components/ProfileFormHeader';
 import { useController } from './useController';
-import { createStyles } from './styles';
 
 export function CompleteProfileScreen() {
-  const { t } = useTranslation();
-  const { colors } = useTheme();
-  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const ctrl = useController();
 
   return (
-    <ScreenTemplate
-      headerProps={{
-        title: t('auth.complete_profile_title'),
-        subtitle: t('auth.complete_profile_subtitle'),
-        type: 'none',
-      }}
+    <ScrollScreenTemplate
+      header={
+        <ProfileFormHeader
+          title={ctrl.labels.title}
+          isRTL={ctrl.isRTL}
+          colors={ctrl.colors}
+          styles={ctrl.styles}
+          onBack={ctrl.handlers.handleBack}
+        />
+      }
+      footer={
+        <CompleteProfileFooter
+          labels={ctrl.labels}
+          isLoading={ctrl.isLoading}
+          isContinueDisabled={ctrl.isContinueDisabled}
+          styles={ctrl.styles}
+          onContinue={ctrl.handlers.handleSave}
+          onSkip={ctrl.handlers.handleSkip}
+        />
+      }
+      contentStyle={ctrl.styles.content}
+      keyboardShouldPersistTaps="handled"
     >
-      <View style={styles.container}>
-        <View style={styles.form}>
-          <Input
-            label={t('auth.name_label')}
-            placeholder={t('auth.name_placeholder')}
-            value={ctrl.name}
-            onChangeText={ctrl.setName}
-            error={ctrl.nameError ?? undefined}
-            autoFocus
-          />
-
-          <View style={styles.spacer} />
-
-          <Button
-            label={t('common.save')}
-            onPress={ctrl.handleSave}
-            loading={ctrl.isLoading}
-            disabled={!ctrl.name.trim() || ctrl.isLoading}
-            fullWidth
-          />
-        </View>
-      </View>
-    </ScreenTemplate>
+      <CompleteProfileForm
+        labels={ctrl.labels}
+        values={ctrl.values}
+        errors={ctrl.errors}
+        isRTL={ctrl.isRTL}
+        colors={ctrl.colors}
+        styles={ctrl.styles}
+        isLoading={ctrl.isLoading}
+        datePicker={ctrl.datePicker}
+        handlers={ctrl.handlers}
+      />
+    </ScrollScreenTemplate>
   );
 }

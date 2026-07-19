@@ -5,7 +5,9 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import { useTheme, springs } from '@dawwar/theme';
-import { Text, Icon, Button } from '../../atoms';
+import { Button } from '../../atoms/Button';
+import { Icon } from '../../atoms/Icon';
+import { Text } from '../../atoms/Text';
 import { createStyles } from './styles';
 import type { ErrorStateProps } from './types';
 

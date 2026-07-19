@@ -30,7 +30,12 @@ export class GatewayService {
 
   /** Notify all online drivers of a new available order */
   broadcastToDrivers(event: string, data: any) {
-    this.server?.emit(event, data); // For now, broadcast to all. Later, filter by location.
+    this.server?.to(Rooms.availableDrivers()).emit(event, data);
+  }
+
+  /** Notify admin live monitor of a new order event */
+  notifyAdminOrderCreated(order: unknown) {
+    this.server?.to(Rooms.adminLive()).emit(SOCKET_EVENTS.ORDER_NEW, order);
   }
 
   /** Notify everyone in the order room of a status change */
@@ -76,5 +81,11 @@ export class GatewayService {
         heading,
         timestamp: Date.now(),
       });
+  }
+
+  notifyWalletRecharged(customerId: string, amount: number) {
+    this.server
+      ?.to(Rooms.customer(customerId))
+      .emit(SOCKET_EVENTS.WALLET_RECHARGED, { amount });
   }
 }

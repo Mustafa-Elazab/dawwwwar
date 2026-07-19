@@ -37,7 +37,7 @@ export const createStyles = (colors: AppColors) =>
       flex: 1,
       ...typography.body2,
       color: colors.text,
-      textAlign: I18nManager.isRTL ? 'right' : 'left',
+      textAlign: 'auto',
     },
     promoBtn: {
       color: colors.primary,
@@ -59,8 +59,8 @@ export const createStyles = (colors: AppColors) =>
       justifyContent: 'space-between',
       alignItems: 'center',
     },
-    summaryLabel: { ...typography.body2, color: colors.textSecondary, textAlign: 'right' },
-    summaryValue: { ...typography.body1, color: colors.text, fontWeight: '700', textAlign: 'left' },
+    summaryLabel: { ...typography.body2, color: colors.textSecondary, textAlign: 'auto' },
+    summaryValue: { ...typography.body1, color: colors.text, fontWeight: '700', textAlign: 'auto' },
     divider: {
       height: 1,
       backgroundColor: colors.borderLight,

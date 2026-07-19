@@ -3,7 +3,7 @@ import { View, StyleSheet, SafeAreaView } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
 import { useTranslation } from '@dawwar/i18n';
 import { useTheme, typography } from '@dawwar/theme';
-import { Text } from '@dawwar/ui';
+import { Text } from '../../../../packages/ui/src/atoms/Text';
 
 export function NetworkStatusBanner() {
   const [isOffline, setIsOffline] = useState(false);

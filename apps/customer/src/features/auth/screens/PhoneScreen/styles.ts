@@ -20,6 +20,7 @@ export const createStyles = (colors: AppColors) =>
     logoText: {
       ...typography.h1,
       fontSize: 64,
+      lineHeight:90,
       color: '#fff',
       fontWeight: '900',
       
@@ -54,7 +55,7 @@ export const createStyles = (colors: AppColors) =>
       ...typography.h3,
       color: colors.text,
       marginBottom: space.lg,
-      textAlign: 'left',
+      textAlign: 'auto',
       fontWeight: '800',
     },
     phoneRow: {
@@ -94,13 +95,13 @@ export const createStyles = (colors: AppColors) =>
       color: colors.text,
       paddingHorizontal: space.md,
       height: '100%',
-      textAlign: 'left',
+      textAlign: 'auto',
     },
     errorText: {
       ...typography.caption,
       color: colors.error,
       marginBottom: space.sm,
-      textAlign: 'left',
+      textAlign: 'auto',
     },
 
     // ── Terms ────────────────────────────────────────────
@@ -134,7 +135,7 @@ export const createStyles = (colors: AppColors) =>
       flex: 1,
       ...typography.caption,
       color: colors.textSecondary,
-      textAlign: 'left',
+      textAlign: 'auto',
       lineHeight: 18,
     },
     termsLink: {

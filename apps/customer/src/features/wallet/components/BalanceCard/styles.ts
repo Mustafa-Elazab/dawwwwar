@@ -14,7 +14,5 @@ export const createStyles = (colors: AppColors) =>
       ...shadows.lg,
     },
     label: { ...typography.label, color: 'rgba(255,255,255,0.8)' },
-    amount: { ...typography.h1, color: '#fff', fontWeight: '800' },
-    currency: { ...typography.h4, color: 'rgba(255,255,255,0.9)' },
-    amountRow: { flexDirection: 'row', alignItems: 'flex-end', gap: space.sm },
+    amount: { ...typography.h1, color: '#fff', fontWeight: '800', textAlign: 'center' },
   });

@@ -1,6 +1,8 @@
-import { StyleSheet } from 'react-native';
+import { I18nManager, StyleSheet } from 'react-native';
 import type { AppColors } from '@dawwar/theme';
 import { space, typography, radius, shadows } from '@dawwar/theme';
+
+const ltrTextAlign = 'left' as const;
 
 export const createStyles = (colors: AppColors) =>
   StyleSheet.create({
@@ -24,6 +26,7 @@ export const createStyles = (colors: AppColors) =>
     content: {
       flex: 1,
       minWidth: 0,
+      alignItems: I18nManager.isRTL ? 'flex-end' : 'flex-start',
     },
     topRow: {
       flexDirection: 'row',
@@ -31,13 +34,29 @@ export const createStyles = (colors: AppColors) =>
       alignItems: 'center',
       marginBottom: 6,
       gap: space.sm,
+      alignSelf: 'stretch',
     },
-    orderNum: { ...typography.caption, color: colors.textSecondary, fontWeight: '800' },
+    orderNum: {
+      ...typography.caption,
+      color: colors.textSecondary,
+      fontWeight: '800',
+      flex: 1,
+      minWidth: 0,
+      textAlign: ltrTextAlign,
+      writingDirection: 'ltr',
+    },
+    statusBadge: {
+      flexShrink: 1,
+      maxWidth: 132,
+    },
     itemName: {
       ...typography.label,
       color: colors.text,
       fontWeight: '900',
       marginBottom: 6,
+      alignSelf: 'stretch',
+      textAlign: 'auto',
+      writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr',
     },
     metaRow: {
       flexDirection: 'row',

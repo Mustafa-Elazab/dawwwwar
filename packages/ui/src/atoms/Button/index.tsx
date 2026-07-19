@@ -85,6 +85,8 @@ export function Button({
           <>
             {leftIcon}
             <Text
+              numberOfLines={1}
+              ellipsizeMode="tail"
               style={[
                 styles[labelStyleKey],
                 styles[

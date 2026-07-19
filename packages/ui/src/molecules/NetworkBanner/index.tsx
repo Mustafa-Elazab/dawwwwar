@@ -2,7 +2,8 @@ import React, { useEffect, useRef } from 'react';
 import { View, Animated } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
 import { useTheme } from '@dawwar/theme';
-import { Text, Icon } from '../../atoms';
+import { Icon } from '../../atoms/Icon';
+import { Text } from '../../atoms/Text';
 import { createStyles } from './styles';
 import type { NetworkBannerProps } from './types';
 

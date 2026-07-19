@@ -1,16 +1,13 @@
 import { TokenStorage } from '@dawwar/api-client';
-import { storage } from '../storage/mmkv';
-
-const ACCESS_TOKEN_KEY = 'driver_access_token';
-const REFRESH_TOKEN_KEY = 'driver_refresh_token';
+import { storage, StorageKeys } from '../storage/mmkv';
 
 export const mmkvTokenStorage: TokenStorage = {
-  getAccessToken: () => storage.getString(ACCESS_TOKEN_KEY) || null,
-  setAccessToken: (token: string) => storage.set(ACCESS_TOKEN_KEY, token),
-  getRefreshToken: () => storage.getString(REFRESH_TOKEN_KEY) || null,
-  setRefreshToken: (token: string) => storage.set(REFRESH_TOKEN_KEY, token),
+  getAccessToken: () => storage.getString(StorageKeys.ACCESS_TOKEN) || null,
+  setAccessToken: (token: string) => storage.set(StorageKeys.ACCESS_TOKEN, token),
+  getRefreshToken: () => storage.getString(StorageKeys.REFRESH_TOKEN) || null,
+  setRefreshToken: (token: string) => storage.set(StorageKeys.REFRESH_TOKEN, token),
   clearTokens: () => {
-    storage.delete(ACCESS_TOKEN_KEY);
-    storage.delete(REFRESH_TOKEN_KEY);
+    storage.delete(StorageKeys.ACCESS_TOKEN);
+    storage.delete(StorageKeys.REFRESH_TOKEN);
   },
 };

@@ -44,7 +44,7 @@ export function MerchantTabBar({ active, onChange }: TabBarProps) {
   });
 
   return (
-    <View style={[styles.row, { borderBottomColor: colors.border, backgroundColor: colors.surface, flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+    <View style={[styles.row, { borderBottomColor: colors.border, backgroundColor: colors.surface }]}>
       {TABS.map((tab) => (
         <TouchableOpacity
           key={tab.key}
@@ -72,7 +72,7 @@ export function MerchantTabBar({ active, onChange }: TabBarProps) {
           { 
             backgroundColor: colors.primary,
             width: TAB_WIDTH,
-            left: 0, // Explicitly set left to allow mirroring to right: 0 in RTL
+            start: 0,
             transform: [{ translateX }]
           }
         ]} 

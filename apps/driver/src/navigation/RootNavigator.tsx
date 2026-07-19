@@ -3,7 +3,7 @@ import { useAppSelector } from '../store/hooks';
 import { selectIsAuthenticated, selectIsLoading, selectIsApproved } from '../store/slices/auth.slice';
 import { AuthNavigator } from './AuthNavigator';
 import { DriverTabs } from './DriverTabs';
-import { PendingApprovalScreen } from './placeholders';
+import { PendingApprovalScreen } from '../features/auth/screens/PendingApprovalScreen';
 import { JS_SplashScreen } from '../features/auth/components/SplashScreen';
 
 export function RootNavigator() {

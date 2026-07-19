@@ -1,5 +1,6 @@
-import type { ListRenderItem, StyleProp, ViewStyle, SectionListData } from 'react-native';
+import type { ListRenderItem, StyleProp, ViewStyle } from 'react-native';
 import type { ScreenTemplateProps } from '../ScreenTemplate/types';
+import type { ScreenStateConfig } from '../AppScreenTemplate/types';
 
 export interface ListScreenTemplateProps<T> extends ScreenTemplateProps {
   // Data
@@ -10,6 +11,7 @@ export interface ListScreenTemplateProps<T> extends ScreenTemplateProps {
   // State flags — template handles rendering automatically
   isLoading?: boolean;
   isError?: boolean;
+  state?: ScreenStateConfig;
   onRetry?: () => void;
   onRefresh?: () => void;
   refreshing?: boolean;
@@ -26,6 +28,7 @@ export interface ListScreenTemplateProps<T> extends ScreenTemplateProps {
   ItemSeparatorComponent?: React.ComponentType | null;
   numColumns?: number;
   columnWrapperStyle?: StyleProp<ViewStyle>;
+  contentContainerStyle?: StyleProp<ViewStyle>;
   onEndReached?: () => void;
   onEndReachedThreshold?: number;
   showsVerticalScrollIndicator?: boolean;

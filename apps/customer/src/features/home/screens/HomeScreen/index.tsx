@@ -3,13 +3,11 @@ import {
   View,
   FlatList,
   TouchableOpacity,
-  ScrollView,
   I18nManager,
   Dimensions,
-  RefreshControl,
 } from 'react-native';
 import { useTranslation } from '@dawwar/i18n';
-import { ScreenTemplate, Text, Icon, Skeleton } from '@dawwar/ui';
+import { ScrollScreenTemplate, Text, Icon, Skeleton } from '@dawwar/ui';
 import { useTheme } from '@dawwar/theme';
 import BottomSheet from '@gorhom/bottom-sheet';
 import { BannerSlider } from '../../components/BannerSlider';
@@ -86,19 +84,14 @@ export function HomeScreen() {
 
   return (
     <>
-      <ScreenTemplate header={renderHeader()} backgroundColor={colors.background}>
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          refreshControl={
-            <RefreshControl
-              refreshing={ctrl.isRefreshing}
-              onRefresh={ctrl.handleRefresh}
-              colors={[colors.primary]}
-              tintColor={colors.primary}
-            />
-          }
-          contentContainerStyle={styles.scrollContent}
-        >
+      <ScrollScreenTemplate
+        header={renderHeader()}
+        backgroundColor={colors.background}
+        refreshing={ctrl.isRefreshing}
+        onRefresh={ctrl.handleRefresh}
+        contentStyle={styles.scrollContent}
+        state={ctrl.screenState}
+      >
           <View style={styles.bannerContainer}>
             {ctrl.isLoading ? (
               <Skeleton width="100%" height={160} style={{ borderRadius: 16 }} />
@@ -156,11 +149,7 @@ export function HomeScreen() {
                   onPress={ctrl.handleSeeAllCategories}
                 >
                   <View style={[styles.categoryIconCircle, { backgroundColor: colors.surfaceVariant }]}>
-                    <Icon
-                      name={I18nManager.isRTL ? 'arrow-left' : 'arrow-right'}
-                      size={24}
-                      color={colors.primary}
-                    />
+                    <Icon name={I18nManager.isRTL? "arrow-left":"arrow-right"} size={24} color={colors.primary} />
                   </View>
                   <Text style={styles.categoryLabel}>{t('home.see_all')}</Text>
                 </TouchableOpacity>
@@ -189,6 +178,7 @@ export function HomeScreen() {
                 <View key={product.id} style={styles.productGridItem}>
                   <ProductCard
                     product={product}
+                    onPress={() => ctrl.handleProductPress(product.id)}
                     onAdd={() => ctrl.handleProductAdd(product)}
                     isLiked={ctrl.isProductLiked(product.id)}
                     onToggleLike={() => ctrl.handleToggleFavorite(product.id)}
@@ -226,16 +216,15 @@ export function HomeScreen() {
               decelerationRate="fast"
             />
           )}
-        </ScrollView>
-      </ScreenTemplate>
+      </ScrollScreenTemplate>
 
       <TouchableOpacity
         style={styles.fab}
         onPress={ctrl.handleCustomOrder}
         activeOpacity={0.9}
       >
-        <Text style={styles.fabText}>{t('home.custom_order_btn')}</Text>
         <Icon name="plus" size={20} color="#fff" />
+        <Text style={styles.fabText}>{t('home.custom_order_btn')}</Text>
       </TouchableOpacity>
 
       <LocationBottomSheet

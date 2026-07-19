@@ -131,8 +131,8 @@ export class OrdersController {
   @Get('driver/available')
   @Roles(UserRole.DRIVER)
   @ApiOperation({ summary: 'Get available orders for driver' })
-  getAvailable() {
-    return this.ordersService.getAvailableOrders();
+  getAvailable(@CurrentUser() user: UserEntity) {
+    return this.ordersService.getAvailableOrders(user.id);
   }
 
   @Get('driver/active')

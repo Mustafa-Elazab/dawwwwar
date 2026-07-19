@@ -6,10 +6,12 @@ import { selectCartCount, selectCartTotal } from '../../../store/slices/cart.sli
 import { useTheme } from '@dawwar/theme';
 import { Icon, Text } from '@dawwar/ui';
 import { TAB_ROUTES } from '../../../navigation/routes';
+import { useTranslation } from '@dawwar/i18n';
 
 export function GlobalCartButton() {
   const { colors } = useTheme();
   const navigation = useNavigation<any>();
+  const { t } = useTranslation();
   const cartCount = useAppSelector(selectCartCount);
   const cartTotal = useAppSelector(selectCartTotal);
 
@@ -22,18 +24,18 @@ export function GlobalCartButton() {
         activeOpacity={0.9}
         onPress={() => navigation.navigate('CustomerTabs', { screen: TAB_ROUTES.BASKET_TAB })}
       >
-        <View style={styles.left}>
+        <View style={styles.leading}>
           <View style={[styles.badge, { backgroundColor: colors.surface }]}>
             <Text variant="caption" style={{ color: colors.primary, fontWeight: '700' }}>
               {cartCount}
             </Text>
           </View>
           <Text variant="body1" style={{ color: '#fff', fontWeight: '600' }}>
-            View Cart
+            {t('cart.view_cart')}
           </Text>
         </View>
         <Text variant="body1" style={{ color: '#fff', fontWeight: '700' }}>
-          {cartTotal.toFixed(2)} EGP
+          {cartTotal.toFixed(2)} {t('common.egp')}
         </Text>
       </TouchableOpacity>
     </View>
@@ -44,8 +46,8 @@ const styles = StyleSheet.create({
   container: {
     position: 'absolute',
     bottom: 70, // Above the tab bar (60 + 10 margin)
-    left: 16,
-    right: 16,
+    start: 16,
+    end: 16,
     zIndex: 999,
   },
   button: {
@@ -61,7 +63,7 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 5,
   },
-  left: {
+  leading: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,

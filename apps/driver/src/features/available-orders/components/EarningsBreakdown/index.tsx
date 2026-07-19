@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useTheme } from '@dawwar/theme';
-import { Text, Divider } from '@dawwar/ui';
+import { Divider } from '../../../../../../../packages/ui/src/atoms/Divider';
+import { Text } from '../../../../../../../packages/ui/src/atoms/Text';
 import { space, typography } from '@dawwar/theme';
 import { useTranslation } from '@dawwar/i18n';
 

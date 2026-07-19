@@ -17,6 +17,10 @@ export const ORDER_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
     OrderStatus.CANCELLED,
     OrderStatus.PICKED_UP, // Direct pickup if driver already at shop
   ],
+  [OrderStatus.WAITING_DRIVER_ACCEPT]: [
+    OrderStatus.DRIVER_ASSIGNED,
+    OrderStatus.CANCELLED,
+  ],
   [OrderStatus.DRIVER_ASSIGNED]: [
     OrderStatus.AT_SHOP,
     OrderStatus.PICKED_UP,
@@ -84,4 +88,5 @@ export const FINAL_STATUSES = [
 export const ALLOW_CUSTOMER_CANCEL = [
   OrderStatus.PENDING,
   OrderStatus.ACCEPTED,
+  OrderStatus.WAITING_DRIVER_ACCEPT,
 ];

@@ -1,18 +1,21 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { likedApi } from './api';
 import { useAppSelector } from '../../../store/hooks';
-import { selectIsAuthenticated } from '../../../store/slices/auth.slice';
+import { selectIsAuthenticated, selectUser } from '../../../store/slices/auth.slice';
 
 export const LIKED_KEYS = {
   all: ['liked'] as const,
+  byUser: (userId: string) => ['liked', userId] as const,
 };
 
 export function useLikedProducts() {
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  const userId = useAppSelector(selectUser)?.id;
+
   return useQuery({
-    queryKey: LIKED_KEYS.all,
+    queryKey: userId ? LIKED_KEYS.byUser(userId) : LIKED_KEYS.all,
     queryFn: likedApi.getFavorites,
-    enabled: isAuthenticated,
+    enabled: isAuthenticated && Boolean(userId),
     staleTime: 60_000,
   });
 }

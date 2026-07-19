@@ -111,8 +111,8 @@ export const createStyles = (colors: AppColors) =>
     loadingRow: {
       position: 'absolute',
       top: '50%',
-      left: '50%',
-      marginLeft: -10,
+      start: '50%',
+      transform: [{ translateX: -10 }],
       marginTop: -10,
     },
     hintText: {

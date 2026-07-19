@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Linking } from 'react-native';
 import { useTheme } from '@dawwar/theme';
-import { Button } from '@dawwar/ui';
+import { DriverButton as Button } from '../../../../components/DriverButton';
 import { useTranslation } from '@dawwar/i18n';
 import { OrderStatus, OrderType } from '@dawwar/types';
 import { createStyles } from './styles';
@@ -51,8 +51,24 @@ export const StatusActionPanel = React.memo(({
         />
       )}
 
-      {/* IN_TRANSIT / PURCHASED → heading to customer */}
-      {(status === OrderStatus.IN_TRANSIT || status === OrderStatus.PURCHASED) && (
+      {/* PURCHASED / PICKED_UP → start delivery toward customer */}
+      {(status === OrderStatus.PURCHASED || status === OrderStatus.PICKED_UP) && (
+        <>
+          <View style={styles.row}>
+            <Button label={t('driver.navigate_customer')} onPress={onNavigate} variant="outline" style={styles.halfBtn} />
+            <Button label={t('driver.call_customer')} onPress={onCallContact} variant="outline" style={styles.halfBtn} />
+          </View>
+          <Button
+            label={t('driver.start_delivery')}
+            onPress={onConfirmPickup}
+            loading={isLoading}
+            fullWidth
+          />
+        </>
+      )}
+
+      {/* IN_TRANSIT → heading to customer */}
+      {status === OrderStatus.IN_TRANSIT && (
         <>
           <View style={styles.row}>
             <Button label={t('driver.navigate_customer')} onPress={onNavigate} variant="outline" style={styles.halfBtn} />

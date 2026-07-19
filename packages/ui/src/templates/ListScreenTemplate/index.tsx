@@ -37,6 +37,7 @@ export function ListScreenTemplate<T>({
 
   isLoading = false,
   isError = false,
+  state,
   onRetry,
   onRefresh,
   refreshing = false,
@@ -51,6 +52,7 @@ export function ListScreenTemplate<T>({
   ItemSeparatorComponent,
   numColumns,
   columnWrapperStyle,
+  contentContainerStyle,
   onEndReached,
   onEndReachedThreshold = 0.5,
   showsVerticalScrollIndicator = false,
@@ -61,11 +63,15 @@ export function ListScreenTemplate<T>({
   const { colors } = useTheme();
   const styles = createStyles(colors);
   const resolvedBg = backgroundColor ?? colors.background;
+  const resolvedIsLoading = state?.isLoading ?? isLoading;
+  const resolvedIsError = state?.isError ?? isError;
+  const resolvedIsEmpty = state?.isEmpty;
+  const resolvedEmptyState = state?.emptyState;
 
   const renderSkeletonItem = renderSkeleton ?? (() => <DefaultSkeleton />);
 
   // Loading state: render skeletonCount skeleton rows
-  if (isLoading) {
+  if (resolvedIsLoading) {
     return (
       <SafeAreaView style={[styles.safeArea, { backgroundColor: resolvedBg }, style]} edges={edges}>
         <StatusBar barStyle={colors.statusBarStyle} backgroundColor={resolvedBg} />
@@ -77,24 +83,22 @@ export function ListScreenTemplate<T>({
             </React.Fragment>
           ))}
         </View>
-        <NetworkBanner />
       </SafeAreaView>
     );
   }
 
   // Error state
-  if (isError) {
+  if (resolvedIsError) {
     return (
       <SafeAreaView style={[styles.safeArea, { backgroundColor: resolvedBg }, style]} edges={edges}>
         <StatusBar barStyle={colors.statusBarStyle} backgroundColor={resolvedBg} />
         {headerProps ? <Header {...headerProps} /> : header}
-        <ErrorState onRetry={onRetry} />
-        <NetworkBanner />
+        <ErrorState message={state?.errorMessage} onRetry={onRetry} />
       </SafeAreaView>
     );
   }
 
-  const isEmpty = !data || data.length === 0;
+  const isEmpty = resolvedIsEmpty ?? (!data || data.length === 0);
 
   return (
     <SafeAreaView
@@ -111,13 +115,14 @@ export function ListScreenTemplate<T>({
         keyExtractor={keyExtractor}
         ListHeaderComponent={ListHeaderComponent}
         ListFooterComponent={ListFooterComponent}
+        contentContainerStyle={contentContainerStyle}
         ListEmptyComponent={
           isEmpty ? (
             <EmptyState
-              icon={emptyIcon}
-              title={emptyTitle}
-              subtitle={emptySubtitle}
-              action={emptyAction}
+              icon={resolvedEmptyState?.icon ?? emptyIcon}
+              title={resolvedEmptyState?.title ?? emptyTitle}
+              subtitle={resolvedEmptyState?.subtitle ?? emptySubtitle}
+              action={resolvedEmptyState?.action ?? emptyAction}
             />
           ) : null
         }
@@ -135,7 +140,6 @@ export function ListScreenTemplate<T>({
         initialNumToRender={8}
       />
       {footer}
-      <NetworkBanner />
     </SafeAreaView>
   );
 }

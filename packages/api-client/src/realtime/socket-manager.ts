@@ -7,13 +7,17 @@ export class SocketManager {
 
   constructor(private url: string) {}
 
-  connect() {
-    if (this.socket?.connected) return this.socket;
+  connect(): Socket | null {
+    if (this.socket) return this.socket;
 
     const token = tokenManager.accessToken;
+    if (!token) {
+      console.warn('[Socket] Connection skipped: missing access token');
+      return null;
+    }
 
     this.socket = io(this.url, {
-      auth: { token: `Bearer ${token}` },
+      auth: { token },
       transports: ['websocket'],
       autoConnect: true,
       reconnection: true,
@@ -85,11 +89,13 @@ export class SocketManager {
   }
 
   emit(event: string, data: any) {
+    if (!this.socket?.connected && !this.connect()) return;
     this.socket?.emit(event, data);
   }
 
   on(event: string, callback: (data: any) => void) {
-    this.socket?.on(event, callback);
+    const socket = this.socket ?? this.connect();
+    socket?.on(event, callback);
   }
 
   off(event: string, callback?: (data: any) => void) {

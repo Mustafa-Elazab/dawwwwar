@@ -63,6 +63,13 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
 
       // Auto-join user's personal room
       void client.join(Rooms.customer(payload.sub));
+      if (payload.role === 'DRIVER') {
+        void client.join(Rooms.driver(payload.sub));
+        void client.join(Rooms.availableDrivers());
+      }
+      if (payload.role === 'ADMIN') {
+        void client.join(Rooms.adminLive());
+      }
     } catch {
       this.logger.warn(`Client disconnected (bad token): ${client.id}`);
       client.disconnect(true);

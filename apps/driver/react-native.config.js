@@ -17,15 +17,12 @@ module.exports = {
     // Phase 2 — voice recording for Custom Order Screen (Task 16)
     '@react-native-voice/voice': { platforms: { android: null, ios: null } },
 
-    // Phase 2 — map views for Tracking Screen
-    'react-native-maps': { platforms: { android: null, ios: null } },
-
     // Phase 2 — Firebase push notifications
 
     // Phase 2 — optimised image loading
     'react-native-fast-image': { platforms: { android: null, ios: null } },
 
-    // Reanimated v3 - exclude until actively used
-    'react-native-reanimated': { platforms: { android: null, ios: null } },
+    // Uses paid Android licensing; driver currently relies on geolocation-service instead.
+    'react-native-background-geolocation': { platforms: { android: null } },
   },
 };

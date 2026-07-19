@@ -1,7 +1,9 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { useTheme, space, radius, shadows, typography } from '@dawwar/theme';
-import { Text, Badge, Icon } from '@dawwar/ui';
+import { Badge } from '../../../../../../../packages/ui/src/atoms/Badge';
+import { Icon } from '../../../../../../../packages/ui/src/atoms/Icon';
+import { Text } from '../../../../../../../packages/ui/src/atoms/Text';
 import { useTranslation } from '@dawwar/i18n';
 import type { Order } from '@dawwar/types';
 

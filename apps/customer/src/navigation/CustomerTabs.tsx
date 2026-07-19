@@ -1,36 +1,34 @@
 import React from 'react';
 import {
-  View,
-  StyleSheet,
+  I18nManager,
   Pressable,
-  Platform,
+  StyleSheet,
+  View,
 } from 'react-native';
 import {
-  createBottomTabNavigator,
   BottomTabBarProps,
+  createBottomTabNavigator,
 } from '@react-navigation/bottom-tabs';
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
-
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from '@dawwar/i18n';
 import { useTheme } from '@dawwar/theme';
 import { Icon, Text } from '@dawwar/ui';
-
 import {
-  TAB_ROUTES,
+  CATEGORY_ROUTES,
   HOME_ROUTES,
   LIKED_ROUTES,
   ORDER_ROUTES,
   PROFILE_ROUTES,
+  TAB_ROUTES,
 } from './routes';
-
 import type { CustomerTabParamList } from './types';
-
+import { CartModal } from './placeholders';
+import { CategoriesStack } from './stacks/CategoriesStack';
 import { HomeStack } from './stacks/HomeStack';
+import { LikedStack } from './stacks/LikedStack';
 import { OrdersStack } from './stacks/OrdersStack';
 import { ProfileStack } from './stacks/ProfileStack';
-import { LikedStack } from './stacks/LikedStack';
-import { CartModal } from './placeholders';
-
-import { useTranslation } from 'react-i18next';
 
 const Tab = createBottomTabNavigator<CustomerTabParamList>();
 
@@ -39,69 +37,75 @@ const TAB_CONFIG = {
     activeIcon: 'home',
     inactiveIcon: 'home-outline',
     label: 'mainTabs.home',
+    rootRoute: HOME_ROUTES.HOME,
+    visible: true,
   },
-
-  [TAB_ROUTES.BASKET_TAB]: {
-    activeIcon: 'basket',
-    inactiveIcon: 'basket-outline',
-    label: 'mainTabs.basket',
+  [TAB_ROUTES.CATEGORY_TAB]: {
+    activeIcon: 'view-grid',
+    inactiveIcon: 'view-grid-outline',
+    label: 'mainTabs.categories',
+    rootRoute: CATEGORY_ROUTES.CATEGORIES,
+    visible: false,
   },
-
   [TAB_ROUTES.ORDERS_TAB]: {
     activeIcon: 'clipboard-text',
     inactiveIcon: 'clipboard-text-outline',
     label: 'mainTabs.orders',
+    rootRoute: ORDER_ROUTES.ORDERS_LIST,
+    visible: true,
   },
-
-  [TAB_ROUTES.LIKED_TAB]: {
-    activeIcon: 'heart',
-    inactiveIcon: 'heart-outline',
-    label: 'mainTabs.liked',
-  },
-
   [TAB_ROUTES.PROFILE_TAB]: {
     activeIcon: 'account-circle',
     inactiveIcon: 'account-circle-outline',
     label: 'mainTabs.profile',
+    rootRoute: PROFILE_ROUTES.PROFILE,
+    visible: true,
+  },
+  [TAB_ROUTES.BASKET_TAB]: {
+    activeIcon: 'basket',
+    inactiveIcon: 'basket-outline',
+    label: 'mainTabs.basket',
+    rootRoute: TAB_ROUTES.BASKET_TAB,
+    visible: true,
+  },
+  [TAB_ROUTES.LIKED_TAB]: {
+    activeIcon: 'heart',
+    inactiveIcon: 'heart-outline',
+    label: 'mainTabs.liked',
+    rootRoute: LIKED_ROUTES.LIKED,
+    visible: true,
   },
 } as const;
 
-const TAB_BAR_VISIBLE_ROUTES: string[] = [
-  HOME_ROUTES.HOME,
-  TAB_ROUTES.BASKET_TAB,
-  ORDER_ROUTES.ORDERS_LIST,
-  LIKED_ROUTES.LIKED,
-  PROFILE_ROUTES.PROFILE,
-];
+function shouldShowTabBar(route: BottomTabBarProps['state']['routes'][number]) {
+  const config = TAB_CONFIG[route.name as keyof typeof TAB_CONFIG];
+  if (!config?.visible) return false;
 
-const getTabBarVisibility = (route: any) => {
-  const routeName = getFocusedRouteNameFromRoute(route) ?? '';
-  
-  // If we are at the root of the tab stack (routeName is empty), show it
-  if (!routeName) return true;
+  const focusedRoute = getFocusedRouteNameFromRoute(route);
+  return !focusedRoute || focusedRoute === config.rootRoute;
+}
 
-  return TAB_BAR_VISIBLE_ROUTES.includes(routeName);
-};
-
-function CustomTabBar({
-  state,
-  navigation,
-}: BottomTabBarProps) {
+function CustomTabBar({ state, navigation }: BottomTabBarProps) {
   const { colors } = useTheme();
   const { t } = useTranslation();
-
-  // Check if current focused route should hide the tab bar
+  const insets = useSafeAreaInsets();
   const activeRoute = state.routes[state.index];
-  const isVisible = getTabBarVisibility(activeRoute);
 
-  if (!isVisible) return null;
+  if (!shouldShowTabBar(activeRoute)) return null;
+
+  const visibleRoutes = state.routes.filter((route) => {
+    const config = TAB_CONFIG[route.name as keyof typeof TAB_CONFIG];
+    return config?.visible;
+  });
 
   return (
     <View
       style={[
         styles.wrapper,
         {
-          backgroundColor: colors.background,
+          backgroundColor: colors.tabBar,
+          borderTopColor: colors.tabBarBorder,
+          paddingBottom: Math.max(insets.bottom, 6),
         },
       ]}
     >
@@ -109,105 +113,87 @@ function CustomTabBar({
         style={[
           styles.container,
           {
-            backgroundColor: colors.surface,
-            borderColor: colors.border,
+            backgroundColor: colors.tabBar,
           },
         ]}
       >
-        {state.routes.map((route, index) => {
-          const isFocused = state.index === index;
+        <View style={styles.tabsRow}>
+          {visibleRoutes.map((route) => {
+            const routeIndex = state.routes.findIndex((candidate) => candidate.key === route.key);
+            const isFocused = state.index === routeIndex;
+            const config = TAB_CONFIG[route.name as keyof typeof TAB_CONFIG];
+            const color = isFocused ? colors.primary : colors.textTertiary;
 
-          const config =
-            TAB_CONFIG[
-              route.name as keyof typeof TAB_CONFIG
-            ];
+            const onPress = () => {
+              const event = navigation.emit({
+                type: 'tabPress',
+                target: route.key,
+                canPreventDefault: true,
+              });
 
-          const onPress = () => {
-            const event = navigation.emit({
-              type: 'tabPress',
-              target: route.key,
-              canPreventDefault: true,
-            });
-
-            if (!event.defaultPrevented) {
-              if (route.name === TAB_ROUTES.ORDERS_TAB) {
-                navigation.navigate(TAB_ROUTES.ORDERS_TAB, {
-                  screen: ORDER_ROUTES.ORDERS_LIST,
-                });
-                return;
-              }
+              if (event.defaultPrevented) return;
 
               if (route.name === TAB_ROUTES.HOME_TAB) {
-                navigation.navigate(TAB_ROUTES.HOME_TAB, {
-                  screen: HOME_ROUTES.HOME,
-                });
+                navigation.navigate(TAB_ROUTES.HOME_TAB, { screen: HOME_ROUTES.HOME });
                 return;
               }
 
-              if (!isFocused) {
-                navigation.navigate(route.name);
+              if (route.name === TAB_ROUTES.CATEGORY_TAB) {
+                navigation.navigate(TAB_ROUTES.CATEGORY_TAB, { screen: CATEGORY_ROUTES.CATEGORIES });
+                return;
               }
-            }
-          };
 
-          const color = isFocused
-            ? colors.primary
-            : colors.textSecondary;
+              if (route.name === TAB_ROUTES.ORDERS_TAB) {
+                navigation.navigate(TAB_ROUTES.ORDERS_TAB, { screen: ORDER_ROUTES.ORDERS_LIST });
+                return;
+              }
 
-          return (
-            <Pressable
-              key={route.key}
-              onPress={onPress}
-              style={styles.tabButton}
-            >
-              <View
-  style={[
-    styles.activeContainer,
-    {
-      backgroundColor: isFocused
-        ? `${colors.primary}12`
-        : 'transparent',
+              if (route.name === TAB_ROUTES.BASKET_TAB) {
+                navigation.navigate(TAB_ROUTES.BASKET_TAB);
+                return;
+              }
 
-      borderWidth: isFocused ? 1 : 0,
+              if (route.name === TAB_ROUTES.LIKED_TAB) {
+                navigation.navigate(TAB_ROUTES.LIKED_TAB, { screen: LIKED_ROUTES.LIKED });
+                return;
+              }
 
-      borderColor: isFocused
-        ? `${colors.primary}20`
-        : 'transparent',
-    },
-  ]}
->
-                <View style={styles.iconContainer}>
-                  <Icon
-                    name={
-                      isFocused
-                        ? config.activeIcon
-                        : config.inactiveIcon
-                    }
-                    size={24}
-                    color={color}
-                  />
+              if (route.name === TAB_ROUTES.PROFILE_TAB) {
+                navigation.navigate(TAB_ROUTES.PROFILE_TAB, { screen: PROFILE_ROUTES.PROFILE });
+              }
+            };
 
-                 
-                </View>
-
-                {isFocused ? (
-                  <Text
+            return (
+              <Pressable
+                key={route.key}
+                onPress={onPress}
+                accessibilityRole="button"
+                accessibilityState={isFocused ? { selected: true } : {}}
+                style={styles.tabButton}
+              >
+                <View style={styles.tabItem}>
+                  <View
                     style={[
-                      styles.label,
-                      {
-                        color,
-                        fontWeight: '800',
+                      styles.iconBubble,
+                      isFocused && {
+                        backgroundColor: colors.primaryLight,
                       },
                     ]}
-                    numberOfLines={1}
                   >
+                    <Icon
+                      name={isFocused ? config.activeIcon : config.inactiveIcon}
+                      size={22}
+                      color={color}
+                    />
+                  </View>
+                  <Text style={[styles.label, { color }]} numberOfLines={1}>
                     {t(config.label)}
                   </Text>
-                ) : null}
-              </View>
-            </Pressable>
-          );
-        })}
+                </View>
+              </Pressable>
+            );
+          })}
+        </View>
       </View>
     </View>
   );
@@ -227,94 +213,57 @@ export function CustomerTabs() {
         },
       }}
     >
-      <Tab.Screen
-        name={TAB_ROUTES.HOME_TAB}
-        component={HomeStack}
-      />
-
-      <Tab.Screen
-        name={TAB_ROUTES.BASKET_TAB}
-        component={CartModal}
-      />
-
-      <Tab.Screen
-        name={TAB_ROUTES.ORDERS_TAB}
-        component={OrdersStack}
-      />
-
-      <Tab.Screen
-        name={TAB_ROUTES.LIKED_TAB}
-        component={LikedStack}
-      />
-
-      <Tab.Screen
-        name={TAB_ROUTES.PROFILE_TAB}
-        component={ProfileStack}
-      />
+      <Tab.Screen name={TAB_ROUTES.HOME_TAB} component={HomeStack} />
+      <Tab.Screen name={TAB_ROUTES.ORDERS_TAB} component={OrdersStack} />
+      <Tab.Screen name={TAB_ROUTES.BASKET_TAB} component={CartModal} />
+      <Tab.Screen name={TAB_ROUTES.LIKED_TAB} component={LikedStack} />
+      <Tab.Screen name={TAB_ROUTES.PROFILE_TAB} component={ProfileStack} />
+      <Tab.Screen name={TAB_ROUTES.CATEGORY_TAB} component={CategoriesStack} />
     </Tab.Navigator>
   );
 }
+
 const styles = StyleSheet.create({
   wrapper: {
-    paddingHorizontal: 12,
-    paddingBottom: Platform.OS === 'ios' ? 10 : 6,
-    paddingTop: 2,
-
-    backgroundColor: 'transparent',
+    borderTopWidth: 1,
+    paddingHorizontal: 6,
+    paddingTop: 6,
   },
-
   container: {
+    width: '100%',
+    paddingHorizontal: 4,
+    paddingVertical: 2,
+  },
+  tabsRow: {
+    minHeight: 58,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-
-    alignSelf: 'center',
-
-    width: '94%',
-
-    borderRadius: 10,
-
-    borderWidth: 1,
-
-    paddingHorizontal: 8,
-    paddingVertical: 6,
-
-    shadowColor: '#000',
-
-    shadowOffset: { width: 0, height: 0 },
-
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-
-    elevation: 6,
   },
-
   tabButton: {
     flex: 1,
-  },
-
-  activeContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-
-    borderRadius: 999,
-
-    paddingVertical: 4,
-    paddingHorizontal: 4,
-
-    minHeight: 46,
-  },
-
-  iconContainer: {
     alignItems: 'center',
     justifyContent: 'center',
   },
-
+  tabItem: {
+    minWidth: 54,
+    minHeight: 54,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 3,
+  },
+  iconBubble: {
+    width: 42,
+    height: 30,
+    borderRadius: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   label: {
-    marginTop: 2,
-
     fontSize: 10,
-
+    lineHeight: 12,
+    fontWeight: '800',
     textAlign: 'center',
+    writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr',
   },
 });

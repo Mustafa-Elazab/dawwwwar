@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
-import { TabScreenTemplate, Header, Text, LoadingSpinner } from '@dawwar/ui';
+import { Text } from '../../../../../../../packages/ui/src/atoms/Text';
+import { LoadingSpinner } from '../../../../../../../packages/ui/src/molecules/LoadingSpinner';
+import { Header } from '../../../../../../../packages/ui/src/organisms/Header';
+import { TabScreenTemplate } from '../../../../../../../packages/ui/src/templates/TabScreenTemplate';
 import { useTheme } from '@dawwar/theme';
 import { space, typography, radius, shadows } from '@dawwar/theme';
 import { useTranslation } from '@dawwar/i18n';

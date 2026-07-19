@@ -5,4 +5,5 @@ export interface ProductRowProps {
   quantity: number;   // 0 if not in cart
   onAdd: () => void;
   onRemove: () => void;
+  onPress?: () => void;
 }

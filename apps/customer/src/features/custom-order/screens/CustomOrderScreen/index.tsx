@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { View, TouchableOpacity, ScrollView } from 'react-native';
+import { I18nManager, View, TouchableOpacity, ScrollView } from 'react-native';
 import { useTranslation } from '@dawwar/i18n';
 import { ScreenTemplate, Text, Button, Icon } from '@dawwar/ui';
 import { space, useTheme } from '@dawwar/theme';
@@ -83,8 +83,8 @@ export function CustomOrderScreen() {
           <View style={styles.stickyFooter}>
             <View style={styles.summaryRow}>
               <View style={styles.summaryItem}>
-                <Icon name={ctrl.shopAddress ? "check-circle" : "circle-outline"} size={16} color={ctrl.shopAddress ? colors.success : colors.textDisabled} />
-                <Text style={[styles.summaryText, { color: ctrl.shopAddress ? colors.text : colors.textDisabled }]}>{t('custom_order.summary_address')}</Text>
+                <Icon name={ctrl.hasPickedShopLocation ? "check-circle" : "circle-outline"} size={16} color={ctrl.hasPickedShopLocation ? colors.success : colors.textDisabled} />
+                <Text style={[styles.summaryText, { color: ctrl.hasPickedShopLocation ? colors.text : colors.textDisabled }]}>{t('custom_order.summary_address')}</Text>
               </View>
               <View style={styles.summaryItem}>
                 <Icon name={(ctrl.textDescription || ctrl.voiceUri) ? "check-circle" : "circle-outline"} size={16} color={(ctrl.textDescription || ctrl.voiceUri) ? colors.success : colors.textDisabled} />
@@ -118,21 +118,19 @@ export function CustomOrderScreen() {
                   {ctrl.shopAddress || t('custom_order.shop_location_hint')}
                 </Text>
               </View>
-              <Icon name="chevron-right" size={22} color={colors.textTertiary} />
+              <Icon
+                name={I18nManager.isRTL ? 'chevron-left' : 'chevron-right'}
+                size={22}
+                color={colors.textTertiary}
+              />
             </TouchableOpacity>
+            {ctrl.errors.shopAddress ? <Text style={styles.errorText}>{ctrl.errors.shopAddress}</Text> : null}
 
             <StyledInput
               icon="store-outline"
               placeholder={t('custom_order.shop_name_placeholder')}
               value={ctrl.shopName}
               onChangeText={ctrl.setShopName}
-            />
-            <StyledInput
-              icon="map-marker-outline"
-              placeholder={t('custom_order.shop_address_placeholder')}
-              value={ctrl.shopAddress}
-              onChangeText={ctrl.setShopAddress}
-              error={ctrl.errors.shopAddress}
             />
           </Section>
 
@@ -195,21 +193,14 @@ export function CustomOrderScreen() {
 
             {/* Payment method */}
             <View style={{ marginTop: space.sm }}>
-              {(['CASH', 'WALLET'] as const).map((method) => (
-                <TouchableOpacity
-                  key={method}
-                  style={styles.paymentRow}
-                  onPress={() => ctrl.setPaymentMethod(method)}
-                  activeOpacity={0.7}
-                >
-                  <View style={[styles.radio, ctrl.paymentMethod === method && styles.radioSelected]}>
-                    {ctrl.paymentMethod === method && <View style={styles.radioDot} />}
-                  </View>
-                  <Text variant="label" color={colors.text}>
-                {method === 'CASH' ? t('checkout.cash') : t('checkout.wallet')}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+              <TouchableOpacity style={styles.paymentRow} activeOpacity={0.7}>
+                <View style={[styles.radio, styles.radioSelected]}>
+                  <View style={styles.radioDot} />
+                </View>
+                <Text variant="label" color={colors.text}>
+                  {t('checkout.cash')}
+                </Text>
+              </TouchableOpacity>
             </View>
             {ctrl.errors.budget ? <Text style={styles.errorText}>{ctrl.errors.budget}</Text> : null}
             {ctrl.errors.payment ? <Text style={styles.errorText}>{ctrl.errors.payment}</Text> : null}

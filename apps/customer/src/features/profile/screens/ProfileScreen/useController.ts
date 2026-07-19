@@ -15,11 +15,11 @@ import {
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { ProfileStackParamList } from '../../../../navigation/types';
 import { launchImageLibrary } from 'react-native-image-picker';
-import { useUpdateProfile, useUploadFile } from '@dawwar/api-client';
+import { useUpdateProfile, useUploadFile, useWallet } from '@dawwar/api-client';
 import Toast from 'react-native-toast-message';
 import { socket as socketManager } from '../../../../core/socket/socket';
 import { requestPushNotificationPermission } from '../../../../utils/notifications';
-import { ThemeMode } from '@dawwar/types';
+import { ThemeMode, type Wallet } from '@dawwar/types';
 import { useTheme } from '@dawwar/theme';
 
 interface ReactNativeFile {
@@ -42,6 +42,9 @@ export function useController() {
 
   const updateProfileMutation = useUpdateProfile();
   const uploadFileMutation = useUploadFile();
+  const walletQuery = useWallet({ enabled: !!user });
+  const wallet = walletQuery.data ? unwrap<Wallet>(walletQuery.data) : undefined;
+  const walletBalance = Number(wallet?.balance ?? 0);
 
   const handleLogout = useCallback(() => {
     Alert.alert(
@@ -123,6 +126,8 @@ export function useController() {
 
   return {
     user,
+    walletBalance,
+    walletBalanceLabel: `${walletBalance.toFixed(2)} ${t('common.egp')}`,
     navigate: navigation.navigate,
     handleLogin: () => dispatch(startAuthFlow()),
     handleLogout,

@@ -63,6 +63,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     ...typography.label,
     fontWeight: '800',
-    textAlign: I18nManager.isRTL ? 'right' : 'left',
+    textAlign: 'auto',
   },
 });

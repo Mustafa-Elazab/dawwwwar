@@ -1,6 +1,14 @@
 import api from '../../../core/api/client';
 import type { ApiResponse, Wallet, WalletTransaction } from '@dawwar/types';
 
+export interface WalletRechargeResponse {
+  paymentKey: string;
+  iframeId?: string;
+  checkoutUrl: string;
+  paymobOrderId?: string;
+  requestedAmount: number;
+}
+
 // ── Phase 2 real implementations ─────────────────────────────────────
 const realWalletApi = {
   getWallet: async (): Promise<ApiResponse<Wallet>> => {
@@ -11,7 +19,7 @@ const realWalletApi = {
     const { data } = await api.get('/wallet/transactions');
     return data;
   },
-  requestRecharge: async (amount: number) => {
+  requestRecharge: async (amount: number): Promise<ApiResponse<WalletRechargeResponse> | WalletRechargeResponse> => {
     const { data } = await api.post('/wallet/recharge', { amount });
     return data;
   },

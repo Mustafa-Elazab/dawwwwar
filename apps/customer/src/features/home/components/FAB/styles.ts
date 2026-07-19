@@ -7,7 +7,7 @@ export const createStyles = (colors: AppColors) =>
     fab: {
       position: 'absolute',
       bottom: space.xl + 65, // Positioned above bottom tab bar
-      right: space.base,
+      end: space.base,
       flexDirection: 'row',
       alignItems: 'center',
       backgroundColor: colors.primary,

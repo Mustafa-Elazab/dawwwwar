@@ -65,11 +65,12 @@ export class PlaceCustomOrderDto {
   @IsString()
   deliveryPhone: string;
 
-  @ApiProperty()
+  @ApiProperty({ required: false, description: 'Legacy client hint. The backend recalculates the fee from coordinates.' })
+  @IsOptional()
   @Type(() => Number)
   @IsNumber()
   @IsPositive()
-  deliveryFee: number;
+  deliveryFee?: number;
 
   @ApiProperty({ required: false, description: 'ISO date string for scheduled delivery' })
   @IsOptional()

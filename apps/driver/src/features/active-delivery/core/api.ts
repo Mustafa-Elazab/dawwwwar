@@ -9,7 +9,7 @@ const realActiveDeliveryApi = {
     return data;
   },
   updateStatus: async (orderId: string, status: OrderStatus, extra?: object) => {
-    const { data } = await api.patch(`/driver/orders/${orderId}/status`, { status, ...extra });
+    const { data } = await api.patch(`/orders/driver/${orderId}/status`, { status, ...extra });
     return data;
   },
   sendShoppingPhotos: async (orderId: string, photoUris: string[]) => {

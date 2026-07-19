@@ -40,7 +40,7 @@ export function AddPaymentMethodScreen() {
   return (
     <ScreenTemplate
       headerProps={{
-        title: t('payment_methods.add_card'),
+        title: t('paymentMethods.add_card'),
         onBackPress: () => navigation.goBack(),
       }}
       footer={
@@ -64,26 +64,26 @@ export function AddPaymentMethodScreen() {
           </Text>
           <View style={styles.cardBottom}>
             <View>
-              <Text style={styles.cardMetaLabel}>{t('payment_methods.cardholder_name')}</Text>
+              <Text style={styles.cardMetaLabel}>{t('paymentMethods.cardholder_name')}</Text>
               <Text style={styles.cardMeta}>{cardName || '-'}</Text>
             </View>
             <View>
-              <Text style={styles.cardMetaLabel}>{t('payment_methods.expiry')}</Text>
+              <Text style={styles.cardMetaLabel}>{t('paymentMethods.expiry')}</Text>
               <Text style={styles.cardMeta}>{expiry || '--/--'}</Text>
             </View>
           </View>
         </View>
 
-        <Text style={styles.inputLabel}>{t('payment_methods.cardholder_name')}</Text>
+        <Text style={styles.inputLabel}>{t('paymentMethods.cardholder_name')}</Text>
         <TextInput
           value={cardName}
           onChangeText={setCardName}
-          placeholder={t('payment_methods.cardholder_name')}
+          placeholder={t('paymentMethods.cardholder_name')}
           placeholderTextColor={colors.placeholder}
           style={styles.input}
         />
 
-        <Text style={styles.inputLabel}>{t('payment_methods.card_number')}</Text>
+        <Text style={styles.inputLabel}>{t('paymentMethods.card_number')}</Text>
         <TextInput
           value={cardNumber}
           onChangeText={setCardNumber}
@@ -95,7 +95,7 @@ export function AddPaymentMethodScreen() {
 
         <View style={styles.inlineInputs}>
           <View style={styles.inlineInputWrap}>
-            <Text style={styles.inputLabel}>{t('payment_methods.expiry')}</Text>
+            <Text style={styles.inputLabel}>{t('paymentMethods.expiry')}</Text>
             <TextInput
               value={expiry}
               onChangeText={setExpiry}
@@ -105,7 +105,7 @@ export function AddPaymentMethodScreen() {
             />
           </View>
           <View style={styles.inlineInputWrap}>
-            <Text style={styles.inputLabel}>{t('payment_methods.cvc')}</Text>
+            <Text style={styles.inputLabel}>{t('paymentMethods.cvc')}</Text>
             <TextInput
               value={cvc}
               onChangeText={setCvc}
@@ -127,9 +127,9 @@ export function AddPaymentMethodScreen() {
             <View style={styles.successIcon}>
               <Icon name="party-popper" size={58} color={colors.primary} />
             </View>
-            <Text style={styles.successTitle}>{t('payment_methods.success_title')}</Text>
-            <Text style={styles.successBody}>{t('payment_methods.success_body')}</Text>
-            <Button label={t('payment_methods.success_button')} onPress={closeSuccess} fullWidth style={styles.okBtn} />
+            <Text style={styles.successTitle}>{t('paymentMethods.success_title')}</Text>
+            <Text style={styles.successBody}>{t('paymentMethods.success_body')}</Text>
+            <Button label={t('paymentMethods.success_button')} onPress={closeSuccess} fullWidth style={styles.okBtn} />
           </View>
         </View>
       </Modal>
@@ -163,7 +163,7 @@ const createStyles = (colors: any) =>
     cardBrand: {
       position: 'absolute',
       top: space.base,
-      right: space.base,
+      end: space.base,
       ...typography.label,
       color: '#fff',
       fontWeight: '900',
@@ -237,7 +237,7 @@ const createStyles = (colors: any) =>
     modalClose: {
       position: 'absolute',
       top: space.sm,
-      right: space.sm,
+      end: space.sm,
       width: 34,
       height: 34,
       alignItems: 'center',

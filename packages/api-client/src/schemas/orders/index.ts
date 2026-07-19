@@ -7,6 +7,23 @@ export const OrderItemSchema = z.object({
   productNameAr: z.string().optional(),
   quantity: z.number().min(1),
   price: z.number().positive(),
+  selectedModifiers: z
+    .array(
+      z.object({
+        groupId: z.string(),
+        groupName: z.string(),
+        groupNameAr: z.string().optional(),
+        options: z.array(
+          z.object({
+            optionId: z.string(),
+            name: z.string(),
+            nameAr: z.string().optional(),
+            priceDelta: z.number(),
+          }),
+        ),
+      }),
+    )
+    .optional(),
 });
 
 export const PlaceOrderSchema = z.object({
@@ -37,6 +54,6 @@ export const PlaceCustomOrderSchema = z.object({
   deliveryLatitude: z.number(),
   deliveryLongitude: z.number(),
   deliveryPhone: z.string().min(10),
-  deliveryFee: z.number().min(0),
+  deliveryFee: z.number().min(0).optional(),
   deliverAt: z.string().datetime().optional(),
 });

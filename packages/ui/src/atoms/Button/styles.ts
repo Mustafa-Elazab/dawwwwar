@@ -11,6 +11,7 @@ export const createStyles = (colors: AppColors) =>
       justifyContent: 'center',
       borderRadius: radius.md,
       gap: space.sm,
+      minWidth: 88,
     },
     fullWidth: { width: '100%' },
     disabled: { opacity: 0.5 },
@@ -44,11 +45,11 @@ export const createStyles = (colors: AppColors) =>
     lg: { paddingHorizontal: space.xl, paddingVertical: space.base },
 
     // Label colors per variant
-    labelPrimary: { ...typography.button, color: colors.primaryText },
-    labelSecondary: { ...typography.button, color: colors.text },
-    labelOutline: { ...typography.button, color: colors.primary },
-    labelGhost: { ...typography.button, color: colors.primary },
-    labelDanger: { ...typography.button, color: colors.primaryText },
+    labelPrimary: { ...typography.button, color: colors.primaryText, flexShrink: 1, textAlign: 'center' },
+    labelSecondary: { ...typography.button, color: colors.text, flexShrink: 1, textAlign: 'center' },
+    labelOutline: { ...typography.button, color: colors.primary, flexShrink: 1, textAlign: 'center' },
+    labelGhost: { ...typography.button, color: colors.primary, flexShrink: 1, textAlign: 'center' },
+    labelDanger: { ...typography.button, color: colors.primaryText, flexShrink: 1, textAlign: 'center' },
 
     // Size label overrides
     labelSm: typography.buttonSm,

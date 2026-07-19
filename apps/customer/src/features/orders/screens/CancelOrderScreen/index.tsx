@@ -201,7 +201,7 @@ const createStyles = (colors: any) =>
     modalClose: {
       position: 'absolute',
       top: space.sm,
-      right: space.sm,
+      end: space.sm,
       width: 34,
       height: 34,
       alignItems: 'center',

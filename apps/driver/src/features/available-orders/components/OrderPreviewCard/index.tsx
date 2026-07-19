@@ -2,7 +2,10 @@ import React from 'react';
 import { View } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import { useTheme } from '@dawwar/theme';
-import { Text, Badge, Button, Icon } from '@dawwar/ui';
+import { Badge } from '../../../../../../../packages/ui/src/atoms/Badge';
+import { DriverButton as Button } from '../../../../components/DriverButton';
+import { Icon } from '../../../../../../../packages/ui/src/atoms/Icon';
+import { Text } from '../../../../../../../packages/ui/src/atoms/Text';
 import { useTranslation } from '@dawwar/i18n';
 import { OrderType, PaymentMethod } from '@dawwar/types';
 import { EarningsBreakdown } from '../EarningsBreakdown';
@@ -110,17 +113,19 @@ export const OrderPreviewCard = React.memo(({
         )}
 
         {/* Regular order: items list */}
-        {!isCustom && order.items && (order.items as any[]).length > 0 && (
+        {!isCustom && order.items && order.items.length > 0 && (
           <View>
-            <Text style={styles.sectionLabel}>Items ({(order.items as any[]).length})</Text>
-            {(order.items as any[]).slice(0, 3).map((item) => (
+            <Text style={styles.sectionLabel}>
+              {t('driver.items_count', { count: order.items.length })}
+            </Text>
+            {order.items.slice(0, 3).map((item) => (
               <Text key={item.id} variant="body2" color={colors.textSecondary}>
                 {item.quantity}× {item.productName}
               </Text>
             ))}
-            {(order.items as any[]).length > 3 && (
+            {order.items.length > 3 && (
               <Text variant="caption" color={colors.textDisabled}>
-                +{(order.items as any[]).length - 3} more
+                {t('driver.more_items', { count: order.items.length - 3 })}
               </Text>
             )}
           </View>

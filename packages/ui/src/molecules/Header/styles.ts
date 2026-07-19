@@ -26,7 +26,7 @@ export const createStyles = (colors: AppColors) =>
     },
     leftAction: {
       padding: 8,
-      marginLeft: -8,
+      marginStart: -8,
     },
     title: {
       fontSize: 18,

@@ -1,6 +1,10 @@
 import React from 'react';
 import { View } from 'react-native';
-import { ScrollScreenTemplate, Text, Avatar, ListItem, Icon } from '@dawwar/ui';
+import { Avatar } from '../../../../../../../packages/ui/src/atoms/Avatar';
+import { Icon } from '../../../../../../../packages/ui/src/atoms/Icon';
+import { Text } from '../../../../../../../packages/ui/src/atoms/Text';
+import { ListItem } from '../../../../../../../packages/ui/src/molecules/ListItem';
+import { ScrollScreenTemplate } from '../../../../../../../packages/ui/src/templates/ScrollScreenTemplate';
 import { useTheme } from '@dawwar/theme';
 import { ThemeMode } from '@dawwar/types';
 import { space } from '@dawwar/theme';

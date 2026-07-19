@@ -52,4 +52,10 @@ export class DriversController {
   getWallet(@CurrentUser() user: UserEntity) {
     return this.driversService.getWalletBalance(user.id);
   }
+
+  @Get('transactions')
+  @ApiOperation({ summary: 'Get driver wallet transaction history' })
+  getTransactions(@CurrentUser() user: UserEntity) {
+    return this.driversService.getTransactions(user.id);
+  }
 }

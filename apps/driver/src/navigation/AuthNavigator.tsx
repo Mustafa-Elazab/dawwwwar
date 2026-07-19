@@ -1,6 +1,9 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-import { PhoneScreen, OtpScreen, RoleScreen, PendingApprovalScreen } from './placeholders';
+import { PhoneScreen } from '../features/auth/screens/PhoneScreen';
+import { OtpScreen } from '../features/auth/screens/OtpScreen';
+import { RoleScreen } from '../features/auth/screens/RoleScreen';
+import { PendingApprovalScreen } from '../features/auth/screens/PendingApprovalScreen';
 import type { AuthStackParamList } from './types';
 import { useAppSelector } from '../store/hooks';
 import { selectIsAuthenticated, selectRole } from '../store/slices/auth.slice';

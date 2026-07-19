@@ -4,6 +4,15 @@ import type { Edge } from 'react-native-safe-area-context';
 import type { HeaderProps } from '../../organisms/Header/types';
 import type { EmptyStateProps } from '../../molecules/EmptyState/types';
 
+export interface ScreenStateConfig {
+  isLoading?: boolean;
+  isError?: boolean;
+  isEmpty?: boolean;
+  loadingMessage?: string;
+  errorMessage?: string;
+  emptyState?: EmptyStateProps;
+}
+
 export interface AppScreenTemplateProps {
   children?: ReactNode;
   header?: ReactNode;
@@ -22,5 +31,6 @@ export interface AppScreenTemplateProps {
   onRetry?: () => void;
   isEmpty?: boolean;
   emptyState?: EmptyStateProps;
+  state?: ScreenStateConfig;
   testID?: string;
 }

@@ -1,19 +1,16 @@
 import api from '../../../core/api/client';
-import { OrderStatus } from '@dawwar/types';
-import type { ApiResponse, Order } from '@dawwar/types';
-
 // ── Phase 2 real implementations ─────────────────────────────────────
 const realAvailableOrdersApi = {
   getAvailable: async () => {
-    const { data } = await api.get('/driver/available-orders');
+    const { data } = await api.get('/orders/driver/available');
     return data;
   },
   acceptOrder: async (orderId: string) => {
-    const { data } = await api.post(`/driver/orders/${orderId}/accept`);
+    const { data } = await api.post(`/orders/driver/${orderId}/accept`);
     return data;
   },
   declineOrder: async (orderId: string) => {
-    const { data } = await api.post(`/driver/orders/${orderId}/decline`);
+    const { data } = await api.post(`/orders/driver/${orderId}/decline`);
     return data;
   },
   updateLocation: async (latitude: number, longitude: number) => {

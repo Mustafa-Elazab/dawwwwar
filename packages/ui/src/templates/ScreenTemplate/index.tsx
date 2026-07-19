@@ -37,7 +37,6 @@ export function ScreenTemplate({
         {children}
       </View>
       {footer}
-      <NetworkBanner />
     </SafeAreaView>
   );
 }

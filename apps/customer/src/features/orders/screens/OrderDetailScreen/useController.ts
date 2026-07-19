@@ -41,7 +41,9 @@ export function useController() {
 
   const isActive = order ? ACTIVE_ORDER_STATUSES.includes(order.status) : false;
   const canCancel = order
-    ? order.status === OrderStatus.PENDING || order.status === OrderStatus.ACCEPTED
+    ? order.status === OrderStatus.PENDING ||
+      order.status === OrderStatus.ACCEPTED ||
+      order.status === OrderStatus.WAITING_DRIVER_ACCEPT
     : false;
 
   const status = useMemo(() => {
@@ -84,7 +86,7 @@ export function useController() {
       {
         icon: 'credit-card-outline',
         title: t('orders.payment_method', 'Payment method'),
-        value: t(`payment_methods.${String(order.paymentMethod).toLowerCase()}`, order.paymentMethod),
+        value: t(`paymentMethods.${String(order.paymentMethod).toLowerCase()}`, order.paymentMethod),
       },
       {
         icon: 'ticket-percent-outline',

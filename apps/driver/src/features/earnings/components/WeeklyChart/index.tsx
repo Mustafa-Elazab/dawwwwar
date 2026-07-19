@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { View } from 'react-native';
 import { useTheme } from '@dawwar/theme';
-import { Text } from '@dawwar/ui';
+import { Text } from '../../../../../../../packages/ui/src/atoms/Text';
 import { useTranslation } from '@dawwar/i18n';
 import { createStyles } from './styles';
 import type { DailyEarning } from '../../core/api';

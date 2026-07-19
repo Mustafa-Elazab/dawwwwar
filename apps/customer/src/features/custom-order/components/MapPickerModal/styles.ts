@@ -4,85 +4,100 @@ import { space, typography, radius, shadows } from '@dawwar/theme';
 
 export const createStyles = (colors: AppColors, isRTL = I18nManager.isRTL) =>
   StyleSheet.create({
-    overlay: { flex: 1, backgroundColor: colors.background },
-    
-    // ── Floating Header ─────────────────────────────────
-    mapHeader: {
-      position: 'absolute',
-      left: 0,
-      right: 0,
-      flexDirection: isRTL ? 'row-reverse' : 'row',
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    header: {
+      flexDirection: 'row',
       alignItems: 'center',
       paddingHorizontal: space.base,
-      paddingVertical: space.md,
+      paddingBottom: space.md,
+      backgroundColor: colors.background,
+    },
+    backButton: {
+      width: 42,
+      height: 42,
+      borderRadius: 21,
       backgroundColor: colors.surface,
-      zIndex: 10,
-      ...shadows.md,
-    },
-    mapBackBtn: {
-      padding: space.xs,
-    },
-    mapTitle: { 
-      ...typography.h4, 
-      color: colors.text, 
-      flex: 1, 
-      textAlign: 'center',
-      marginRight: isRTL ? 0 : 32,
-      marginLeft: isRTL ? 32 : 0,
-    },
-
-    map: { flex: 1 },
-
-    // ── Fixed Center Pin ────────────────────────────────
-    centerPin: {
-      position: 'absolute',
-      top: '50%',
-      left: '50%',
-      marginTop: -40,   // offset for pin height
-      marginLeft: -20,  // offset for pin width/2
-      zIndex: 5,
       alignItems: 'center',
       justifyContent: 'center',
+      ...shadows.sm,
     },
-
-    hint: {
-      position: 'absolute', 
-      bottom: 120, 
-      alignSelf: 'center',
-      backgroundColor: colors.card, 
-      paddingHorizontal: space.md,
-      paddingVertical: space.sm, 
-      borderRadius: radius.full,
-      ...shadows.md,
-      zIndex: 5,
+    backIcon: {
+      transform: [{ scaleX: isRTL ? -1 : 1 }],
     },
-    hintText: { ...typography.caption, color: colors.textSecondary },
-
-    // ── Bottom Action ───────────────────────────────────
-    bottomContainer: {
-      position: 'absolute',
-      bottom: 0,
-      left: 0,
-      right: 0,
+    headerTitle: {
+      ...typography.h4,
+      flex: 1,
+      color: colors.text,
+      textAlign: 'center',
+    },
+    headerSpacer: {
+      width: 42,
+    },
+    mapWrap: {
+      flex: 1,
+      position: 'relative',
+      overflow: 'hidden',
       backgroundColor: colors.surface,
-      padding: space.base,
-      borderTopLeftRadius: 20,
-      borderTopRightRadius: 20,
-      ...shadows.lg,
-      zIndex: 10,
     },
-    addressPreview: {
+    map: {
+      ...StyleSheet.absoluteFillObject,
+    },
+    centerPin: {
+      ...StyleSheet.absoluteFillObject,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingBottom: 44,
+    },
+    footer: {
+      backgroundColor: colors.background,
+      paddingHorizontal: space.base,
+      paddingTop: space.sm,
+      borderTopStartRadius: radius.xl,
+      borderTopEndRadius: radius.xl,
+      ...shadows.lg,
+    },
+    handle: {
+      alignSelf: 'center',
+      width: 54,
+      height: 5,
+      borderRadius: radius.full,
+      backgroundColor: colors.border,
       marginBottom: space.md,
     },
-    addressText: { 
-      ...typography.body2, 
+    footerTitle: {
+      ...typography.h4,
       color: colors.text,
-      fontWeight: '600',
-      textAlign: isRTL ? 'right' : 'left',
+      textAlign: 'center',
+      marginBottom: space.md,
+    },
+    addressRow: {
+      minHeight: 58,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: space.sm,
+      borderRadius: radius.md,
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
+      paddingHorizontal: space.md,
+      marginBottom: space.md,
+    },
+    addressTextWrap: {
+      flex: 1,
+      alignItems: 'flex-start',
+    },
+    addressText: {
+      ...typography.body2,
+      color: colors.text,
+      fontWeight: '700',
+      textAlign: 'auto',
       writingDirection: isRTL ? 'rtl' : 'ltr',
     },
-    confirmBtn: {
-      height: 52,
+    confirmButton: {
+      height: 54,
       borderRadius: radius.lg,
     },
   });

@@ -14,7 +14,7 @@ import {
   PaymentMethod,
 } from '../../database/entities';
 import { OrderItemEntity } from '../../database/entities/order-item.entity';
-import { ProductEntity } from '../../database/entities/product.entity';
+import { ProductEntity, ProductModifierGroupType } from '../../database/entities/product.entity';
 import { WalletEntity } from '../../database/entities/wallet.entity';
 import {
   WalletTransactionEntity,
@@ -39,6 +39,8 @@ import type { UpdateDeliveryStatusDto } from './dto/update-delivery-status.dto';
 const ACTIVE_STATUSES = [
   OrderStatus.PENDING,
   OrderStatus.ACCEPTED,
+  OrderStatus.READY,
+  OrderStatus.WAITING_DRIVER_ACCEPT,
   OrderStatus.DRIVER_ASSIGNED,
   OrderStatus.AT_SHOP,
   OrderStatus.SHOPPING,
@@ -49,6 +51,27 @@ const ACTIVE_STATUSES = [
 ];
 
 const PLATFORM_DRIVER_COMMISSION = 5; // EGP flat fee per delivery for now
+
+type SelectedModifierOptionInput = {
+  optionId: string;
+};
+
+type SelectedModifierGroupInput = {
+  groupId: string;
+  options?: SelectedModifierOptionInput[];
+};
+
+type EnrichedSelectedModifierGroup = {
+  groupId: string;
+  groupName: string;
+  groupNameAr?: string;
+  options: {
+    optionId: string;
+    name: string;
+    nameAr?: string;
+    priceDelta: number;
+  }[];
+};
 
 @Injectable()
 export class OrdersService {
@@ -85,6 +108,65 @@ export class OrdersService {
     });
     if (!order) throw new NotFoundException('ORDER_NOT_FOUND');
     return order;
+  }
+
+  private calculateProductPriceWithModifiers(
+    product: ProductEntity,
+    selectedGroups: SelectedModifierGroupInput[] = [],
+  ): { unitPrice: number; selectedModifiers: EnrichedSelectedModifierGroup[] } {
+    const groups = product.modifierGroups ?? [];
+    const selectedByGroup = new Map(
+      selectedGroups.map((group) => [group.groupId, group.options ?? []]),
+    );
+    const validGroupIds = new Set(groups.map((group) => group.id));
+    for (const selectedGroup of selectedGroups) {
+      if (!validGroupIds.has(selectedGroup.groupId)) {
+        throw new BadRequestException(`INVALID_MODIFIER_GROUP:${selectedGroup.groupId}`);
+      }
+    }
+    const enriched: EnrichedSelectedModifierGroup[] = [];
+    let modifiersTotal = 0;
+
+    for (const group of groups) {
+      const selectedOptions = selectedByGroup.get(group.id) ?? [];
+      const min = group.required ? Math.max(group.min ?? 1, 1) : group.min ?? 0;
+      const max = group.type === ProductModifierGroupType.SINGLE ? 1 : group.max;
+
+      if (selectedOptions.length < min) {
+        throw new BadRequestException(`REQUIRED_MODIFIER_MISSING:${group.id}`);
+      }
+      if (max != null && selectedOptions.length > max) {
+        throw new BadRequestException(`TOO_MANY_MODIFIER_OPTIONS:${group.id}`);
+      }
+
+      const options = selectedOptions.map((selected) => {
+        const option = group.options.find((candidate) => candidate.id === selected.optionId);
+        if (!option || option.isAvailable === false) {
+          throw new BadRequestException(`INVALID_MODIFIER_OPTION:${selected.optionId}`);
+        }
+        modifiersTotal += Number(option.priceDelta || 0);
+        return {
+          optionId: option.id,
+          name: option.name,
+          nameAr: option.nameAr,
+          priceDelta: Number(option.priceDelta || 0),
+        };
+      });
+
+      if (options.length > 0) {
+        enriched.push({
+          groupId: group.id,
+          groupName: group.name,
+          groupNameAr: group.nameAr,
+          options,
+        });
+      }
+    }
+
+    return {
+      unitPrice: Number(product.price) + modifiersTotal,
+      selectedModifiers: enriched,
+    };
   }
 
   async getDeliveryFeePreview(
@@ -143,7 +225,12 @@ export class OrdersService {
       if (!dbProduct.isAvailable) {
         throw new BadRequestException('PRODUCT_UNAVAILABLE');
       }
-      item.price = Number(dbProduct.price);
+      const pricedItem = this.calculateProductPriceWithModifiers(
+        dbProduct,
+        item.selectedModifiers,
+      );
+      item.price = pricedItem.unitPrice;
+      item.selectedModifiers = pricedItem.selectedModifiers as any;
       item.productName = dbProduct.name;
       item.productNameAr = dbProduct.nameAr;
     }
@@ -224,6 +311,7 @@ export class OrdersService {
             productNameAr: i.productNameAr,
             quantity: i.quantity,
             price: i.price,
+            selectedModifiers: i.selectedModifiers ?? [],
           }),
         );
         await manager.save(items);
@@ -241,9 +329,6 @@ export class OrdersService {
           void this.orderNotifications.notifyMerchantNewOrder(order).catch(() => {});
         }
         
-        // Broadcast to all online drivers
-        this.gatewayService.broadcastToDrivers(SOCKET_EVENTS.ORDER_NEW, order);
-        
         if (dto.promoCode) {
           void this.promoService.markUsed(dto.promoCode).catch(() => {});
         }
@@ -253,18 +338,13 @@ export class OrdersService {
 
   // ── Customer: place custom order ───────────────────────────────────
   async placeCustomOrder(customerId: string, dto: PlaceCustomOrderDto): Promise<OrderEntity> {
-    // If shop coordinates are provided:
-    let deliveryFee = dto.deliveryFee;
-    if (dto.shopLatitude && dto.shopLongitude) {
-      const { fee } = this.deliveryFeeService.calculateFee(
-        dto.shopLatitude,
-        dto.shopLongitude,
-        dto.deliveryLatitude,
-        dto.deliveryLongitude,
-        dto.estimatedBudget,
-      );
-      deliveryFee = fee;
-    }
+    const { fee: deliveryFee } = this.deliveryFeeService.calculateFee(
+      dto.shopLatitude,
+      dto.shopLongitude,
+      dto.deliveryLatitude,
+      dto.deliveryLongitude,
+      dto.estimatedBudget,
+    );
 
     const total = dto.estimatedBudget + deliveryFee;
 
@@ -276,8 +356,9 @@ export class OrdersService {
       const order = manager.create(OrderEntity, {
         orderNumber,
         customerId,
+        merchantId: null,
         type: OrderType.CUSTOM,
-        status: OrderStatus.PENDING,
+        status: OrderStatus.WAITING_DRIVER_ACCEPT,
         subtotal: dto.estimatedBudget,
         deliveryFee,
         total,
@@ -314,9 +395,19 @@ export class OrdersService {
         );
       }
 
-      await this.createOrderEvent(manager, saved.id, OrderStatus.PENDING, 'Custom Order Placed', 'تم إنشاء طلب خاص');
+      await this.createOrderEvent(
+        manager,
+        saved.id,
+        OrderStatus.WAITING_DRIVER_ACCEPT,
+        'Waiting for Driver',
+        'في انتظار قبول السائق',
+      );
 
       return saved;
+    }).then((order) => {
+      this.gatewayService.broadcastToDrivers(SOCKET_EVENTS.ORDER_NEW, order);
+      this.gatewayService.notifyAdminOrderCreated(order);
+      return order;
     });
   }
 
@@ -387,6 +478,8 @@ export class OrdersService {
       if (updated.driverId) {
         void this.orderNotifications.notifyCustomerDriverAssigned(updated).catch(() => {});
         this.gatewayService.notifyDriverAssigned(orderId, updated.customerId, updated.driver);
+      } else {
+        this.gatewayService.broadcastToDrivers(SOCKET_EVENTS.ORDER_NEW, updated);
       }
     }
 
@@ -426,6 +519,9 @@ export class OrdersService {
 
     if (updated.customerId) {
       this.gatewayService.notifyOrderStatusChanged(orderId, OrderStatus.READY, updated);
+      if (!updated.driverId) {
+        this.gatewayService.broadcastToDrivers(SOCKET_EVENTS.ORDER_NEW, updated);
+      }
       void this.orderNotifications
         .notifyCustomerStatusChange(updated, '✅ طلبك جاهز للاستلام')
         .catch(() => {});
@@ -458,10 +554,14 @@ export class OrdersService {
     if (!order) throw new NotFoundException('ORDER_NOT_FOUND');
 
     if (order.driverId === driverId) {
+      const fallbackStatus = order.type === OrderType.CUSTOM
+        ? OrderStatus.WAITING_DRIVER_ACCEPT
+        : OrderStatus.READY;
+
       // 1. Reset order driver association
       await this.orderRepo.update(orderId, {
         driverId: null,
-        status: OrderStatus.READY, // Fallback to ready for assignment
+        status: fallbackStatus,
         assignedAt: null,
       });
 
@@ -469,10 +569,16 @@ export class OrdersService {
       await this.createOrderEvent(
         this.orderRepo.manager,
         orderId,
-        OrderStatus.READY,
+        fallbackStatus,
         'Driver Declined',
         'رفض السائق الطلب',
       );
+
+      const releasedOrder = await this.getOrderById(orderId);
+      this.gatewayService.notifyOrderStatusChanged(orderId, fallbackStatus, releasedOrder);
+      if (fallbackStatus === OrderStatus.WAITING_DRIVER_ACCEPT) {
+        this.gatewayService.broadcastToDrivers(SOCKET_EVENTS.ORDER_NEW, releasedOrder);
+      }
 
       // 3. Trigger immediate re-assignment attempt
       if (order.merchant?.latitude && order.merchant?.longitude) {
@@ -624,7 +730,7 @@ export class OrdersService {
     }
 
     const additionalData: Partial<OrderEntity> = {};
-    if (dto.status === OrderStatus.IN_TRANSIT) {
+    if (dto.status === OrderStatus.PURCHASED || dto.status === OrderStatus.IN_TRANSIT) {
       if (dto.actualAmount !== undefined) additionalData.actualAmount = dto.actualAmount;
       if (dto.receiptImage) additionalData.receiptImage = dto.receiptImage;
     }
@@ -649,7 +755,10 @@ export class OrdersService {
     if (!isAdmin && order.customerId !== customerId) throw new ForbiddenException('NOT_YOUR_ORDER');
     
     // Policy: Customers can cancel before the order has moved to delivery.
-    if (![OrderStatus.PENDING, OrderStatus.ACCEPTED].includes(order.status) && !isAdmin) {
+    if (
+      ![OrderStatus.PENDING, OrderStatus.ACCEPTED, OrderStatus.WAITING_DRIVER_ACCEPT].includes(order.status) &&
+      !isAdmin
+    ) {
       throw new BadRequestException('CAN_ONLY_CANCEL_EARLY');
     }
 
@@ -668,14 +777,44 @@ export class OrdersService {
   }
 
   // ── Driver: get available orders ────────────────────────────────────
-  async getAvailableOrders(): Promise<OrderEntity[]> {
-    return this.orderRepo.find({
+  async getAvailableOrders(driverId?: string): Promise<OrderEntity[]> {
+    const orders = await this.orderRepo.find({
       where: {
-        status: In([OrderStatus.PENDING, OrderStatus.ACCEPTED]),
+        status: In([
+          OrderStatus.ACCEPTED,
+          OrderStatus.READY,
+          OrderStatus.WAITING_DRIVER_ACCEPT,
+        ]),
         driverId: IsNull(),
       },
       relations: ['merchant', 'items'],
       order: { createdAt: 'ASC' },
+    });
+
+    if (!driverId) {
+      return orders;
+    }
+
+    const driver = await this.driverProfileRepo.findOne({ where: { userId: driverId } });
+    if (driver?.currentLatitude == null || driver.currentLongitude == null) {
+      return orders;
+    }
+
+    return orders.filter((order) => {
+      const pickupLat = order.type === OrderType.CUSTOM
+        ? order.shopLatitude
+        : order.merchant?.latitude;
+      const pickupLng = order.type === OrderType.CUSTOM
+        ? order.shopLongitude
+        : order.merchant?.longitude;
+
+      if (pickupLat == null || pickupLng == null) return true;
+      return this.deliveryFeeService.calculateDistanceKm(
+        Number(driver.currentLatitude),
+        Number(driver.currentLongitude),
+        Number(pickupLat),
+        Number(pickupLng),
+      ) <= 10;
     });
   }
 
@@ -691,6 +830,8 @@ export class OrdersService {
         statuses: [
           OrderStatus.PENDING,
           OrderStatus.ACCEPTED,
+          OrderStatus.READY,
+          OrderStatus.WAITING_DRIVER_ACCEPT,
           OrderStatus.DRIVER_ASSIGNED,
           OrderStatus.AT_SHOP,
           OrderStatus.SHOPPING,

@@ -125,7 +125,6 @@ export const createStyles = (colors: AppColors) =>
       flexWrap: 'wrap',
       justifyContent: 'space-between',
       rowGap: space.md,
-      direction: 'ltr',
     },
     categoryCard: {
       alignItems: 'center',

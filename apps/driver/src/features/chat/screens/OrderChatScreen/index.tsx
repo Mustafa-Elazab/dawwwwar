@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useTheme } from '@dawwar/theme';
-import { Header, ChatInterface } from '@dawwar/ui';
+import { ChatInterface } from '../../../../../../../packages/ui/src/organisms/Chat';
+import { Header } from '../../../../../../../packages/ui/src/organisms/Header';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { useAppSelector } from '../../../../store/hooks';
 import { selectUser } from '../../../../store/slices/auth.slice';

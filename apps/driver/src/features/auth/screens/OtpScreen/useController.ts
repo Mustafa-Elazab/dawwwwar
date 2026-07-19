@@ -6,6 +6,11 @@ import { useVerifyOtp, useSendOtp } from '../../core/hooks';
 import { useOtpCountdown } from '../../hooks/useOtpCountdown';
 import { AUTH_ROUTES } from '../../../../navigation/routes';
 import type { OtpScreenNavProp, OtpScreenRouteProp } from './types';
+import type { ApiResponse } from '@dawwar/types';
+import type { VerifyOtpResponse } from '../../core/response';
+
+const unwrap = (res: ApiResponse<VerifyOtpResponse> | VerifyOtpResponse): VerifyOtpResponse =>
+  res && typeof res === 'object' && 'data' in res ? res.data : res;
 
 export function useController() {
   const { t } = useTranslation();
@@ -13,8 +18,7 @@ export function useController() {
   const route = useRoute<OtpScreenRouteProp>();
   const { phone } = route.params;
 
-  // 6-element array — one per box
-  const [digits, setDigits] = useState<string[]>(Array(6).fill(''));
+  const [digits, setDigits] = useState('');
   const [otpError, setOtpError] = useState<string | null>(null);
 
   // Shake animation (triggered on wrong OTP)
@@ -42,15 +46,15 @@ export function useController() {
   const sendOtpMutation = useSendOtp();
 
   const submitOtp = useCallback(
-    async (codeDigits: string[]) => {
-      const code = codeDigits.join('');
+    async (code: string) => {
       if (code.length < 6) return;
 
       setOtpError(null);
       try {
         const res = await verifyMutation.mutateAsync({ phone, code });
+        const payload = unwrap(res);
         // verifyOtp onSuccess dispatches setAuth → RootNavigator re-renders
-        if (res.isNewUser) {
+        if (payload.isFirstLogin) {
           navigation.navigate(AUTH_ROUTES.ROLE);
         }
         // If not first login: RootNavigator auth guard handles redirect automatically
@@ -70,41 +74,28 @@ export function useController() {
         } else {
           setOtpError(t('errors.server'));
         }
-        // Clear digits on error
-        setDigits(Array(6).fill(''));
+        setDigits('');
       }
     },
     [phone, verifyMutation, navigation, triggerShake, t],
   );
 
-  const handleDigitChange = useCallback(
-    (index: number, char: string) => {
-      const next = [...digits];
-      next[index] = char;
-      setDigits(next);
+  const handleOtpChange = useCallback(
+    (code: string) => {
+      setDigits(code);
       setOtpError(null);
-      // Auto-submit when all 6 boxes filled
-      if (next.every((d) => d !== '') && index === 5) {
-        void submitOtp(next);
+      if (code.length === 6) {
+        void submitOtp(code);
       }
     },
-    [digits, submitOtp],
-  );
-
-  const handleBackspace = useCallback(
-    (index: number) => {
-      const next = [...digits];
-      next[index] = '';
-      setDigits(next);
-    },
-    [digits],
+    [submitOtp],
   );
 
   const handleResend = useCallback(async () => {
     if (!resendTimer.isExpired) return;
     try {
       await sendOtpMutation.mutateAsync({ phone });
-      setDigits(Array(6).fill(''));
+      setDigits('');
       setOtpError(null);
       otpTimer.reset(120);
       resendTimer.reset(30);
@@ -124,8 +115,8 @@ export function useController() {
     canResend: resendTimer.isExpired,
     resendSeconds: resendTimer.seconds,
     // handlers
-    handleDigitChange,
-    handleBackspace,
+    handleOtpChange,
+    handleBack: () => navigation.goBack(),
     handleResend,
     // display
     phone,

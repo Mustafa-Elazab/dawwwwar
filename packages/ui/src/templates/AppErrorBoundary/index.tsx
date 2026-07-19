@@ -1,4 +1,4 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import React, { ErrorInfo, ReactNode } from 'react';
 import { Pressable, ScrollView, Text, View, StyleSheet } from 'react-native';
 
 interface Props {
@@ -11,7 +11,7 @@ interface State {
   error?: Error;
 }
 
-export class AppErrorBoundary extends Component<Props, State> {
+export class AppErrorBoundary extends React.Component<Props, State> {
   public override state: State = {
     hasError: false
   };

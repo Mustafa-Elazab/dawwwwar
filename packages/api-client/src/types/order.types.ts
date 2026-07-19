@@ -1,4 +1,4 @@
-import { PaymentMethod, OrderStatus } from '@dawwar/types';
+import { PaymentMethod, OrderStatus, SelectedModifierGroup } from '@dawwar/types';
 
 export interface OrderItemDto {
   productId: string;
@@ -6,6 +6,7 @@ export interface OrderItemDto {
   productNameAr?: string;
   quantity: number;
   price: number;
+  selectedModifiers?: SelectedModifierGroup[];
 }
 
 export interface PlaceOrderDto {
@@ -36,7 +37,7 @@ export interface PlaceCustomOrderDto {
   deliveryLatitude: number;
   deliveryLongitude: number;
   deliveryPhone: string;
-  deliveryFee: number;
+  deliveryFee?: number;
   deliverAt?: string; // ISO date string
 }
 

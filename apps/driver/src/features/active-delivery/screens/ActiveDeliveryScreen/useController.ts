@@ -93,18 +93,25 @@ export function useController() {
   const updateStatusMutation = useUpdateDeliveryStatus();
   const uploadFile = useUploadFile();
 
+  const performStatusUpdate = useCallback(
+    async (status: OrderStatus, extra?: { actualAmount?: number; receiptImage?: string }) => {
+      await updateStatusMutation.mutateAsync({
+        id: orderId,
+        payload: { status, ...extra },
+      });
+    },
+    [updateStatusMutation, orderId],
+  );
+
   const handleStatusUpdate = useCallback(
     async (status: OrderStatus, extra?: { actualAmount?: number; receiptImage?: string }) => {
       try {
-        await updateStatusMutation.mutateAsync({ 
-          id: orderId, 
-          payload: { status, ...extra } 
-        });
+        await performStatusUpdate(status, extra);
       } catch {
         Toast.show({ type: 'error', text1: t('errors.server') });
       }
     },
-    [updateStatusMutation, orderId, t],
+    [performStatusUpdate, t],
   );
 
   const handleArrived = useCallback(() => {
@@ -119,9 +126,27 @@ export function useController() {
     }
   }, [order, handleStatusUpdate]);
 
-  const handleConfirmPickup = useCallback(() => {
-    void handleStatusUpdate(OrderStatus.IN_TRANSIT);
-  }, [handleStatusUpdate]);
+  const handleConfirmPickup = useCallback(async () => {
+    try {
+      if (order?.status === OrderStatus.PURCHASED) {
+        await performStatusUpdate(OrderStatus.PICKED_UP);
+        await performStatusUpdate(OrderStatus.IN_TRANSIT);
+        return;
+      }
+
+      if (order?.status === OrderStatus.AT_SHOP) {
+        await performStatusUpdate(OrderStatus.PICKED_UP);
+        await performStatusUpdate(OrderStatus.IN_TRANSIT);
+        return;
+      }
+
+      if (order?.status === OrderStatus.PICKED_UP) {
+        await performStatusUpdate(OrderStatus.IN_TRANSIT);
+      }
+    } catch {
+      Toast.show({ type: 'error', text1: t('errors.server') });
+    }
+  }, [order?.status, performStatusUpdate, t]);
 
   // Shopping Flow State
   const [capturedPhotos, setCapturedPhotos] = useState<string[]>([]);
@@ -170,13 +195,18 @@ export function useController() {
         formData.append('folder', 'receipts');
         const uploadRes = await uploadFile.mutateAsync(formData);
         
-        // 2. Update status to PURCHASED
-        await handleStatusUpdate(OrderStatus.PURCHASED, {
+        // 2. Custom orders must enter SHOPPING before PURCHASED.
+        if (order?.status === OrderStatus.AT_SHOP) {
+          await performStatusUpdate(OrderStatus.SHOPPING);
+        }
+
+        // 3. Update status to PURCHASED
+        await performStatusUpdate(OrderStatus.PURCHASED, {
           actualAmount,
           receiptImage: uploadRes.data.url,
         });
 
-        // 3. Send receipt to chat as well
+        // 4. Send receipt to chat as well
         socketManager.emit('CHAT_SEND_MESSAGE', {
           orderId,
           type: 'IMAGE',
@@ -189,7 +219,7 @@ export function useController() {
         Toast.show({ type: 'error', text1: t('errors.server') });
       }
     },
-    [handleStatusUpdate, orderId, uploadFile, t],
+    [order?.status, orderId, performStatusUpdate, uploadFile, t],
   );
 
   const handleConfirmDelivery = useCallback(() => {

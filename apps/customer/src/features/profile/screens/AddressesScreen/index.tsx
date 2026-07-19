@@ -85,6 +85,10 @@ export function AddressesScreen() {
       refreshing={false}
       emptyTitle={t('addresses.empty')}
       emptySubtitle={t('addresses.empty_sub')}
+      emptyAction={{
+        label: t('addresses.add'),
+        onPress: ctrl.handleAddNew,
+      }}
     />
   );
 }

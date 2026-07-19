@@ -57,3 +57,11 @@ export function useDriverWalletBalance() {
     queryFn: () => driver.getWalletBalance(),
   });
 }
+
+export function useDriverTransactions() {
+  const { driver } = useApiClient();
+  return useQuery({
+    queryKey: QUERY_KEYS.driver.transactions,
+    queryFn: () => driver.getTransactions(),
+  });
+}

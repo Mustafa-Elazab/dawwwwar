@@ -7,7 +7,7 @@ import { useTranslation } from '@dawwar/i18n';
 import { createStyles } from './styles';
 import type { ProductCardProps } from './types';
 
-export const ProductCard = React.memo(function ProductCard({ product, merchantName, onAdd, isLiked, onToggleLike, style }: ProductCardProps & { style?: ViewStyle }) {
+export const ProductCard = React.memo(function ProductCard({ product, merchantName, onAdd, onPress, isLiked, onToggleLike, style }: ProductCardProps & { style?: ViewStyle }) {
   const { colors } = useTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
   const { t, i18n } = useTranslation();
@@ -25,7 +25,12 @@ export const ProductCard = React.memo(function ProductCard({ product, merchantNa
     : product.name || product.nameAr;
 
   return (
-    <View style={[styles.card, !product.isAvailable && styles.unavailable, style]}>
+    <TouchableOpacity
+      style={[styles.card, !product.isAvailable && styles.unavailable, style]}
+      activeOpacity={0.9}
+      onPress={onPress}
+      disabled={!onPress}
+    >
       <View style={styles.imageContainer}>
         <FastImage
           source={{ uri: product.images?.[0] || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=1000' }}
@@ -90,6 +95,6 @@ export const ProductCard = React.memo(function ProductCard({ product, merchantNa
           </TouchableOpacity>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 });

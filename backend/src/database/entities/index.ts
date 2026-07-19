@@ -22,3 +22,4 @@ export { DisputeResolutionEntity } from './dispute-resolution.entity';
 export { UserEntity, UserRole } from './user.entity';
 export { WalletEntity } from './wallet.entity';
 export { WalletTransactionEntity, TransactionType, TransactionReason } from './wallet-transaction.entity';
+export { WalletRechargeEntity, WalletRechargeStatus } from './wallet-recharge.entity';

@@ -22,6 +22,21 @@ buildscript {
 
 apply plugin: "com.facebook.react.rootproject"
 
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        maven {
+            // [REQUIRED] background-geolocation
+            url("$rootDir/../../../node_modules/react-native-background-geolocation/android/libs")
+        }
+        maven {
+            // [REQUIRED] background-fetch
+            url("$rootDir/../../../node_modules/react-native-background-fetch/android/libs")
+        }
+    }
+}
+
 subprojects {
     project.configurations.all {
         resolutionStrategy.eachDependency { details ->

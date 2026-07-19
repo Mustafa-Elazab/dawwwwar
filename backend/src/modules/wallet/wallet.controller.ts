@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Headers, HttpCode, HttpStatus, Post, Req } from '@nestjs/common';
+import { Body, Controller, ForbiddenException, Get, Headers, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags, ApiProperty } from '@nestjs/swagger';
 import { IsNumber, IsPositive, Min } from 'class-validator';
 import { WalletService } from './wallet.service';
@@ -40,9 +40,9 @@ export class WalletController {
   @ApiOperation({ summary: 'Request manual wallet recharge (Phase 2)' })
   requestRecharge(
     @CurrentUser() user: UserEntity,
-    @Body('amount') amount: number,
+    @Body() dto: RechargeDto,
   ) {
-    return this.walletService.requestRecharge(user.id, amount);
+    return this.walletService.requestRecharge(user.id, dto.amount);
   }
 
   @Post('recharge/paymob')
@@ -51,26 +51,22 @@ export class WalletController {
   @ApiOperation({ summary: 'Request Paymob wallet recharge (Phase 3)' })
   requestPaymobRecharge(
     @CurrentUser() user: UserEntity,
-    @Body('amount') amount: number,
+    @Body() dto: RechargeDto,
   ) {
-    return this.walletService.requestRecharge(user.id, amount);
+    return this.walletService.requestRecharge(user.id, dto.amount);
   }
 
   @Public()
-  @Post('paymob-webhook')
+  @Post(['paymob-webhook', 'webhook/paymob'])
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Paymob transaction webhook' })
   async paymobWebhook(
-    @Req() req: any,
     @Headers('hmac') hmac: string,
     @Body() dto: PaymobWebhookDto,
   ) {
-    // Note: in a real production environment, the raw body should be used for HMAC verification.
-    // For this implementation, we use the parsed payload object order for simplicity.
-    const isValid = this.walletService.verifyPaymobHmac(dto, hmac);
+    const isValid = this.walletService.verifyPaymobHmac(dto, hmac ?? dto.hmac);
     if (!isValid) {
-      // Return 200 anyway so Paymob stops retrying, but don't process it
-      return { received: true };
+      throw new ForbiddenException('Invalid Paymob HMAC signature');
     }
 
     await this.walletService.handlePaymobWebhook(dto);

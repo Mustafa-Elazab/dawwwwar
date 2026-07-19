@@ -8,6 +8,7 @@ export enum OrderStatus {
   PENDING = 'PENDING',
   ACCEPTED = 'ACCEPTED',
   READY = 'READY',
+  WAITING_DRIVER_ACCEPT = 'WAITING_DRIVER_ACCEPT',
   DRIVER_ASSIGNED = 'DRIVER_ASSIGNED',
   AT_SHOP = 'AT_SHOP',
   SHOPPING = 'SHOPPING',
@@ -52,7 +53,7 @@ export class OrderEntity extends BaseEntity {
   merchant?: MerchantEntity;
 
   @Column({ name: 'merchant_id', nullable: true })
-  merchantId?: string;
+  merchantId?: string | null;
 
   @ManyToOne(() => UserEntity, { nullable: true })
   @JoinColumn({ name: 'driver_id' })

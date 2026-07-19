@@ -22,33 +22,32 @@ export const createStyles = (colors: AppColors, isRTL = I18nManager.isRTL) =>
     gradient: {
       position: 'absolute',
       bottom: 0,
-      left: 0,
-      right: 0,
+      start: 0,
+      end: 0,
       height: 120,
       backgroundColor: 'rgba(0,0,0,0.6)', // Simple solid fade to text, or use gradient if installed
     },
     headerContent: {
       position: 'absolute',
       bottom: 0,
-      left: 0,
-      right: 0,
+      start: 0,
+      end: 0,
       padding: 16,
     },
     businessName: {
       ...typography.h2,
       color: '#fff',
       marginBottom: 8,
-      textAlign: isRTL ? 'right' : 'left',
-      writingDirection: isRTL ? 'rtl' : 'ltr',
+      textAlign: 'auto',
     },
     metaRow: {
-      flexDirection: isRTL ? 'row-reverse' : 'row',
+      flexDirection: 'row',
       alignItems: 'center',
       marginBottom: 12,
-      alignSelf: isRTL ? 'flex-end' : 'flex-start',
+      alignSelf:'flex-start',
     },
     ratingRow: {
-      flexDirection: isRTL ? 'row-reverse' : 'row',
+      flexDirection: 'row',
       alignItems: 'center',
       backgroundColor: 'rgba(0,0,0,0.4)',
       paddingHorizontal: 6,
@@ -67,6 +66,6 @@ export const createStyles = (colors: AppColors, isRTL = I18nManager.isRTL) =>
       marginHorizontal: 4,
     },
     badgeWrapper: {
-      alignSelf: isRTL ? 'flex-end' : 'flex-start',
+      alignSelf: 'flex-start',
     },
   });

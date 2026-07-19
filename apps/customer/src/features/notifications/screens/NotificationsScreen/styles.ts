@@ -6,6 +6,8 @@ export const createStyles = (colors: AppColors) =>
   StyleSheet.create({
     row: {
       flexDirection: 'row',
+      alignItems: 'flex-start',
+      gap: spacing[3],
       padding: spacing[4],
       borderBottomWidth: 1,
       borderBottomColor: colors.borderLight,
@@ -22,7 +24,6 @@ export const createStyles = (colors: AppColors) =>
       borderRadius: radius.full,
       alignItems: 'center',
       justifyContent: 'center',
-      marginEnd: spacing[3],
       backgroundColor: colors.surfaceVariant,
     },
     content: {
@@ -57,8 +58,10 @@ export const createStyles = (colors: AppColors) =>
       marginBottom: spacing[2],
       lineHeight: 20,
       textAlign: 'auto',
+      writingDirection: 'rtl',
     },
     time: {
       color: colors.textDisabled,
+      textAlign: 'auto',
     },
   });

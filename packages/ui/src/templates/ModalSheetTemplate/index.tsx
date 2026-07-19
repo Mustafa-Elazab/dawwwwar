@@ -9,7 +9,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@dawwar/theme';
-import { Icon, Text } from '../../atoms';
+import { Icon } from '../../atoms/Icon';
+import { Text } from '../../atoms/Text';
 import { createStyles } from './styles';
 import type { ModalSheetTemplateProps } from './types';
 

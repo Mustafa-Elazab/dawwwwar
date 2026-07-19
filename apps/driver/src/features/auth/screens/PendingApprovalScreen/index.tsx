@@ -1,6 +1,8 @@
 import React from 'react';
 import { View } from 'react-native';
-import { ScreenTemplate, Text, Button } from '@dawwar/ui';
+import { Text } from '../../../../../../../packages/ui/src/atoms/Text';
+import { ScreenTemplate } from '../../../../../../../packages/ui/src/templates/ScreenTemplate';
+import { AuthButton } from '../../components/AuthButton';
 import { useTheme } from '@dawwar/theme';
 import { useController } from './useController';
 import { createStyles } from './styles';
@@ -16,19 +18,19 @@ export function PendingApprovalScreen() {
         <Text style={styles.illustration}>{'⏳'}</Text>
         <Text style={styles.title}>{ctrl.t('auth.pending_title')}</Text>
         <Text style={styles.body}>{ctrl.t('auth.pending_body')}</Text>
-        <Button
+        <AuthButton
           label={ctrl.t('auth.refresh_status')}
           onPress={ctrl.handleRefreshStatus}
           loading={ctrl.isRefreshing}
           style={styles.contactBtn}
         />
-        <Button
+        <AuthButton
           label={ctrl.t('auth.pending_contact')}
           variant="outline"
           onPress={ctrl.handleContactAdmin}
           style={styles.contactBtn}
         />
-        <Button
+        <AuthButton
           label={ctrl.t('auth.logout')}
           variant="ghost"
           onPress={ctrl.handleLogout}

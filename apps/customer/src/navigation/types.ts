@@ -7,6 +7,7 @@ import type {
   CATEGORY_ROUTES,
   ORDER_ROUTES,
   WALLET_ROUTES,
+  PAYMENT_ROUTES,
   PROFILE_ROUTES,
   MODAL_ROUTES,
 } from './routes';
@@ -77,11 +78,14 @@ export type ProfileStackParamList = {
   [PROFILE_ROUTES.PAYMENT_METHODS]: undefined;
   [PROFILE_ROUTES.ADD_PAYMENT_METHOD]: undefined;
   [PROFILE_ROUTES.INVITE_FRIENDS]: undefined;
+  [PROFILE_ROUTES.PROMOTIONS]: undefined;
+  [PROFILE_ROUTES.GET_MORE_PROMOTIONS]: undefined;
 };
 
 // ─── Tab Navigator ────────────────────────────────────────
 export type CustomerTabParamList = {
   [TAB_ROUTES.HOME_TAB]: NavigatorScreenParams<HomeStackParamList>;
+  [TAB_ROUTES.CATEGORY_TAB]: NavigatorScreenParams<CategoriesStackParamList>;
   [TAB_ROUTES.BASKET_TAB]: undefined;
   [TAB_ROUTES.ORDERS_TAB]: NavigatorScreenParams<OrdersStackParamList>;
   [TAB_ROUTES.LIKED_TAB]: NavigatorScreenParams<LikedStackParamList>;
@@ -92,5 +96,22 @@ export type CustomerTabParamList = {
 export type RootParamList = {
   CustomerTabs: NavigatorScreenParams<CustomerTabParamList>;
   [MODAL_ROUTES.CHECKOUT]: undefined;
-  [MODAL_ROUTES.CUSTOM_ORDER]: undefined;
+  [MODAL_ROUTES.CUSTOM_ORDER]:
+    | {
+        pickedShopLocation?: {
+          latitude: number;
+          longitude: number;
+          address: string;
+        };
+      }
+    | undefined;
+  [MODAL_ROUTES.CUSTOM_ORDER_MAP_PICKER]: {
+    initialLatitude?: number;
+    initialLongitude?: number;
+  };
+  [PAYMENT_ROUTES.PAYMENT_WEBVIEW]: {
+    url: string;
+    title: string;
+    onSuccess?: () => void;
+  };
 };

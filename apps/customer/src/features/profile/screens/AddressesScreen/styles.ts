@@ -53,7 +53,7 @@ export const createStyles = (colors: AppColors) =>
     info: {
       flex: 1,
       gap: 2,
-      alignItems: 'flex-start',
+      alignItems: I18nManager.isRTL ? 'flex-end' : 'flex-start',
     },
     labelRow: {
       flexDirection: 'row',
@@ -68,14 +68,13 @@ export const createStyles = (colors: AppColors) =>
     street: {
       ...typography.caption,
       color: colors.textSecondary,
-      textAlign: 'left',
+      textAlign: 'auto',
     },
     
     defaultBadge: {
       position: 'absolute',
       top: -8,
-      right: I18nManager.isRTL ? 12 : undefined,
-      left: I18nManager.isRTL ? undefined : 12,
+      start: 12,
       backgroundColor: colors.primary,
       paddingHorizontal: 8,
       paddingVertical: 2,

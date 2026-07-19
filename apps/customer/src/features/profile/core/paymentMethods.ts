@@ -1,7 +1,9 @@
 import { storage, StorageKeys } from '../../../core/storage/mmkv';
+import { PaymentMethod } from '@dawwar/types';
 
 export type PaymentMethodKind =
   | 'cash'
+  | 'wallet'
   | 'google_pay'
   | 'apple_pay'
   | 'instapay'
@@ -15,15 +17,36 @@ export interface SavedPaymentMethod {
   masked?: string;
   holderName?: string;
   expiry?: string;
+  supported?: boolean;
 }
 
 export const DEFAULT_PAYMENT_METHODS: SavedPaymentMethod[] = [
-  { id: 'cash', kind: 'cash', label: 'payment_methods.cash' },
-  { id: 'google_pay', kind: 'google_pay', label: 'payment_methods.google_pay' },
-  { id: 'apple_pay', kind: 'apple_pay', label: 'payment_methods.apple_pay' },
-  { id: 'instapay', kind: 'instapay', label: 'payment_methods.instapay' },
-  { id: 'vodafone_cash', kind: 'vodafone_cash', label: 'payment_methods.vodafone_cash' },
+  { id: 'cash', kind: 'cash', label: 'paymentMethods.cash', supported: true },
+  { id: 'wallet', kind: 'wallet', label: 'paymentMethods.wallet', supported: false },
+  { id: 'google_pay', kind: 'google_pay', label: 'paymentMethods.google_pay', supported: false },
+  { id: 'apple_pay', kind: 'apple_pay', label: 'paymentMethods.apple_pay', supported: false },
+  { id: 'instapay', kind: 'instapay', label: 'paymentMethods.instapay', supported: false },
+  { id: 'vodafone_cash', kind: 'vodafone_cash', label: 'paymentMethods.vodafone_cash', supported: false },
 ];
+
+export const SUPPORTED_PAYMENT_METHOD_IDS = ['cash'] as const;
+
+export type SupportedPaymentMethodId = typeof SUPPORTED_PAYMENT_METHOD_IDS[number];
+
+export function isSupportedPaymentMethod(id: string): id is SupportedPaymentMethodId {
+  return (SUPPORTED_PAYMENT_METHOD_IDS as readonly string[]).includes(id);
+}
+
+export function toOrderPaymentMethod(id?: string): PaymentMethod {
+  return PaymentMethod.CASH;
+}
+
+export function getPaymentMethodLabelKey(id?: string) {
+  const method = [...DEFAULT_PAYMENT_METHODS, ...readSavedPaymentMethods()].find(
+    (candidate) => candidate.id === id,
+  );
+  return method?.label ?? 'paymentMethods.cash';
+}
 
 export function readSavedPaymentMethods(): SavedPaymentMethod[] {
   const raw = storage.getString(StorageKeys.PAYMENT_METHODS);
@@ -42,15 +65,16 @@ export function writeSavedPaymentMethods(methods: SavedPaymentMethod[]) {
 
 export function addSavedCard(card: Omit<SavedPaymentMethod, 'kind' | 'label'>) {
   const cards = readSavedPaymentMethods();
-  const next = [{ ...card, kind: 'card' as const, label: 'payment_methods.card' }, ...cards];
+  const next = [{ ...card, kind: 'card' as const, label: 'paymentMethods.card', supported: false }, ...cards];
   writeSavedPaymentMethods(next);
-  storage.set(StorageKeys.SELECTED_PAYMENT_METHOD, card.id);
 }
 
 export function readSelectedPaymentMethod() {
-  return storage.getString(StorageKeys.SELECTED_PAYMENT_METHOD) ?? 'cash';
+  const selected = storage.getString(StorageKeys.SELECTED_PAYMENT_METHOD) ?? 'cash';
+  return isSupportedPaymentMethod(selected) ? selected : 'cash';
 }
 
 export function writeSelectedPaymentMethod(id: string) {
+  if (!isSupportedPaymentMethod(id)) return;
   storage.set(StorageKeys.SELECTED_PAYMENT_METHOD, id);
 }

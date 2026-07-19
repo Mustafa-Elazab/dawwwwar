@@ -1,7 +1,8 @@
 import React from 'react';
 import { TouchableOpacity, View, I18nManager } from 'react-native';
 import { useTheme } from '@dawwar/theme';
-import { Text, Icon } from '../../atoms';
+import { Icon } from '../../atoms/Icon';
+import { Text } from '../../atoms/Text';
 import { createStyles } from './styles';
 import type { ListItemProps } from './types';
 
