@@ -4,7 +4,7 @@ import { useLocalizationInitialization } from '@dawwar/i18n';
 
 import { registerFarhaTranslations } from './i18n/farhaResources';
 import { AppProviders } from './providers';
-import { FarhaHomeScreen } from '../features/home/screens/FarhaHomeScreen';
+import { FarhaPhase1App } from '../features/phase1/FarhaPhase1App';
 
 export function App() {
   const isI18nReady = useLocalizationInitialization('ar');
@@ -29,7 +29,7 @@ export function App() {
 
   return (
     <AppProviders>
-      <FarhaHomeScreen />
+      <FarhaPhase1App />
     </AppProviders>
   );
 }
