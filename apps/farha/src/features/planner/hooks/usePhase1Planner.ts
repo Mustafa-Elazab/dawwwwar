@@ -45,7 +45,7 @@ import type {
   Phase1ScreenName,
   Phase1TabKey,
 } from '../domain/phase1Types';
-import { createPhase1BillingClient } from '../data/phase1Billing';
+import { createPhase1BillingClient } from '../../monetization/data/phase1Billing';
 import { createPhase1Repository } from '../data/phase1Repository';
 
 export type Phase1Status = 'loading' | 'ready' | 'error';

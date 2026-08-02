@@ -2,7 +2,7 @@ import { StyleSheet } from 'react-native';
 import type { AppColors } from '@dawwar/theme';
 import { radius, spacing } from '@dawwar/theme';
 
-export const createPhase1Styles = (colors: AppColors) =>
+export const createPhase1ScreenStyles = (colors: AppColors) =>
   StyleSheet.create({
     screenContent: {
       flex: 1,
@@ -154,3 +154,5 @@ export const createPhase1Styles = (colors: AppColors) =>
       borderColor: colors.border,
     },
   });
+
+export type Phase1ScreenStyles = ReturnType<typeof createPhase1ScreenStyles>;

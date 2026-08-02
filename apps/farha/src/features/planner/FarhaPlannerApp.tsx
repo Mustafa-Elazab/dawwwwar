@@ -1,24 +1,30 @@
 import React from 'react';
 
-import { usePhase1Planner } from './hooks/usePhase1Planner';
 import {
   BudgetCategoryListScreen,
   BudgetItemFormScreen,
   BudgetItemListScreen,
+} from '../budget/screens';
+import {
   ChecklistItemEditScreen,
   ChecklistTimelineScreen,
+} from '../checklist/screens';
+import {
   EventCreateScreen,
   EventDashboardScreen,
   EventEditScreen,
   EventListScreen,
+} from '../events/screens';
+import {
   OnboardingWelcomeScreen,
-  ProUpgradeScreen,
-  SettingsScreen,
-  ShareCardPreviewScreen,
   SplashScreen,
-} from './screens/Phase1Screens';
+} from '../onboarding/screens';
+import { ProUpgradeScreen } from '../monetization/screens';
+import { SettingsScreen } from '../settings/screens';
+import { ShareCardPreviewScreen } from '../sharing/screens';
+import { usePhase1Planner } from './hooks/usePhase1Planner';
 
-export function FarhaPhase1App() {
+export function FarhaPlannerApp() {
   const controller = usePhase1Planner();
 
   switch (controller.route.name) {

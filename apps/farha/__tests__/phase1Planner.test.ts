@@ -16,10 +16,10 @@ import {
   upsertChecklistItem,
   upsertPhase1BudgetItem,
   validateBudgetItemDraft,
-} from '../src/features/phase1/domain/phase1Logic';
-import { defaultPhase1BudgetCategories } from '../src/features/phase1/data/defaultBudgetCategories';
-import { standardChecklistTemplates } from '../src/features/phase1/data/checklistTemplates';
-import { createPhase1BillingClient } from '../src/features/phase1/data/phase1Billing';
+} from '../src/features/planner/domain/phase1Logic';
+import { defaultPhase1BudgetCategories } from '../src/features/planner/data/defaultBudgetCategories';
+import { standardChecklistTemplates } from '../src/features/planner/data/checklistTemplates';
+import { createPhase1BillingClient } from '../src/features/monetization/data/phase1Billing';
 
 describe('Farha Phase 1 planner logic', () => {
   const now = new Date('2026-08-02T09:00:00.000Z');
