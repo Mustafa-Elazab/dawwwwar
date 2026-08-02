@@ -1,6 +1,6 @@
 import React from 'react';
 import { I18nManager, TouchableOpacity, View } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { NavigationContext } from '@react-navigation/native';
 import { useTheme } from '@dawwar/theme';
 
 import { Icon } from '../../atoms/Icon';
@@ -17,6 +17,7 @@ export function Header({
 
   leftComponent,
   rightComponent,
+  bottomComponent,
 
   type = 'default',
   onBackPress,
@@ -28,10 +29,9 @@ export function Header({
   const { colors } = useTheme();
   const styles = createStyles(colors);
 
-  const navigation = useNavigation();
+  const navigation = React.useContext(NavigationContext);
 
-  const isRTL = I18nManager.isRTL;
-  const canGoBack = navigation.canGoBack();
+  const canGoBack = !!navigation?.canGoBack?.();
 
   /**
    * Show default back button
@@ -49,7 +49,7 @@ export function Header({
       return;
     }
 
-    navigation.goBack();
+    navigation?.goBack();
   };
 
   const renderAction = (
@@ -112,7 +112,7 @@ export function Header({
   const hasActions = leftNode || rightNode;
 
   const hasContent =
-    hasActions || title || subtitle;
+    hasActions || title || subtitle || bottomComponent;
 
   if (!hasContent) {
     return null;
@@ -164,6 +164,12 @@ export function Header({
           )}
         </View>
       )}
+
+      {bottomComponent ? (
+        <View style={styles.bottomComponent}>
+          {bottomComponent}
+        </View>
+      ) : null}
     </View>
   );
 }

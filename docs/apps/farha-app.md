@@ -14,8 +14,9 @@ current Phase 1 screen/functionality spec is
 - Product scope: Phase 1 planner MVP only. Navigation, onboarding, events,
   budget, checklist, share preview, Pro/settings gates, and local reminder
   records are included.
-- Boundary: no backend changes, no shared-package source changes, no changes
-  to other apps, and no Phase 2/Phase 3 work.
+- Boundary: no backend changes, no changes to other apps, and no Phase 2/Phase
+  3 work. Shared UI changes are limited to header prop support outside a
+  navigation container and a self-contained `SegmentedControl` item contract.
 
 ## Team-Lead Sign-Offs
 
@@ -55,17 +56,20 @@ current Phase 1 screen/functionality spec is
 
 ## Phase 1 Implementation Snapshot
 
-- App shell: `FarhaPlannerApp` provides the S1-S14 route switch and bottom-tab
-  app experience without adding a navigation dependency to Farha.
+- App shell: `FarhaPlannerApp` provides the S1-S14 route switch, recognizes
+  Home/Budget/Checklist/Settings as the tab screen set, and renders a
+  customer-style bottom tab experience without adding a navigation dependency
+  to Farha.
 - Feature structure: screens now live under feature-owned modules such as
   `features/events`, `features/budget`, `features/checklist`,
   `features/sharing`, `features/monetization`, `features/settings`, and
   `features/onboarding`. Each screen folder owns its `index.tsx`, `styles.ts`,
-  and `controller.ts`; reusable components and utilities stay feature-local.
+  and `controller.ts`; screens render `AppScreenTemplate` directly with
+  `headerProps`, while feature components and utilities stay feature-local.
 - Planner core: `features/planner` owns the Phase 1 repository, MMKV storage
   key `farha.phase1.v1`, route state, Pro flag, notifications toggle,
-  bottom-tab shell, shared frame components, a planner controller provider, and
-  shared planner utilities.
+  bottom-tab route mapping, shared date input, reusable screen chrome props, a
+  planner controller provider, and shared planner utilities.
 - Events: first-launch routing, onboarding, event create/list/edit/delete,
   free-tier one-event gate, and Pro multi-event switching are implemented.
 - Budget: default categories, custom categories, item add/edit/delete,
@@ -83,9 +87,9 @@ current Phase 1 screen/functionality spec is
 - Notifications: future pending checklist tasks create local scheduled
   notification records. OS-level notification scheduling remains a native SDK
   follow-up.
-- Android packaging: Farha debug APKs bundle `index.android.bundle`; the
-  debug APK asset table was verified, so installed debug builds can launch
-  without Metro running.
+- Android packaging: Farha debug APKs bundle `index.android.bundle` and disable
+  React Native dev support in `MainApplication.kt`; installed debug builds can
+  launch from packaged assets without Metro running.
 
 ## Phase 1 Screen Catalog
 
@@ -110,7 +114,7 @@ current Phase 1 screen/functionality spec is
 
 | Package | M0 finding |
 |---|---|
-| `@dawwar/ui` | Required M0 exports are present: `AppScreenTemplate`, `AppText`, `AppCard`, `SectionHeader`, and `AppButton`. The planned future exports such as `ListRow`, `StepIndicator`, `FormField`, `AppInput`, `BottomSheet`, `SearchBar`, `EmptyState`, `ErrorState`, `Tabs`, and `SegmentedControl` are also available. |
+| `@dawwar/ui` | Required M0 exports are present: `AppScreenTemplate`, `AppText`, `AppCard`, `SectionHeader`, and `AppButton`. `Header` supports explicit back handlers outside React Navigation and optional bottom header content. `SegmentedControl` owns its item/text contract. The planned future exports such as `ListRow`, `StepIndicator`, `FormField`, `AppInput`, `BottomSheet`, `SearchBar`, `EmptyState`, `ErrorState`, `Tabs`, and `SegmentedControl` are also available. |
 | `@dawwar/theme` | `ThemeProvider`, `useTheme`, colors, spacing, typography, radius, shadows, and animation tokens are exported. |
 | `@dawwar/i18n` | `useLocalizationInitialization`, `i18n`, `useTranslation`, language storage, and RTL helpers are exported. Farha registers app-local keys for M0. |
 | `@dawwar/types` | Shared generic models/enums/API/navigation exports are available. Farha event/budget/checklist types should stay local unless another app needs them. |
@@ -223,6 +227,8 @@ real AdMob/UMP/Play Billing SDK verification remain tracked in sections C and D.
 | 2026-08-02 | Screen-local `controller.ts` colocation refactor | done |
 | 2026-08-02 | UI cleanup: icon back, calendar dates, card padding, customer-style bottom tabs, no fake ads | done |
 | 2026-08-02 | Feature-owned screen architecture and no-Metro debug bundle config | done |
+| 2026-08-02 | Direct `AppScreenTemplate` header props and planner tab screen registry | done |
+| 2026-08-02 | `pnpm --filter @dawwar/ui type-check` | done |
 
 ## Native/Release Follow-Ups
 

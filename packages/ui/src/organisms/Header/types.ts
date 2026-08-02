@@ -14,6 +14,7 @@ export interface HeaderProps {
   rightAction?: HeaderAction;
   leftComponent?: ReactNode;
   rightComponent?: ReactNode;
+  bottomComponent?: ReactNode;
   type?: 'default' | 'none';
   onBackPress?: () => void;
   transparent?: boolean;

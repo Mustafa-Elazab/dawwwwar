@@ -31,6 +31,6 @@ export type { PaymentMethodCardProps } from './PaymentMethodCard';
 export type { LocationSelectorSheetProps, LocationSelectorAddress } from './LocationSelectorSheet';
 export type { FloatingCartCTAProps } from './FloatingCartCTA';
 export type { TabsProps, TabItem } from './Tabs';
-export type { SegmentedControlProps } from './SegmentedControl';
+export type { SegmentedControlItem, SegmentedControlProps } from './SegmentedControl';
 export type { PromoBannerProps } from './PromoBanner';
 export type { ProfileHeaderProps } from './ProfileHeader';

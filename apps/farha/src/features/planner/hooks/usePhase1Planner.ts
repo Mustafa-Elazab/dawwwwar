@@ -47,6 +47,7 @@ import type {
 } from '../domain/phase1Types';
 import { createPhase1BillingClient } from '../../monetization/data/phase1Billing';
 import { createPhase1Repository } from '../data/phase1Repository';
+import { getPlannerTabForScreen, PLANNER_TAB_SCREEN_BY_KEY } from '../navigation/plannerTabs';
 
 export type Phase1Status = 'loading' | 'ready' | 'error';
 
@@ -159,6 +160,13 @@ export const usePhase1Planner = (): Phase1PlannerController => {
     }
   }, [route.name, state, status]);
 
+  useEffect(() => {
+    const routeTab = getPlannerTabForScreen(route.name);
+    if (routeTab) {
+      setActiveTab(routeTab);
+    }
+  }, [route.name]);
+
   const navigate = useCallback((name: Phase1ScreenName, params?: Phase1Route['params']) => {
     setRoutes((current) => [...current, { name, params }]);
   }, []);
@@ -179,14 +187,8 @@ export const usePhase1Planner = (): Phase1PlannerController => {
   }, [state]);
 
   const openTab = useCallback((tab: Phase1TabKey) => {
-    const screenByTab: Record<Phase1TabKey, Phase1ScreenName> = {
-      home: 'EventDashboardScreen',
-      budget: 'BudgetCategoryListScreen',
-      checklist: 'ChecklistTimelineScreen',
-      settings: 'SettingsScreen',
-    };
     setActiveTab(tab);
-    reset(screenByTab[tab], { eventId: state.activeEventId, tab });
+    reset(PLANNER_TAB_SCREEN_BY_KEY[tab], { eventId: state.activeEventId, tab });
   }, [reset, state.activeEventId]);
 
   const completeOnboardingAction = useCallback(() => {

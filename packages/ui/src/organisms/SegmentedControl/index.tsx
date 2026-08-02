@@ -2,10 +2,15 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useTheme, radius, spacing } from '@dawwar/theme';
 import { AppPressable, AppText } from '../../atoms';
-import type { TabItem } from '../Tabs';
+
+export interface SegmentedControlItem {
+  key: string;
+  label: string;
+  accessibilityLabel?: string;
+}
 
 export interface SegmentedControlProps {
-  items: TabItem[];
+  items: SegmentedControlItem[];
   activeKey: string;
   onChange: (key: string) => void;
 }
@@ -20,6 +25,9 @@ export function SegmentedControl({ items, activeKey, onChange }: SegmentedContro
         return (
           <AppPressable
             key={item.key}
+            accessibilityRole="button"
+            accessibilityState={active ? { selected: true } : undefined}
+            accessibilityLabel={item.accessibilityLabel ?? item.label}
             onPress={() => onChange(item.key)}
             style={[styles.item, { backgroundColor: active ? colors.primary : 'transparent' }]}
           >

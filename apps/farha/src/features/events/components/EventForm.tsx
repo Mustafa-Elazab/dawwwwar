@@ -4,7 +4,7 @@ import { useTranslation } from '@dawwar/i18n';
 import { useTheme } from '@dawwar/theme';
 import { AppInput, SegmentedControl } from '@dawwar/ui';
 
-import { DateField } from '../../planner/components';
+import { DateField } from '../../planner/inputs/DateField';
 import {
   phase1EventTypes,
   validateEventDraft,

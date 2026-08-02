@@ -60,4 +60,7 @@ export const createStyles = (colors: AppColors) =>
       writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr',
       lineHeight: 20,
     },
+    bottomComponent: {
+      marginTop: 12,
+    },
   });

@@ -23,8 +23,16 @@ import { ProUpgradeScreen } from '../monetization/screens';
 import { SettingsScreen } from '../settings/screens';
 import { ShareCardPreviewScreen } from '../sharing/screens';
 import { PlannerControllerProvider } from './context/PlannerControllerContext';
-import type { Phase1ScreenName } from './domain/phase1Types';
+import type { Phase1ScreenName, Phase1TabKey } from './domain/phase1Types';
 import { usePhase1Planner } from './hooks/usePhase1Planner';
+import { getPlannerTabForScreen } from './navigation/plannerTabs';
+
+const TAB_SCREEN_COMPONENTS: Record<Phase1TabKey, React.ComponentType> = {
+  home: EventDashboardScreen,
+  budget: BudgetCategoryListScreen,
+  checklist: ChecklistTimelineScreen,
+  settings: SettingsScreen,
+};
 
 export function FarhaPlannerApp() {
   const controller = usePhase1Planner();
@@ -41,6 +49,12 @@ interface FarhaPlannerRouteProps {
 }
 
 function FarhaPlannerRoute({ routeName }: FarhaPlannerRouteProps) {
+  const tabKey = getPlannerTabForScreen(routeName);
+  if (tabKey) {
+    const TabScreen = TAB_SCREEN_COMPONENTS[tabKey];
+    return <TabScreen />;
+  }
+
   switch (routeName) {
     case 'SplashScreen':
       return <SplashScreen />;
@@ -50,26 +64,18 @@ function FarhaPlannerRoute({ routeName }: FarhaPlannerRouteProps) {
       return <EventCreateScreen />;
     case 'EventListScreen':
       return <EventListScreen />;
-    case 'EventDashboardScreen':
-      return <EventDashboardScreen />;
     case 'EventEditScreen':
       return <EventEditScreen />;
-    case 'BudgetCategoryListScreen':
-      return <BudgetCategoryListScreen />;
     case 'BudgetItemListScreen':
       return <BudgetItemListScreen />;
     case 'BudgetItemFormScreen':
       return <BudgetItemFormScreen />;
-    case 'ChecklistTimelineScreen':
-      return <ChecklistTimelineScreen />;
     case 'ChecklistItemEditScreen':
       return <ChecklistItemEditScreen />;
     case 'ShareCardPreviewScreen':
       return <ShareCardPreviewScreen />;
     case 'ProUpgradeScreen':
       return <ProUpgradeScreen />;
-    case 'SettingsScreen':
-      return <SettingsScreen />;
     default:
       return <SplashScreen />;
   }

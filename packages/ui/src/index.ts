@@ -117,7 +117,7 @@ export type { PaymentMethodCardProps } from './organisms/PaymentMethodCard';
 export type { LocationSelectorSheetProps, LocationSelectorAddress } from './organisms/LocationSelectorSheet';
 export type { FloatingCartCTAProps } from './organisms/FloatingCartCTA';
 export type { TabsProps, TabItem } from './organisms/Tabs';
-export type { SegmentedControlProps } from './organisms/SegmentedControl';
+export type { SegmentedControlItem, SegmentedControlProps } from './organisms/SegmentedControl';
 export type { PromoBannerProps } from './organisms/PromoBanner';
 export type { ProfileHeaderProps } from './organisms/ProfileHeader';
 
