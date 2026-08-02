@@ -14,6 +14,12 @@ const resolvePackage = (pkg) => {
 const SINGLETON_PINS = {
   react: resolvePackage('react'),
   'react-native': resolvePackage('react-native'),
+  '@react-navigation/bottom-tabs': resolvePackage('@react-navigation/bottom-tabs'),
+  '@react-navigation/core': resolvePackage('@react-navigation/core'),
+  '@react-navigation/elements': resolvePackage('@react-navigation/elements'),
+  '@react-navigation/native': resolvePackage('@react-navigation/native'),
+  '@react-navigation/native-stack': resolvePackage('@react-navigation/native-stack'),
+  '@react-navigation/routers': resolvePackage('@react-navigation/routers'),
   'react-native-gesture-handler': resolvePackage('react-native-gesture-handler'),
   'react-native-reanimated': resolvePackage('react-native-reanimated'),
   'react-native-safe-area-context': resolvePackage('react-native-safe-area-context'),
