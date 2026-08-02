@@ -4,14 +4,14 @@ import { useTranslation } from '@dawwar/i18n';
 import {
   parseCurrencyInput,
   validateBudgetItemDraft,
-} from '../../planner/domain/phase1Logic';
+} from '../../../planner/domain/phase1Logic';
+import { usePlannerController } from '../../../planner/context/PlannerControllerContext';
 import type {
   BudgetItemDraft,
   FarhaPhase1BudgetCategory,
   FarhaPhase1BudgetItem,
-} from '../../planner/domain/phase1Types';
-import type { Phase1PlannerController } from '../../planner/hooks/usePhase1Planner';
-import { confirmAction } from '../../planner/utils/helpers';
+} from '../../../planner/domain/phase1Types';
+import { confirmAction } from '../../../planner/utils/helpers';
 
 interface BudgetItemFormState {
   categoryId: string;
@@ -33,7 +33,8 @@ const emptyBudgetItemForm: BudgetItemFormState = {
   notes: '',
 };
 
-export function useController(appController: Phase1PlannerController) {
+export function useController() {
+  const appController = usePlannerController();
   const { t } = useTranslation();
   const category = appController.getCategoryById(appController.route.params?.categoryId);
   const editingItem = appController.getBudgetItemById(appController.route.params?.budgetItemId);

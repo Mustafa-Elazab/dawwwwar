@@ -6,17 +6,16 @@ import { AppBadge, AppButton, AppPressable, AppText } from '@dawwar/ui';
 
 import { isOverdue } from '../../planner/domain/phase1Logic';
 import type { FarhaPhase1ChecklistItem } from '../../planner/domain/phase1Types';
-import type { Phase1PlannerController } from '../../planner/hooks/usePhase1Planner';
 import { getChecklistTitle } from '../utils/checklistLabels';
 import { createPhase1ScreenStyles } from '../../planner/utils/styles';
 
 interface ChecklistRowProps {
-  controller: Phase1PlannerController;
   item: FarhaPhase1ChecklistItem;
   onPress: () => void;
+  onMarkDone: () => void;
 }
 
-export function ChecklistRow({ controller, item, onPress }: ChecklistRowProps) {
+export function ChecklistRow({ item, onPress, onMarkDone }: ChecklistRowProps) {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => createPhase1ScreenStyles(colors), [colors]);
@@ -55,7 +54,7 @@ export function ChecklistRow({ controller, item, onPress }: ChecklistRowProps) {
         <AppButton
           label={t('farha.phase1.checklist.markDoneShort')}
           size="sm"
-          onPress={() => controller.setChecklistItemStatus(item.id, 'done')}
+          onPress={onMarkDone}
         />
       ) : null}
     </AppPressable>

@@ -1,10 +1,11 @@
 import { useState } from 'react';
 
-import { validateEventDraft } from '../../planner/domain/phase1Logic';
-import type { Phase1PlannerController } from '../../planner/hooks/usePhase1Planner';
-import { defaultEventForm, type EventFormState } from '../utils/eventForm';
+import { usePlannerController } from '../../../planner/context/PlannerControllerContext';
+import { validateEventDraft } from '../../../planner/domain/phase1Logic';
+import { defaultEventForm, type EventFormState } from '../../utils/eventForm';
 
-export function useController(appController: Phase1PlannerController) {
+export function useController() {
+  const appController = usePlannerController();
   const [form, setForm] = useState<EventFormState>(defaultEventForm);
   const [submitted, setSubmitted] = useState(false);
   const draft = { ...form };

@@ -4,22 +4,19 @@ import { useTranslation } from '@dawwar/i18n';
 import { useTheme } from '@dawwar/theme';
 import { AppPressable, AppText } from '@dawwar/ui';
 
-import type { FarhaPhase1Event } from '../../planner/domain/phase1Types';
-import type { Phase1PlannerController } from '../../planner/hooks/usePhase1Planner';
+import type { FarhaPhase1BudgetCategory } from '../../planner/domain/phase1Types';
 import { getCategoryName } from '../utils/categoryLabels';
 import { createPhase1ScreenStyles } from '../../planner/utils/styles';
 
 interface CategorySelectorProps {
-  controller: Phase1PlannerController;
-  event: FarhaPhase1Event;
+  categories: FarhaPhase1BudgetCategory[];
   selectedCategoryId: string;
   onChange: (categoryId: string) => void;
   allowNone?: boolean;
 }
 
 export function CategorySelector({
-  controller,
-  event,
+  categories,
   selectedCategoryId,
   onChange,
   allowNone,
@@ -27,7 +24,6 @@ export function CategorySelector({
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => createPhase1ScreenStyles(colors), [colors]);
-  const categories = controller.getEventCategories(event.id);
 
   return (
     <View style={styles.stack}>

@@ -60,11 +60,12 @@ current Phase 1 screen/functionality spec is
 - Feature structure: screens now live under feature-owned modules such as
   `features/events`, `features/budget`, `features/checklist`,
   `features/sharing`, `features/monetization`, `features/settings`, and
-  `features/onboarding`. Each feature owns its screens, controllers/hooks,
-  components, and utility files.
+  `features/onboarding`. Each screen folder owns its `index.tsx`, `styles.ts`,
+  and `controller.ts`; reusable components and utilities stay feature-local.
 - Planner core: `features/planner` owns the Phase 1 repository, MMKV storage
   key `farha.phase1.v1`, route state, Pro flag, notifications toggle,
-  bottom-tab shell, shared frame components, and shared planner utilities.
+  bottom-tab shell, shared frame components, a planner controller provider, and
+  shared planner utilities.
 - Events: first-launch routing, onboarding, event create/list/edit/delete,
   free-tier one-event gate, and Pro multi-event switching are implemented.
 - Budget: default categories, custom categories, item add/edit/delete,
@@ -220,6 +221,7 @@ Billing SDK verification remain tracked in sections C and D.
 | 2026-08-02 | `./gradlew :app:assembleDebug` from `apps/farha/android` | done |
 | 2026-08-02 | Phase 1 screen folder/controller refactor | done |
 | 2026-08-02 | Debug APK contains `assets/index.android.bundle` | done |
+| 2026-08-02 | Screen-local `controller.ts` colocation refactor | done |
 | 2026-08-02 | Feature-owned screen architecture and no-Metro debug bundle config | done |
 
 ## Native/Release Follow-Ups

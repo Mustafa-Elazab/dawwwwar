@@ -9,23 +9,21 @@ import { getChecklistTitle } from '../../../checklist/utils/checklistLabels';
 import { AdBanner } from '../../../monetization/components';
 import { MissingEvent, ScreenFrame } from '../../../planner/components';
 import { formatCountdown } from '../../../planner/utils/helpers';
-import type { Phase1ScreenProps } from '../../../planner/types/screenTypes';
+import { useController } from './controller';
 import { createStyles } from './styles';
-import { useController } from '../../hooks/useEventDashboardController';
 
-export function EventDashboardScreen({ controller }: Phase1ScreenProps) {
+export function EventDashboardScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const ctrl = useController(controller);
+  const ctrl = useController();
 
-  if (!ctrl.event) return <MissingEvent controller={controller} />;
+  if (!ctrl.event) return <MissingEvent />;
 
   return (
     <ScreenFrame
       title={ctrl.event.title}
       subtitle={formatCountdown(t, ctrl.event)}
-      controller={controller}
       showTabs
       headerActions={(
         <View style={styles.headerActions}>

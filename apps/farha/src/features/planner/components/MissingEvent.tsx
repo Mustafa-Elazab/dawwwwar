@@ -2,14 +2,15 @@ import React from 'react';
 import { useTranslation } from '@dawwar/i18n';
 import { AppButton } from '@dawwar/ui';
 
-import type { Phase1ScreenProps } from '../types/screenTypes';
+import { usePlannerController } from '../context/PlannerControllerContext';
 import { ScreenFrame } from './ScreenFrame';
 
-export function MissingEvent({ controller }: Phase1ScreenProps) {
+export function MissingEvent() {
   const { t } = useTranslation();
+  const controller = usePlannerController();
 
   return (
-    <ScreenFrame title={t('farha.phase1.errors.missingEvent')} controller={controller} showBack>
+    <ScreenFrame title={t('farha.phase1.errors.missingEvent')} showBack>
       <AppButton
         label={t('farha.phase1.actions.createEvent')}
         onPress={() => controller.navigate('EventCreateScreen')}

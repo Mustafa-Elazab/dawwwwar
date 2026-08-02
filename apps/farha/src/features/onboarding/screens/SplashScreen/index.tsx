@@ -4,15 +4,14 @@ import { useTranslation } from '@dawwar/i18n';
 import { useTheme } from '@dawwar/theme';
 import { AppScreenTemplate, AppText } from '@dawwar/ui';
 
-import type { Phase1ScreenProps } from '../../../planner/types/screenTypes';
+import { useController } from './controller';
 import { createStyles } from './styles';
-import { useController } from '../../hooks/useSplashController';
 
-export function SplashScreen({ controller }: Phase1ScreenProps) {
+export function SplashScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const ctrl = useController(controller);
+  const ctrl = useController();
 
   return (
     <AppScreenTemplate contentStyle={styles.screenContent} isLoading={ctrl.status === 'loading'}>

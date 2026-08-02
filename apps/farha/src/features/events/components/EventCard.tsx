@@ -4,23 +4,23 @@ import { useTranslation } from '@dawwar/i18n';
 import { useTheme } from '@dawwar/theme';
 import { AppBadge, AppCard, AppText } from '@dawwar/ui';
 
-import { calculateBudgetTotals } from '../../planner/domain/phase1Logic';
-import type { FarhaPhase1Event } from '../../planner/domain/phase1Types';
-import type { Phase1PlannerController } from '../../planner/hooks/usePhase1Planner';
+import type {
+  BudgetTotals,
+  FarhaPhase1Event,
+} from '../../planner/domain/phase1Types';
 import { formatCountdown, money } from '../../planner/utils/helpers';
 import { createPhase1ScreenStyles } from '../../planner/utils/styles';
 
 interface EventCardProps {
-  controller: Phase1PlannerController;
   event: FarhaPhase1Event;
+  totals: BudgetTotals;
   onPress: () => void;
 }
 
-export function EventCard({ controller, event, onPress }: EventCardProps) {
+export function EventCard({ event, totals, onPress }: EventCardProps) {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => createPhase1ScreenStyles(colors), [colors]);
-  const totals = calculateBudgetTotals(controller.getEventBudgetItems(event.id));
 
   return (
     <AppCard variant="outlined" style={styles.section} onPress={onPress}>

@@ -9,23 +9,21 @@ import { getCategoryName } from '../../utils/categoryLabels';
 import { AdBanner } from '../../../monetization/components';
 import { MissingEvent, ScreenFrame } from '../../../planner/components';
 import { money } from '../../../planner/utils/helpers';
-import type { Phase1ScreenProps } from '../../../planner/types/screenTypes';
+import { useController } from './controller';
 import { createStyles } from './styles';
-import { useController } from '../../hooks/useBudgetCategoryListController';
 
-export function BudgetCategoryListScreen({ controller }: Phase1ScreenProps) {
+export function BudgetCategoryListScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const ctrl = useController(controller);
+  const ctrl = useController();
 
-  if (!ctrl.event) return <MissingEvent controller={controller} />;
+  if (!ctrl.event) return <MissingEvent />;
 
   return (
     <ScreenFrame
       title={t('farha.phase1.budgetCategories.title')}
       subtitle={ctrl.event.title}
-      controller={controller}
       showTabs
     >
       <BudgetSummaryCard title={t('farha.phase1.budgetCategories.totalHeader')} totals={ctrl.totals} />

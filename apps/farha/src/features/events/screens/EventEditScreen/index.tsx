@@ -4,17 +4,16 @@ import { AppButton } from '@dawwar/ui';
 
 import { EventForm } from '../../components';
 import { MissingEvent, ScreenFrame } from '../../../planner/components';
-import type { Phase1ScreenProps } from '../../../planner/types/screenTypes';
-import { useController } from '../../hooks/useEventEditController';
+import { useController } from './controller';
 
-export function EventEditScreen({ controller }: Phase1ScreenProps) {
+export function EventEditScreen() {
   const { t } = useTranslation();
-  const ctrl = useController(controller);
+  const ctrl = useController();
 
-  if (!ctrl.event) return <MissingEvent controller={controller} />;
+  if (!ctrl.event) return <MissingEvent />;
 
   return (
-    <ScreenFrame title={t('farha.phase1.eventEdit.title')} controller={controller} showBack>
+    <ScreenFrame title={t('farha.phase1.eventEdit.title')} showBack>
       <EventForm form={ctrl.form} submitted={ctrl.submitted} onChange={ctrl.setForm} />
       <AppButton
         label={t('farha.phase1.actions.save')}

@@ -7,20 +7,19 @@ import { AppButton, AppText } from '@dawwar/ui';
 import { BudgetBadge } from '../../../budget/components';
 import { MissingEvent, ScreenFrame } from '../../../planner/components';
 import { formatCountdown, money } from '../../../planner/utils/helpers';
-import type { Phase1ScreenProps } from '../../../planner/types/screenTypes';
+import { useController } from './controller';
 import { createStyles } from './styles';
-import { useController } from '../../hooks/useShareCardPreviewController';
 
-export function ShareCardPreviewScreen({ controller }: Phase1ScreenProps) {
+export function ShareCardPreviewScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const ctrl = useController(controller);
+  const ctrl = useController();
 
-  if (!ctrl.event) return <MissingEvent controller={controller} />;
+  if (!ctrl.event) return <MissingEvent />;
 
   return (
-    <ScreenFrame title={t('farha.phase1.share.title')} subtitle={t('farha.phase1.share.subtitle')} controller={controller} showBack>
+    <ScreenFrame title={t('farha.phase1.share.title')} subtitle={t('farha.phase1.share.subtitle')} showBack>
       <View style={styles.shareCard}>
         <View style={styles.stack}>
           <AppText variant="h2" align="auto">{ctrl.event.title}</AppText>

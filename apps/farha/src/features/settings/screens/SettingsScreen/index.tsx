@@ -5,18 +5,17 @@ import { useTheme } from '@dawwar/theme';
 import { AppButton, AppCard, AppText, SectionHeader } from '@dawwar/ui';
 
 import { ScreenFrame } from '../../../planner/components';
-import type { Phase1ScreenProps } from '../../../planner/types/screenTypes';
+import { useController } from './controller';
 import { createStyles } from './styles';
-import { useController } from '../../hooks/useSettingsController';
 
-export function SettingsScreen({ controller }: Phase1ScreenProps) {
+export function SettingsScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const ctrl = useController(controller);
+  const ctrl = useController();
 
   return (
-    <ScreenFrame title={t('farha.phase1.settings.title')} subtitle={t('farha.phase1.settings.subtitle')} controller={controller} showTabs>
+    <ScreenFrame title={t('farha.phase1.settings.title')} subtitle={t('farha.phase1.settings.subtitle')} showTabs>
       <AppCard variant="outlined" style={styles.section}>
         <SectionHeader title={t('farha.phase1.settings.language')} />
         <View style={styles.wrapRow}>

@@ -1,8 +1,10 @@
-import type { Phase1PlannerController } from '../../planner/hooks/usePhase1Planner';
+import { usePlannerController } from '../../../planner/context/PlannerControllerContext';
 
 const benefits = ['unlimitedEvents', 'templates', 'noAds'] as const;
 
-export function useController(appController: Phase1PlannerController) {
+export function useController() {
+  const appController = usePlannerController();
+
   return {
     benefits,
     upgradeToPro: appController.upgradeToPro,

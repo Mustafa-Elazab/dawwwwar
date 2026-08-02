@@ -7,25 +7,23 @@ import { AppButton, EmptyState } from '@dawwar/ui';
 import { BudgetItemRow } from '../../components';
 import { getCategoryName } from '../../utils/categoryLabels';
 import { ScreenFrame } from '../../../planner/components';
-import type { Phase1ScreenProps } from '../../../planner/types/screenTypes';
+import { useController } from './controller';
 import { createStyles } from './styles';
-import { useController } from '../../hooks/useBudgetItemListController';
 
-export function BudgetItemListScreen({ controller }: Phase1ScreenProps) {
+export function BudgetItemListScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const ctrl = useController(controller);
+  const ctrl = useController();
 
   if (!ctrl.category) {
-    return <ScreenFrame title={t('farha.phase1.errors.missingCategory')} controller={controller} showBack />;
+    return <ScreenFrame title={t('farha.phase1.errors.missingCategory')} showBack />;
   }
 
   return (
     <ScreenFrame
       title={getCategoryName(t, ctrl.category)}
       subtitle={t('farha.phase1.budgetItems.subtitle')}
-      controller={controller}
       showBack
     >
       <AppButton label={t('farha.phase1.actions.addItem')} onPress={ctrl.addItem} fullWidth />

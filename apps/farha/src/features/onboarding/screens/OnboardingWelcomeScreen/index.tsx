@@ -5,15 +5,14 @@ import { useTheme } from '@dawwar/theme';
 import { AppButton, AppCard, AppText } from '@dawwar/ui';
 
 import { ScreenFrame } from '../../../planner/components';
-import type { Phase1ScreenProps } from '../../../planner/types/screenTypes';
+import { useController } from './controller';
 import { createStyles } from './styles';
-import { useController } from '../../hooks/useOnboardingWelcomeController';
 
-export function OnboardingWelcomeScreen({ controller }: Phase1ScreenProps) {
+export function OnboardingWelcomeScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const ctrl = useController(controller);
+  const ctrl = useController();
 
   return (
     <ScreenFrame title={t('farha.phase1.onboarding.title')} subtitle={t('farha.phase1.onboarding.subtitle')}>

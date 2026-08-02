@@ -1,10 +1,11 @@
 import { useMemo } from 'react';
 
-import { getChecklistSummary } from '../../planner/domain/phase1Logic';
-import type { Phase1PlannerController } from '../../planner/hooks/usePhase1Planner';
-import { getScreenEvent } from '../../planner/utils/helpers';
+import { usePlannerController } from '../../../planner/context/PlannerControllerContext';
+import { getChecklistSummary } from '../../../planner/domain/phase1Logic';
+import { getScreenEvent } from '../../../planner/utils/helpers';
 
-export function useController(appController: Phase1PlannerController) {
+export function useController() {
+  const appController = usePlannerController();
   const event = getScreenEvent(appController);
   const items = useMemo(
     () => appController.getEventChecklistItems(event?.id),
@@ -26,5 +27,7 @@ export function useController(appController: Phase1PlannerController) {
         eventId: event.id,
         checklistItemId,
       }),
+    markDone: (checklistItemId: string) =>
+      appController.setChecklistItemStatus(checklistItemId, 'done'),
   };
 }

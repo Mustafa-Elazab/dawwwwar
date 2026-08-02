@@ -1,10 +1,11 @@
 import { i18n, updateLanguage, type AppLanguage } from '@dawwar/i18n';
 import { useTranslation } from '@dawwar/i18n';
 
-import type { Phase1PlannerController } from '../../planner/hooks/usePhase1Planner';
-import { confirmAction } from '../../planner/utils/helpers';
+import { usePlannerController } from '../../../planner/context/PlannerControllerContext';
+import { confirmAction } from '../../../planner/utils/helpers';
 
-export function useController(appController: Phase1PlannerController) {
+export function useController() {
+  const appController = usePlannerController();
   const { t } = useTranslation();
   const language = (i18n.language === 'en' ? 'en' : 'ar') as AppLanguage;
 

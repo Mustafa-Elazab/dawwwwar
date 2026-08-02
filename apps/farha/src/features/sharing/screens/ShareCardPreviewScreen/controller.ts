@@ -4,11 +4,12 @@ import {
   calculateBudgetTotals,
   createSharePayload,
   getChecklistSummary,
-} from '../../planner/domain/phase1Logic';
-import type { Phase1PlannerController } from '../../planner/hooks/usePhase1Planner';
-import { getScreenEvent } from '../../planner/utils/helpers';
+} from '../../../planner/domain/phase1Logic';
+import { usePlannerController } from '../../../planner/context/PlannerControllerContext';
+import { getScreenEvent } from '../../../planner/utils/helpers';
 
-export function useController(appController: Phase1PlannerController) {
+export function useController() {
+  const appController = usePlannerController();
   const event = getScreenEvent(appController);
   const totals = useMemo(
     () => calculateBudgetTotals(appController.getEventBudgetItems(event?.id)),

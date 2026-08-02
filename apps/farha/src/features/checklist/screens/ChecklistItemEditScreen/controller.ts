@@ -1,18 +1,18 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from '@dawwar/i18n';
 
-import { validateChecklistItemDraft } from '../../planner/domain/phase1Logic';
+import { usePlannerController } from '../../../planner/context/PlannerControllerContext';
+import { validateChecklistItemDraft } from '../../../planner/domain/phase1Logic';
 import type {
   ChecklistItemDraft,
   FarhaPhase1ChecklistItem,
-} from '../../planner/domain/phase1Types';
-import type { Phase1PlannerController } from '../../planner/hooks/usePhase1Planner';
+} from '../../../planner/domain/phase1Types';
 import {
   confirmAction,
   getScreenEvent,
-} from '../../planner/utils/helpers';
-import type { Phase1TranslationFn } from '../../planner/types/screenTypes';
-import { getChecklistTitle } from '../utils/checklistLabels';
+} from '../../../planner/utils/helpers';
+import type { Phase1TranslationFn } from '../../../planner/types/screenTypes';
+import { getChecklistTitle } from '../../utils/checklistLabels';
 
 interface ChecklistItemFormState {
   title: string;
@@ -28,10 +28,15 @@ const emptyChecklistItemForm: ChecklistItemFormState = {
   notes: '',
 };
 
-export function useController(appController: Phase1PlannerController) {
+export function useController() {
+  const appController = usePlannerController();
   const { t } = useTranslation();
   const event = getScreenEvent(appController);
   const editingItem = appController.getChecklistItemById(appController.route.params?.checklistItemId);
+  const categories = useMemo(
+    () => appController.getEventCategories(event?.id),
+    [appController, event?.id],
+  );
   const [form, setForm] = useState<ChecklistItemFormState>(
     checklistItemToForm(editingItem, t),
   );
@@ -78,6 +83,7 @@ export function useController(appController: Phase1PlannerController) {
 
   return {
     event,
+    categories,
     editingItem,
     form,
     submitted,

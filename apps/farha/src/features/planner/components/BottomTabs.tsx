@@ -4,14 +4,15 @@ import { useTranslation } from '@dawwar/i18n';
 import { useTheme } from '@dawwar/theme';
 import { AppPressable, AppText } from '@dawwar/ui';
 
+import { usePlannerController } from '../context/PlannerControllerContext';
 import type { Phase1TabKey } from '../domain/phase1Types';
-import type { Phase1ScreenProps } from '../types/screenTypes';
 import { createPhase1ScreenStyles } from '../utils/styles';
 
-export function BottomTabs({ controller }: Phase1ScreenProps) {
+export function BottomTabs() {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => createPhase1ScreenStyles(colors), [colors]);
+  const controller = usePlannerController();
   const tabs: Phase1TabKey[] = ['home', 'budget', 'checklist', 'settings'];
 
   return (

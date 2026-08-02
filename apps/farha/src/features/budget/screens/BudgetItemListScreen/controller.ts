@@ -1,8 +1,9 @@
 import { useMemo } from 'react';
 
-import type { Phase1PlannerController } from '../../planner/hooks/usePhase1Planner';
+import { usePlannerController } from '../../../planner/context/PlannerControllerContext';
 
-export function useController(appController: Phase1PlannerController) {
+export function useController() {
+  const appController = usePlannerController();
   const category = appController.getCategoryById(appController.route.params?.categoryId);
   const items = useMemo(
     () => appController.getCategoryItems(category?.id),

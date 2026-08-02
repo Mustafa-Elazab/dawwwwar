@@ -4,7 +4,7 @@ import { useTranslation } from '@dawwar/i18n';
 import { useTheme } from '@dawwar/theme';
 import { AppButton, AppScreenTemplate, AppText } from '@dawwar/ui';
 
-import type { Phase1PlannerController } from '../hooks/usePhase1Planner';
+import { usePlannerController } from '../context/PlannerControllerContext';
 import { createPhase1ScreenStyles } from '../utils/styles';
 import { BottomTabs } from './BottomTabs';
 
@@ -12,7 +12,6 @@ interface ScreenFrameProps {
   title: string;
   subtitle?: string;
   children?: React.ReactNode;
-  controller?: Phase1PlannerController;
   showBack?: boolean;
   showTabs?: boolean;
   headerActions?: React.ReactNode;
@@ -22,7 +21,6 @@ export function ScreenFrame({
   title,
   subtitle,
   children,
-  controller,
   showBack,
   showTabs,
   headerActions,
@@ -30,15 +28,16 @@ export function ScreenFrame({
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => createPhase1ScreenStyles(colors), [colors]);
+  const controller = usePlannerController();
 
   return (
     <AppScreenTemplate
       contentStyle={styles.screenContent}
-      isLoading={controller?.status === 'loading'}
-      isError={controller?.status === 'error'}
-      errorMessage={controller?.errorMessageKey ? t(controller.errorMessageKey) : undefined}
-      onRetry={controller?.reload}
-      footer={showTabs && controller ? <BottomTabs controller={controller} /> : undefined}
+      isLoading={controller.status === 'loading'}
+      isError={controller.status === 'error'}
+      errorMessage={controller.errorMessageKey ? t(controller.errorMessageKey) : undefined}
+      onRetry={controller.reload}
+      footer={showTabs ? <BottomTabs /> : undefined}
     >
       <ScrollView
         contentContainerStyle={styles.scrollContent}
@@ -55,7 +54,7 @@ export function ScreenFrame({
                 </AppText>
               ) : null}
             </View>
-            {showBack && controller ? (
+            {showBack ? (
               <AppButton
                 label={t('farha.phase1.actions.back')}
                 size="sm"

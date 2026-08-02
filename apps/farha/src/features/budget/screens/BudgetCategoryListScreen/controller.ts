@@ -4,13 +4,13 @@ import { useTranslation } from '@dawwar/i18n';
 import {
   calculateBudgetTotals,
   validateBudgetCategoryDraft,
-} from '../../planner/domain/phase1Logic';
-import type { FarhaPhase1BudgetCategory } from '../../planner/domain/phase1Types';
-import type { Phase1PlannerController } from '../../planner/hooks/usePhase1Planner';
+} from '../../../planner/domain/phase1Logic';
+import { usePlannerController } from '../../../planner/context/PlannerControllerContext';
+import type { FarhaPhase1BudgetCategory } from '../../../planner/domain/phase1Types';
 import {
   confirmAction,
   getScreenEvent,
-} from '../../planner/utils/helpers';
+} from '../../../planner/utils/helpers';
 
 interface BudgetCategoryRowModel {
   category: FarhaPhase1BudgetCategory;
@@ -18,7 +18,8 @@ interface BudgetCategoryRowModel {
   totals: ReturnType<typeof calculateBudgetTotals>;
 }
 
-export function useController(appController: Phase1PlannerController) {
+export function useController() {
+  const appController = usePlannerController();
   const { t } = useTranslation();
   const event = getScreenEvent(appController);
   const [categoryName, setCategoryName] = useState('');

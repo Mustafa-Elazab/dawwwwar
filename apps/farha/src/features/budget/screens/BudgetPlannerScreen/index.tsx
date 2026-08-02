@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useTranslation } from '@dawwar/i18n';
 import { useTheme } from '@dawwar/theme';
@@ -13,135 +13,31 @@ import {
   SegmentedControl,
 } from '@dawwar/ui';
 
-import { farhaEventTypes } from '../../data/defaultBudgetCategories';
-import {
-  formatBudgetAmount,
-  parseCurrencyInput,
-  validateBudgetItemDraft,
-} from '../../domain/budgetTotals';
-import { useBudgetPlanner } from '../../hooks/useBudgetPlanner';
 import type {
-  BudgetCategory,
-  BudgetItem,
-  BudgetItemDraft,
   BudgetTotals,
   FarhaEventType,
 } from '../../../../types';
+import { useController } from './controller';
 import { createStyles } from './styles';
-
-interface BudgetItemFormState {
-  categoryId: string;
-  title: string;
-  plannedCost: string;
-  actualCost: string;
-  depositPaid: string;
-  dueDate: string;
-  notes: string;
-}
-
-const emptyForm: BudgetItemFormState = {
-  categoryId: '',
-  title: '',
-  plannedCost: '',
-  actualCost: '',
-  depositPaid: '',
-  dueDate: '',
-  notes: '',
-};
 
 export function BudgetPlannerScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const planner = useBudgetPlanner();
-  const [form, setForm] = useState<BudgetItemFormState>(emptyForm);
-  const [editingItemId, setEditingItemId] = useState<string | undefined>();
-  const [hasSubmitted, setHasSubmitted] = useState(false);
-
-  useEffect(() => {
-    if (!planner.categories.length) return;
-
-    setForm((current) => {
-      const hasCurrentCategory = planner.categories.some(
-        (category) => category.id === current.categoryId,
-      );
-
-      if (hasCurrentCategory) return current;
-
-      return {
-        ...current,
-        categoryId: planner.categories[0].id,
-      };
-    });
-  }, [planner.categories]);
-
-  const draft = useMemo((): BudgetItemDraft => ({
-    id: editingItemId,
-    categoryId: form.categoryId,
-    title: form.title,
-    plannedCost: parseCurrencyInput(form.plannedCost),
-    actualCost: parseCurrencyInput(form.actualCost),
-    depositPaid: parseCurrencyInput(form.depositPaid),
-    dueDate: form.dueDate,
-    notes: form.notes,
-  }), [editingItemId, form]);
-
-  const validation = useMemo(() => validateBudgetItemDraft(draft), [draft]);
-  const selectedCategory = planner.categories.find((category) => category.id === form.categoryId);
-  const eventTabs = useMemo(
-    () =>
-      farhaEventTypes.map((type) => ({
-        key: type,
-        label: t(`farha.m1.events.${type}`),
-      })),
-    [t],
-  );
-
-  const submit = () => {
-    setHasSubmitted(true);
-
-    if (!validation.isValid) return;
-
-    planner.saveBudgetItem(draft);
-    resetForm(planner.categories);
-  };
-
-  const editItem = (item: BudgetItem) => {
-    setEditingItemId(item.id);
-    setHasSubmitted(false);
-    setForm({
-      categoryId: item.categoryId,
-      title: item.title,
-      plannedCost: item.plannedCost ? String(item.plannedCost) : '',
-      actualCost: item.actualCost ? String(item.actualCost) : '',
-      depositPaid: item.depositPaid ? String(item.depositPaid) : '',
-      dueDate: item.dueDate ?? '',
-      notes: item.notes ?? '',
-    });
-  };
-
-  const resetForm = (categories: BudgetCategory[]) => {
-    setEditingItemId(undefined);
-    setHasSubmitted(false);
-    setForm({
-      ...emptyForm,
-      categoryId: categories[0]?.id ?? '',
-    });
-  };
-
-  const getFieldError = (field: keyof BudgetItemDraft): string | undefined => {
-    if (!hasSubmitted) return undefined;
-
-    const errorKey = validation.errors[field];
-    return errorKey ? t(`farha.m1.validation.${errorKey}`) : undefined;
-  };
-
-  const renderAmount = (amount: number) =>
-    `${formatBudgetAmount(amount)} ${t('farha.m1.currencySuffix')}`;
-
-  const activeEventName = planner.activeEvent
-    ? t(planner.activeEvent.title)
-    : t('farha.m1.events.wedding');
+  const planner = useController();
+  const {
+    activeEventName,
+    editingItemId,
+    eventTabs,
+    form,
+    getFieldError,
+    renderAmount,
+    resetForm,
+    selectedCategory,
+    setForm,
+    submit,
+    editItem,
+  } = planner;
 
   return (
     <AppScreenTemplate
@@ -302,7 +198,7 @@ export function BudgetPlannerScreen() {
               <AppButton
                 label={t('farha.m1.cancelEdit')}
                 variant="outline"
-                onPress={() => resetForm(planner.categories)}
+                onPress={resetForm}
                 fullWidth
               />
             ) : null}

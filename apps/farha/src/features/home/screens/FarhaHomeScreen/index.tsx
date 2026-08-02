@@ -4,13 +4,14 @@ import { useTranslation } from '@dawwar/i18n';
 import { useTheme } from '@dawwar/theme';
 import { AppButton, AppCard, AppScreenTemplate, AppText, SectionHeader } from '@dawwar/ui';
 
-import { m0ReadinessTranslationKeys } from '../../data/readiness';
+import { useController } from './controller';
 import { createStyles } from './styles';
 
 export function FarhaHomeScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
+  const ctrl = useController();
 
   return (
     <AppScreenTemplate testID="farha-home-screen" contentStyle={styles.content}>
@@ -29,7 +30,7 @@ export function FarhaHomeScreen() {
       <AppCard variant="outlined" style={styles.card}>
         <SectionHeader title={t('farha.m0.readinessTitle')} />
         <View style={styles.readinessList}>
-          {m0ReadinessTranslationKeys.map((key) => (
+          {ctrl.readinessTranslationKeys.map((key) => (
             <View key={key} style={styles.readinessRow}>
               <View style={styles.readinessDot} />
               <AppText style={styles.readinessText} align="auto">

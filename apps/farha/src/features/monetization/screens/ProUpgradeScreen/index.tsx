@@ -5,18 +5,17 @@ import { useTheme } from '@dawwar/theme';
 import { AppButton, AppCard, AppText } from '@dawwar/ui';
 
 import { ScreenFrame } from '../../../planner/components';
-import type { Phase1ScreenProps } from '../../../planner/types/screenTypes';
+import { useController } from './controller';
 import { createStyles } from './styles';
-import { useController } from '../../hooks/useProUpgradeController';
 
-export function ProUpgradeScreen({ controller }: Phase1ScreenProps) {
+export function ProUpgradeScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const ctrl = useController(controller);
+  const ctrl = useController();
 
   return (
-    <ScreenFrame title={t('farha.phase1.pro.title')} subtitle={t('farha.phase1.pro.subtitle')} controller={controller} showBack>
+    <ScreenFrame title={t('farha.phase1.pro.title')} subtitle={t('farha.phase1.pro.subtitle')} showBack>
       <View style={styles.stack}>
         {ctrl.benefits.map((benefit) => (
           <AppCard key={benefit} variant="outlined" style={styles.section}>

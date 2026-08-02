@@ -4,12 +4,11 @@ import { AppButton } from '@dawwar/ui';
 
 import { EventForm } from '../../components';
 import { ScreenFrame } from '../../../planner/components';
-import type { Phase1ScreenProps } from '../../../planner/types/screenTypes';
-import { useController } from '../../hooks/useEventCreateController';
+import { useController } from './controller';
 
-export function EventCreateScreen({ controller }: Phase1ScreenProps) {
+export function EventCreateScreen() {
   const { t } = useTranslation();
-  const ctrl = useController(controller);
+  const ctrl = useController();
 
   return (
     <ScreenFrame

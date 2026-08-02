@@ -7,25 +7,23 @@ import { AppButton, AppInput, AppText } from '@dawwar/ui';
 import { getCategoryName } from '../../utils/categoryLabels';
 import { ScreenFrame } from '../../../planner/components';
 import { money } from '../../../planner/utils/helpers';
-import type { Phase1ScreenProps } from '../../../planner/types/screenTypes';
+import { useController } from './controller';
 import { createStyles } from './styles';
-import { useController } from '../../hooks/useBudgetItemFormController';
 
-export function BudgetItemFormScreen({ controller }: Phase1ScreenProps) {
+export function BudgetItemFormScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const ctrl = useController(controller);
+  const ctrl = useController();
 
   if (!ctrl.category) {
-    return <ScreenFrame title={t('farha.phase1.errors.missingCategory')} controller={controller} showBack />;
+    return <ScreenFrame title={t('farha.phase1.errors.missingCategory')} showBack />;
   }
 
   return (
     <ScreenFrame
       title={ctrl.editingItem ? t('farha.phase1.budgetForm.editTitle') : t('farha.phase1.budgetForm.addTitle')}
       subtitle={getCategoryName(t, ctrl.category)}
-      controller={controller}
       showBack
     >
       <View style={styles.stack}>

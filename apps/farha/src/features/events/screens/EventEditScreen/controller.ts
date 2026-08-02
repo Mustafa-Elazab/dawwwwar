@@ -1,15 +1,16 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from '@dawwar/i18n';
 
-import { validateEventDraft } from '../../planner/domain/phase1Logic';
-import type { Phase1PlannerController } from '../../planner/hooks/usePhase1Planner';
+import { usePlannerController } from '../../../planner/context/PlannerControllerContext';
+import { validateEventDraft } from '../../../planner/domain/phase1Logic';
 import {
   confirmAction,
   getScreenEvent,
-} from '../../planner/utils/helpers';
-import { eventToForm, type EventFormState } from '../utils/eventForm';
+} from '../../../planner/utils/helpers';
+import { eventToForm, type EventFormState } from '../../utils/eventForm';
 
-export function useController(appController: Phase1PlannerController) {
+export function useController() {
+  const appController = usePlannerController();
   const { t } = useTranslation();
   const event = getScreenEvent(appController);
   const [form, setForm] = useState<EventFormState>(eventToForm(event));

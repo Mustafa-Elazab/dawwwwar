@@ -6,20 +6,19 @@ import { AppButton, AppCard, AppText, EmptyState, SectionHeader, StepIndicator }
 
 import { ChecklistRow } from '../../components';
 import { MissingEvent, ScreenFrame } from '../../../planner/components';
-import type { Phase1ScreenProps } from '../../../planner/types/screenTypes';
+import { useController } from './controller';
 import { createStyles } from './styles';
-import { useController } from '../../hooks/useChecklistTimelineController';
 
-export function ChecklistTimelineScreen({ controller }: Phase1ScreenProps) {
+export function ChecklistTimelineScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const ctrl = useController(controller);
+  const ctrl = useController();
 
-  if (!ctrl.event) return <MissingEvent controller={controller} />;
+  if (!ctrl.event) return <MissingEvent />;
 
   return (
-    <ScreenFrame title={t('farha.phase1.checklist.title')} subtitle={ctrl.event.title} controller={controller} showTabs>
+    <ScreenFrame title={t('farha.phase1.checklist.title')} subtitle={ctrl.event.title} showTabs>
       <AppCard variant="outlined" style={styles.section}>
         <SectionHeader title={t('farha.phase1.checklist.progressTitle')} />
         <StepIndicator
@@ -43,9 +42,9 @@ export function ChecklistTimelineScreen({ controller }: Phase1ScreenProps) {
           {ctrl.items.map((item) => (
             <ChecklistRow
               key={item.id}
-              controller={controller}
               item={item}
               onPress={() => ctrl.editTask(item.id)}
+              onMarkDone={() => ctrl.markDone(item.id)}
             />
           ))}
         </View>

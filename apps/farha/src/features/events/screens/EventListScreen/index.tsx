@@ -6,25 +6,24 @@ import { AppButton, EmptyState } from '@dawwar/ui';
 
 import { EventCard } from '../../components';
 import { ScreenFrame } from '../../../planner/components';
-import type { Phase1ScreenProps } from '../../../planner/types/screenTypes';
+import { useController } from './controller';
 import { createStyles } from './styles';
-import { useController } from '../../hooks/useEventListController';
 
-export function EventListScreen({ controller }: Phase1ScreenProps) {
+export function EventListScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const ctrl = useController(controller);
+  const ctrl = useController();
 
   return (
     <ScreenFrame title={t('farha.phase1.eventList.title')} subtitle={t('farha.phase1.eventList.subtitle')}>
       {ctrl.events.length ? (
         <View style={styles.stack}>
-          {ctrl.events.map((event) => (
+          {ctrl.events.map(({ event, totals }) => (
             <EventCard
               key={event.id}
-              controller={controller}
               event={event}
+              totals={totals}
               onPress={() => ctrl.openEvent(event.id)}
             />
           ))}
