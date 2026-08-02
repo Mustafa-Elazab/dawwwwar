@@ -16,6 +16,7 @@ export const createStyles = (colors: AppColors) =>
       gap: spacing[2],
     },
     section: {
+      padding: spacing[4],
       gap: spacing[4],
     },
     eventSummary: {
@@ -74,6 +75,9 @@ export const createStyles = (colors: AppColors) =>
     inputGrid: {
       flexDirection: 'row',
       gap: spacing[3],
+    },
+    inputItem: {
+      flex: 1,
     },
     actionRow: {
       gap: spacing[3],

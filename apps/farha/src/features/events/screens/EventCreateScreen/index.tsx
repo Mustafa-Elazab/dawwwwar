@@ -14,6 +14,7 @@ export function EventCreateScreen() {
     <ScreenFrame
       title={t('farha.phase1.eventCreate.title')}
       subtitle={t('farha.phase1.eventCreate.subtitle')}
+      showBack
     >
       <EventForm
         form={ctrl.form}

@@ -15,6 +15,7 @@ export const createStyles = (colors: AppColors) =>
       gap: spacing[2],
     },
     card: {
+      padding: spacing[4],
       gap: spacing[4],
     },
     readinessList: {

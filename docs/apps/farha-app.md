@@ -34,7 +34,7 @@ current Phase 1 screen/functionality spec is
 - Package: `apps/farha/package.json` is named `@dawwar/farha`.
 - Root commands: `farha:start`, `farha:android`, and `farha:ios` are present.
 - App shell: `App.tsx` initializes shared localization, registers Farha's local
-  copy, hides the native splash, and renders the placeholder through shared
+  copy, hides the native splash, and renders the Farha app through shared
   providers.
 - UI proof: `FarhaHomeScreen` uses `@dawwar/ui`, `@dawwar/theme`, and
   `@dawwar/i18n`.
@@ -76,10 +76,10 @@ current Phase 1 screen/functionality spec is
   exist, and completion excludes skipped tasks.
 - Sharing: share-card preview and native `Share.share` payload are
   implemented. Optional image capture/save remains a native SDK follow-up.
-- Monetization/settings: free ad placeholders, local Pro unlock/restore flag,
-  replaceable `Phase1BillingClient` mock, language switch, notifications
-  toggle, about, and clear-data reset are implemented. Real AdMob/UMP/Play
-  Billing SDK wiring remains a release task.
+- Monetization/settings: free one-event gating, local Pro unlock/restore flag,
+  replaceable `Phase1BillingClient` adapter, language switch, notifications
+  toggle, about, and clear-data reset are implemented. Fake ad UI was removed;
+  real AdMob/UMP/Play Billing SDK wiring remains a release task.
 - Notifications: future pending checklist tasks create local scheduled
   notification records. OS-level notification scheduling remains a native SDK
   follow-up.
@@ -95,7 +95,7 @@ current Phase 1 screen/functionality spec is
 | S2 `OnboardingWelcomeScreen` | done | Sets onboarded state and routes to event creation. |
 | S3 `EventCreateScreen` | done | Creates event, categories, checklist templates, and notification records. |
 | S4 `EventListScreen` | done | Pro multi-event switcher with free-tier upsell path. |
-| S5 `EventDashboardScreen` | done | Home tab summaries, share action, edit/switch actions, and free ad placeholder. |
+| S5 `EventDashboardScreen` | done | Home tab summaries, share action, edit/switch actions, and no fake ad UI. |
 | S6 `EventEditScreen` | done | Edit/delete with cascading local cleanup. |
 | S7 `BudgetCategoryListScreen` | done | Category totals, custom category add, delete cascade. |
 | S8 `BudgetItemListScreen` | done | Category item list with payment status badges. |
@@ -103,7 +103,7 @@ current Phase 1 screen/functionality spec is
 | S10 `ChecklistTimelineScreen` | done | Template/custom checklist timeline using `StepIndicator` plus task rows. |
 | S11 `ChecklistItemEditScreen` | done | Add/edit/delete/done/skipped and notification record updates. |
 | S12 `ShareCardPreviewScreen` | done | Preview and native text share done; optional image capture/save pending. |
-| S13 `ProUpgradeScreen` | done | Pro benefits, local unlock/restore, and replaceable mock billing client done; Play Billing SDK pending for release. |
+| S13 `ProUpgradeScreen` | done | Pro benefits, local unlock/restore, and replaceable billing client done; Play Billing SDK pending for release. |
 | S14 `SettingsScreen` | done | Language, notifications toggle, Pro row, about, and clear data. |
 
 ## Shared Package Drift Review
@@ -115,7 +115,6 @@ current Phase 1 screen/functionality spec is
 | `@dawwar/i18n` | `useLocalizationInitialization`, `i18n`, `useTranslation`, language storage, and RTL helpers are exported. Farha registers app-local keys for M0. |
 | `@dawwar/types` | Shared generic models/enums/API/navigation exports are available. Farha event/budget/checklist types should stay local unless another app needs them. |
 | `@dawwar/api-client` | Available but intentionally unused in Phase 1; reserve it for Phase 2 vendor-directory reads after explicit authorization. |
-| `@dawwar/mocks` | Available but unused in M0; add Farha-specific fixtures only when M1/M2 tests need them. |
 
 ## Open Questions And Human Decisions
 
@@ -150,9 +149,9 @@ Status values: `not started`, `in progress`, `blocked on human`, `done`.
 | Basic accessibility: font scaling, touch targets, contrast | in progress |
 | No crashes on a low/mid-end Android profile | not started |
 
-M4 is marked done for the Phase 1 code path: free gates, ad placeholders, and
-mockable Pro purchase/restore exist. Store-account setup and real AdMob/UMP/Play
-Billing SDK verification remain tracked in sections C and D.
+M4 is marked done for the Phase 1 code path: free gates and the local Pro
+purchase/restore adapter exist. Fake ad UI was removed; store-account setup and
+real AdMob/UMP/Play Billing SDK verification remain tracked in sections C and D.
 
 ### B. Store Listing Assets
 
@@ -222,6 +221,7 @@ Billing SDK verification remain tracked in sections C and D.
 | 2026-08-02 | Phase 1 screen folder/controller refactor | done |
 | 2026-08-02 | Debug APK contains `assets/index.android.bundle` | done |
 | 2026-08-02 | Screen-local `controller.ts` colocation refactor | done |
+| 2026-08-02 | UI cleanup: icon back, calendar dates, card padding, customer-style bottom tabs, no fake ads | done |
 | 2026-08-02 | Feature-owned screen architecture and no-Metro debug bundle config | done |
 
 ## Native/Release Follow-Ups

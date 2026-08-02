@@ -13,6 +13,7 @@ import {
   SegmentedControl,
 } from '@dawwar/ui';
 
+import { DateField } from '../../../planner/components';
 import type {
   BudgetTotals,
   FarhaEventType,
@@ -155,6 +156,7 @@ export function BudgetPlannerScreen() {
             />
             <View style={styles.inputGrid}>
               <AppInput
+                containerStyle={styles.inputItem}
                 label={t('farha.m1.plannedCost')}
                 keyboardType="numeric"
                 value={form.plannedCost}
@@ -162,6 +164,7 @@ export function BudgetPlannerScreen() {
                 error={getFieldError('plannedCost')}
               />
               <AppInput
+                containerStyle={styles.inputItem}
                 label={t('farha.m1.actualCost')}
                 keyboardType="numeric"
                 value={form.actualCost}
@@ -171,17 +174,20 @@ export function BudgetPlannerScreen() {
             </View>
             <View style={styles.inputGrid}>
               <AppInput
+                containerStyle={styles.inputItem}
                 label={t('farha.m1.depositPaid')}
                 keyboardType="numeric"
                 value={form.depositPaid}
                 onChangeText={(depositPaid) => setForm((current) => ({ ...current, depositPaid }))}
                 error={getFieldError('depositPaid')}
               />
-              <AppInput
+              <DateField
+                containerStyle={styles.inputItem}
                 label={t('farha.m1.dueDate')}
                 placeholder={t('farha.m1.dueDatePlaceholder')}
                 value={form.dueDate}
-                onChangeText={(dueDate) => setForm((current) => ({ ...current, dueDate }))}
+                onChange={(dueDate) => setForm((current) => ({ ...current, dueDate }))}
+                allowClear
               />
             </View>
             <AppInput

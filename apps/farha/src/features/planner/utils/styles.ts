@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native';
+import { I18nManager, StyleSheet } from 'react-native';
 import type { AppColors } from '@dawwar/theme';
 import { radius, spacing } from '@dawwar/theme';
 
@@ -11,7 +11,7 @@ export const createPhase1ScreenStyles = (colors: AppColors) =>
       gap: spacing[4],
       paddingHorizontal: spacing[4],
       paddingVertical: spacing[5],
-      paddingBottom: spacing[8],
+      paddingBottom: spacing[10],
     },
     centered: {
       flexGrow: 1,
@@ -27,12 +27,23 @@ export const createPhase1ScreenStyles = (colors: AppColors) =>
       gap: spacing[2],
     },
     titleRow: {
-      flexDirection: 'row',
+      flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
       gap: spacing[3],
     },
+    backButton: {
+      width: 44,
+      height: 44,
+      borderRadius: radius.full,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
     section: {
+      padding: spacing[4],
       gap: spacing[4],
     },
     stack: {
@@ -127,31 +138,41 @@ export const createPhase1ScreenStyles = (colors: AppColors) =>
       gap: spacing[4],
     },
     bottomTabs: {
-      flexDirection: 'row',
       borderTopWidth: StyleSheet.hairlineWidth,
-      borderTopColor: colors.border,
-      backgroundColor: colors.surface,
       paddingHorizontal: spacing[2],
       paddingTop: spacing[2],
-      paddingBottom: spacing[2],
+    },
+    tabsRow: {
+      minHeight: 58,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
       gap: spacing[1],
     },
-    tabItem: {
+    tabButton: {
       flex: 1,
-      minHeight: 48,
-      borderRadius: radius.md,
       alignItems: 'center',
       justifyContent: 'center',
-      paddingHorizontal: spacing[1],
     },
-    adBanner: {
-      minHeight: 52,
-      borderRadius: radius.md,
-      backgroundColor: colors.surfaceVariant,
+    tabItem: {
+      minWidth: 54,
+      minHeight: 54,
+      alignItems: 'center',
       justifyContent: 'center',
-      paddingHorizontal: spacing[4],
-      borderWidth: StyleSheet.hairlineWidth,
-      borderColor: colors.border,
+      gap: spacing[1],
+    },
+    tabIconBubble: {
+      width: 42,
+      height: 30,
+      borderRadius: radius.full,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    tabLabel: {
+      fontSize: 10,
+      lineHeight: 12,
+      fontWeight: '800',
+      writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr',
     },
   });
 

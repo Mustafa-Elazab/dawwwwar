@@ -198,11 +198,11 @@ describe('Farha Phase 1 planner logic', () => {
 
     await expect(billingClient.purchasePro()).resolves.toEqual({
       entitled: true,
-      source: 'localMock',
+      source: 'localEntitlement',
     });
     await expect(billingClient.restorePro()).resolves.toEqual({
       entitled: true,
-      source: 'localMock',
+      source: 'localEntitlement',
     });
   });
 });

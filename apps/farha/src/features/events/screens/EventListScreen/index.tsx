@@ -16,7 +16,7 @@ export function EventListScreen() {
   const ctrl = useController();
 
   return (
-    <ScreenFrame title={t('farha.phase1.eventList.title')} subtitle={t('farha.phase1.eventList.subtitle')}>
+    <ScreenFrame title={t('farha.phase1.eventList.title')} subtitle={t('farha.phase1.eventList.subtitle')} showBack>
       {ctrl.events.length ? (
         <View style={styles.stack}>
           {ctrl.events.map(({ event, totals }) => (

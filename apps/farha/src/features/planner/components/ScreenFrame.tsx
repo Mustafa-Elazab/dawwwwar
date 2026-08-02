@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
-import { ScrollView, View } from 'react-native';
+import { I18nManager, ScrollView, View } from 'react-native';
 import { useTranslation } from '@dawwar/i18n';
 import { useTheme } from '@dawwar/theme';
-import { AppButton, AppScreenTemplate, AppText } from '@dawwar/ui';
+import { AppIcon, AppPressable, AppScreenTemplate, AppText } from '@dawwar/ui';
 
 import { usePlannerController } from '../context/PlannerControllerContext';
 import { createPhase1ScreenStyles } from '../utils/styles';
@@ -46,6 +46,20 @@ export function ScreenFrame({
       >
         <View style={styles.header}>
           <View style={styles.titleRow}>
+            {showBack && controller.canGoBack ? (
+              <AppPressable
+                accessibilityRole="button"
+                accessibilityLabel={t('farha.phase1.actions.back')}
+                style={styles.backButton}
+                onPress={controller.goBack}
+              >
+                <AppIcon
+                  name={I18nManager.isRTL ? 'chevron-right' : 'chevron-left'}
+                  size={26}
+                  color={colors.text}
+                />
+              </AppPressable>
+            ) : null}
             <View style={styles.rowText}>
               <AppText variant="h2" align="auto">{title}</AppText>
               {subtitle ? (
@@ -54,14 +68,6 @@ export function ScreenFrame({
                 </AppText>
               ) : null}
             </View>
-            {showBack ? (
-              <AppButton
-                label={t('farha.phase1.actions.back')}
-                size="sm"
-                variant="outline"
-                onPress={controller.goBack}
-              />
-            ) : null}
           </View>
           {headerActions}
         </View>

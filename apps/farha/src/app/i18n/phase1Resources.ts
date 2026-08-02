@@ -204,8 +204,12 @@ export const phase1Resources = {
       past: '{{count}} days ago',
       today: 'Today',
     },
-    ads: {
-      banner: 'Free tier ad banner placeholder',
+    calendar: {
+      title: 'Choose date',
+      open: 'Open calendar',
+      previousMonth: 'Previous month',
+      nextMonth: 'Next month',
+      clear: 'Clear date',
     },
     confirm: {
       deleteEvent: 'Delete this event and all its budget/checklist data?',
@@ -468,8 +472,12 @@ export const phase1Resources = {
       past: 'منذ {{count}} يوم',
       today: 'اليوم',
     },
-    ads: {
-      banner: 'مساحة إعلان للخطة المجانية',
+    calendar: {
+      title: 'اختيار التاريخ',
+      open: 'فتح التقويم',
+      previousMonth: 'الشهر السابق',
+      nextMonth: 'الشهر التالي',
+      clear: 'مسح التاريخ',
     },
     confirm: {
       deleteEvent: 'حذف هذه المناسبة وكل بيانات الميزانية والمهام؟',

@@ -5,7 +5,7 @@ import { useTheme } from '@dawwar/theme';
 import { AppButton, AppInput } from '@dawwar/ui';
 
 import { CategorySelector } from '../../../budget/components';
-import { MissingEvent, ScreenFrame } from '../../../planner/components';
+import { DateField, MissingEvent, ScreenFrame } from '../../../planner/components';
 import { useController } from './controller';
 import { createStyles } from './styles';
 
@@ -29,12 +29,13 @@ export function ChecklistItemEditScreen() {
           onChangeText={(title) => ctrl.setForm((current) => ({ ...current, title }))}
           error={ctrl.submitted && ctrl.validation.errors.title ? t('farha.phase1.validation.required') : undefined}
         />
-        <AppInput
+        <DateField
           label={t('farha.phase1.labels.dueDate')}
           placeholder={t('farha.phase1.labels.datePlaceholder')}
           value={ctrl.form.dueDate}
-          onChangeText={(dueDate) => ctrl.setForm((current) => ({ ...current, dueDate }))}
+          onChange={(dueDate) => ctrl.setForm((current) => ({ ...current, dueDate }))}
           error={ctrl.submitted && ctrl.validation.errors.dueDate ? t('farha.phase1.validation.invalidDate') : undefined}
+          allowClear
         />
         <CategorySelector
           categories={ctrl.categories}

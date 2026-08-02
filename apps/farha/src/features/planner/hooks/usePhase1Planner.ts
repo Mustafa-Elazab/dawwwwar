@@ -55,6 +55,7 @@ export interface Phase1PlannerController {
   state: FarhaPhase1State;
   route: Phase1Route;
   activeTab: Phase1TabKey;
+  canGoBack: boolean;
   activeEvent?: FarhaPhase1Event;
   activeCategories: FarhaPhase1BudgetCategory[];
   activeBudgetItems: FarhaPhase1BudgetItem[];
@@ -306,6 +307,7 @@ export const usePhase1Planner = (): Phase1PlannerController => {
     state,
     route,
     activeTab,
+    canGoBack: routes.length > 1,
     activeEvent,
     activeCategories,
     activeBudgetItems,

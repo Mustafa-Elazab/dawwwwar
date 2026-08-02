@@ -6,7 +6,6 @@ import { AppButton, AppCard, AppInput, AppPressable, AppText, SectionHeader } fr
 
 import { BudgetSummaryCard } from '../../components';
 import { getCategoryName } from '../../utils/categoryLabels';
-import { AdBanner } from '../../../monetization/components';
 import { MissingEvent, ScreenFrame } from '../../../planner/components';
 import { money } from '../../../planner/utils/helpers';
 import { useController } from './controller';
@@ -73,7 +72,6 @@ export function BudgetCategoryListScreen() {
           </AppPressable>
         ))}
       </View>
-      {!ctrl.isPro ? <AdBanner /> : null}
     </ScreenFrame>
   );
 }

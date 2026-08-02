@@ -14,7 +14,6 @@
   "dependencies": {
     "@dawwar/api-client": "workspace:*",
     "@dawwar/i18n": "workspace:*",
-    "@dawwar/mocks": "workspace:*",
     "@dawwar/theme": "workspace:*",
     "@dawwar/types": "workspace:*",
     "@dawwar/ui": "workspace:*",

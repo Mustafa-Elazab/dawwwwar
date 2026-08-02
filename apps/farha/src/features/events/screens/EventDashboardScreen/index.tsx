@@ -6,7 +6,6 @@ import { AppButton, AppCard, AppText, SectionHeader } from '@dawwar/ui';
 
 import { BudgetSummaryCard } from '../../../budget/components';
 import { getChecklistTitle } from '../../../checklist/utils/checklistLabels';
-import { AdBanner } from '../../../monetization/components';
 import { MissingEvent, ScreenFrame } from '../../../planner/components';
 import { formatCountdown } from '../../../planner/utils/helpers';
 import { useController } from './controller';
@@ -68,7 +67,6 @@ export function EventDashboardScreen() {
         onPress={ctrl.shareResults}
         fullWidth
       />
-      {!ctrl.isPro ? <AdBanner /> : null}
     </ScreenFrame>
   );
 }

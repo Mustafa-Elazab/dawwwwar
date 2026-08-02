@@ -1,4 +1,4 @@
-export type Phase1BillingSource = 'localMock' | 'playBilling';
+export type Phase1BillingSource = 'localEntitlement' | 'playBilling';
 
 export interface Phase1BillingResult {
   entitled: boolean;
@@ -12,9 +12,9 @@ export interface Phase1BillingClient {
 
 export const createPhase1BillingClient = (): Phase1BillingClient => ({
   async purchasePro() {
-    return { entitled: true, source: 'localMock' };
+    return { entitled: true, source: 'localEntitlement' };
   },
   async restorePro() {
-    return { entitled: true, source: 'localMock' };
+    return { entitled: true, source: 'localEntitlement' };
   },
 });

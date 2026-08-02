@@ -4,6 +4,7 @@ import { useTranslation } from '@dawwar/i18n';
 import { useTheme } from '@dawwar/theme';
 import { AppInput, SegmentedControl } from '@dawwar/ui';
 
+import { DateField } from '../../planner/components';
 import {
   phase1EventTypes,
   validateEventDraft,
@@ -41,11 +42,11 @@ export function EventForm({ form, submitted, onChange }: EventFormProps) {
         onChangeText={(title) => onChange({ ...form, title })}
         error={submitted && validation.errors.title ? t('farha.phase1.validation.required') : undefined}
       />
-      <AppInput
+      <DateField
         label={t('farha.phase1.labels.eventDate')}
         placeholder={t('farha.phase1.labels.datePlaceholder')}
         value={form.date}
-        onChangeText={(date) => onChange({ ...form, date })}
+        onChange={(date) => onChange({ ...form, date })}
         error={submitted && validation.errors.date ? t('farha.phase1.validation.invalidDate') : undefined}
       />
     </View>

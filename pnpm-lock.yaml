@@ -469,9 +469,6 @@ importers:
       '@dawwar/i18n':
         specifier: workspace:*
         version: link:../../packages/i18n
-      '@dawwar/mocks':
-        specifier: workspace:*
-        version: link:../../packages/mocks
       '@dawwar/theme':
         specifier: workspace:*
         version: link:../../packages/theme

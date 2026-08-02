@@ -5,7 +5,7 @@ import { useTheme } from '@dawwar/theme';
 import { AppButton, AppInput, AppText } from '@dawwar/ui';
 
 import { getCategoryName } from '../../utils/categoryLabels';
-import { ScreenFrame } from '../../../planner/components';
+import { DateField, ScreenFrame } from '../../../planner/components';
 import { money } from '../../../planner/utils/helpers';
 import { useController } from './controller';
 import { createStyles } from './styles';
@@ -60,12 +60,14 @@ export function BudgetItemFormScreen() {
             onChangeText={(depositPaid) => ctrl.setForm((current) => ({ ...current, depositPaid }))}
             error={ctrl.submitted && ctrl.validation.errors.depositPaid ? t('farha.phase1.validation.invalidAmount') : undefined}
           />
-          <AppInput
+          <DateField
+            testID="farha-budget-item-due-date"
             containerStyle={styles.gridItem}
             label={t('farha.phase1.labels.dueDate')}
             placeholder={t('farha.phase1.labels.datePlaceholder')}
             value={ctrl.form.dueDate}
-            onChangeText={(dueDate) => ctrl.setForm((current) => ({ ...current, dueDate }))}
+            onChange={(dueDate) => ctrl.setForm((current) => ({ ...current, dueDate }))}
+            allowClear
           />
         </View>
         <AppInput
