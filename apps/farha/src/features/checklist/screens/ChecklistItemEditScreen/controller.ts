@@ -1,17 +1,17 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from '@dawwar/i18n';
 
-import { usePlannerController } from '../../../planner/context/PlannerControllerContext';
-import { validateChecklistItemDraft } from '../../../planner/domain/phase1Logic';
+import { usePlannerController } from '../../../../core/planner/context/PlannerControllerContext';
+import { validateChecklistItemDraft } from '../../../../core/planner/domain/phase1Logic';
 import type {
   ChecklistItemDraft,
   FarhaPhase1ChecklistItem,
-} from '../../../planner/domain/phase1Types';
+} from '../../../../core/planner/domain/phase1Types';
 import {
   confirmAction,
   getScreenEvent,
 } from '../../../planner/utils/helpers';
-import type { Phase1TranslationFn } from '../../../planner/types/screenTypes';
+import type { Phase1TranslationFn } from '../../../../core/planner/screenTypes';
 import { getChecklistTitle } from '../../utils/checklistLabels';
 
 interface ChecklistItemFormState {

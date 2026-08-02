@@ -4,7 +4,7 @@ import { useTranslation } from '@dawwar/i18n';
 import { useTheme } from '@dawwar/theme';
 import { AppPressable, AppText } from '@dawwar/ui';
 
-import type { FarhaPhase1BudgetCategory } from '../../planner/domain/phase1Types';
+import type { FarhaPhase1BudgetCategory } from '../../../core/planner/domain/phase1Types';
 import { getCategoryName } from '../utils/categoryLabels';
 import { createPhase1ScreenStyles } from '../../planner/utils/styles';
 

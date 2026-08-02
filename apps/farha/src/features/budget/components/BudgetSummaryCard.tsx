@@ -4,7 +4,7 @@ import { useTranslation } from '@dawwar/i18n';
 import { useTheme } from '@dawwar/theme';
 import { AppCard, AppText, SectionHeader } from '@dawwar/ui';
 
-import type { BudgetTotals } from '../../planner/domain/phase1Types';
+import type { BudgetTotals } from '../../../core/planner/domain/phase1Types';
 import { money } from '../../planner/utils/helpers';
 import { createPhase1ScreenStyles } from '../../planner/utils/styles';
 import { BudgetBadge } from './BudgetBadge';

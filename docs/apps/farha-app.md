@@ -56,20 +56,26 @@ current Phase 1 screen/functionality spec is
 
 ## Phase 1 Implementation Snapshot
 
-- App shell: `FarhaPlannerApp` provides the S1-S14 route switch, recognizes
-  Home/Budget/Checklist/Settings as the tab screen set, and renders a
-  customer-style bottom tab experience without adding a navigation dependency
-  to Farha.
+- App shell: `FarhaPlannerApp` owns only the planner controller/provider
+  boundary. `src/navigation` owns Farha's `NavigationContainer`, native root
+  stack, customer-style bottom tab navigator, route constants, and typed
+  navigation params.
 - Feature structure: screens now live under feature-owned modules such as
   `features/events`, `features/budget`, `features/checklist`,
   `features/sharing`, `features/monetization`, `features/settings`, and
   `features/onboarding`. Each screen folder owns its `index.tsx`, `styles.ts`,
   and `controller.ts`; screens render `AppScreenTemplate` directly with
   `headerProps`, while feature components and utilities stay feature-local.
-- Planner core: `features/planner` owns the Phase 1 repository, MMKV storage
-  key `farha.phase1.v1`, route state, Pro flag, notifications toggle,
-  bottom-tab route mapping, shared date input, reusable screen chrome props, a
-  planner controller provider, and shared planner utilities.
+- Planner core: `core/planner` owns the Phase 1 repository, MMKV storage key
+  `farha.phase1.v1`, domain logic, domain types, route state, Pro flag,
+  notifications toggle, and planner controller provider. `features/planner`
+  now contains only shared planner UI helpers such as screen chrome, date input,
+  missing-event state, and formatting/confirmation helpers.
+- State management: Farha intentionally does not use Redux/Redux Toolkit yet.
+  Phase 1 state is local offline workflow state owned by the planner
+  controller plus MMKV repository; React Query remains available for future
+  server state, and Redux can be introduced later only if app-wide client state
+  grows beyond the planner provider boundary.
 - Events: first-launch routing, onboarding, event create/list/edit/delete,
   free-tier one-event gate, and Pro multi-event switching are implemented.
 - Budget: default categories, custom categories, item add/edit/delete,
@@ -87,10 +93,12 @@ current Phase 1 screen/functionality spec is
 - Notifications: future pending checklist tasks create local scheduled
   notification records. OS-level notification scheduling remains a native SDK
   follow-up.
-- Android packaging: Farha debug builds package `index.android.bundle` and
-  React image assets, so installed debug APKs can launch without Metro. The
-  branded Android launcher icon and native bootsplash logo are generated from
-  the Farha rings logo.
+- Android packaging: Farha debug builds are Metro-attached for reload/HMR and
+  allow local cleartext traffic so emulators can reach Metro at
+  `10.0.2.2:8081`. Release-style builds package `index.android.bundle` and
+  React image assets for installs that must launch without Metro, and keep
+  cleartext traffic disabled. The branded Android launcher icon and native
+  bootsplash logo are generated from the Farha rings logo.
 
 ## Phase 1 Screen Catalog
 
@@ -227,12 +235,15 @@ real AdMob/UMP/Play Billing SDK verification remain tracked in sections C and D.
 | 2026-08-02 | Debug APK contains `assets/index.android.bundle` | done |
 | 2026-08-02 | Screen-local `controller.ts` colocation refactor | done |
 | 2026-08-02 | UI cleanup: icon back, calendar dates, card padding, customer-style bottom tabs, no fake ads | done |
-| 2026-08-02 | Feature-owned screen architecture and bundled debug asset verification | done |
+| 2026-08-02 | Feature-owned screen architecture and bundled asset verification | done |
 | 2026-08-02 | Direct `AppScreenTemplate` header props and planner tab screen registry | done |
 | 2026-08-02 | `pnpm --filter @dawwar/ui type-check` | done |
 | 2026-08-02 | Language persistence and Metro-connected debug startup fix | done |
 | 2026-08-02 | Branded splash background/logo animation and launcher icon assets | done |
-| 2026-08-02 | Debug APK contains `assets/index.android.bundle` and Farha image assets | done |
+| 2026-08-02 | Farha image assets included in Android packaged builds | done |
+| 2026-08-03 | Debug build restored to Metro-attached reload mode | done |
+| 2026-08-03 | Debug-only cleartext Metro traffic enabled for Android attach | done |
+| 2026-08-03 | Native stack and bottom-tab navigation moved to `src/navigation`; planner logic moved to `core/planner` | done |
 
 ## Native/Release Follow-Ups
 

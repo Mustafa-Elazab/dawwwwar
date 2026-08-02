@@ -4,8 +4,7 @@ import { useTranslation } from '@dawwar/i18n';
 import { useTheme } from '@dawwar/theme';
 import type { AppScreenTemplateProps, HeaderProps } from '@dawwar/ui';
 
-import { usePlannerController } from '../context/PlannerControllerContext';
-import { PlannerBottomTabs } from '../navigation/PlannerBottomTabs';
+import { usePlannerController } from '../../../core/planner/context/PlannerControllerContext';
 import { createPhase1ScreenStyles } from '../utils/styles';
 
 interface PlannerScreenChromeOptions {
@@ -37,7 +36,6 @@ export function usePlannerScreenChrome({
   title,
   subtitle,
   showBack,
-  showTabs,
   headerActions,
 }: PlannerScreenChromeOptions): PlannerScreenChrome {
   const { t } = useTranslation();
@@ -60,7 +58,7 @@ export function usePlannerScreenChrome({
       errorMessage: controller.errorMessageKey ? t(controller.errorMessageKey) : undefined,
       onRetry: controller.reload,
       headerProps,
-      footer: showTabs ? <PlannerBottomTabs /> : undefined,
+      footer: undefined,
     },
     scrollViewProps: {
       contentContainerStyle: styles.scrollContent,

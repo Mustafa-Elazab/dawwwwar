@@ -13,7 +13,7 @@ import {
   SegmentedControl,
 } from '@dawwar/ui';
 
-import { DateField } from '../../../planner/inputs/DateField';
+import { DateField } from '../../../planner/components/DateField';
 import type {
   BudgetTotals,
   FarhaEventType,

@@ -4,12 +4,12 @@ import { useTranslation } from '@dawwar/i18n';
 import { useTheme } from '@dawwar/theme';
 import { AppInput, SegmentedControl } from '@dawwar/ui';
 
-import { DateField } from '../../planner/inputs/DateField';
+import { DateField } from '../../planner/components/DateField';
 import {
   phase1EventTypes,
   validateEventDraft,
-} from '../../planner/domain/phase1Logic';
-import type { FarhaPhase1EventType } from '../../planner/domain/phase1Types';
+} from '../../../core/planner/domain/phase1Logic';
+import type { FarhaPhase1EventType } from '../../../core/planner/domain/phase1Types';
 import { createPhase1ScreenStyles } from '../../planner/utils/styles';
 import type { EventFormState } from '../utils/eventForm';
 

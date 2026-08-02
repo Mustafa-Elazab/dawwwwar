@@ -3,10 +3,10 @@ import { Alert } from 'react-native';
 import {
   formatCurrency,
   getCountdownDays,
-} from '../domain/phase1Logic';
-import type { Phase1PlannerController } from '../hooks/usePhase1Planner';
-import type { FarhaPhase1Event } from '../domain/phase1Types';
-import type { Phase1TranslationFn } from '../types/screenTypes';
+} from '../../../core/planner/domain/phase1Logic';
+import type { Phase1PlannerController } from '../../../core/planner/usePhase1Planner';
+import type { FarhaPhase1Event } from '../../../core/planner/domain/phase1Types';
+import type { Phase1TranslationFn } from '../../../core/planner/screenTypes';
 
 export const getScreenEvent = (
   controller: Phase1PlannerController,

@@ -1,4 +1,4 @@
-import { usePlannerController } from '../../../planner/context/PlannerControllerContext';
+import { usePlannerController } from '../../../../core/planner/context/PlannerControllerContext';
 
 const onboardingSlides = ['budget', 'checklist', 'share'] as const;
 

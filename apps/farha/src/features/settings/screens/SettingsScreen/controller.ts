@@ -2,7 +2,7 @@ import { i18n, updateLanguage, type AppLanguage } from '@dawwar/i18n';
 import { useTranslation } from '@dawwar/i18n';
 import { useState } from 'react';
 
-import { usePlannerController } from '../../../planner/context/PlannerControllerContext';
+import { usePlannerController } from '../../../../core/planner/context/PlannerControllerContext';
 import { confirmAction } from '../../../planner/utils/helpers';
 
 export function useController() {

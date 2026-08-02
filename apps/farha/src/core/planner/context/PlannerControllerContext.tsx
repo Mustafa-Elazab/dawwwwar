@@ -1,6 +1,6 @@
 import React, { createContext, useContext } from 'react';
 
-import type { Phase1PlannerController } from '../hooks/usePhase1Planner';
+import type { Phase1PlannerController } from '../usePhase1Planner';
 
 const PlannerControllerContext = createContext<Phase1PlannerController | undefined>(undefined);
 

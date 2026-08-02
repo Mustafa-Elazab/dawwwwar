@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from 'react';
 
-import { usePlannerController } from '../../../planner/context/PlannerControllerContext';
-import { calculateBudgetTotals } from '../../../planner/domain/phase1Logic';
+import { usePlannerController } from '../../../../core/planner/context/PlannerControllerContext';
+import { calculateBudgetTotals } from '../../../../core/planner/domain/phase1Logic';
 
 export function useController() {
   const appController = usePlannerController();

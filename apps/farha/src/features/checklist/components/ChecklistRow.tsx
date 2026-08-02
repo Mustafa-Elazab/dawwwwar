@@ -4,8 +4,8 @@ import { useTranslation } from '@dawwar/i18n';
 import { useTheme } from '@dawwar/theme';
 import { AppBadge, AppButton, AppPressable, AppText } from '@dawwar/ui';
 
-import { isOverdue } from '../../planner/domain/phase1Logic';
-import type { FarhaPhase1ChecklistItem } from '../../planner/domain/phase1Types';
+import { isOverdue } from '../../../core/planner/domain/phase1Logic';
+import type { FarhaPhase1ChecklistItem } from '../../../core/planner/domain/phase1Types';
 import { getChecklistTitle } from '../utils/checklistLabels';
 import { createPhase1ScreenStyles } from '../../planner/utils/styles';
 

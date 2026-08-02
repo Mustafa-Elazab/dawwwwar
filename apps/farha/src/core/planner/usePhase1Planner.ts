@@ -29,7 +29,7 @@ import {
   updateEventWithTemplateDueDates,
   upsertChecklistItem,
   upsertPhase1BudgetItem,
-} from '../domain/phase1Logic';
+} from './domain/phase1Logic';
 import type {
   BudgetCategoryDraft,
   BudgetItemDraft,
@@ -44,10 +44,10 @@ import type {
   Phase1Route,
   Phase1ScreenName,
   Phase1TabKey,
-} from '../domain/phase1Types';
-import { createPhase1BillingClient } from '../../monetization/data/phase1Billing';
-import { createPhase1Repository } from '../data/phase1Repository';
-import { getPlannerTabForScreen, PLANNER_TAB_SCREEN_BY_KEY } from '../navigation/plannerTabs';
+} from './domain/phase1Types';
+import { createPhase1BillingClient } from '../../features/monetization/data/phase1Billing';
+import { createPhase1Repository } from './data/phase1Repository';
+import { getPlannerTabForScreen, PLANNER_TAB_SCREEN_BY_KEY } from '../../navigation/plannerTabs';
 
 export type Phase1Status = 'loading' | 'ready' | 'error';
 

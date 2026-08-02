@@ -3,7 +3,7 @@ import { ScrollView } from 'react-native';
 import { useTranslation } from '@dawwar/i18n';
 import { AppButton, AppScreenTemplate } from '@dawwar/ui';
 
-import { usePlannerController } from '../context/PlannerControllerContext';
+import { usePlannerController } from '../../../core/planner/context/PlannerControllerContext';
 import { usePlannerScreenChrome } from '../hooks/usePlannerScreenChrome';
 
 export function MissingEventState() {

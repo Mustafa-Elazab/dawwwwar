@@ -7,7 +7,7 @@ import { AppBadge, AppCard, AppText } from '@dawwar/ui';
 import type {
   BudgetTotals,
   FarhaPhase1Event,
-} from '../../planner/domain/phase1Types';
+} from '../../../core/planner/domain/phase1Types';
 import { formatCountdown, money } from '../../planner/utils/helpers';
 import { createPhase1ScreenStyles } from '../../planner/utils/styles';
 

@@ -6,7 +6,7 @@ import { AppButton, AppInput, AppScreenTemplate } from '@dawwar/ui';
 
 import { CategorySelector } from '../../../budget/components';
 import { usePlannerScreenChrome } from '../../../planner/hooks/usePlannerScreenChrome';
-import { DateField } from '../../../planner/inputs/DateField';
+import { DateField } from '../../../planner/components/DateField';
 import { MissingEventState } from '../../../planner/states/MissingEventState';
 import { useController } from './controller';
 import { createStyles } from './styles';

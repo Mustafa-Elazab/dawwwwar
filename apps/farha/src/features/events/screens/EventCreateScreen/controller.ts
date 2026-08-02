@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
-import { usePlannerController } from '../../../planner/context/PlannerControllerContext';
-import { validateEventDraft } from '../../../planner/domain/phase1Logic';
+import { usePlannerController } from '../../../../core/planner/context/PlannerControllerContext';
+import { validateEventDraft } from '../../../../core/planner/domain/phase1Logic';
 import { defaultEventForm, type EventFormState } from '../../utils/eventForm';
 
 export function useController() {

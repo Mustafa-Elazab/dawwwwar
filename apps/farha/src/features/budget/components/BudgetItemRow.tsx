@@ -7,8 +7,8 @@ import { AppBadge, AppPressable, AppText } from '@dawwar/ui';
 import {
   calculateItemBalance,
   getBudgetItemStatus,
-} from '../../planner/domain/phase1Logic';
-import type { FarhaPhase1BudgetItem } from '../../planner/domain/phase1Types';
+} from '../../../core/planner/domain/phase1Logic';
+import type { FarhaPhase1BudgetItem } from '../../../core/planner/domain/phase1Types';
 import { money } from '../../planner/utils/helpers';
 import { createPhase1ScreenStyles } from '../../planner/utils/styles';
 

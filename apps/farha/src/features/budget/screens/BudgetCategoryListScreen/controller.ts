@@ -4,9 +4,9 @@ import { useTranslation } from '@dawwar/i18n';
 import {
   calculateBudgetTotals,
   validateBudgetCategoryDraft,
-} from '../../../planner/domain/phase1Logic';
-import { usePlannerController } from '../../../planner/context/PlannerControllerContext';
-import type { FarhaPhase1BudgetCategory } from '../../../planner/domain/phase1Types';
+} from '../../../../core/planner/domain/phase1Logic';
+import { usePlannerController } from '../../../../core/planner/context/PlannerControllerContext';
+import type { FarhaPhase1BudgetCategory } from '../../../../core/planner/domain/phase1Types';
 import {
   confirmAction,
   getScreenEvent,

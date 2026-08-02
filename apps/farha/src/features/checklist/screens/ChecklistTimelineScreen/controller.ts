@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 
-import { usePlannerController } from '../../../planner/context/PlannerControllerContext';
-import { getChecklistSummary } from '../../../planner/domain/phase1Logic';
+import { usePlannerController } from '../../../../core/planner/context/PlannerControllerContext';
+import { getChecklistSummary } from '../../../../core/planner/domain/phase1Logic';
 import { getScreenEvent } from '../../../planner/utils/helpers';
 
 export function useController() {

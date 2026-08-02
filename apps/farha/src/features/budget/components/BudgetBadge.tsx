@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslation } from '@dawwar/i18n';
 import { AppBadge } from '@dawwar/ui';
 
-import type { BudgetTotals } from '../../planner/domain/phase1Types';
+import type { BudgetTotals } from '../../../core/planner/domain/phase1Types';
 
 export function BudgetBadge({ totals }: { totals: BudgetTotals }) {
   const { t } = useTranslation();

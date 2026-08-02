@@ -16,9 +16,9 @@ import {
   upsertChecklistItem,
   upsertPhase1BudgetItem,
   validateBudgetItemDraft,
-} from '../src/features/planner/domain/phase1Logic';
-import { defaultPhase1BudgetCategories } from '../src/features/planner/data/defaultBudgetCategories';
-import { standardChecklistTemplates } from '../src/features/planner/data/checklistTemplates';
+} from '../src/core/planner/domain/phase1Logic';
+import { defaultPhase1BudgetCategories } from '../src/core/planner/data/defaultBudgetCategories';
+import { standardChecklistTemplates } from '../src/core/planner/data/checklistTemplates';
 import { createPhase1BillingClient } from '../src/features/monetization/data/phase1Billing';
 
 describe('Farha Phase 1 planner logic', () => {

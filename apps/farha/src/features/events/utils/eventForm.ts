@@ -1,4 +1,4 @@
-import type { FarhaPhase1Event, FarhaPhase1EventType } from '../../planner/domain/phase1Types';
+import type { FarhaPhase1Event, FarhaPhase1EventType } from '../../../core/planner/domain/phase1Types';
 
 export interface EventFormState {
   type: FarhaPhase1EventType;

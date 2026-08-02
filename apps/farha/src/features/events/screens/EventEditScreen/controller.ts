@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from '@dawwar/i18n';
 
-import { usePlannerController } from '../../../planner/context/PlannerControllerContext';
-import { validateEventDraft } from '../../../planner/domain/phase1Logic';
+import { usePlannerController } from '../../../../core/planner/context/PlannerControllerContext';
+import { validateEventDraft } from '../../../../core/planner/domain/phase1Logic';
 import {
   confirmAction,
   getScreenEvent,

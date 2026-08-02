@@ -1,5 +1,5 @@
-import type { FarhaPhase1ChecklistItem } from '../../planner/domain/phase1Types';
-import type { Phase1TranslationFn } from '../../planner/types/screenTypes';
+import type { FarhaPhase1ChecklistItem } from '../../../core/planner/domain/phase1Types';
+import type { Phase1TranslationFn } from '../../../core/planner/screenTypes';
 
 export const getChecklistTitle = (
   t: Phase1TranslationFn,

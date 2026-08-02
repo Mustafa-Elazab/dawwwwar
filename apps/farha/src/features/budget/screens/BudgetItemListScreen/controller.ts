@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-import { usePlannerController } from '../../../planner/context/PlannerControllerContext';
+import { usePlannerController } from '../../../../core/planner/context/PlannerControllerContext';
 
 export function useController() {
   const appController = usePlannerController();

@@ -1,4 +1,4 @@
-import type { Phase1ScreenName, Phase1TabKey } from '../domain/phase1Types';
+import type { Phase1ScreenName, Phase1TabKey } from '../core/planner/domain/phase1Types';
 
 interface PlannerTabConfig {
   activeIcon: string;
