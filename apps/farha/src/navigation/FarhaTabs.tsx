@@ -1,9 +1,6 @@
 import React from 'react';
 import { I18nManager, Pressable, StyleSheet, View } from 'react-native';
-import {
-  BottomTabBarProps,
-  createBottomTabNavigator,
-} from '@react-navigation/bottom-tabs';
+import { createBottomTabNavigator, type BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from '@dawwar/i18n';
 import { useTheme } from '@dawwar/theme';

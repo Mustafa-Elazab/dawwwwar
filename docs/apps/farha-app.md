@@ -24,35 +24,25 @@ current Phase 1 screen/functionality spec is
 |---|---|---|
 | Product manager | done for Phase 1 shell | Scope follows S1-S14 in the complete spec, with Phase 2/vendor/backend excluded. |
 | Architect | done for Phase 1 shell | Data is app-local, offline-first, and behind a Phase 1 repository/use-case layer. No new native SDKs were added. |
-| Engineer | done for Phase 1 shell | Custom navigator, all named screens, local events/budget/checklist, Pro flag, share payload, settings, and local notification records are implemented. |
+| Engineer | done for Phase 1 shell | Native stack navigation, bottom tabs, all named screens, local events/budget/checklist, Pro flag, share payload, settings, and local notification records are implemented. |
 | QA | done for Phase 1 code checks | Type-check, lint, unit tests, and Android debug build passed on 2026-08-02. Rendered device QA is still tracked below. |
 | Localization/RTL reviewer | done for code copy | Phase 1 visible strings are registered in Arabic and English; rendered RTL/device QA remains pending. |
 | Release manager | blocked for store/native SDK pieces | Real AdMob, UMP, Play Billing, OS notifications, image capture, signing, tester gates, and store assets still need release setup. |
 
-## M0 Implementation Snapshot
+## Publish-Oriented Snapshot
 
-- Workspace: `pnpm-workspace.yaml` covers `apps/*`, so Farha is included.
-- Package: `apps/farha/package.json` is named `@dawwar/farha`.
-- Root commands: `farha:start`, `farha:android`, and `farha:ios` are present.
-- App shell: `App.tsx` initializes shared localization, registers Farha's local
-  copy, hides the native splash, and renders the Farha app through shared
-  providers.
-- UI proof: `FarhaHomeScreen` uses `@dawwar/ui`, `@dawwar/theme`, and
-  `@dawwar/i18n`.
+- Workspace: `pnpm-workspace.yaml` covers `apps/*`, so Farha is included as
+  `@dawwar/farha`.
+- App shell: `App.tsx` initializes shared localization, registers Farha's
+  Arabic/English copy, hides the native splash, and renders the planner through
+  shared providers.
+- Navigation: `src/navigation` owns the `NavigationContainer`, native root
+  stack, bottom tab navigator created with `createBottomTabNavigator`, route
+  constants, and typed route params.
+- Data: `src/core/planner` is the single active offline planner domain and
+  persistence layer. Legacy M0/M1 prototype screens, repositories, tests, and
+  translation blocks were removed during publish-readiness cleanup.
 - Native permissions: Android currently keeps only `INTERNET`.
-
-## M1 Implementation Snapshot
-
-- Domain: local Farha event, budget category, budget item, draft,
-  validation, summary, and totals types live in `apps/farha/src/types`.
-- Persistence: `src/core/database` defines the M1 local schema/version and a
-  repository over Farha's MMKV storage key `farha.budgetPlanner.v1`.
-- Seeds: creating a new event type seeds all 12 default budget categories.
-- UI: `BudgetPlannerScreen` lets the user switch/create engagement, wedding,
-  and anniversary plans; add/edit budget items; and review planned, actual,
-  deposit, balance, and over/under totals.
-- Offline behavior: M1 data is local-only and does not call the backend or
-  any network API.
 
 ## Phase 1 Implementation Snapshot
 
@@ -244,6 +234,7 @@ real AdMob/UMP/Play Billing SDK verification remain tracked in sections C and D.
 | 2026-08-03 | Debug build restored to Metro-attached reload mode | done |
 | 2026-08-03 | Debug-only cleartext Metro traffic enabled for Android attach | done |
 | 2026-08-03 | Native stack and bottom-tab navigation moved to `src/navigation`; planner logic moved to `core/planner` | done |
+| 2026-08-03 | Publish-readiness cleanup removed legacy M0/M1 prototype code and added Farha publish report | done |
 
 ## Native/Release Follow-Ups
 
