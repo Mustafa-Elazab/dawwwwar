@@ -7,7 +7,7 @@ import { AppProviders } from './providers';
 import { FarhaPlannerApp } from '../features/planner/FarhaPlannerApp';
 
 export function App() {
-  const isI18nReady = useLocalizationInitialization('ar');
+  const isI18nReady = useLocalizationInitialization();
   const [areFarhaStringsReady, setAreFarhaStringsReady] = useState(false);
 
   useEffect(() => {

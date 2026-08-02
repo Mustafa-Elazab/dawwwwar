@@ -28,11 +28,13 @@ export function SettingsScreen() {
             <AppButton
               label={t('farha.phase1.settings.arabic')}
               variant={ctrl.language === 'ar' ? 'primary' : 'outline'}
+              disabled={ctrl.isChangingLanguage}
               onPress={ctrl.setArabic}
             />
             <AppButton
               label={t('farha.phase1.settings.english')}
               variant={ctrl.language === 'en' ? 'primary' : 'outline'}
+              disabled={ctrl.isChangingLanguage}
               onPress={ctrl.setEnglish}
             />
           </View>

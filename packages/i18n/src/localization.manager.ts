@@ -35,20 +35,16 @@ export const getDeviceLanguage = (): AppLanguage => {
 };
 
 export const setI18nConfig = async (preferredLanguage?: AppLanguage | null) => {
-  console.log('[I18N] setI18nConfig called, isInitialized:', i18n.isInitialized);
   let userLang: AppLanguage | null = isAppLanguage(preferredLanguage)
     ? preferredLanguage
     : getStoredLanguage();
 
-  console.log('[I18N] userLang from preferred/storage:', userLang);
   if (!userLang) {
     userLang = getDeviceLanguage();
-    console.log('[I18N] userLang from device:', userLang);
   }
 
   setStoredLanguage(userLang);
 
-  console.log('[I18N] Calling configureRTL with:', userLang);
   const shouldRestartForDirection = I18nManager.isRTL !== (userLang === 'ar');
   configureRTL(userLang);
 
@@ -63,7 +59,6 @@ export const setI18nConfig = async (preferredLanguage?: AppLanguage | null) => {
     return Promise.resolve();
   }
 
-  console.log('[I18N] Initializing i18n instance');
   await i18n.use(initReactI18next).init({
     lng: userLang,
     fallbackLng: 'en',
@@ -81,7 +76,6 @@ export const setI18nConfig = async (preferredLanguage?: AppLanguage | null) => {
       }
     },
   });
-  console.log('[I18N] i18n instance initialized');
 
   if (shouldRestartForDirection) {
     handleRTLRestart(userLang);

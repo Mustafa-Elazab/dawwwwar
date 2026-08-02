@@ -15,7 +15,6 @@ class MainApplication : Application(), ReactApplication {
       context = applicationContext,
       packageList =
         PackageList(this).packages,
-      useDevSupport = false,
     )
   }
 

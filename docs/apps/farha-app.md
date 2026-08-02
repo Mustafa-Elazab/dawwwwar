@@ -87,9 +87,9 @@ current Phase 1 screen/functionality spec is
 - Notifications: future pending checklist tasks create local scheduled
   notification records. OS-level notification scheduling remains a native SDK
   follow-up.
-- Android packaging: Farha debug APKs bundle `index.android.bundle` and disable
-  React Native dev support in `MainApplication.kt`; installed debug builds can
-  launch from packaged assets without Metro running.
+- Android packaging: Farha debug builds keep React Native dev support and use
+  Metro for reload/HMR. Release-style packaged builds should include
+  `index.android.bundle` before installing without Metro.
 
 ## Phase 1 Screen Catalog
 
@@ -226,9 +226,10 @@ real AdMob/UMP/Play Billing SDK verification remain tracked in sections C and D.
 | 2026-08-02 | Debug APK contains `assets/index.android.bundle` | done |
 | 2026-08-02 | Screen-local `controller.ts` colocation refactor | done |
 | 2026-08-02 | UI cleanup: icon back, calendar dates, card padding, customer-style bottom tabs, no fake ads | done |
-| 2026-08-02 | Feature-owned screen architecture and no-Metro debug bundle config | done |
+| 2026-08-02 | Feature-owned screen architecture and bundled debug asset verification | done |
 | 2026-08-02 | Direct `AppScreenTemplate` header props and planner tab screen registry | done |
 | 2026-08-02 | `pnpm --filter @dawwar/ui type-check` | done |
+| 2026-08-02 | Language persistence and Metro-connected debug startup fix | done |
 
 ## Native/Release Follow-Ups
 
