@@ -4,6 +4,7 @@ export const phase1Resources = {
     currency: 'EGP',
     splash: {
       subtitle: 'Offline wedding and life-event planning',
+      warmText: 'Your celebration starts softly here',
     },
     tabs: {
       home: 'Home',
@@ -272,6 +273,7 @@ export const phase1Resources = {
     currency: 'جنيه',
     splash: {
       subtitle: 'تخطيط الفرح والمناسبات بدون إنترنت',
+      warmText: 'بداية دافية لكل تفصيلة حلوة',
     },
     tabs: {
       home: 'الرئيسية',
