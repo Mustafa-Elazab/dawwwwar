@@ -50,6 +50,13 @@ export function useController() {
   const draft = formToBudgetDraft(form, editingItem?.id, category?.id ?? '');
   const validation = validateBudgetItemDraft(draft);
   const balance = (draft.actualCost ?? draft.plannedCost) - draft.depositPaid;
+  const fundAllocatedToItem = editingItem
+    ? appController
+        .getEventSavingsAllocations(category?.eventId)
+        .filter((allocation) => allocation.budgetItemId === editingItem.id)
+        .reduce((total, allocation) => total + allocation.amount, 0)
+    : 0;
+  const fundAllocationWarning = fundAllocatedToItem > 0 && draft.depositPaid < fundAllocatedToItem;
 
   const save = () => {
     setSubmitted(true);
@@ -75,6 +82,8 @@ export function useController() {
     submitted,
     validation,
     balance,
+    fundAllocationWarning,
+    fundAllocatedToItem,
     setForm,
     save,
     deleteItem,

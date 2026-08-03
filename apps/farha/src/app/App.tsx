@@ -4,7 +4,12 @@ import { useLocalizationInitialization } from '@dawwar/i18n';
 
 import { registerFarhaTranslations } from './i18n/farhaResources';
 import { AppProviders } from './providers';
+import {
+  initFarhaFirebaseServices,
+  registerFarhaMessagingToken,
+} from '../core/firebase/farhaFirebase';
 import { FarhaPlannerApp } from '../features/planner/FarhaPlannerApp';
+import { initializeFarhaAds } from '../features/monetization/ads/adConsent';
 
 export function App() {
   const isI18nReady = useLocalizationInitialization();
@@ -20,6 +25,9 @@ export function App() {
   useEffect(() => {
     if (!areFarhaStringsReady) return;
 
+    void initFarhaFirebaseServices();
+    registerFarhaMessagingToken();
+    void initializeFarhaAds();
     void RNBootSplash.hide({ fade: true });
   }, [areFarhaStringsReady]);
 

@@ -80,5 +80,6 @@ export function useController() {
     addCategory,
     deleteCategory,
     openCategory,
+    openSavings: () => event && appController.navigate('SavingsFundScreen', { eventId: event.id }),
   };
 }

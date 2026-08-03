@@ -24,6 +24,11 @@ import {
   SplashScreen,
 } from '../features/onboarding/screens';
 import { ShareCardPreviewScreen } from '../features/sharing/screens';
+import {
+  SavingsAllocationScreen,
+  SavingsContributionFormScreen,
+  SavingsFundScreen,
+} from '../features/savings/screens';
 import { FarhaTabs } from './FarhaTabs';
 import { FARHA_ROOT_ROUTES } from './routes';
 import type { FarhaRootParamList } from './types';
@@ -78,6 +83,9 @@ export function FarhaNavigator({ controller }: FarhaNavigatorProps) {
         <RootStack.Screen name={FARHA_ROOT_ROUTES.BUDGET_ITEM_LIST} component={BudgetItemListScreen} />
         <RootStack.Screen name={FARHA_ROOT_ROUTES.BUDGET_ITEM_FORM} component={BudgetItemFormScreen} />
         <RootStack.Screen name={FARHA_ROOT_ROUTES.CHECKLIST_ITEM_EDIT} component={ChecklistItemEditScreen} />
+        <RootStack.Screen name={FARHA_ROOT_ROUTES.SAVINGS_FUND} component={SavingsFundScreen} />
+        <RootStack.Screen name={FARHA_ROOT_ROUTES.SAVINGS_CONTRIBUTION_FORM} component={SavingsContributionFormScreen} />
+        <RootStack.Screen name={FARHA_ROOT_ROUTES.SAVINGS_ALLOCATION} component={SavingsAllocationScreen} />
         <RootStack.Screen name={FARHA_ROOT_ROUTES.SHARE_CARD_PREVIEW} component={ShareCardPreviewScreen} />
         <RootStack.Screen name={FARHA_ROOT_ROUTES.PRO_UPGRADE} component={ProUpgradeScreen} />
         <RootStack.Screen name={FARHA_ROOT_ROUTES.TABS} component={FarhaTabs} />

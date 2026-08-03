@@ -6,9 +6,10 @@ import { AppButton, AppCard, AppScreenTemplate, AppText, SectionHeader } from '@
 
 import { BudgetSummaryCard } from '../../../budget/components';
 import { getChecklistTitle } from '../../../checklist/utils/checklistLabels';
+import { FarhaAdBanner } from '../../../monetization/ads/FarhaAdBanner';
 import { usePlannerScreenChrome } from '../../../planner/hooks/usePlannerScreenChrome';
 import { MissingEventState } from '../../../planner/states/MissingEventState';
-import { formatCountdown } from '../../../planner/utils/helpers';
+import { formatCountdown, money } from '../../../planner/utils/helpers';
 import { useController } from './controller';
 import { createStyles } from './styles';
 
@@ -51,6 +52,21 @@ export function EventDashboardScreen() {
           totals={ctrl.budgetTotals}
           onPress={ctrl.openBudget}
         />
+        <FarhaAdBanner isPro={ctrl.isPro} placement="dashboard" />
+        <AppCard variant="outlined" style={styles.section} onPress={ctrl.openSavings}>
+          <SectionHeader title={t('farha.phase1.savings.dashboardTitle')} />
+          <AppText variant="h3" align="auto">
+            {money(t, ctrl.savingsSummary.balance)}
+          </AppText>
+          <AppText variant="body2" color={colors.textSecondary} align="auto">
+            {ctrl.savingsSummary.monthlyGoal
+              ? t('farha.phase1.savings.dashboardGoal', {
+                  saved: money(t, ctrl.savingsSummary.contributedThisMonth),
+                  goal: money(t, ctrl.savingsSummary.monthlyGoal),
+                })
+              : t('farha.phase1.savings.dashboardNoGoal')}
+          </AppText>
+        </AppCard>
         <AppCard variant="outlined" style={styles.section} onPress={ctrl.openChecklist}>
           <SectionHeader title={t('farha.phase1.dashboard.checklistSummary')} />
           <AppText variant="h3" align="auto">

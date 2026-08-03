@@ -5,6 +5,7 @@ import { useTheme } from '@dawwar/theme';
 import { AppButton, AppCard, AppInput, AppPressable, AppScreenTemplate, AppText, SectionHeader } from '@dawwar/ui';
 
 import { BudgetSummaryCard } from '../../components';
+import { FarhaAdBanner } from '../../../monetization/ads/FarhaAdBanner';
 import { getCategoryName } from '../../utils/categoryLabels';
 import { usePlannerScreenChrome } from '../../../planner/hooks/usePlannerScreenChrome';
 import { MissingEventState } from '../../../planner/states/MissingEventState';
@@ -21,6 +22,14 @@ export function BudgetCategoryListScreen() {
     title: t('farha.phase1.budgetCategories.title'),
     subtitle: ctrl.event?.title,
     showTabs: true,
+    headerActions: (
+      <AppButton
+        label={t('farha.phase1.savings.title')}
+        size="sm"
+        variant="outline"
+        onPress={ctrl.openSavings}
+      />
+    ),
   });
 
   if (!ctrl.event) return <MissingEventState />;
@@ -29,6 +38,7 @@ export function BudgetCategoryListScreen() {
     <AppScreenTemplate {...screen.templateProps}>
       <ScrollView {...screen.scrollViewProps}>
         <BudgetSummaryCard title={t('farha.phase1.budgetCategories.totalHeader')} totals={ctrl.totals} />
+        <FarhaAdBanner isPro={ctrl.isPro} placement="budget_categories" />
         <AppCard variant="outlined" style={styles.section}>
           <SectionHeader title={t('farha.phase1.budgetCategories.addCategory')} />
           <AppInput

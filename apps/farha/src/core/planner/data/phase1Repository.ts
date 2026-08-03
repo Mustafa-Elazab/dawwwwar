@@ -58,6 +58,8 @@ const normalizePhase1State = (state: Partial<FarhaPhase1State>): FarhaPhase1Stat
     budgetItems: state.budgetItems ?? [],
     checklistItems: state.checklistItems ?? [],
     scheduledNotifications: state.scheduledNotifications ?? [],
+    savingsContributions: state.savingsContributions ?? [],
+    savingsAllocations: state.savingsAllocations ?? [],
     lastInterstitialShownAt: state.lastInterstitialShownAt,
     updatedAt: state.updatedAt ?? fallback.updatedAt,
   };

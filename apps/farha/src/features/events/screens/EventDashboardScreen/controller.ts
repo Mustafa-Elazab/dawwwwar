@@ -19,6 +19,10 @@ export function useController() {
     [appController, event?.id],
   );
   const budgetTotals = useMemo(() => calculateBudgetTotals(budgetItems), [budgetItems]);
+  const savingsSummary = useMemo(
+    () => appController.getSavingsSummary(event?.id),
+    [appController, event?.id],
+  );
   const checklistSummary = useMemo(
     () => getChecklistSummary(checklistItems),
     [checklistItems],
@@ -27,11 +31,13 @@ export function useController() {
   return {
     event,
     budgetTotals,
+    savingsSummary,
     checklistSummary,
     isPro: appController.state.isPro,
     editEvent: () => event && appController.navigate('EventEditScreen', { eventId: event.id }),
     switchEvent: () => appController.navigate('EventListScreen'),
     openBudget: () => appController.openTab('budget'),
+    openSavings: () => event && appController.navigate('SavingsFundScreen', { eventId: event.id }),
     openChecklist: () => appController.openTab('checklist'),
     shareResults: () => event && appController.navigate('ShareCardPreviewScreen', { eventId: event.id }),
   };

@@ -1,25 +1,35 @@
 import {
   addBudgetCategory,
+  calculateFundBalance,
   calculateBudgetTotals,
+  confirmSavingsAllocations,
   createEventWithSeeds,
   createInitialPhase1State,
   createSharePayload,
   deleteEventCascade,
   getBudgetItemStatus,
   getChecklistSummary,
+  getEventSavingsContributions,
   getEventBudgetItems,
   getEventCategories,
   getEventChecklistItems,
+  getSavingsSummary,
   resolveBootRoute,
   setChecklistStatus,
+  setSavingsMonthlyGoal,
   setNotificationsEnabled,
+  suggestSavingsAllocations,
   upsertChecklistItem,
   upsertPhase1BudgetItem,
+  upsertSavingsContribution,
   validateBudgetItemDraft,
 } from '../src/core/planner/domain/phase1Logic';
 import { defaultPhase1BudgetCategories } from '../src/core/planner/data/defaultBudgetCategories';
 import { standardChecklistTemplates } from '../src/core/planner/data/checklistTemplates';
-import { createPhase1BillingClient } from '../src/features/monetization/data/phase1Billing';
+import {
+  createPhase1BillingClient,
+  type Phase1BillingAdapter,
+} from '../src/features/monetization/data/phase1Billing';
 
 describe('Farha Phase 1 planner logic', () => {
   const now = new Date('2026-08-02T09:00:00.000Z');
@@ -179,7 +189,84 @@ describe('Farha Phase 1 planner logic', () => {
     expect(deleted.budgetCategories).toHaveLength(0);
     expect(deleted.budgetItems).toHaveLength(0);
     expect(deleted.checklistItems).toHaveLength(0);
+    expect(deleted.savingsContributions).toHaveLength(0);
+    expect(deleted.savingsAllocations).toHaveLength(0);
     expect(deleted.scheduledNotifications).toHaveLength(0);
+  });
+
+  it('tracks savings balance, monthly goal progress, and newest contribution first', () => {
+    const state = createEventWithSeeds(createInitialPhase1State(now), {
+      type: 'wedding',
+      title: 'Wedding',
+      date: '2027-08-02',
+    }, now);
+    const withGoal = setSavingsMonthlyGoal(state, state.activeEventId ?? '', 5000, now);
+    const first = upsertSavingsContribution(withGoal, {
+      eventId: withGoal.activeEventId ?? '',
+      amount: 1000,
+      date: '2026-08-02',
+    }, new Date('2026-08-02T10:00:00.000Z'));
+    const second = upsertSavingsContribution(first, {
+      eventId: first.activeEventId ?? '',
+      amount: 2500,
+      date: '2026-08-03',
+      note: 'Family help',
+    }, new Date('2026-08-03T10:00:00.000Z'));
+
+    expect(calculateFundBalance(second, second.activeEventId)).toBe(3500);
+    expect(getSavingsSummary(second, second.activeEventId, now)).toMatchObject({
+      balance: 3500,
+      contributedThisMonth: 3500,
+      monthlyGoal: 5000,
+      monthlyProgress: 0.7,
+    });
+    expect(getEventSavingsContributions(second, second.activeEventId)[0]).toMatchObject({
+      amount: 2500,
+      note: 'Family help',
+    });
+  });
+
+  it('suggests savings allocation by due date and updates budget deposits with audit rows', () => {
+    const state = createEventWithSeeds(createInitialPhase1State(now), {
+      type: 'wedding',
+      title: 'Wedding',
+      date: '2027-08-02',
+    }, now);
+    const category = getEventCategories(state, state.activeEventId)[0];
+    const firstItemState = upsertPhase1BudgetItem(state, {
+      categoryId: category.id,
+      name: 'Later item',
+      plannedCost: 4000,
+      depositPaid: 0,
+      dueDate: '2026-09-01',
+    }, now);
+    const secondItemState = upsertPhase1BudgetItem(firstItemState, {
+      categoryId: category.id,
+      name: 'Soon item',
+      plannedCost: 3000,
+      depositPaid: 500,
+      dueDate: '2026-08-15',
+    }, new Date('2026-08-02T09:01:00.000Z'));
+    const funded = upsertSavingsContribution(secondItemState, {
+      eventId: secondItemState.activeEventId ?? '',
+      amount: 5000,
+      date: '2026-08-02',
+    }, new Date('2026-08-02T09:02:00.000Z'));
+    const suggestion = suggestSavingsAllocations(funded, funded.activeEventId ?? '');
+    const allocated = confirmSavingsAllocations(
+      funded,
+      funded.activeEventId ?? '',
+      suggestion,
+      new Date('2026-08-02T09:03:00.000Z'),
+    );
+
+    expect(suggestion.map((item) => item.amount)).toEqual([2500, 2500]);
+    expect(allocated.savingsAllocations).toHaveLength(2);
+    expect(calculateFundBalance(allocated, allocated.activeEventId)).toBe(0);
+    expect(calculateBudgetTotals(getEventBudgetItems(allocated, allocated.activeEventId))).toMatchObject({
+      depositTotal: 5500,
+      balanceTotal: 1500,
+    });
   });
 
   it('generates a share payload with event, budget, checklist, and Farha mark', () => {
@@ -193,16 +280,39 @@ describe('Farha Phase 1 planner logic', () => {
     expect(createSharePayload(state, state.activeEventId ?? '')).toContain('Made with Farha');
   });
 
-  it('keeps Phase 1 Pro purchase and restore behind a replaceable billing client', async () => {
-    const billingClient = createPhase1BillingClient();
+  it('keeps Phase 1 Pro purchase and restore behind a Play Billing adapter', async () => {
+    const fakeAdapter: Phase1BillingAdapter = {
+      initConnection: async () => true,
+      fetchProducts: async () => [],
+      requestPurchase: async () => {
+        setTimeout(() => {
+          purchaseListener?.({
+            productId: 'farha_pro_lifetime',
+          } as Parameters<Parameters<Phase1BillingAdapter['purchaseUpdatedListener']>[0]>[0]);
+        }, 0);
+      },
+      purchaseUpdatedListener: (listener) => {
+        purchaseListener = listener;
+        return { remove: jest.fn() };
+      },
+      purchaseErrorListener: () => ({ remove: jest.fn() }),
+      finishTransaction: async () => true,
+      getAvailablePurchases: async () => [{
+        productId: 'farha_pro_lifetime',
+      } as Awaited<ReturnType<Phase1BillingAdapter['getAvailablePurchases']>>[number]],
+    };
+    let purchaseListener:
+      | Parameters<Phase1BillingAdapter['purchaseUpdatedListener']>[0]
+      | undefined;
+    const billingClient = createPhase1BillingClient(async () => fakeAdapter);
 
     await expect(billingClient.purchasePro()).resolves.toEqual({
       entitled: true,
-      source: 'localEntitlement',
+      source: 'playBilling',
     });
     await expect(billingClient.restorePro()).resolves.toEqual({
       entitled: true,
-      source: 'localEntitlement',
+      source: 'playBilling',
     });
   });
 });

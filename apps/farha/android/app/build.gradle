@@ -2,6 +2,11 @@ apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
 
+if (file("google-services.json").exists()) {
+    apply plugin: "com.google.gms.google-services"
+    apply plugin: "com.google.firebase.crashlytics"
+}
+
 def osName = System.getProperty("os.name").toLowerCase()
 def hermesOsBin = osName.contains("mac") ? "osx-bin" : "linux64-bin"
 def hermesCommandPath = file("../../../../node_modules/hermes-compiler/hermesc/${hermesOsBin}/hermesc")

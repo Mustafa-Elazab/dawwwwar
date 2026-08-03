@@ -10,6 +10,9 @@ export type Phase1ScreenName =
   | 'BudgetItemFormScreen'
   | 'ChecklistTimelineScreen'
   | 'ChecklistItemEditScreen'
+  | 'SavingsFundScreen'
+  | 'SavingsContributionFormScreen'
+  | 'SavingsAllocationScreen'
   | 'ShareCardPreviewScreen'
   | 'ProUpgradeScreen'
   | 'SettingsScreen';
@@ -44,6 +47,7 @@ export interface Phase1Route {
     categoryId?: string;
     budgetItemId?: string;
     checklistItemId?: string;
+    contributionId?: string;
     from?: Phase1ScreenName;
     tab?: Phase1TabKey;
   };
@@ -54,6 +58,7 @@ export interface FarhaPhase1Event {
   type: FarhaPhase1EventType;
   title: string;
   date: string;
+  savingsMonthlyGoal?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -106,6 +111,25 @@ export interface FarhaPhase1ScheduledNotification {
   title: string;
 }
 
+export interface FarhaPhase1SavingsContribution {
+  id: string;
+  eventId: string;
+  amount: number;
+  date: string;
+  note?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface FarhaPhase1SavingsAllocation {
+  id: string;
+  eventId: string;
+  budgetItemId: string;
+  amount: number;
+  date: string;
+  createdAt: string;
+}
+
 export interface FarhaPhase1State {
   schemaVersion: number;
   hasOnboarded: boolean;
@@ -117,6 +141,8 @@ export interface FarhaPhase1State {
   budgetItems: FarhaPhase1BudgetItem[];
   checklistItems: FarhaPhase1ChecklistItem[];
   scheduledNotifications: FarhaPhase1ScheduledNotification[];
+  savingsContributions: FarhaPhase1SavingsContribution[];
+  savingsAllocations: FarhaPhase1SavingsAllocation[];
   lastInterstitialShownAt?: string;
   updatedAt: string;
 }
@@ -151,6 +177,26 @@ export interface ChecklistItemDraft {
   title: string;
   dueDate?: string;
   notes?: string;
+}
+
+export interface SavingsContributionDraft {
+  id?: string;
+  eventId: string;
+  amount: number;
+  date: string;
+  note?: string;
+}
+
+export interface SavingsAllocationInput {
+  budgetItemId: string;
+  amount: number;
+}
+
+export interface SavingsSummary {
+  balance: number;
+  contributedThisMonth: number;
+  monthlyGoal?: number;
+  monthlyProgress: number;
 }
 
 export interface BudgetTotals {

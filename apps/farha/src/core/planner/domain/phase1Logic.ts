@@ -15,8 +15,13 @@ import type {
   FarhaPhase1Event,
   FarhaPhase1EventType,
   FarhaPhase1ScheduledNotification,
+  FarhaPhase1SavingsAllocation,
+  FarhaPhase1SavingsContribution,
   FarhaPhase1State,
   Phase1Route,
+  SavingsAllocationInput,
+  SavingsContributionDraft,
+  SavingsSummary,
   ValidationResult,
 } from './phase1Types';
 
@@ -39,6 +44,8 @@ export const createInitialPhase1State = (now = new Date()): FarhaPhase1State => 
   budgetItems: [],
   checklistItems: [],
   scheduledNotifications: [],
+  savingsContributions: [],
+  savingsAllocations: [],
   updatedAt: now.toISOString(),
 });
 
@@ -183,6 +190,12 @@ export const deleteEventCascade = (
     budgetCategories: state.budgetCategories.filter((category) => category.eventId !== eventId),
     budgetItems: state.budgetItems.filter((item) => !categoryIds.has(item.categoryId)),
     checklistItems: state.checklistItems.filter((item) => item.eventId !== eventId),
+    savingsContributions: state.savingsContributions.filter(
+      (contribution) => contribution.eventId !== eventId,
+    ),
+    savingsAllocations: state.savingsAllocations.filter(
+      (allocation) => allocation.eventId !== eventId,
+    ),
     scheduledNotifications: state.scheduledNotifications.filter(
       (notification) => notification.eventId !== eventId,
     ),
@@ -284,8 +297,156 @@ export const deletePhase1BudgetItem = (
 ): FarhaPhase1State => ({
   ...state,
   budgetItems: state.budgetItems.filter((item) => item.id !== itemId),
+  savingsAllocations: state.savingsAllocations.filter(
+    (allocation) => allocation.budgetItemId !== itemId,
+  ),
   updatedAt: now.toISOString(),
 });
+
+export const upsertSavingsContribution = (
+  state: FarhaPhase1State,
+  draft: SavingsContributionDraft,
+  now = new Date(),
+): FarhaPhase1State => {
+  const timestamp = now.toISOString();
+  const normalizedDraft = {
+    eventId: draft.eventId,
+    amount: draft.amount,
+    date: draft.date,
+    note: normalizeOptionalText(draft.note),
+  };
+
+  if (draft.id) {
+    return {
+      ...state,
+      savingsContributions: state.savingsContributions.map((contribution) =>
+        contribution.id === draft.id
+          ? { ...contribution, ...normalizedDraft, updatedAt: timestamp }
+          : contribution,
+      ),
+      scheduledNotifications: refreshSavingsGoalNotifications(
+        {
+          ...state,
+          savingsContributions: state.savingsContributions.map((contribution) =>
+            contribution.id === draft.id
+              ? { ...contribution, ...normalizedDraft, updatedAt: timestamp }
+              : contribution,
+          ),
+        },
+        draft.eventId,
+        now,
+      ),
+      updatedAt: timestamp,
+    };
+  }
+
+  const contribution: FarhaPhase1SavingsContribution = {
+    id: createId('savings-contribution', now),
+    ...normalizedDraft,
+    createdAt: timestamp,
+    updatedAt: timestamp,
+  };
+  const nextState = {
+    ...state,
+    savingsContributions: [...state.savingsContributions, contribution],
+    updatedAt: timestamp,
+  };
+
+  return {
+    ...nextState,
+    scheduledNotifications: refreshSavingsGoalNotifications(nextState, draft.eventId, now),
+  };
+};
+
+export const deleteSavingsContribution = (
+  state: FarhaPhase1State,
+  contributionId: string,
+  now = new Date(),
+): FarhaPhase1State => {
+  const contribution = getSavingsContributionById(state, contributionId);
+  const nextState = {
+    ...state,
+    savingsContributions: state.savingsContributions.filter((item) => item.id !== contributionId),
+    updatedAt: now.toISOString(),
+  };
+
+  return contribution
+    ? {
+        ...nextState,
+        scheduledNotifications: refreshSavingsGoalNotifications(nextState, contribution.eventId, now),
+      }
+    : nextState;
+};
+
+export const setSavingsMonthlyGoal = (
+  state: FarhaPhase1State,
+  eventId: string,
+  monthlyGoal: number | undefined,
+  now = new Date(),
+): FarhaPhase1State => {
+  const timestamp = now.toISOString();
+  const nextState = {
+    ...state,
+    events: state.events.map((event) =>
+      event.id === eventId
+        ? { ...event, savingsMonthlyGoal: monthlyGoal, updatedAt: timestamp }
+        : event,
+    ),
+    updatedAt: timestamp,
+  };
+
+  return {
+    ...nextState,
+    scheduledNotifications: refreshSavingsGoalNotifications(nextState, eventId, now),
+  };
+};
+
+export const confirmSavingsAllocations = (
+  state: FarhaPhase1State,
+  eventId: string,
+  inputs: SavingsAllocationInput[],
+  now = new Date(),
+): FarhaPhase1State => {
+  const timestamp = now.toISOString();
+  const fundBalance = calculateFundBalance(state, eventId);
+  let remainingFund = fundBalance;
+  const budgetItemsById = new Map(getEventBudgetItems(state, eventId).map((item) => [item.id, item]));
+  const appliedInputs: SavingsAllocationInput[] = [];
+
+  inputs.forEach((input) => {
+    const item = budgetItemsById.get(input.budgetItemId);
+    if (!item || input.amount <= 0 || remainingFund <= 0) return;
+
+    const cappedAmount = Math.min(input.amount, calculateItemBalance(item), remainingFund);
+    if (cappedAmount <= 0) return;
+
+    appliedInputs.push({ budgetItemId: input.budgetItemId, amount: cappedAmount });
+    budgetItemsById.set(input.budgetItemId, {
+      ...item,
+      depositPaid: item.depositPaid + cappedAmount,
+      updatedAt: timestamp,
+    });
+    remainingFund -= cappedAmount;
+  });
+
+  if (!appliedInputs.length) return state;
+
+  const allocations: FarhaPhase1SavingsAllocation[] = appliedInputs.map((input, index) => ({
+    id: createId(`savings-allocation-${index}`, now),
+    eventId,
+    budgetItemId: input.budgetItemId,
+    amount: input.amount,
+    date: timestamp.slice(0, 10),
+    createdAt: timestamp,
+  }));
+
+  return {
+    ...state,
+    budgetItems: state.budgetItems.map((item) => budgetItemsById.get(item.id) ?? item),
+    savingsAllocations: [...state.savingsAllocations, ...allocations],
+    updatedAt: timestamp,
+  };
+};
 
 export const upsertChecklistItem = (
   state: FarhaPhase1State,
@@ -484,6 +645,28 @@ export const getChecklistItemById = (
 ): FarhaPhase1ChecklistItem | undefined =>
   state.checklistItems.find((item) => item.id === itemId);
 
+export const getSavingsContributionById = (
+  state: FarhaPhase1State,
+  contributionId?: string,
+): FarhaPhase1SavingsContribution | undefined =>
+  state.savingsContributions.find((contribution) => contribution.id === contributionId);
+
+export const getEventSavingsContributions = (
+  state: FarhaPhase1State,
+  eventId?: string,
+): FarhaPhase1SavingsContribution[] =>
+  state.savingsContributions
+    .filter((contribution) => contribution.eventId === eventId)
+    .sort((first, second) =>
+      `${second.date}-${second.createdAt}`.localeCompare(`${first.date}-${first.createdAt}`),
+    );
+
+export const getEventSavingsAllocations = (
+  state: FarhaPhase1State,
+  eventId?: string,
+): FarhaPhase1SavingsAllocation[] =>
+  state.savingsAllocations.filter((allocation) => allocation.eventId === eventId);
+
 export const calculateItemBalance = (item: Pick<FarhaPhase1BudgetItem, 'plannedCost' | 'actualCost' | 'depositPaid'>): number =>
   getBudgetActualBase(item) - item.depositPaid;
 
@@ -512,6 +695,68 @@ export const calculateBudgetTotals = (items: FarhaPhase1BudgetItem[]): BudgetTot
     balanceTotal,
     badge: actualTotal > plannedTotal ? 'over' : 'on',
   };
+};
+
+export const calculateFundBalance = (
+  state: FarhaPhase1State,
+  eventId?: string,
+): number => {
+  const contributions = sumBy(getEventSavingsContributions(state, eventId), (item) => item.amount);
+  const allocations = sumBy(getEventSavingsAllocations(state, eventId), (item) => item.amount);
+  return Math.max(contributions - allocations, 0);
+};
+
+export const getContributedThisMonth = (
+  state: FarhaPhase1State,
+  eventId?: string,
+  now = new Date(),
+): number => {
+  const monthPrefix = now.toISOString().slice(0, 7);
+  return sumBy(
+    getEventSavingsContributions(state, eventId).filter((item) => item.date.startsWith(monthPrefix)),
+    (item) => item.amount,
+  );
+};
+
+export const getSavingsSummary = (
+  state: FarhaPhase1State,
+  eventId?: string,
+  now = new Date(),
+): SavingsSummary => {
+  const event = getEventById(state, eventId);
+  const monthlyGoal = event?.savingsMonthlyGoal;
+  const contributedThisMonth = getContributedThisMonth(state, eventId, now);
+
+  return {
+    balance: calculateFundBalance(state, eventId),
+    contributedThisMonth,
+    monthlyGoal,
+    monthlyProgress: monthlyGoal ? Math.min(contributedThisMonth / monthlyGoal, 1) : 0,
+  };
+};
+
+export const getAllocatableBudgetItems = (
+  state: FarhaPhase1State,
+  eventId?: string,
+): FarhaPhase1BudgetItem[] =>
+  getEventBudgetItems(state, eventId)
+    .filter((item) => calculateItemBalance(item) > 0)
+    .sort(compareBudgetItemsForAllocation);
+
+export const suggestSavingsAllocations = (
+  state: FarhaPhase1State,
+  eventId: string,
+): SavingsAllocationInput[] => {
+  let remainingFund = calculateFundBalance(state, eventId);
+  if (remainingFund <= 0) return [];
+
+  return getAllocatableBudgetItems(state, eventId).flatMap((item) => {
+    if (remainingFund <= 0) return [];
+
+    const amount = Math.min(calculateItemBalance(item), remainingFund);
+    remainingFund -= amount;
+    return amount > 0 ? [{ budgetItemId: item.id, amount }] : [];
+  });
 };
 
 export const getChecklistSummary = (
@@ -578,6 +823,17 @@ export const validateChecklistItemDraft = (
   const errors: ValidationResult<'title' | 'dueDate'>['errors'] = {};
   if (!draft.title.trim()) errors.title = 'required';
   if (draft.dueDate && !isValidDate(draft.dueDate)) errors.dueDate = 'invalidDate';
+  return { isValid: Object.keys(errors).length === 0, errors, warnings: {} };
+};
+
+export const validateSavingsContributionDraft = (
+  draft: SavingsContributionDraft,
+): ValidationResult<'amount' | 'date'> => {
+  const errors: ValidationResult<'amount' | 'date'>['errors'] = {};
+
+  if (!isValidCurrency(draft.amount) || draft.amount <= 0) errors.amount = 'invalidAmount';
+  if (!isValidDate(draft.date)) errors.date = 'invalidDate';
+
   return { isValid: Object.keys(errors).length === 0, errors, warnings: {} };
 };
 
@@ -688,6 +944,55 @@ const shouldRecordInterstitial = (state: FarhaPhase1State, now: Date): boolean =
 
   const minutesSinceLast = (now.getTime() - new Date(state.lastInterstitialShownAt).getTime()) / 60000;
   return minutesSinceLast >= 4;
+};
+
+const refreshSavingsGoalNotifications = (
+  state: FarhaPhase1State,
+  eventId: string,
+  now: Date,
+): FarhaPhase1ScheduledNotification[] => {
+  const withoutSavingsReminder = state.scheduledNotifications.filter(
+    (notification) => notification.checklistItemId !== `savings-goal-${eventId}`,
+  );
+  if (!state.notificationsEnabled) return withoutSavingsReminder;
+
+  const summary = getSavingsSummary(state, eventId, now);
+  if (!summary.monthlyGoal || summary.contributedThisMonth >= summary.monthlyGoal) {
+    return withoutSavingsReminder;
+  }
+
+  const reminderDate = getMonthEndReminderDate(now);
+  if (!reminderDate) return withoutSavingsReminder;
+
+  return [
+    ...withoutSavingsReminder,
+    {
+      id: createId(`notification-savings-goal-${eventId}`, now),
+      eventId,
+      checklistItemId: `savings-goal-${eventId}`,
+      fireAt: `${reminderDate}T18:00:00`,
+      title: 'farha.phase1.savings.goalReminder',
+    },
+  ];
+};
+
+const getMonthEndReminderDate = (now: Date): string | undefined => {
+  const date = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0, 12));
+  date.setUTCDate(date.getUTCDate() - 3);
+  const reminder = date.toISOString().slice(0, 10);
+  return differenceInCalendarDays(reminder, now.toISOString().slice(0, 10)) >= 0
+    ? reminder
+    : undefined;
+};
+
+const compareBudgetItemsForAllocation = (
+  first: FarhaPhase1BudgetItem,
+  second: FarhaPhase1BudgetItem,
+): number => {
+  const firstDate = first.dueDate ?? '9999-12-31';
+  const secondDate = second.dueDate ?? '9999-12-31';
+  const dateCompare = firstDate.localeCompare(secondDate);
+  return dateCompare || first.name.localeCompare(second.name);
 };
 
 const compareChecklistItems = (

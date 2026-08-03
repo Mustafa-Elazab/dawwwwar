@@ -65,7 +65,9 @@ export function BudgetItemFormScreen() {
               onChangeText={(depositPaid) => ctrl.setForm((current) => ({ ...current, depositPaid }))}
               error={ctrl.submitted && ctrl.validation.errors.depositPaid ? t('farha.phase1.validation.invalidAmount') : undefined}
             />
-            <DateField
+           
+          </View>
+          <DateField
               testID="farha-budget-item-due-date"
               containerStyle={styles.gridItem}
               label={t('farha.phase1.labels.dueDate')}
@@ -74,7 +76,6 @@ export function BudgetItemFormScreen() {
               onChange={(dueDate) => ctrl.setForm((current) => ({ ...current, dueDate }))}
               allowClear
             />
-          </View>
           <AppInput
             label={t('farha.phase1.labels.notes')}
             value={ctrl.form.notes}
@@ -88,6 +89,13 @@ export function BudgetItemFormScreen() {
             </AppText>
             {ctrl.validation.warnings.depositPaid ? (
               <AppText variant="caption" align="auto">{t('farha.phase1.validation.depositOverTotal')}</AppText>
+            ) : null}
+            {ctrl.fundAllocationWarning ? (
+              <AppText variant="caption" align="auto">
+                {t('farha.phase1.savings.depositBelowFundAllocation', {
+                  amount: money(t, ctrl.fundAllocatedToItem),
+                })}
+              </AppText>
             ) : null}
           </View>
         </View>
