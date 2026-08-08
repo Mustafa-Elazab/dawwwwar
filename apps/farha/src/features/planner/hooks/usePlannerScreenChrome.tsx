@@ -2,9 +2,10 @@ import React, { useMemo } from 'react';
 import type { ScrollViewProps } from 'react-native';
 import { useTranslation } from '@dawwar/i18n';
 import { useTheme } from '@dawwar/theme';
-import type { AppScreenTemplateProps, HeaderProps } from '@dawwar/ui';
+import type { AppScreenTemplateProps } from '@dawwar/ui';
 
 import { usePlannerController } from '../../../core/planner/context/PlannerControllerContext';
+import { CurvedHeader } from '../components/CurvedHeader';
 import { createPhase1ScreenStyles } from '../utils/styles';
 
 interface PlannerScreenChromeOptions {
@@ -23,8 +24,11 @@ interface PlannerScreenChrome {
     | 'isError'
     | 'errorMessage'
     | 'onRetry'
-    | 'headerProps'
+    | 'header'
     | 'footer'
+    | 'backgroundColor'
+    | 'statusBarStyle'
+    | 'statusBarBackgroundColor'
   >;
   scrollViewProps: Pick<
     ScrollViewProps,
@@ -43,21 +47,24 @@ export function usePlannerScreenChrome({
   const styles = useMemo(() => createPhase1ScreenStyles(colors), [colors]);
   const controller = usePlannerController();
 
-  const headerProps: HeaderProps = {
-    title,
-    subtitle,
-    onBackPress: showBack ? controller.goBack : undefined,
-    bottomComponent: headerActions,
-  };
-
   return {
     templateProps: {
+      backgroundColor: colors.primary,
+      statusBarStyle: 'light-content',
+      statusBarBackgroundColor: colors.primary,
       contentStyle: styles.screenContent,
       isLoading: controller.status === 'loading',
       isError: controller.status === 'error',
       errorMessage: controller.errorMessageKey ? t(controller.errorMessageKey) : undefined,
       onRetry: controller.reload,
-      headerProps,
+      header: (
+        <CurvedHeader
+          title={title}
+          subtitle={subtitle}
+          onBackPress={showBack ? controller.goBack : undefined}
+          action={headerActions}
+        />
+      ),
       footer: undefined,
     },
     scrollViewProps: {

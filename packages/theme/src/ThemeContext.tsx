@@ -33,14 +33,20 @@ export const ThemeContext = createContext<ThemeContextValue | null>(null);
 interface ThemeProviderProps {
   children: React.ReactNode;
   storage: MMKV;  // each app passes its own MMKV instance
+  lightColorOverrides?: Partial<AppColors>;
+  darkColorOverrides?: Partial<AppColors>;
 }
 
-export function ThemeProvider({ children, storage }: ThemeProviderProps) {
+export function ThemeProvider({
+  children,
+  storage,
+  lightColorOverrides,
+  darkColorOverrides,
+}: ThemeProviderProps) {
   const systemScheme = useColorScheme();
 
   const [mode, setModeState] = useState<ThemeMode>(() => {
     const stored = storage.getString(THEME_STORAGE_KEY);
-    console.log('[ThemeProvider] Initial mode from storage:', stored);
     if (stored === ThemeMode.LIGHT) return ThemeMode.LIGHT;
     if (stored === ThemeMode.DARK) return ThemeMode.DARK;
     return ThemeMode.SYSTEM;
@@ -53,11 +59,12 @@ export function ThemeProvider({ children, storage }: ThemeProviderProps) {
   }, [mode, systemScheme]);
 
   const colors = useMemo(
-    () => (isDark ? darkColors : lightColors),
-    [isDark],
+    () => ({
+      ...(isDark ? darkColors : lightColors),
+      ...(isDark ? darkColorOverrides : lightColorOverrides),
+    }),
+    [darkColorOverrides, isDark, lightColorOverrides],
   );
-
-  console.log('[ThemeProvider] Render:', { mode, isDark, systemScheme, colors: colors === lightColors ? 'light' : 'dark' });
 
   const setMode = useCallback(
     (newMode: ThemeMode) => {

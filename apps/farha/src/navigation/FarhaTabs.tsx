@@ -6,10 +6,10 @@ import { useTranslation } from '@dawwar/i18n';
 import { useTheme } from '@dawwar/theme';
 import { AppIcon, AppText } from '@dawwar/ui';
 
-import { BudgetCategoryListScreen } from '../features/budget/screens';
-import { ChecklistTimelineScreen } from '../features/checklist/screens';
 import { EventDashboardScreen } from '../features/events/screens';
+import { ShareCardPreviewScreen } from '../features/sharing/screens';
 import { SettingsScreen } from '../features/settings/screens';
+import { TaskListScreen } from '../features/tasks/screens';
 import { FARHA_TAB_ROUTES } from './routes';
 import type { FarhaTabParamList } from './types';
 import { PLANNER_TAB_CONFIG, PLANNER_TAB_KEYS } from './plannerTabs';
@@ -18,8 +18,8 @@ const Tab = createBottomTabNavigator<FarhaTabParamList>();
 
 const TAB_ROUTE_BY_KEY = {
   home: FARHA_TAB_ROUTES.HOME,
-  budget: FARHA_TAB_ROUTES.BUDGET,
-  checklist: FARHA_TAB_ROUTES.CHECKLIST,
+  tasks: FARHA_TAB_ROUTES.TASKS,
+  share: FARHA_TAB_ROUTES.SHARE,
   settings: FARHA_TAB_ROUTES.SETTINGS,
 } as const;
 
@@ -46,7 +46,7 @@ function FarhaTabBar({ state, navigation }: BottomTabBarProps) {
             const routeIndex = state.routes.findIndex((route) => route.name === routeName);
             const isFocused = state.index === routeIndex;
             const config = PLANNER_TAB_CONFIG[tab];
-            const color = isFocused ? colors.primary : colors.textTertiary;
+            const color = isFocused ? colors.primaryText : colors.textTertiary;
 
             const onPress = () => {
               const route = state.routes[routeIndex];
@@ -76,7 +76,7 @@ function FarhaTabBar({ state, navigation }: BottomTabBarProps) {
                   <View
                     style={[
                       styles.iconBubble,
-                      isFocused ? { backgroundColor: colors.primaryLight } : undefined,
+                      isFocused ? { backgroundColor: colors.primary } : undefined,
                     ]}
                   >
                     <AppIcon
@@ -119,8 +119,8 @@ export function FarhaTabs() {
       }}
     >
       <Tab.Screen name={FARHA_TAB_ROUTES.HOME} component={EventDashboardScreen} />
-      <Tab.Screen name={FARHA_TAB_ROUTES.BUDGET} component={BudgetCategoryListScreen} />
-      <Tab.Screen name={FARHA_TAB_ROUTES.CHECKLIST} component={ChecklistTimelineScreen} />
+      <Tab.Screen name={FARHA_TAB_ROUTES.TASKS} component={TaskListScreen} />
+      <Tab.Screen name={FARHA_TAB_ROUTES.SHARE} component={ShareCardPreviewScreen} />
       <Tab.Screen name={FARHA_TAB_ROUTES.SETTINGS} component={SettingsScreen} />
     </Tab.Navigator>
   );
@@ -128,7 +128,7 @@ export function FarhaTabs() {
 
 const styles = StyleSheet.create({
   wrapper: {
-    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopWidth: 0,
     paddingHorizontal: 6,
     paddingTop: 6,
   },
@@ -156,9 +156,9 @@ const styles = StyleSheet.create({
     gap: 3,
   },
   iconBubble: {
-    width: 42,
-    height: 30,
-    borderRadius: 15,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
   },

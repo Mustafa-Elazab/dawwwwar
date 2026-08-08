@@ -26,19 +26,19 @@ export function BudgetItemRow({ item, onPress }: BudgetItemRowProps) {
   return (
     <AppPressable
       accessibilityRole="button"
-      accessibilityLabel={item.name}
+      accessibilityLabel={item.name ?? item.title}
       style={styles.listRow}
       onPress={onPress}
     >
       <View style={styles.rowText}>
-        <AppText variant="label" align="auto">{item.name}</AppText>
+        <AppText variant="label" align="auto">{item.name ?? item.title}</AppText>
         <AppText variant="caption" color={colors.textSecondary} align="auto">
           {item.dueDate ?? t('farha.phase1.labels.noDueDate')}
         </AppText>
       </View>
       <View style={styles.rowSide}>
         <AppText variant="label" align="auto">
-          {money(t, item.actualCost ?? item.plannedCost)}
+          {money(t, item.actualCost ?? item.plannedCost ?? 0)}
         </AppText>
         <AppText variant="caption" color={colors.textSecondary} align="auto">
           {money(t, calculateItemBalance(item))}

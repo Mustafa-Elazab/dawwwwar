@@ -7,24 +7,18 @@ export type FarhaRouteParams = Phase1Route['params'];
 
 export type FarhaTabParamList = {
   [FARHA_TAB_ROUTES.HOME]: FarhaRouteParams;
-  [FARHA_TAB_ROUTES.BUDGET]: FarhaRouteParams;
-  [FARHA_TAB_ROUTES.CHECKLIST]: FarhaRouteParams;
+  [FARHA_TAB_ROUTES.TASKS]: FarhaRouteParams;
+  [FARHA_TAB_ROUTES.SHARE]: FarhaRouteParams;
   [FARHA_TAB_ROUTES.SETTINGS]: FarhaRouteParams;
 };
 
 export type FarhaRootParamList = {
   [FARHA_ROOT_ROUTES.SPLASH]: FarhaRouteParams;
   [FARHA_ROOT_ROUTES.ONBOARDING]: FarhaRouteParams;
-  [FARHA_ROOT_ROUTES.EVENT_CREATE]: FarhaRouteParams;
-  [FARHA_ROOT_ROUTES.EVENT_LIST]: FarhaRouteParams;
-  [FARHA_ROOT_ROUTES.EVENT_EDIT]: FarhaRouteParams;
-  [FARHA_ROOT_ROUTES.BUDGET_ITEM_LIST]: FarhaRouteParams;
-  [FARHA_ROOT_ROUTES.BUDGET_ITEM_FORM]: FarhaRouteParams;
-  [FARHA_ROOT_ROUTES.CHECKLIST_ITEM_EDIT]: FarhaRouteParams;
-  [FARHA_ROOT_ROUTES.SAVINGS_FUND]: FarhaRouteParams;
-  [FARHA_ROOT_ROUTES.SAVINGS_CONTRIBUTION_FORM]: FarhaRouteParams;
-  [FARHA_ROOT_ROUTES.SAVINGS_ALLOCATION]: FarhaRouteParams;
-  [FARHA_ROOT_ROUTES.SHARE_CARD_PREVIEW]: FarhaRouteParams;
+  [FARHA_ROOT_ROUTES.OCCASION_CREATE]: FarhaRouteParams;
+  [FARHA_ROOT_ROUTES.OCCASION_LIST]: FarhaRouteParams;
+  [FARHA_ROOT_ROUTES.OCCASION_EDIT]: FarhaRouteParams;
+  [FARHA_ROOT_ROUTES.TASK_FORM]: FarhaRouteParams;
   [FARHA_ROOT_ROUTES.PRO_UPGRADE]: FarhaRouteParams;
   [FARHA_ROOT_ROUTES.TABS]: NavigatorScreenParams<FarhaTabParamList>;
 };

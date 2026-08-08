@@ -48,13 +48,15 @@ export function SavingsAllocationScreen() {
         {ctrl.items.length ? (
           <View style={styles.stack}>
             {ctrl.items.map((item) => {
-              const category = appController.getCategoryById(item.categoryId);
+              const category = item.category && ctrl.event
+                ? appController.getCategoryById(`${ctrl.event.id}-${item.category}`)
+                : undefined;
 
               return (
                 <AppCard key={item.id} variant="outlined" style={styles.section}>
                   <View style={styles.row}>
                     <View style={styles.rowText}>
-                      <AppText variant="label" align="auto">{item.name}</AppText>
+                      <AppText variant="label" align="auto">{item.title}</AppText>
                       <AppText variant="caption" color={colors.textSecondary} align="auto">
                         {category ? getCategoryName(t, category) : t('farha.phase1.labels.none')}
                       </AppText>

@@ -7,19 +7,19 @@ export function useController() {
   const appController = usePlannerController();
   const events = useMemo(
     () =>
-      appController.state.events.map((event) => ({
+      appController.state.occasions.map((event) => ({
         event,
         totals: calculateBudgetTotals(appController.getEventBudgetItems(event.id)),
       })),
     [appController],
   );
   const addEvent = useCallback(() => {
-    if (!appController.state.isPro && appController.state.events.length >= 1) {
-      appController.navigate('ProUpgradeScreen', { from: 'EventListScreen' });
+    if (!appController.state.isPro && appController.state.occasions.length >= 1) {
+      appController.navigate('ProUpgradeScreen', { from: 'OccasionListScreen' });
       return;
     }
 
-    appController.navigate('EventCreateScreen');
+    appController.navigate('OccasionCreateScreen');
   }, [appController]);
 
   return {

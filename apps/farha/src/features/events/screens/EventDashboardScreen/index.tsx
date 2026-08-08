@@ -5,11 +5,11 @@ import { useTheme } from '@dawwar/theme';
 import { AppButton, AppCard, AppScreenTemplate, AppText, SectionHeader } from '@dawwar/ui';
 
 import { BudgetSummaryCard } from '../../../budget/components';
-import { getChecklistTitle } from '../../../checklist/utils/checklistLabels';
 import { FarhaAdBanner } from '../../../monetization/ads/FarhaAdBanner';
 import { usePlannerScreenChrome } from '../../../planner/hooks/usePlannerScreenChrome';
 import { MissingEventState } from '../../../planner/states/MissingEventState';
-import { formatCountdown, money } from '../../../planner/utils/helpers';
+import { formatCountdown } from '../../../planner/utils/helpers';
+import { getTaskTitle } from '../../../tasks/utils/taskLabels';
 import { useController } from './controller';
 import { createStyles } from './styles';
 
@@ -48,36 +48,22 @@ export function EventDashboardScreen() {
     <AppScreenTemplate {...screen.templateProps}>
       <ScrollView {...screen.scrollViewProps}>
         <BudgetSummaryCard
-          title={t('farha.phase1.dashboard.budgetSummary')}
+          title={t('farha.phase1.dashboard.tasksSummary')}
           totals={ctrl.budgetTotals}
-          onPress={ctrl.openBudget}
+          onPress={ctrl.openTasks}
         />
         <FarhaAdBanner isPro={ctrl.isPro} placement="dashboard" />
-        <AppCard variant="outlined" style={styles.section} onPress={ctrl.openSavings}>
-          <SectionHeader title={t('farha.phase1.savings.dashboardTitle')} />
-          <AppText variant="h3" align="auto">
-            {money(t, ctrl.savingsSummary.balance)}
-          </AppText>
-          <AppText variant="body2" color={colors.textSecondary} align="auto">
-            {ctrl.savingsSummary.monthlyGoal
-              ? t('farha.phase1.savings.dashboardGoal', {
-                  saved: money(t, ctrl.savingsSummary.contributedThisMonth),
-                  goal: money(t, ctrl.savingsSummary.monthlyGoal),
-                })
-              : t('farha.phase1.savings.dashboardNoGoal')}
-          </AppText>
-        </AppCard>
-        <AppCard variant="outlined" style={styles.section} onPress={ctrl.openChecklist}>
-          <SectionHeader title={t('farha.phase1.dashboard.checklistSummary')} />
+        <AppCard variant="outlined" style={styles.section} onPress={ctrl.openTasks}>
+          <SectionHeader title={t('farha.phase1.dashboard.actionSummary')} />
           <AppText variant="h3" align="auto">
             {t('farha.phase1.checklist.progress', {
-              done: ctrl.checklistSummary.doneCount,
-              total: ctrl.checklistSummary.actionableTotal,
+              done: ctrl.taskSummary.doneCount,
+              total: ctrl.taskSummary.actionableTotal,
             })}
           </AppText>
           <AppText variant="body2" color={colors.textSecondary} align="auto">
-            {ctrl.checklistSummary.nextPending
-              ? `${getChecklistTitle(t, ctrl.checklistSummary.nextPending)} - ${ctrl.checklistSummary.nextPending.dueDate ?? t('farha.phase1.labels.noDueDate')}`
+            {ctrl.taskSummary.nextPending
+              ? `${getTaskTitle(t, ctrl.taskSummary.nextPending)} - ${ctrl.taskSummary.nextPending.dueDate ?? t('farha.phase1.labels.noDueDate')}`
               : t('farha.phase1.checklist.noPending')}
           </AppText>
         </AppCard>

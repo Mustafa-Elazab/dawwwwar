@@ -1,30 +1,21 @@
 import {
-  addBudgetCategory,
-  calculateFundBalance,
   calculateBudgetTotals,
-  confirmSavingsAllocations,
   createEventWithSeeds,
   createInitialPhase1State,
   createSharePayload,
   deleteEventCascade,
-  getBudgetItemStatus,
   getChecklistSummary,
-  getEventSavingsContributions,
-  getEventBudgetItems,
   getEventCategories,
-  getEventChecklistItems,
-  getSavingsSummary,
+  getEventTasks,
+  getTaskPaymentStatus,
+  logTaskPayment,
+  migratePhase1State,
   resolveBootRoute,
-  setChecklistStatus,
-  setSavingsMonthlyGoal,
   setNotificationsEnabled,
-  suggestSavingsAllocations,
-  upsertChecklistItem,
-  upsertPhase1BudgetItem,
-  upsertSavingsContribution,
-  validateBudgetItemDraft,
+  setTaskStatus,
+  upsertTask,
+  validateTaskDraft,
 } from '../src/core/planner/domain/phase1Logic';
-import { defaultPhase1BudgetCategories } from '../src/core/planner/data/defaultBudgetCategories';
 import { standardChecklistTemplates } from '../src/core/planner/data/checklistTemplates';
 import {
   createPhase1BillingClient,
@@ -34,38 +25,38 @@ import {
 describe('Farha Phase 1 planner logic', () => {
   const now = new Date('2026-08-02T09:00:00.000Z');
 
-  it('routes first launch, empty onboarded state, single event, and Pro multi-event state', () => {
+  it('routes first launch, empty onboarded state, single occasion, and Pro multi-occasion state', () => {
     const initial = createInitialPhase1State(now);
     expect(resolveBootRoute(initial).name).toBe('OnboardingWelcomeScreen');
 
     const onboarded = { ...initial, hasOnboarded: true };
-    expect(resolveBootRoute(onboarded).name).toBe('EventCreateScreen');
+    expect(resolveBootRoute(onboarded).name).toBe('OccasionCreateScreen');
 
-    const oneEvent = createEventWithSeeds(onboarded, {
+    const oneOccasion = createEventWithSeeds(onboarded, {
       type: 'wedding',
       title: 'Wedding',
       date: '2027-08-02',
     }, now);
-    expect(resolveBootRoute(oneEvent).name).toBe('EventDashboardScreen');
+    expect(resolveBootRoute(oneOccasion).name).toBe('OccasionDashboardScreen');
 
-    const twoEvents = createEventWithSeeds({ ...oneEvent, isPro: true }, {
-      type: 'engagement',
-      title: 'Engagement',
+    const twoOccasions = createEventWithSeeds({ ...oneOccasion, isPro: true }, {
+      type: 'graduation',
+      title: 'Graduation',
       date: '2027-01-02',
     }, now);
-    expect(resolveBootRoute(twoEvents).name).toBe('EventListScreen');
+    expect(resolveBootRoute(twoOccasions).name).toBe('OccasionListScreen');
   });
 
-  it('seeds all default budget categories and the exact wedding checklist template', () => {
+  it('seeds default task categories and graduation tasks', () => {
     const state = createEventWithSeeds(createInitialPhase1State(now), {
-      type: 'wedding',
-      title: 'Wedding',
+      type: 'graduation',
+      title: 'Graduation',
       date: '2027-08-02',
     }, now);
 
-    expect(getEventCategories(state, state.activeEventId)).toHaveLength(defaultPhase1BudgetCategories.length);
-    expect(getEventChecklistItems(state, state.activeEventId)).toHaveLength(
-      standardChecklistTemplates.wedding?.length,
+    expect(getEventCategories(state, state.activeOccasionId)).toHaveLength(12);
+    expect(getEventTasks(state, state.activeOccasionId)).toHaveLength(
+      standardChecklistTemplates.graduation?.length,
     );
   });
 
@@ -75,15 +66,16 @@ describe('Farha Phase 1 planner logic', () => {
       title: 'Engagement',
       date: '2027-02-02',
     }, now);
-    const category = getEventCategories(state, state.activeEventId)[0];
-    const withItem = upsertPhase1BudgetItem(state, {
-      categoryId: category.id,
-      name: 'Venue',
+    const withTask = upsertTask(state, {
+      occasionId: state.activeOccasionId ?? '',
+      title: 'Venue',
+      category: 'venue',
+      status: 'pending',
       plannedCost: 10000,
       depositPaid: 2500,
     }, now);
 
-    expect(calculateBudgetTotals(getEventBudgetItems(withItem, withItem.activeEventId))).toEqual({
+    expect(calculateBudgetTotals(getEventTasks(withTask, withTask.activeOccasionId))).toEqual({
       plannedTotal: 10000,
       actualTotal: 10000,
       depositTotal: 2500,
@@ -92,16 +84,17 @@ describe('Farha Phase 1 planner logic', () => {
     });
   });
 
-  it('derives item payment badges from deposits and remaining balance', () => {
-    expect(getBudgetItemStatus({ plannedCost: 100, depositPaid: 0 })).toBe('unpaid');
-    expect(getBudgetItemStatus({ plannedCost: 100, depositPaid: 40 })).toBe('partial');
-    expect(getBudgetItemStatus({ plannedCost: 100, actualCost: 90, depositPaid: 90 })).toBe('paid');
+  it('derives task payment badges from deposits and remaining balance', () => {
+    expect(getTaskPaymentStatus({ plannedCost: 100, depositPaid: 0 })).toBe('unpaid');
+    expect(getTaskPaymentStatus({ plannedCost: 100, depositPaid: 40 })).toBe('partial');
+    expect(getTaskPaymentStatus({ plannedCost: 100, actualCost: 90, depositPaid: 90 })).toBe('paid');
   });
 
   it('warns but does not block a deposit that exceeds the total', () => {
-    const validation = validateBudgetItemDraft({
-      categoryId: 'category',
-      name: 'Dress',
+    const validation = validateTaskDraft({
+      occasionId: 'occasion',
+      title: 'Dress',
+      status: 'pending',
       plannedCost: 1000,
       actualCost: undefined,
       depositPaid: 1200,
@@ -111,173 +104,158 @@ describe('Farha Phase 1 planner logic', () => {
     expect(validation.warnings.depositPaid).toBe('depositOverTotal');
   });
 
-  it('excludes skipped checklist items from completion denominator', () => {
+  it('excludes skipped tasks from completion denominator', () => {
     const state = createEventWithSeeds(createInitialPhase1State(now), {
       type: 'anniversary',
       title: 'Anniversary',
       date: '2027-01-02',
     }, now);
-    const items = getEventChecklistItems(state, state.activeEventId);
-    const withDone = setChecklistStatus(state, items[0].id, 'done', now);
-    const withSkipped = setChecklistStatus(withDone, items[1].id, 'skipped', now);
+    const items = getEventTasks(state, state.activeOccasionId);
+    const withDone = setTaskStatus(state, items[0].id, 'done', now);
+    const withSkipped = setTaskStatus(withDone, items[1].id, 'skipped', now);
 
-    expect(getChecklistSummary(getEventChecklistItems(withSkipped, withSkipped.activeEventId))).toMatchObject({
+    expect(getChecklistSummary(getEventTasks(withSkipped, withSkipped.activeOccasionId))).toMatchObject({
       doneCount: 1,
       actionableTotal: items.length - 1,
       skippedCount: 1,
     });
   });
 
-  it('stores edited template checklist titles as custom text', () => {
+  it('stores future task and payment-plan notification records and cancels them when reminders are disabled', () => {
     const state = createEventWithSeeds(createInitialPhase1State(now), {
       type: 'engagement',
       title: 'Engagement',
       date: '2027-02-02',
     }, now);
-    const templateItem = getEventChecklistItems(state, state.activeEventId)[0];
-    const edited = upsertChecklistItem(state, {
-      id: templateItem.id,
-      eventId: templateItem.eventId,
-      categoryId: templateItem.categoryId,
-      title: 'Agree final celebration budget',
-      dueDate: templateItem.dueDate,
-      notes: 'Family-approved number',
-    }, now);
-    const updatedItem = getEventChecklistItems(edited, edited.activeEventId)
-      .find((item) => item.id === templateItem.id);
-
-    expect(updatedItem).toMatchObject({
-      title: 'Agree final celebration budget',
-      titleKey: undefined,
-      source: 'template',
+    const withPlan = upsertTask(state, {
+      occasionId: state.activeOccasionId ?? '',
+      title: 'Pay hall installment',
+      category: 'venue',
       status: 'pending',
-    });
-  });
-
-  it('stores future notification records and cancels them when reminders are disabled', () => {
-    const state = createEventWithSeeds(createInitialPhase1State(now), {
-      type: 'engagement',
-      title: 'Engagement',
-      date: '2027-02-02',
+      plannedCost: 1000,
+      depositPaid: 0,
+      dueDate: '2026-09-02',
+      paymentPlan: {
+        monthlyAmount: 100,
+        nextDueDate: '2026-09-02',
+      },
     }, now);
 
-    expect(state.scheduledNotifications.length).toBeGreaterThan(0);
-    expect(setNotificationsEnabled(state, false, now).scheduledNotifications).toHaveLength(0);
+    expect(withPlan.scheduledNotifications.length).toBeGreaterThan(state.scheduledNotifications.length);
+    expect(setNotificationsEnabled(withPlan, false, now).scheduledNotifications).toHaveLength(0);
   });
 
-  it('cascades event deletion through budget, checklist, and notification records', () => {
-    const eventState = createEventWithSeeds(createInitialPhase1State(now), {
+  it('logs a monthly payment, advances next due date, and stops reminders when paid off', () => {
+    const state = createEventWithSeeds(createInitialPhase1State(now), {
       type: 'wedding',
       title: 'Wedding',
       date: '2027-08-02',
     }, now);
-    const withCustomCategory = addBudgetCategory(eventState, {
-      eventId: eventState.activeEventId ?? '',
-      name: 'Custom',
+    const withPlan = upsertTask(state, {
+      occasionId: state.activeOccasionId ?? '',
+      title: 'Dress',
+      category: 'dress',
+      status: 'pending',
+      plannedCost: 200,
+      depositPaid: 0,
+      paymentPlan: {
+        monthlyAmount: 100,
+        nextDueDate: '2026-08-15',
+      },
     }, now);
-    const category = getEventCategories(withCustomCategory, withCustomCategory.activeEventId)[0];
-    const withItem = upsertPhase1BudgetItem(withCustomCategory, {
-      categoryId: category.id,
-      name: 'Hall',
-      plannedCost: 50000,
-      actualCost: 60000,
-      depositPaid: 10000,
+    const task = getEventTasks(withPlan, withPlan.activeOccasionId).find((item) => item.title === 'Dress');
+    const partiallyPaid = logTaskPayment(withPlan, {
+      taskId: task?.id ?? '',
+      amount: 100,
+      paidAt: '2026-08-15',
     }, now);
-    const deleted = deleteEventCascade(withItem, withItem.activeEventId ?? '', now);
+    const updated = getEventTasks(partiallyPaid, partiallyPaid.activeOccasionId).find((item) => item.id === task?.id);
+    expect(updated?.depositPaid).toBe(100);
+    expect(updated?.paymentPlan?.nextDueDate).toBe('2026-09-15');
 
-    expect(deleted.events).toHaveLength(0);
-    expect(deleted.budgetCategories).toHaveLength(0);
-    expect(deleted.budgetItems).toHaveLength(0);
-    expect(deleted.checklistItems).toHaveLength(0);
-    expect(deleted.savingsContributions).toHaveLength(0);
-    expect(deleted.savingsAllocations).toHaveLength(0);
+    const paidOff = logTaskPayment(partiallyPaid, {
+      taskId: task?.id ?? '',
+      amount: 100,
+      paidAt: '2026-09-15',
+    }, now);
+    const paidTask = getEventTasks(paidOff, paidOff.activeOccasionId).find((item) => item.id === task?.id);
+    expect(paidTask?.paymentPlan).toBeUndefined();
+  });
+
+  it('migrates legacy budget and checklist rows into unified tasks', () => {
+    const migrated = migratePhase1State({
+      hasOnboarded: true,
+      activeEventId: 'event-1',
+      events: [{
+        id: 'event-1',
+        type: 'wedding',
+        title: 'Wedding',
+        date: '2027-01-01',
+        createdAt: now.toISOString(),
+        updatedAt: now.toISOString(),
+      }],
+      budgetCategories: [{
+        id: 'cat-1',
+        eventId: 'event-1',
+        key: 'venue',
+        nameKey: 'farha.phase1.categories.venue',
+        isDefault: true,
+        createdAt: now.toISOString(),
+        updatedAt: now.toISOString(),
+      }],
+      budgetItems: [{
+        id: 'budget-1',
+        categoryId: 'cat-1',
+        name: 'Book the hall',
+        plannedCost: 1000,
+        depositPaid: 200,
+        createdAt: now.toISOString(),
+        updatedAt: now.toISOString(),
+      }],
+      checklistItems: [{
+        id: 'task-1',
+        eventId: 'event-1',
+        categoryId: 'cat-1',
+        title: 'Book the hall',
+        status: 'pending',
+        source: 'custom',
+        createdAt: now.toISOString(),
+        updatedAt: now.toISOString(),
+      }],
+    }, now);
+
+    expect(migrated.occasions).toHaveLength(1);
+    expect(migrated.tasks).toHaveLength(1);
+    expect(migrated.tasks[0]).toMatchObject({
+      category: 'venue',
+      plannedCost: 1000,
+      depositPaid: 200,
+    });
+  });
+
+  it('cascades occasion deletion through tasks and notifications', () => {
+    const state = createEventWithSeeds(createInitialPhase1State(now), {
+      type: 'wedding',
+      title: 'Wedding',
+      date: '2027-08-02',
+    }, now);
+    const deleted = deleteEventCascade(state, state.activeOccasionId ?? '', now);
+
+    expect(deleted.occasions).toHaveLength(0);
+    expect(deleted.tasks).toHaveLength(0);
     expect(deleted.scheduledNotifications).toHaveLength(0);
   });
 
-  it('tracks savings balance, monthly goal progress, and newest contribution first', () => {
-    const state = createEventWithSeeds(createInitialPhase1State(now), {
-      type: 'wedding',
-      title: 'Wedding',
-      date: '2027-08-02',
-    }, now);
-    const withGoal = setSavingsMonthlyGoal(state, state.activeEventId ?? '', 5000, now);
-    const first = upsertSavingsContribution(withGoal, {
-      eventId: withGoal.activeEventId ?? '',
-      amount: 1000,
-      date: '2026-08-02',
-    }, new Date('2026-08-02T10:00:00.000Z'));
-    const second = upsertSavingsContribution(first, {
-      eventId: first.activeEventId ?? '',
-      amount: 2500,
-      date: '2026-08-03',
-      note: 'Family help',
-    }, new Date('2026-08-03T10:00:00.000Z'));
-
-    expect(calculateFundBalance(second, second.activeEventId)).toBe(3500);
-    expect(getSavingsSummary(second, second.activeEventId, now)).toMatchObject({
-      balance: 3500,
-      contributedThisMonth: 3500,
-      monthlyGoal: 5000,
-      monthlyProgress: 0.7,
-    });
-    expect(getEventSavingsContributions(second, second.activeEventId)[0]).toMatchObject({
-      amount: 2500,
-      note: 'Family help',
-    });
-  });
-
-  it('suggests savings allocation by due date and updates budget deposits with audit rows', () => {
-    const state = createEventWithSeeds(createInitialPhase1State(now), {
-      type: 'wedding',
-      title: 'Wedding',
-      date: '2027-08-02',
-    }, now);
-    const category = getEventCategories(state, state.activeEventId)[0];
-    const firstItemState = upsertPhase1BudgetItem(state, {
-      categoryId: category.id,
-      name: 'Later item',
-      plannedCost: 4000,
-      depositPaid: 0,
-      dueDate: '2026-09-01',
-    }, now);
-    const secondItemState = upsertPhase1BudgetItem(firstItemState, {
-      categoryId: category.id,
-      name: 'Soon item',
-      plannedCost: 3000,
-      depositPaid: 500,
-      dueDate: '2026-08-15',
-    }, new Date('2026-08-02T09:01:00.000Z'));
-    const funded = upsertSavingsContribution(secondItemState, {
-      eventId: secondItemState.activeEventId ?? '',
-      amount: 5000,
-      date: '2026-08-02',
-    }, new Date('2026-08-02T09:02:00.000Z'));
-    const suggestion = suggestSavingsAllocations(funded, funded.activeEventId ?? '');
-    const allocated = confirmSavingsAllocations(
-      funded,
-      funded.activeEventId ?? '',
-      suggestion,
-      new Date('2026-08-02T09:03:00.000Z'),
-    );
-
-    expect(suggestion.map((item) => item.amount)).toEqual([2500, 2500]);
-    expect(allocated.savingsAllocations).toHaveLength(2);
-    expect(calculateFundBalance(allocated, allocated.activeEventId)).toBe(0);
-    expect(calculateBudgetTotals(getEventBudgetItems(allocated, allocated.activeEventId))).toMatchObject({
-      depositTotal: 5500,
-      balanceTotal: 1500,
-    });
-  });
-
-  it('generates a share payload with event, budget, checklist, and Farha mark', () => {
+  it('generates a share payload with occasion, task progress, money totals, and Farha mark', () => {
     const state = createEventWithSeeds(createInitialPhase1State(now), {
       type: 'wedding',
       title: 'Family Wedding',
       date: '2027-08-02',
     }, now);
 
-    expect(createSharePayload(state, state.activeEventId ?? '')).toContain('Family Wedding');
-    expect(createSharePayload(state, state.activeEventId ?? '')).toContain('Made with Farha');
+    expect(createSharePayload(state, state.activeOccasionId ?? '')).toContain('Family Wedding');
+    expect(createSharePayload(state, state.activeOccasionId ?? '')).toContain('Tasks:');
+    expect(createSharePayload(state, state.activeOccasionId ?? '')).toContain('Made with Farha');
   });
 
   it('keeps Phase 1 Pro purchase and restore behind a Play Billing adapter', async () => {

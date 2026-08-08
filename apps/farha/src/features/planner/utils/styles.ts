@@ -6,11 +6,15 @@ export const createPhase1ScreenStyles = (colors: AppColors) =>
   StyleSheet.create({
     screenContent: {
       flex: 1,
+      marginTop: -48,
+      borderTopLeftRadius: 56,
+      overflow: 'hidden',
+      backgroundColor: colors.surface,
     },
     scrollContent: {
       gap: spacing[4],
       paddingHorizontal: spacing[4],
-      paddingVertical: spacing[5],
+      paddingTop: spacing[8],
       paddingBottom: spacing[10],
     },
     centered: {
@@ -43,7 +47,7 @@ export const createPhase1ScreenStyles = (colors: AppColors) =>
       justifyContent: 'center',
     },
     section: {
-      padding: spacing[4],
+      padding: spacing[5],
       gap: spacing[4],
     },
     stack: {
@@ -91,9 +95,10 @@ export const createPhase1ScreenStyles = (colors: AppColors) =>
     listRow: {
       minHeight: 64,
       borderWidth: StyleSheet.hairlineWidth,
-      borderRadius: radius.md,
+      borderRadius: radius.lg,
       borderColor: colors.border,
-      padding: spacing[3],
+      backgroundColor: colors.card,
+      padding: spacing[4],
       flexDirection: 'row',
       alignItems: 'center',
       gap: spacing[3],

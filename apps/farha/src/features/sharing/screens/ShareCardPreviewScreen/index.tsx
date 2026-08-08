@@ -19,7 +19,7 @@ export function ShareCardPreviewScreen() {
   const screen = usePlannerScreenChrome({
     title: t('farha.phase1.share.title'),
     subtitle: t('farha.phase1.share.subtitle'),
-    showBack: true,
+    showTabs: true,
   });
 
   if (!ctrl.event) return <MissingEventState />;

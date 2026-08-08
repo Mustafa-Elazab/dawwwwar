@@ -19,7 +19,7 @@ export function MissingEventState() {
       <ScrollView {...screen.scrollViewProps}>
         <AppButton
           label={t('farha.phase1.actions.createEvent')}
-          onPress={() => controller.navigate('EventCreateScreen')}
+          onPress={() => controller.navigate('OccasionCreateScreen')}
           fullWidth
         />
       </ScrollView>

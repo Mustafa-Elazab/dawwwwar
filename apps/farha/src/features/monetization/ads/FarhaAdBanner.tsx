@@ -9,7 +9,7 @@ import { canRequestFarhaAds } from './adConsent';
 
 interface FarhaAdBannerProps {
   isPro: boolean;
-  placement: 'dashboard' | 'budget_categories';
+  placement: 'dashboard' | 'budget_categories' | 'tasks';
 }
 
 export function FarhaAdBanner({ isPro, placement }: FarhaAdBannerProps) {

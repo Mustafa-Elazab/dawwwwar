@@ -1,23 +1,17 @@
 export const FARHA_ROOT_ROUTES = {
   SPLASH: 'SplashScreen',
   ONBOARDING: 'OnboardingWelcomeScreen',
-  EVENT_CREATE: 'EventCreateScreen',
-  EVENT_LIST: 'EventListScreen',
-  EVENT_EDIT: 'EventEditScreen',
-  BUDGET_ITEM_LIST: 'BudgetItemListScreen',
-  BUDGET_ITEM_FORM: 'BudgetItemFormScreen',
-  CHECKLIST_ITEM_EDIT: 'ChecklistItemEditScreen',
-  SAVINGS_FUND: 'SavingsFundScreen',
-  SAVINGS_CONTRIBUTION_FORM: 'SavingsContributionFormScreen',
-  SAVINGS_ALLOCATION: 'SavingsAllocationScreen',
-  SHARE_CARD_PREVIEW: 'ShareCardPreviewScreen',
+  OCCASION_CREATE: 'OccasionCreateScreen',
+  OCCASION_LIST: 'OccasionListScreen',
+  OCCASION_EDIT: 'OccasionEditScreen',
+  TASK_FORM: 'TaskFormScreen',
   PRO_UPGRADE: 'ProUpgradeScreen',
   TABS: 'FarhaTabs',
 } as const;
 
 export const FARHA_TAB_ROUTES = {
-  HOME: 'EventDashboardScreen',
-  BUDGET: 'BudgetCategoryListScreen',
-  CHECKLIST: 'ChecklistTimelineScreen',
+  HOME: 'OccasionDashboardScreen',
+  TASKS: 'TaskListScreen',
+  SHARE: 'ShareCardPreviewScreen',
   SETTINGS: 'SettingsScreen',
 } as const;

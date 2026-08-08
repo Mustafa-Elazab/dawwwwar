@@ -2,10 +2,12 @@ import { farhaStorage } from '../../../app/storage';
 import {
   createInitialPhase1State,
   FARHA_PHASE1_SCHEMA_VERSION,
+  migratePhase1State,
 } from '../domain/phase1Logic';
-import type { FarhaPhase1State } from '../domain/phase1Types';
+import type { FarhaPhase1State, LegacyPhase1State } from '../domain/phase1Types';
 
-export const FARHA_PHASE1_STORAGE_KEY = 'farha.phase1.v1';
+export const FARHA_PHASE1_STORAGE_KEY = 'farha.phase1.v2';
+const FARHA_PHASE1_LEGACY_STORAGE_KEY = 'farha.phase1.v1';
 
 export interface Phase1KeyValueStore {
   getString: (key: string) => string | undefined;
@@ -28,39 +30,22 @@ export const createPhase1Repository = (
 });
 
 export const loadPhase1State = (storage: Phase1KeyValueStore): FarhaPhase1State => {
-  const raw = storage.getString(FARHA_PHASE1_STORAGE_KEY);
+  const raw = storage.getString(FARHA_PHASE1_STORAGE_KEY) ??
+    storage.getString(FARHA_PHASE1_LEGACY_STORAGE_KEY);
   if (!raw) {
     return createInitialPhase1State();
   }
 
   try {
-    return normalizePhase1State(JSON.parse(raw) as Partial<FarhaPhase1State>);
+    return normalizePhase1State(JSON.parse(raw) as Partial<LegacyPhase1State | FarhaPhase1State>);
   } catch {
     return createInitialPhase1State();
   }
 };
 
-const normalizePhase1State = (state: Partial<FarhaPhase1State>): FarhaPhase1State => {
-  const fallback = createInitialPhase1State();
-  const events = state.events ?? [];
-  const activeEventId = state.activeEventId && events.some((event) => event.id === state.activeEventId)
-    ? state.activeEventId
-    : events[0]?.id;
-
-  return {
-    schemaVersion: FARHA_PHASE1_SCHEMA_VERSION,
-    hasOnboarded: state.hasOnboarded ?? fallback.hasOnboarded,
-    isPro: state.isPro ?? fallback.isPro,
-    notificationsEnabled: state.notificationsEnabled ?? fallback.notificationsEnabled,
-    activeEventId,
-    events,
-    budgetCategories: state.budgetCategories ?? [],
-    budgetItems: state.budgetItems ?? [],
-    checklistItems: state.checklistItems ?? [],
-    scheduledNotifications: state.scheduledNotifications ?? [],
-    savingsContributions: state.savingsContributions ?? [],
-    savingsAllocations: state.savingsAllocations ?? [],
-    lastInterstitialShownAt: state.lastInterstitialShownAt,
-    updatedAt: state.updatedAt ?? fallback.updatedAt,
-  };
-};
+const normalizePhase1State = (
+  state: Partial<LegacyPhase1State | FarhaPhase1State>,
+): FarhaPhase1State => ({
+  ...migratePhase1State(state),
+  schemaVersion: FARHA_PHASE1_SCHEMA_VERSION,
+});

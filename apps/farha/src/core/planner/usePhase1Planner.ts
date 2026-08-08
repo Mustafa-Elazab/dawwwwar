@@ -2,18 +2,12 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Share } from 'react-native';
 
 import {
-  addBudgetCategory,
   clearAllPhase1Data,
-  confirmSavingsAllocations,
   completeOnboarding,
   createEventWithSeeds,
   createSharePayload,
-  deleteBudgetCategoryCascade,
-  deleteChecklistItem,
   deleteEventCascade,
-  deletePhase1BudgetItem,
-  deleteSavingsContribution,
-  getAllocatableBudgetItems,
+  deleteTask,
   getActiveEvent,
   getBudgetItemById,
   getCategoryById,
@@ -24,21 +18,21 @@ import {
   getEventById,
   getEventCategories,
   getEventChecklistItems,
-  getEventSavingsAllocations,
-  getEventSavingsContributions,
+  getEventTasks,
   getSavingsContributionById,
   getSavingsSummary,
+  getTaskById,
+  getTaskSummary,
+  logTaskPayment,
   resolveBootRoute,
   setActiveEvent,
-  setChecklistStatus,
   setNotificationsEnabled,
   setProStatus,
-  setSavingsMonthlyGoal,
-  suggestSavingsAllocations,
+  setTaskStatus,
   updateEventWithTemplateDueDates,
   upsertChecklistItem,
   upsertPhase1BudgetItem,
-  upsertSavingsContribution,
+  upsertTask,
 } from './domain/phase1Logic';
 import type {
   BudgetCategoryDraft,
@@ -47,17 +41,18 @@ import type {
   ChecklistStatus,
   EventFormDraft,
   FarhaPhase1BudgetCategory,
-  FarhaPhase1BudgetItem,
-  FarhaPhase1ChecklistItem,
   FarhaPhase1Event,
   FarhaPhase1SavingsAllocation,
   FarhaPhase1SavingsContribution,
   FarhaPhase1State,
+  FarhaPhase1Task,
   Phase1Route,
   Phase1ScreenName,
   Phase1TabKey,
   SavingsAllocationInput,
   SavingsContributionDraft,
+  TaskDraft,
+  TaskPaymentInput,
 } from './domain/phase1Types';
 import { createPhase1BillingClient } from '../../features/monetization/data/phase1Billing';
 import {
@@ -78,9 +73,10 @@ export interface Phase1PlannerController {
   activeTab: Phase1TabKey;
   canGoBack: boolean;
   activeEvent?: FarhaPhase1Event;
+  activeTasks: FarhaPhase1Task[];
   activeCategories: FarhaPhase1BudgetCategory[];
-  activeBudgetItems: FarhaPhase1BudgetItem[];
-  activeChecklistItems: FarhaPhase1ChecklistItem[];
+  activeBudgetItems: FarhaPhase1Task[];
+  activeChecklistItems: FarhaPhase1Task[];
   errorMessageKey?: string;
   reload: () => void;
   navigate: (name: Phase1ScreenName, params?: Phase1Route['params']) => void;
@@ -92,6 +88,10 @@ export interface Phase1PlannerController {
   updateEvent: (draft: EventFormDraft) => void;
   deleteEvent: (eventId: string) => void;
   openEvent: (eventId: string) => void;
+  saveTask: (draft: TaskDraft) => void;
+  setTaskStatus: (taskId: string, status: ChecklistStatus) => void;
+  logTaskPayment: (input: TaskPaymentInput) => void;
+  deleteTask: (taskId: string) => void;
   addBudgetCategory: (draft: BudgetCategoryDraft) => void;
   deleteBudgetCategory: (categoryId: string) => void;
   saveBudgetItem: (draft: BudgetItemDraft) => void;
@@ -110,19 +110,22 @@ export interface Phase1PlannerController {
   shareActiveEvent: () => Promise<void>;
   getEventById: (eventId?: string) => FarhaPhase1Event | undefined;
   getCategoryById: (categoryId?: string) => FarhaPhase1BudgetCategory | undefined;
-  getBudgetItemById: (itemId?: string) => FarhaPhase1BudgetItem | undefined;
-  getChecklistItemById: (itemId?: string) => FarhaPhase1ChecklistItem | undefined;
+  getTaskById: (taskId?: string) => FarhaPhase1Task | undefined;
+  getBudgetItemById: (itemId?: string) => FarhaPhase1Task | undefined;
+  getChecklistItemById: (itemId?: string) => FarhaPhase1Task | undefined;
   getSavingsContributionById: (contributionId?: string) => FarhaPhase1SavingsContribution | undefined;
   getEventCategories: (eventId?: string) => FarhaPhase1BudgetCategory[];
-  getCategoryItems: (categoryId?: string) => FarhaPhase1BudgetItem[];
-  getEventBudgetItems: (eventId?: string) => FarhaPhase1BudgetItem[];
-  getEventChecklistItems: (eventId?: string) => FarhaPhase1ChecklistItem[];
+  getCategoryItems: (categoryId?: string) => FarhaPhase1Task[];
+  getEventTasks: (eventId?: string) => FarhaPhase1Task[];
+  getEventBudgetItems: (eventId?: string) => FarhaPhase1Task[];
+  getEventChecklistItems: (eventId?: string) => FarhaPhase1Task[];
   getEventSavingsContributions: (eventId?: string) => FarhaPhase1SavingsContribution[];
   getEventSavingsAllocations: (eventId?: string) => FarhaPhase1SavingsAllocation[];
   getSavingsSummary: (eventId?: string) => ReturnType<typeof getSavingsSummary>;
-  getAllocatableBudgetItems: (eventId?: string) => FarhaPhase1BudgetItem[];
+  getAllocatableBudgetItems: (eventId?: string) => FarhaPhase1Task[];
   suggestSavingsAllocations: (eventId: string) => SavingsAllocationInput[];
-  getChecklistSummary: (items: FarhaPhase1ChecklistItem[]) => ReturnType<typeof getChecklistSummary>;
+  getChecklistSummary: (items: FarhaPhase1Task[]) => ReturnType<typeof getChecklistSummary>;
+  getTaskSummary: (items: FarhaPhase1Task[]) => ReturnType<typeof getTaskSummary>;
 }
 
 const repository = createPhase1Repository();
@@ -137,16 +140,12 @@ export const usePhase1Planner = (): Phase1PlannerController => {
 
   const route = routes[routes.length - 1] ?? { name: 'SplashScreen' };
   const activeEvent = useMemo(() => getActiveEvent(state), [state]);
+  const activeTasks = useMemo(
+    () => getEventTasks(state, activeEvent?.id),
+    [activeEvent?.id, state],
+  );
   const activeCategories = useMemo(
     () => getEventCategories(state, activeEvent?.id),
-    [activeEvent?.id, state],
-  );
-  const activeBudgetItems = useMemo(
-    () => getEventBudgetItems(state, activeEvent?.id),
-    [activeEvent?.id, state],
-  );
-  const activeChecklistItems = useMemo(
-    () => getEventChecklistItems(state, activeEvent?.id),
     [activeEvent?.id, state],
   );
 
@@ -184,19 +183,14 @@ export const usePhase1Planner = (): Phase1PlannerController => {
 
   useEffect(() => {
     if (status !== 'ready' || route.name !== 'SplashScreen') return;
-
     const bootRoute = resolveBootRoute(state);
     setRoutes([bootRoute]);
-    if (bootRoute.params?.tab) {
-      setActiveTab(bootRoute.params.tab);
-    }
+    if (bootRoute.params?.tab) setActiveTab(bootRoute.params.tab);
   }, [route.name, state, status]);
 
   useEffect(() => {
     const routeTab = getPlannerTabForScreen(route.name);
-    if (routeTab) {
-      setActiveTab(routeTab);
-    }
+    if (routeTab) setActiveTab(routeTab);
   }, [route.name]);
 
   const navigate = useCallback((name: Phase1ScreenName, params?: Phase1Route['params']) => {
@@ -220,24 +214,24 @@ export const usePhase1Planner = (): Phase1PlannerController => {
 
   const openTab = useCallback((tab: Phase1TabKey) => {
     setActiveTab(tab);
-    reset(PLANNER_TAB_SCREEN_BY_KEY[tab], { eventId: state.activeEventId, tab });
-  }, [reset, state.activeEventId]);
+    reset(PLANNER_TAB_SCREEN_BY_KEY[tab], { occasionId: state.activeOccasionId, tab });
+  }, [reset, state.activeOccasionId]);
 
   const completeOnboardingAction = useCallback(() => {
     persist(completeOnboarding(state));
-    reset('EventCreateScreen');
+    reset('OccasionCreateScreen');
   }, [persist, reset, state]);
 
   const createEventAction = useCallback((draft: EventFormDraft) => {
-    if (!state.isPro && state.events.length >= 1) {
-      navigate('ProUpgradeScreen', { from: 'EventCreateScreen' });
+    if (!state.isPro && state.occasions.length >= 1) {
+      navigate('ProUpgradeScreen', { from: 'OccasionCreateScreen' });
       return false;
     }
 
     const nextState = createEventWithSeeds(state, draft);
     persist(nextState);
     logFarhaEvent('event_created');
-    reset('EventDashboardScreen', { eventId: nextState.activeEventId, tab: 'home' });
+    reset('OccasionDashboardScreen', { occasionId: nextState.activeOccasionId, tab: 'home' });
     setActiveTab('home');
     return true;
   }, [navigate, persist, reset, state]);
@@ -245,83 +239,44 @@ export const usePhase1Planner = (): Phase1PlannerController => {
   const updateEventAction = useCallback((draft: EventFormDraft) => {
     const nextState = updateEventWithTemplateDueDates(state, draft);
     persist(nextState);
-    reset('EventDashboardScreen', { eventId: draft.id, tab: 'home' });
+    reset('OccasionDashboardScreen', { occasionId: draft.id, tab: 'home' });
     setActiveTab('home');
   }, [persist, reset, state]);
 
   const deleteEventAction = useCallback((eventId: string) => {
     const nextState = deleteEventCascade(state, eventId);
     persist(nextState);
-    reset(resolveBootRoute(nextState).name, resolveBootRoute(nextState).params);
+    const bootRoute = resolveBootRoute(nextState);
+    reset(bootRoute.name, bootRoute.params);
   }, [persist, reset, state]);
 
   const openEvent = useCallback((eventId: string) => {
     const nextState = setActiveEvent(state, eventId);
     persist(nextState);
-    reset('EventDashboardScreen', { eventId, tab: 'home' });
+    reset('OccasionDashboardScreen', { occasionId: eventId, tab: 'home' });
     setActiveTab('home');
   }, [persist, reset, state]);
 
-  const addBudgetCategoryAction = useCallback((draft: BudgetCategoryDraft) => {
-    persist(addBudgetCategory(state, draft));
-  }, [persist, state]);
-
-  const deleteBudgetCategoryAction = useCallback((categoryId: string) => {
-    persist(deleteBudgetCategoryCascade(state, categoryId));
-  }, [persist, state]);
-
-  const saveBudgetItemAction = useCallback((draft: BudgetItemDraft) => {
-    const isNewItem = !draft.id;
-    persist(upsertPhase1BudgetItem(state, draft));
-    if (isNewItem) logFarhaEvent('budget_item_added');
-    showBudgetItemSavedInterstitial(state.isPro);
+  const saveTaskAction = useCallback((draft: TaskDraft) => {
+    const isNew = !draft.id;
+    persist(upsertTask(state, draft));
+    if (isNew) logFarhaEvent('budget_item_added');
+    if (draft.plannedCost || draft.actualCost) showBudgetItemSavedInterstitial(state.isPro);
     goBack();
   }, [goBack, persist, state]);
 
-  const deleteBudgetItemAction = useCallback((itemId: string) => {
-    persist(deletePhase1BudgetItem(state, itemId));
-    goBack();
-  }, [goBack, persist, state]);
-
-  const saveChecklistItemAction = useCallback((draft: ChecklistItemDraft) => {
-    persist(upsertChecklistItem(state, draft));
-    goBack();
-  }, [goBack, persist, state]);
-
-  const setChecklistItemStatusAction = useCallback((itemId: string, nextStatus: ChecklistStatus) => {
-    persist(setChecklistStatus(state, itemId, nextStatus));
+  const setTaskStatusAction = useCallback((taskId: string, nextStatus: ChecklistStatus) => {
+    persist(setTaskStatus(state, taskId, nextStatus));
     if (nextStatus === 'done') logFarhaEvent('checklist_task_completed');
   }, [persist, state]);
 
-  const deleteChecklistItemAction = useCallback((itemId: string) => {
-    persist(deleteChecklistItem(state, itemId));
-    goBack();
-  }, [goBack, persist, state]);
-
-  const saveSavingsContributionAction = useCallback((draft: SavingsContributionDraft) => {
-    persist(upsertSavingsContribution(state, draft));
-    logFarhaEvent('savings_contribution_added');
-    goBack();
-  }, [goBack, persist, state]);
-
-  const deleteSavingsContributionAction = useCallback((contributionId: string) => {
-    persist(deleteSavingsContribution(state, contributionId));
-    goBack();
-  }, [goBack, persist, state]);
-
-  const setSavingsMonthlyGoalAction = useCallback((
-    eventId: string,
-    monthlyGoal: number | undefined,
-  ) => {
-    persist(setSavingsMonthlyGoal(state, eventId, monthlyGoal));
+  const logTaskPaymentAction = useCallback((input: TaskPaymentInput) => {
+    persist(logTaskPayment(state, input));
+    logFarhaEvent('budget_item_added');
   }, [persist, state]);
 
-  const confirmSavingsAllocationsAction = useCallback((
-    eventId: string,
-    inputs: SavingsAllocationInput[],
-  ) => {
-    persist(confirmSavingsAllocations(state, eventId, inputs));
-    logFarhaEvent('savings_allocation_confirmed');
+  const deleteTaskAction = useCallback((taskId: string) => {
+    persist(deleteTask(state, taskId));
     goBack();
   }, [goBack, persist, state]);
 
@@ -329,7 +284,6 @@ export const usePhase1Planner = (): Phase1PlannerController => {
     void billingClient.purchasePro()
       .then((result) => {
         if (!result.entitled) return;
-
         persist(setProStatus(state, true));
         logFarhaEvent('pro_purchase_completed');
         goBack();
@@ -367,7 +321,6 @@ export const usePhase1Planner = (): Phase1PlannerController => {
   const shareActiveEvent = useCallback(async () => {
     const event = getActiveEvent(state);
     if (!event) return;
-
     await Share.share({ message: createSharePayload(state, event.id) });
     logFarhaEvent('share_completed');
   }, [state]);
@@ -379,9 +332,10 @@ export const usePhase1Planner = (): Phase1PlannerController => {
     activeTab,
     canGoBack: routes.length > 1,
     activeEvent,
+    activeTasks,
     activeCategories,
-    activeBudgetItems,
-    activeChecklistItems,
+    activeBudgetItems: activeTasks,
+    activeChecklistItems: activeTasks,
     errorMessageKey,
     reload,
     navigate,
@@ -393,17 +347,27 @@ export const usePhase1Planner = (): Phase1PlannerController => {
     updateEvent: updateEventAction,
     deleteEvent: deleteEventAction,
     openEvent,
-    addBudgetCategory: addBudgetCategoryAction,
-    deleteBudgetCategory: deleteBudgetCategoryAction,
-    saveBudgetItem: saveBudgetItemAction,
-    deleteBudgetItem: deleteBudgetItemAction,
-    saveChecklistItem: saveChecklistItemAction,
-    setChecklistItemStatus: setChecklistItemStatusAction,
-    deleteChecklistItem: deleteChecklistItemAction,
-    saveSavingsContribution: saveSavingsContributionAction,
-    deleteSavingsContribution: deleteSavingsContributionAction,
-    setSavingsMonthlyGoal: setSavingsMonthlyGoalAction,
-    confirmSavingsAllocations: confirmSavingsAllocationsAction,
+    saveTask: saveTaskAction,
+    setTaskStatus: setTaskStatusAction,
+    logTaskPayment: logTaskPaymentAction,
+    deleteTask: deleteTaskAction,
+    addBudgetCategory: () => undefined,
+    deleteBudgetCategory: () => undefined,
+    saveBudgetItem: (draft) => {
+      persist(upsertPhase1BudgetItem(state, draft));
+      goBack();
+    },
+    deleteBudgetItem: deleteTaskAction,
+    saveChecklistItem: (draft) => {
+      persist(upsertChecklistItem(state, draft));
+      goBack();
+    },
+    setChecklistItemStatus: setTaskStatusAction,
+    deleteChecklistItem: deleteTaskAction,
+    saveSavingsContribution: () => undefined,
+    deleteSavingsContribution: () => undefined,
+    setSavingsMonthlyGoal: () => undefined,
+    confirmSavingsAllocations: () => undefined,
     upgradeToPro,
     restorePurchase,
     setNotificationsEnabled: setNotificationsEnabledAction,
@@ -411,18 +375,21 @@ export const usePhase1Planner = (): Phase1PlannerController => {
     shareActiveEvent,
     getEventById: (eventId) => getEventById(state, eventId),
     getCategoryById: (categoryId) => getCategoryById(state, categoryId),
+    getTaskById: (taskId) => getTaskById(state, taskId),
     getBudgetItemById: (itemId) => getBudgetItemById(state, itemId),
     getChecklistItemById: (itemId) => getChecklistItemById(state, itemId),
     getSavingsContributionById: (contributionId) => getSavingsContributionById(state, contributionId),
     getEventCategories: (eventId) => getEventCategories(state, eventId),
     getCategoryItems: (categoryId) => getCategoryItems(state, categoryId),
+    getEventTasks: (eventId) => getEventTasks(state, eventId),
     getEventBudgetItems: (eventId) => getEventBudgetItems(state, eventId),
     getEventChecklistItems: (eventId) => getEventChecklistItems(state, eventId),
-    getEventSavingsContributions: (eventId) => getEventSavingsContributions(state, eventId),
-    getEventSavingsAllocations: (eventId) => getEventSavingsAllocations(state, eventId),
-    getSavingsSummary: (eventId) => getSavingsSummary(state, eventId),
-    getAllocatableBudgetItems: (eventId) => getAllocatableBudgetItems(state, eventId),
-    suggestSavingsAllocations: (eventId) => suggestSavingsAllocations(state, eventId),
+    getEventSavingsContributions: () => [],
+    getEventSavingsAllocations: () => [],
+    getSavingsSummary: () => getSavingsSummary(),
+    getAllocatableBudgetItems: () => [],
+    suggestSavingsAllocations: () => [],
     getChecklistSummary,
+    getTaskSummary,
   };
 };

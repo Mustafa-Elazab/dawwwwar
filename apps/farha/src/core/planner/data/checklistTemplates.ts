@@ -43,5 +43,14 @@ export const standardChecklistTemplates: Partial<Record<FarhaPhase1EventType, Ch
     { offsetDaysBeforeEvent: 7, titleKey: 'farha.phase1.templates.anniversary.sendInvitations' },
     { offsetDaysBeforeEvent: 1, titleKey: 'farha.phase1.templates.anniversary.finalReview' },
   ],
+  graduation: [
+    { offsetDaysBeforeEvent: 60, titleKey: 'farha.phase1.templates.graduation.setBudget' },
+    { offsetDaysBeforeEvent: 45, titleKey: 'farha.phase1.templates.graduation.bookVenue' },
+    { offsetDaysBeforeEvent: 30, titleKey: 'farha.phase1.templates.graduation.orderOutfit' },
+    { offsetDaysBeforeEvent: 21, titleKey: 'farha.phase1.templates.graduation.bookPhotoVideo' },
+    { offsetDaysBeforeEvent: 14, titleKey: 'farha.phase1.templates.graduation.sendInvitations' },
+    { offsetDaysBeforeEvent: 7, titleKey: 'farha.phase1.templates.graduation.confirmCatering' },
+    { offsetDaysBeforeEvent: 1, titleKey: 'farha.phase1.templates.graduation.finalReview' },
+  ],
   other: [],
 };

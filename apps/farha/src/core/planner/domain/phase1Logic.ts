@@ -1,71 +1,100 @@
 import { defaultPhase1BudgetCategories } from '../data/defaultBudgetCategories';
 import { standardChecklistTemplates } from '../data/checklistTemplates';
 import type {
+  BudgetBadgeStatus,
   BudgetCategoryDraft,
   BudgetItemDraft,
   BudgetItemPaymentStatus,
   BudgetTotals,
   ChecklistItemDraft,
-  ChecklistSummary,
   ChecklistStatus,
+  ChecklistSummary,
   EventFormDraft,
   FarhaPhase1BudgetCategory,
   FarhaPhase1BudgetItem,
-  FarhaPhase1ChecklistItem,
   FarhaPhase1Event,
   FarhaPhase1EventType,
+  FarhaPhase1Occasion,
   FarhaPhase1ScheduledNotification,
-  FarhaPhase1SavingsAllocation,
-  FarhaPhase1SavingsContribution,
   FarhaPhase1State,
+  FarhaPhase1Task,
+  FarhaPhase1TaskCategoryKey,
+  LegacyPhase1State,
+  OccasionFormDraft,
   Phase1Route,
   SavingsAllocationInput,
   SavingsContributionDraft,
   SavingsSummary,
+  TaskDraft,
+  TaskPaymentInput,
+  TaskPaymentStatus,
+  TaskSummary,
   ValidationResult,
 } from './phase1Types';
 
-export const FARHA_PHASE1_SCHEMA_VERSION = 1;
+export const FARHA_PHASE1_SCHEMA_VERSION = 2;
 
 export const phase1EventTypes: FarhaPhase1EventType[] = [
   'engagement',
   'wedding',
   'anniversary',
+  'graduation',
   'other',
 ];
+
+export const phase1TaskCategories: FarhaPhase1TaskCategoryKey[] =
+  defaultPhase1BudgetCategories.map((category) => category.key);
 
 export const createInitialPhase1State = (now = new Date()): FarhaPhase1State => ({
   schemaVersion: FARHA_PHASE1_SCHEMA_VERSION,
   hasOnboarded: false,
   isPro: false,
   notificationsEnabled: true,
-  events: [],
-  budgetCategories: [],
-  budgetItems: [],
-  checklistItems: [],
+  occasions: [],
+  tasks: [],
   scheduledNotifications: [],
-  savingsContributions: [],
-  savingsAllocations: [],
   updatedAt: now.toISOString(),
 });
 
+export const migratePhase1State = (
+  rawState: Partial<LegacyPhase1State | FarhaPhase1State>,
+  now = new Date(),
+): FarhaPhase1State => {
+  const fallback = createInitialPhase1State(now);
+  const state = rawState as LegacyPhase1State & Partial<FarhaPhase1State>;
+  const occasions = normalizeOccasions(state.occasions ?? state.events ?? []);
+  const activeOccasionId = normalizeActiveOccasionId(
+    state.activeOccasionId ?? state.activeEventId,
+    occasions,
+  );
+  const tasks = state.tasks?.length
+    ? normalizeTasks(state.tasks, occasions)
+    : migrateLegacyTasks(state, occasions, now);
+
+  return {
+    schemaVersion: FARHA_PHASE1_SCHEMA_VERSION,
+    hasOnboarded: state.hasOnboarded ?? fallback.hasOnboarded,
+    isPro: state.isPro ?? fallback.isPro,
+    notificationsEnabled: state.notificationsEnabled ?? fallback.notificationsEnabled,
+    activeOccasionId,
+    occasions,
+    tasks,
+    scheduledNotifications: normalizeNotifications(state.scheduledNotifications ?? [], tasks),
+    lastInterstitialShownAt: state.lastInterstitialShownAt,
+    updatedAt: state.updatedAt ?? fallback.updatedAt,
+  };
+};
+
 export const resolveBootRoute = (state: FarhaPhase1State): Phase1Route => {
-  if (!state.hasOnboarded) {
-    return { name: 'OnboardingWelcomeScreen' };
-  }
-
-  if (!state.events.length) {
-    return { name: 'EventCreateScreen' };
-  }
-
-  if (state.events.length === 1 || !state.isPro) {
+  if (!state.hasOnboarded) return { name: 'OnboardingWelcomeScreen' };
+  if (!state.occasions.length) return { name: 'OccasionCreateScreen' };
+  if (state.occasions.length === 1 || !state.isPro) {
     return {
-      name: 'EventDashboardScreen',
-      params: { eventId: state.activeEventId ?? state.events[0].id, tab: 'home' },
+      name: 'OccasionDashboardScreen',
+      params: { occasionId: state.activeOccasionId ?? state.occasions[0].id, tab: 'home' },
     };
   }
-
-  return { name: 'EventListScreen' };
+  return { name: 'OccasionListScreen' };
 };
 
 export const completeOnboarding = (
@@ -81,34 +110,35 @@ export const createEventWithSeeds = (
   state: FarhaPhase1State,
   draft: EventFormDraft,
   now = new Date(),
+): FarhaPhase1State => createOccasionWithSeeds(state, draft, now);
+
+export const createOccasionWithSeeds = (
+  state: FarhaPhase1State,
+  draft: OccasionFormDraft,
+  now = new Date(),
 ): FarhaPhase1State => {
   const timestamp = now.toISOString();
-  const event: FarhaPhase1Event = {
-    id: createId(`event-${draft.type}`, now),
+  const occasion: FarhaPhase1Occasion = {
+    id: createId(`occasion-${draft.type}`, now),
     type: draft.type,
     title: draft.title.trim(),
     date: draft.date,
     createdAt: timestamp,
     updatedAt: timestamp,
   };
-  const categories = seedBudgetCategories(event.id, now);
-  const checklistItems = seedChecklistItems(event, state.notificationsEnabled, now);
-  const scheduledNotifications = state.notificationsEnabled
-    ? [
-        ...state.scheduledNotifications,
-        ...checklistItems.flatMap((item) => createNotificationForChecklistItem(event, item, now)),
-      ]
-    : state.scheduledNotifications;
-
-  return {
+  const seededTasks = seedTasks(occasion, now);
+  const nextState: FarhaPhase1State = {
     ...state,
     hasOnboarded: true,
-    activeEventId: event.id,
-    events: [...state.events, event],
-    budgetCategories: [...state.budgetCategories, ...categories],
-    checklistItems: [...state.checklistItems, ...checklistItems],
-    scheduledNotifications,
+    activeOccasionId: occasion.id,
+    occasions: [...state.occasions, occasion],
+    tasks: [...state.tasks, ...seededTasks],
     updatedAt: timestamp,
+  };
+
+  return {
+    ...nextState,
+    scheduledNotifications: refreshTaskNotifications(nextState, occasion.id, now),
   };
 };
 
@@ -116,88 +146,74 @@ export const updateEventWithTemplateDueDates = (
   state: FarhaPhase1State,
   draft: EventFormDraft,
   now = new Date(),
+): FarhaPhase1State => updateOccasionWithTemplateDueDates(state, draft, now);
+
+export const updateOccasionWithTemplateDueDates = (
+  state: FarhaPhase1State,
+  draft: OccasionFormDraft,
+  now = new Date(),
 ): FarhaPhase1State => {
   if (!draft.id) return state;
-
   const timestamp = now.toISOString();
-  const event = state.events.find((candidate) => candidate.id === draft.id);
-  if (!event) return state;
+  const occasion = getOccasionById(state, draft.id);
+  if (!occasion) return state;
 
-  const updatedEvent: FarhaPhase1Event = {
-    ...event,
+  const updatedOccasion: FarhaPhase1Occasion = {
+    ...occasion,
     type: draft.type,
     title: draft.title.trim(),
     date: draft.date,
     updatedAt: timestamp,
   };
-  const checklistItems = state.checklistItems.map((item) => {
+  const tasks = state.tasks.map((task) => {
     if (
-      item.eventId !== updatedEvent.id ||
-      item.source !== 'template' ||
-      item.status !== 'pending' ||
-      typeof item.offsetDaysBeforeEvent !== 'number'
+      task.occasionId !== updatedOccasion.id ||
+      task.source !== 'template' ||
+      task.status !== 'pending' ||
+      typeof task.offsetDaysBeforeOccasion !== 'number'
     ) {
-      return item;
+      return task;
     }
 
     return {
-      ...item,
-      dueDate: subtractDays(updatedEvent.date, item.offsetDaysBeforeEvent),
+      ...task,
+      dueDate: subtractDays(updatedOccasion.date, task.offsetDaysBeforeOccasion),
       updatedAt: timestamp,
     };
   });
-
-  const withoutEventNotifications = state.scheduledNotifications.filter(
-    (notification) => notification.eventId !== updatedEvent.id,
-  );
-  const refreshedNotifications = state.notificationsEnabled
-    ? checklistItems
-        .filter((item) => item.eventId === updatedEvent.id)
-        .flatMap((item) => createNotificationForChecklistItem(updatedEvent, item, now))
-    : [];
+  const nextState: FarhaPhase1State = {
+    ...state,
+    activeOccasionId: updatedOccasion.id,
+    occasions: state.occasions.map((candidate) =>
+      candidate.id === updatedOccasion.id ? updatedOccasion : candidate,
+    ),
+    tasks,
+    updatedAt: timestamp,
+  };
 
   return {
-    ...state,
-    activeEventId: updatedEvent.id,
-    events: state.events.map((candidate) =>
-      candidate.id === updatedEvent.id ? updatedEvent : candidate,
-    ),
-    checklistItems,
-    scheduledNotifications: [...withoutEventNotifications, ...refreshedNotifications],
-    updatedAt: timestamp,
+    ...nextState,
+    scheduledNotifications: refreshTaskNotifications(nextState, updatedOccasion.id, now),
   };
 };
 
 export const deleteEventCascade = (
   state: FarhaPhase1State,
-  eventId: string,
+  occasionId: string,
   now = new Date(),
 ): FarhaPhase1State => {
-  const categoryIds = new Set(
-    state.budgetCategories
-      .filter((category) => category.eventId === eventId)
-      .map((category) => category.id),
-  );
-  const remainingEvents = state.events.filter((event) => event.id !== eventId);
-  const nextActiveEventId = state.activeEventId === eventId
-    ? remainingEvents[0]?.id
-    : state.activeEventId;
+  const remainingOccasions = state.occasions.filter((occasion) => occasion.id !== occasionId);
+  const nextActiveOccasionId = state.activeOccasionId === occasionId
+    ? remainingOccasions[0]?.id
+    : state.activeOccasionId;
 
   return {
     ...state,
-    activeEventId: nextActiveEventId,
-    events: remainingEvents,
-    budgetCategories: state.budgetCategories.filter((category) => category.eventId !== eventId),
-    budgetItems: state.budgetItems.filter((item) => !categoryIds.has(item.categoryId)),
-    checklistItems: state.checklistItems.filter((item) => item.eventId !== eventId),
-    savingsContributions: state.savingsContributions.filter(
-      (contribution) => contribution.eventId !== eventId,
-    ),
-    savingsAllocations: state.savingsAllocations.filter(
-      (allocation) => allocation.eventId !== eventId,
-    ),
+    activeOccasionId: nextActiveOccasionId,
+    occasions: remainingOccasions,
+    tasks: state.tasks.filter((task) => task.occasionId !== occasionId),
     scheduledNotifications: state.scheduledNotifications.filter(
-      (notification) => notification.eventId !== eventId,
+      (notification) => notification.occasionId !== occasionId,
     ),
     updatedAt: now.toISOString(),
   };
@@ -205,352 +221,132 @@ export const deleteEventCascade = (
 
 export const setActiveEvent = (
   state: FarhaPhase1State,
-  eventId: string,
+  occasionId: string,
   now = new Date(),
 ): FarhaPhase1State => ({
   ...state,
-  activeEventId: eventId,
+  activeOccasionId: occasionId,
   updatedAt: now.toISOString(),
 });
 
-export const addBudgetCategory = (
+export const upsertTask = (
   state: FarhaPhase1State,
-  draft: BudgetCategoryDraft,
+  draft: TaskDraft,
   now = new Date(),
 ): FarhaPhase1State => {
   const timestamp = now.toISOString();
-  const category: FarhaPhase1BudgetCategory = {
-    id: createId('budget-category', now),
-    eventId: draft.eventId,
-    customName: draft.name.trim(),
-    isDefault: false,
-    createdAt: timestamp,
-    updatedAt: timestamp,
-  };
+  const normalizedDraft = normalizeTaskDraft(draft);
+  const occasion = getOccasionById(state, draft.occasionId);
+  if (!occasion) return state;
 
-  return {
-    ...state,
-    budgetCategories: [...state.budgetCategories, category],
-    updatedAt: timestamp,
-  };
-};
-
-export const deleteBudgetCategoryCascade = (
-  state: FarhaPhase1State,
-  categoryId: string,
-  now = new Date(),
-): FarhaPhase1State => ({
-  ...state,
-  budgetCategories: state.budgetCategories.filter((category) => category.id !== categoryId),
-  budgetItems: state.budgetItems.filter((item) => item.categoryId !== categoryId),
-  updatedAt: now.toISOString(),
-});
-
-export const upsertPhase1BudgetItem = (
-  state: FarhaPhase1State,
-  draft: BudgetItemDraft,
-  now = new Date(),
-): FarhaPhase1State => {
-  const timestamp = now.toISOString();
-  const normalizedDraft = normalizeBudgetDraft(draft);
-
-  if (draft.id) {
-    return {
-      ...state,
-      budgetItems: state.budgetItems.map((item) =>
-        item.id === draft.id
+  const tasks = draft.id
+    ? state.tasks.map((task) =>
+        task.id === draft.id
           ? {
-              ...item,
+              ...task,
               ...normalizedDraft,
+              titleKey: undefined,
               updatedAt: timestamp,
             }
-          : item,
-      ),
-      lastInterstitialShownAt: shouldRecordInterstitial(state, now)
-        ? timestamp
-        : state.lastInterstitialShownAt,
-      updatedAt: timestamp,
-    };
-  }
+          : task,
+      )
+    : [
+        ...state.tasks,
+        {
+          id: createId('task', now),
+          ...normalizedDraft,
+          source: 'custom' as const,
+          createdAt: timestamp,
+          updatedAt: timestamp,
+        },
+      ];
 
-  const item: FarhaPhase1BudgetItem = {
-    id: createId('budget-item', now),
-    ...normalizedDraft,
-    createdAt: timestamp,
-    updatedAt: timestamp,
-  };
-
-  return {
+  const nextState: FarhaPhase1State = {
     ...state,
-    budgetItems: [...state.budgetItems, item],
-    lastInterstitialShownAt: shouldRecordInterstitial(state, now)
+    tasks,
+    lastInterstitialShownAt: hasTaskCost(normalizedDraft) && shouldRecordInterstitial(state, now)
       ? timestamp
       : state.lastInterstitialShownAt,
     updatedAt: timestamp,
   };
-};
-
-export const deletePhase1BudgetItem = (
-  state: FarhaPhase1State,
-  itemId: string,
-  now = new Date(),
-): FarhaPhase1State => ({
-  ...state,
-  budgetItems: state.budgetItems.filter((item) => item.id !== itemId),
-  savingsAllocations: state.savingsAllocations.filter(
-    (allocation) => allocation.budgetItemId !== itemId,
-  ),
-  updatedAt: now.toISOString(),
-});
-
-export const upsertSavingsContribution = (
-  state: FarhaPhase1State,
-  draft: SavingsContributionDraft,
-  now = new Date(),
-): FarhaPhase1State => {
-  const timestamp = now.toISOString();
-  const normalizedDraft = {
-    eventId: draft.eventId,
-    amount: draft.amount,
-    date: draft.date,
-    note: normalizeOptionalText(draft.note),
-  };
-
-  if (draft.id) {
-    return {
-      ...state,
-      savingsContributions: state.savingsContributions.map((contribution) =>
-        contribution.id === draft.id
-          ? { ...contribution, ...normalizedDraft, updatedAt: timestamp }
-          : contribution,
-      ),
-      scheduledNotifications: refreshSavingsGoalNotifications(
-        {
-          ...state,
-          savingsContributions: state.savingsContributions.map((contribution) =>
-            contribution.id === draft.id
-              ? { ...contribution, ...normalizedDraft, updatedAt: timestamp }
-              : contribution,
-          ),
-        },
-        draft.eventId,
-        now,
-      ),
-      updatedAt: timestamp,
-    };
-  }
-
-  const contribution: FarhaPhase1SavingsContribution = {
-    id: createId('savings-contribution', now),
-    ...normalizedDraft,
-    createdAt: timestamp,
-    updatedAt: timestamp,
-  };
-  const nextState = {
-    ...state,
-    savingsContributions: [...state.savingsContributions, contribution],
-    updatedAt: timestamp,
-  };
 
   return {
     ...nextState,
-    scheduledNotifications: refreshSavingsGoalNotifications(nextState, draft.eventId, now),
+    scheduledNotifications: refreshTaskNotifications(nextState, occasion.id, now),
   };
 };
 
-export const deleteSavingsContribution = (
+export const setTaskStatus = (
   state: FarhaPhase1State,
-  contributionId: string,
+  taskId: string,
+  status: ChecklistStatus,
   now = new Date(),
 ): FarhaPhase1State => {
-  const contribution = getSavingsContributionById(state, contributionId);
-  const nextState = {
-    ...state,
-    savingsContributions: state.savingsContributions.filter((item) => item.id !== contributionId),
-    updatedAt: now.toISOString(),
-  };
+  const timestamp = now.toISOString();
+  const task = getTaskById(state, taskId);
+  const tasks = state.tasks.map((candidate) =>
+    candidate.id === taskId ? { ...candidate, status, updatedAt: timestamp } : candidate,
+  );
+  const nextState = { ...state, tasks, updatedAt: timestamp };
 
-  return contribution
-    ? {
-        ...nextState,
-        scheduledNotifications: refreshSavingsGoalNotifications(nextState, contribution.eventId, now),
-      }
+  return task
+    ? { ...nextState, scheduledNotifications: refreshTaskNotifications(nextState, task.occasionId, now) }
     : nextState;
 };
 
-export const setSavingsMonthlyGoal = (
+export const logTaskPayment = (
   state: FarhaPhase1State,
-  eventId: string,
-  monthlyGoal: number | undefined,
+  input: TaskPaymentInput,
   now = new Date(),
 ): FarhaPhase1State => {
   const timestamp = now.toISOString();
-  const nextState = {
-    ...state,
-    events: state.events.map((event) =>
-      event.id === eventId
-        ? { ...event, savingsMonthlyGoal: monthlyGoal, updatedAt: timestamp }
-        : event,
-    ),
-    updatedAt: timestamp,
-  };
+  const task = getTaskById(state, input.taskId);
+  if (!task || input.amount <= 0) return state;
+
+  const nextDeposit = task.depositPaid + input.amount;
+  const nextPlan = task.paymentPlan && calculateTaskBalance({ ...task, depositPaid: nextDeposit }) > 0
+    ? {
+        ...task.paymentPlan,
+        nextDueDate: addMonths(input.paidAt ?? task.paymentPlan.nextDueDate, 1),
+      }
+    : undefined;
+  const tasks = state.tasks.map((candidate) =>
+    candidate.id === input.taskId
+      ? {
+          ...candidate,
+          depositPaid: nextDeposit,
+          paymentPlan: nextPlan,
+          updatedAt: timestamp,
+        }
+      : candidate,
+  );
+  const nextState = { ...state, tasks, updatedAt: timestamp };
 
   return {
     ...nextState,
-    scheduledNotifications: refreshSavingsGoalNotifications(nextState, eventId, now),
+    scheduledNotifications: refreshTaskNotifications(nextState, task.occasionId, now),
   };
 };
 
-export const confirmSavingsAllocations = (
+export const deleteTask = (
   state: FarhaPhase1State,
-  eventId: string,
-  inputs: SavingsAllocationInput[],
+  taskId: string,
   now = new Date(),
 ): FarhaPhase1State => {
-  const timestamp = now.toISOString();
-  const fundBalance = calculateFundBalance(state, eventId);
-  let remainingFund = fundBalance;
-  const budgetItemsById = new Map(getEventBudgetItems(state, eventId).map((item) => [item.id, item]));
-  const appliedInputs: SavingsAllocationInput[] = [];
-
-  inputs.forEach((input) => {
-    const item = budgetItemsById.get(input.budgetItemId);
-    if (!item || input.amount <= 0 || remainingFund <= 0) return;
-
-    const cappedAmount = Math.min(input.amount, calculateItemBalance(item), remainingFund);
-    if (cappedAmount <= 0) return;
-
-    appliedInputs.push({ budgetItemId: input.budgetItemId, amount: cappedAmount });
-    budgetItemsById.set(input.budgetItemId, {
-      ...item,
-      depositPaid: item.depositPaid + cappedAmount,
-      updatedAt: timestamp,
-    });
-    remainingFund -= cappedAmount;
-  });
-
-  if (!appliedInputs.length) return state;
-
-  const allocations: FarhaPhase1SavingsAllocation[] = appliedInputs.map((input, index) => ({
-    id: createId(`savings-allocation-${index}`, now),
-    eventId,
-    budgetItemId: input.budgetItemId,
-    amount: input.amount,
-    date: timestamp.slice(0, 10),
-    createdAt: timestamp,
-  }));
-
-  return {
+  const task = getTaskById(state, taskId);
+  const nextState = {
     ...state,
-    budgetItems: state.budgetItems.map((item) => budgetItemsById.get(item.id) ?? item),
-    savingsAllocations: [...state.savingsAllocations, ...allocations],
-    updatedAt: timestamp,
+    tasks: state.tasks.filter((candidate) => candidate.id !== taskId),
+    scheduledNotifications: state.scheduledNotifications.filter(
+      (notification) => notification.taskId !== taskId,
+    ),
+    updatedAt: now.toISOString(),
   };
+
+  return task
+    ? { ...nextState, scheduledNotifications: refreshTaskNotifications(nextState, task.occasionId, now) }
+    : nextState;
 };
-
-export const upsertChecklistItem = (
-  state: FarhaPhase1State,
-  draft: ChecklistItemDraft,
-  now = new Date(),
-): FarhaPhase1State => {
-  const timestamp = now.toISOString();
-  const normalizedDraft = {
-    eventId: draft.eventId,
-    categoryId: normalizeOptionalText(draft.categoryId),
-    title: draft.title.trim(),
-    dueDate: normalizeOptionalText(draft.dueDate),
-    notes: normalizeOptionalText(draft.notes),
-  };
-
-  const event = getEventById(state, draft.eventId);
-  if (!event) return state;
-
-  const withoutOldNotification = draft.id
-    ? state.scheduledNotifications.filter((notification) => notification.checklistItemId !== draft.id)
-    : state.scheduledNotifications;
-
-  if (draft.id) {
-    const checklistItems = state.checklistItems.map((item) =>
-      item.id === draft.id
-        ? {
-            ...item,
-            ...normalizedDraft,
-            source: item.source,
-            status: item.status,
-            titleKey: undefined,
-            updatedAt: timestamp,
-          }
-        : item,
-    );
-    const updatedItem = checklistItems.find((item) => item.id === draft.id);
-
-    return {
-      ...state,
-      checklistItems,
-      scheduledNotifications: updatedItem && state.notificationsEnabled
-        ? [
-            ...withoutOldNotification,
-            ...createNotificationForChecklistItem(event, updatedItem, now),
-          ]
-        : withoutOldNotification,
-      updatedAt: timestamp,
-    };
-  }
-
-  const item: FarhaPhase1ChecklistItem = {
-    id: createId('checklist-item', now),
-    ...normalizedDraft,
-    status: 'pending',
-    source: 'custom',
-    createdAt: timestamp,
-    updatedAt: timestamp,
-  };
-
-  return {
-    ...state,
-    checklistItems: [...state.checklistItems, item],
-    scheduledNotifications: state.notificationsEnabled
-      ? [
-          ...state.scheduledNotifications,
-          ...createNotificationForChecklistItem(event, item, now),
-        ]
-      : state.scheduledNotifications,
-    updatedAt: timestamp,
-  };
-};
-
-export const setChecklistStatus = (
-  state: FarhaPhase1State,
-  itemId: string,
-  status: ChecklistStatus,
-  now = new Date(),
-): FarhaPhase1State => ({
-  ...state,
-  checklistItems: state.checklistItems.map((item) =>
-    item.id === itemId
-      ? { ...item, status, updatedAt: now.toISOString() }
-      : item,
-  ),
-  scheduledNotifications: status === 'pending'
-    ? state.scheduledNotifications
-    : state.scheduledNotifications.filter(
-        (notification) => notification.checklistItemId !== itemId,
-      ),
-  updatedAt: now.toISOString(),
-});
-
-export const deleteChecklistItem = (
-  state: FarhaPhase1State,
-  itemId: string,
-  now = new Date(),
-): FarhaPhase1State => ({
-  ...state,
-  checklistItems: state.checklistItems.filter((item) => item.id !== itemId),
-  scheduledNotifications: state.scheduledNotifications.filter(
-    (notification) => notification.checklistItemId !== itemId,
-  ),
-  updatedAt: now.toISOString(),
-});
 
 export const setProStatus = (
   state: FarhaPhase1State,
@@ -567,126 +363,78 @@ export const setNotificationsEnabled = (
   enabled: boolean,
   now = new Date(),
 ): FarhaPhase1State => {
-  if (!enabled) {
-    return {
-      ...state,
-      notificationsEnabled: false,
-      scheduledNotifications: [],
-      updatedAt: now.toISOString(),
-    };
-  }
+  const nextState = {
+    ...state,
+    notificationsEnabled: enabled,
+    scheduledNotifications: [],
+    updatedAt: now.toISOString(),
+  };
+
+  if (!enabled) return nextState;
 
   return {
-    ...state,
-    notificationsEnabled: true,
-    scheduledNotifications: state.checklistItems.flatMap((item) => {
-      const event = getEventById(state, item.eventId);
-      return event ? createNotificationForChecklistItem(event, item, now) : [];
-    }),
-    updatedAt: now.toISOString(),
+    ...nextState,
+    scheduledNotifications: state.occasions.flatMap((occasion) =>
+      refreshTaskNotifications(nextState, occasion.id, now),
+    ),
   };
 };
 
 export const clearAllPhase1Data = (now = new Date()): FarhaPhase1State =>
   createInitialPhase1State(now);
 
-export const getEventById = (
+export const getOccasionById = (
   state: FarhaPhase1State,
-  eventId?: string,
-): FarhaPhase1Event | undefined =>
-  state.events.find((event) => event.id === eventId);
+  occasionId?: string,
+): FarhaPhase1Occasion | undefined =>
+  state.occasions.find((occasion) => occasion.id === occasionId);
+
+export const getEventById = getOccasionById;
 
 export const getActiveEvent = (state: FarhaPhase1State): FarhaPhase1Event | undefined =>
-  getEventById(state, state.activeEventId) ?? state.events[0];
+  getOccasionById(state, state.activeOccasionId) ?? state.occasions[0];
 
-export const getEventCategories = (
+export const getEventTasks = (
   state: FarhaPhase1State,
-  eventId?: string,
-): FarhaPhase1BudgetCategory[] =>
-  state.budgetCategories.filter((category) => category.eventId === eventId);
+  occasionId?: string,
+): FarhaPhase1Task[] =>
+  state.tasks
+    .filter((task) => task.occasionId === occasionId)
+    .sort(compareTasks);
 
-export const getCategoryById = (
+export const getTaskById = (
   state: FarhaPhase1State,
-  categoryId?: string,
-): FarhaPhase1BudgetCategory | undefined =>
-  state.budgetCategories.find((category) => category.id === categoryId);
+  taskId?: string,
+): FarhaPhase1Task | undefined =>
+  state.tasks.find((task) => task.id === taskId);
 
-export const getCategoryItems = (
-  state: FarhaPhase1State,
-  categoryId?: string,
-): FarhaPhase1BudgetItem[] =>
-  state.budgetItems.filter((item) => item.categoryId === categoryId);
+export const calculateTaskBalance = (
+  task: Pick<FarhaPhase1Task, 'plannedCost' | 'actualCost' | 'depositPaid'>,
+): number =>
+  Math.max(getTaskActualBase(task) - task.depositPaid, 0);
 
-export const getEventBudgetItems = (
-  state: FarhaPhase1State,
-  eventId?: string,
-): FarhaPhase1BudgetItem[] => {
-  const categoryIds = new Set(getEventCategories(state, eventId).map((category) => category.id));
-  return state.budgetItems.filter((item) => categoryIds.has(item.categoryId));
-};
+export const getTaskActualBase = (
+  task: Pick<FarhaPhase1Task, 'plannedCost' | 'actualCost'>,
+): number => task.actualCost ?? task.plannedCost ?? 0;
 
-export const getBudgetItemById = (
-  state: FarhaPhase1State,
-  itemId?: string,
-): FarhaPhase1BudgetItem | undefined =>
-  state.budgetItems.find((item) => item.id === itemId);
-
-export const getEventChecklistItems = (
-  state: FarhaPhase1State,
-  eventId?: string,
-): FarhaPhase1ChecklistItem[] =>
-  state.checklistItems
-    .filter((item) => item.eventId === eventId)
-    .sort(compareChecklistItems);
-
-export const getChecklistItemById = (
-  state: FarhaPhase1State,
-  itemId?: string,
-): FarhaPhase1ChecklistItem | undefined =>
-  state.checklistItems.find((item) => item.id === itemId);
-
-export const getSavingsContributionById = (
-  state: FarhaPhase1State,
-  contributionId?: string,
-): FarhaPhase1SavingsContribution | undefined =>
-  state.savingsContributions.find((contribution) => contribution.id === contributionId);
-
-export const getEventSavingsContributions = (
-  state: FarhaPhase1State,
-  eventId?: string,
-): FarhaPhase1SavingsContribution[] =>
-  state.savingsContributions
-    .filter((contribution) => contribution.eventId === eventId)
-    .sort((first, second) =>
-      `${second.date}-${second.createdAt}`.localeCompare(`${first.date}-${first.createdAt}`),
-    );
-
-export const getEventSavingsAllocations = (
-  state: FarhaPhase1State,
-  eventId?: string,
-): FarhaPhase1SavingsAllocation[] =>
-  state.savingsAllocations.filter((allocation) => allocation.eventId === eventId);
-
-export const calculateItemBalance = (item: Pick<FarhaPhase1BudgetItem, 'plannedCost' | 'actualCost' | 'depositPaid'>): number =>
-  getBudgetActualBase(item) - item.depositPaid;
-
-export const getBudgetActualBase = (
-  item: Pick<FarhaPhase1BudgetItem, 'plannedCost' | 'actualCost'>,
-): number => item.actualCost ?? item.plannedCost;
-
-export const getBudgetItemStatus = (
-  item: Pick<FarhaPhase1BudgetItem, 'plannedCost' | 'actualCost' | 'depositPaid'>,
-): BudgetItemPaymentStatus => {
-  if (item.depositPaid <= 0) return 'unpaid';
-  if (calculateItemBalance(item) <= 0) return 'paid';
+export const getTaskPaymentStatus = (
+  task: Pick<FarhaPhase1Task, 'plannedCost' | 'actualCost' | 'depositPaid'>,
+): TaskPaymentStatus => {
+  if (!hasTaskCost(task) || task.depositPaid <= 0) return 'unpaid';
+  if (calculateTaskBalance(task) <= 0) return 'paid';
   return 'partial';
 };
 
-export const calculateBudgetTotals = (items: FarhaPhase1BudgetItem[]): BudgetTotals => {
-  const plannedTotal = sumBy(items, (item) => item.plannedCost);
-  const actualTotal = sumBy(items, getBudgetActualBase);
-  const depositTotal = sumBy(items, (item) => item.depositPaid);
-  const balanceTotal = sumBy(items, calculateItemBalance);
+export const getBudgetItemStatus = getTaskPaymentStatus;
+export const calculateItemBalance = calculateTaskBalance;
+export const getBudgetActualBase = getTaskActualBase;
+
+export const calculateBudgetTotals = (tasks: FarhaPhase1Task[]): BudgetTotals => {
+  const costedTasks = tasks.filter(hasTaskCost);
+  const plannedTotal = sumBy(costedTasks, (task) => task.plannedCost ?? 0);
+  const actualTotal = sumBy(costedTasks, getTaskActualBase);
+  const depositTotal = sumBy(costedTasks, (task) => task.depositPaid);
+  const balanceTotal = sumBy(costedTasks, calculateTaskBalance);
 
   return {
     plannedTotal,
@@ -697,83 +445,31 @@ export const calculateBudgetTotals = (items: FarhaPhase1BudgetItem[]): BudgetTot
   };
 };
 
-export const calculateFundBalance = (
-  state: FarhaPhase1State,
-  eventId?: string,
-): number => {
-  const contributions = sumBy(getEventSavingsContributions(state, eventId), (item) => item.amount);
-  const allocations = sumBy(getEventSavingsAllocations(state, eventId), (item) => item.amount);
-  return Math.max(contributions - allocations, 0);
-};
-
-export const getContributedThisMonth = (
-  state: FarhaPhase1State,
-  eventId?: string,
-  now = new Date(),
-): number => {
-  const monthPrefix = now.toISOString().slice(0, 7);
-  return sumBy(
-    getEventSavingsContributions(state, eventId).filter((item) => item.date.startsWith(monthPrefix)),
-    (item) => item.amount,
-  );
-};
-
-export const getSavingsSummary = (
-  state: FarhaPhase1State,
-  eventId?: string,
-  now = new Date(),
-): SavingsSummary => {
-  const event = getEventById(state, eventId);
-  const monthlyGoal = event?.savingsMonthlyGoal;
-  const contributedThisMonth = getContributedThisMonth(state, eventId, now);
-
-  return {
-    balance: calculateFundBalance(state, eventId),
-    contributedThisMonth,
-    monthlyGoal,
-    monthlyProgress: monthlyGoal ? Math.min(contributedThisMonth / monthlyGoal, 1) : 0,
-  };
-};
-
-export const getAllocatableBudgetItems = (
-  state: FarhaPhase1State,
-  eventId?: string,
-): FarhaPhase1BudgetItem[] =>
-  getEventBudgetItems(state, eventId)
-    .filter((item) => calculateItemBalance(item) > 0)
-    .sort(compareBudgetItemsForAllocation);
-
-export const suggestSavingsAllocations = (
-  state: FarhaPhase1State,
-  eventId: string,
-): SavingsAllocationInput[] => {
-  let remainingFund = calculateFundBalance(state, eventId);
-  if (remainingFund <= 0) return [];
-
-  return getAllocatableBudgetItems(state, eventId).flatMap((item) => {
-    if (remainingFund <= 0) return [];
-
-    const amount = Math.min(calculateItemBalance(item), remainingFund);
-    remainingFund -= amount;
-    return amount > 0 ? [{ budgetItemId: item.id, amount }] : [];
-  });
-};
-
-export const getChecklistSummary = (
-  items: FarhaPhase1ChecklistItem[],
-): ChecklistSummary => {
-  const actionableItems = items.filter((item) => item.status !== 'skipped');
-  const doneCount = actionableItems.filter((item) => item.status === 'done').length;
+export const getTaskSummary = (tasks: FarhaPhase1Task[]): TaskSummary => {
+  const actionableItems = tasks.filter((task) => task.status !== 'skipped');
+  const doneCount = actionableItems.filter((task) => task.status === 'done').length;
   const nextPending = actionableItems
-    .filter((item) => item.status === 'pending')
-    .sort(compareChecklistItems)[0];
+    .filter((task) => task.status === 'pending')
+    .sort(compareTasks)[0];
 
   return {
     doneCount,
     actionableTotal: actionableItems.length,
-    totalCount: items.length,
-    skippedCount: items.length - actionableItems.length,
+    totalCount: tasks.length,
+    skippedCount: tasks.length - actionableItems.length,
     nextPending,
+    totals: calculateBudgetTotals(tasks),
+  };
+};
+
+export const getChecklistSummary = (tasks: FarhaPhase1Task[]): ChecklistSummary => {
+  const summary = getTaskSummary(tasks);
+  return {
+    doneCount: summary.doneCount,
+    actionableTotal: summary.actionableTotal,
+    totalCount: summary.totalCount,
+    skippedCount: summary.skippedCount,
+    nextPending: summary.nextPending,
   };
 };
 
@@ -781,11 +477,41 @@ export const validateEventDraft = (
   draft: EventFormDraft,
 ): ValidationResult<'title' | 'date'> => {
   const errors: ValidationResult<'title' | 'date'>['errors'] = {};
-
   if (!draft.title.trim()) errors.title = 'required';
   if (!isValidDate(draft.date)) errors.date = 'required';
-
   return { isValid: Object.keys(errors).length === 0, errors, warnings: {} };
+};
+
+export const validateTaskDraft = (
+  draft: TaskDraft,
+): ValidationResult<'title' | 'plannedCost' | 'actualCost' | 'depositPaid' | 'dueDate' | 'monthlyAmount' | 'nextDueDate'> => {
+  const errors: ValidationResult<'title' | 'plannedCost' | 'actualCost' | 'depositPaid' | 'dueDate' | 'monthlyAmount' | 'nextDueDate'>['errors'] = {};
+  const warnings: ValidationResult<'title' | 'plannedCost' | 'actualCost' | 'depositPaid' | 'dueDate' | 'monthlyAmount' | 'nextDueDate'>['warnings'] = {};
+
+  if (!draft.title.trim()) errors.title = 'required';
+  if (draft.dueDate && !isValidDate(draft.dueDate)) errors.dueDate = 'invalidDate';
+  if (typeof draft.plannedCost === 'number' && !isValidCurrency(draft.plannedCost)) {
+    errors.plannedCost = 'invalidAmount';
+  }
+  if (typeof draft.actualCost === 'number' && !isValidCurrency(draft.actualCost)) {
+    errors.actualCost = 'invalidAmount';
+  }
+  if (typeof draft.depositPaid === 'number' && !isValidCurrency(draft.depositPaid)) {
+    errors.depositPaid = 'invalidAmount';
+  }
+  if (draft.paymentPlan) {
+    if (!isValidCurrency(draft.paymentPlan.monthlyAmount) || draft.paymentPlan.monthlyAmount <= 0) {
+      errors.monthlyAmount = 'invalidAmount';
+    }
+    if (!isValidDate(draft.paymentPlan.nextDueDate)) errors.nextDueDate = 'invalidDate';
+  }
+
+  const base = typeof draft.actualCost === 'number' ? draft.actualCost : draft.plannedCost;
+  if (typeof base === 'number' && typeof draft.depositPaid === 'number' && draft.depositPaid > base) {
+    warnings.depositPaid = 'depositOverTotal';
+  }
+
+  return { isValid: Object.keys(errors).length === 0, errors, warnings };
 };
 
 export const validateBudgetCategoryDraft = (
@@ -799,22 +525,24 @@ export const validateBudgetCategoryDraft = (
 export const validateBudgetItemDraft = (
   draft: BudgetItemDraft,
 ): ValidationResult<'name' | 'plannedCost' | 'actualCost' | 'depositPaid'> => {
-  const errors: ValidationResult<'name' | 'plannedCost' | 'actualCost' | 'depositPaid'>['errors'] = {};
-  const warnings: ValidationResult<'name' | 'plannedCost' | 'actualCost' | 'depositPaid'>['warnings'] = {};
-
-  if (!draft.name.trim()) errors.name = 'required';
-  if (!isValidCurrency(draft.plannedCost)) errors.plannedCost = 'invalidAmount';
-  if (typeof draft.actualCost === 'number' && !isValidCurrency(draft.actualCost)) {
-    errors.actualCost = 'invalidAmount';
-  }
-  if (!isValidCurrency(draft.depositPaid)) errors.depositPaid = 'invalidAmount';
-
-  const base = typeof draft.actualCost === 'number' ? draft.actualCost : draft.plannedCost;
-  if (Number.isFinite(base) && draft.depositPaid > base) {
-    warnings.depositPaid = 'depositOverTotal';
-  }
-
-  return { isValid: Object.keys(errors).length === 0, errors, warnings };
+  const taskValidation = validateTaskDraft({
+    occasionId: '',
+    title: draft.name,
+    status: 'pending',
+    plannedCost: draft.plannedCost,
+    actualCost: draft.actualCost,
+    depositPaid: draft.depositPaid,
+  });
+  return {
+    isValid: taskValidation.isValid,
+    errors: {
+      name: taskValidation.errors.title,
+      plannedCost: taskValidation.errors.plannedCost,
+      actualCost: taskValidation.errors.actualCost,
+      depositPaid: taskValidation.errors.depositPaid,
+    },
+    warnings: { depositPaid: taskValidation.warnings.depositPaid },
+  };
 };
 
 export const validateChecklistItemDraft = (
@@ -830,10 +558,8 @@ export const validateSavingsContributionDraft = (
   draft: SavingsContributionDraft,
 ): ValidationResult<'amount' | 'date'> => {
   const errors: ValidationResult<'amount' | 'date'>['errors'] = {};
-
   if (!isValidCurrency(draft.amount) || draft.amount <= 0) errors.amount = 'invalidAmount';
   if (!isValidDate(draft.date)) errors.date = 'invalidDate';
-
   return { isValid: Object.keys(errors).length === 0, errors, warnings: {} };
 };
 
@@ -855,158 +581,364 @@ export const isOverdue = (dueDate?: string, now = new Date()): boolean =>
 
 export const createSharePayload = (
   state: FarhaPhase1State,
-  eventId: string,
+  occasionId: string,
 ): string => {
-  const event = getEventById(state, eventId);
-  if (!event) return 'Farha';
+  const occasion = getOccasionById(state, occasionId);
+  if (!occasion) return 'Farha';
 
-  const budgetTotals = calculateBudgetTotals(getEventBudgetItems(state, event.id));
-  const checklistSummary = getChecklistSummary(getEventChecklistItems(state, event.id));
+  const tasks = getEventTasks(state, occasion.id);
+  const totals = calculateBudgetTotals(tasks);
+  const summary = getTaskSummary(tasks);
 
   return [
-    `${event.title} - ${event.date}`,
-    `Budget planned: ${formatCurrency(budgetTotals.plannedTotal)}`,
-    `Budget actual: ${formatCurrency(budgetTotals.actualTotal)}`,
-    `Checklist: ${checklistSummary.doneCount}/${checklistSummary.actionableTotal}`,
+    `${occasion.title} - ${occasion.date}`,
+    `Tasks: ${summary.doneCount}/${summary.actionableTotal}`,
+    `Planned: ${formatCurrency(totals.plannedTotal)}`,
+    `Actual: ${formatCurrency(totals.actualTotal)}`,
+    `Remaining: ${formatCurrency(totals.balanceTotal)}`,
     'Made with Farha',
   ].join('\n');
 };
 
-const seedBudgetCategories = (
-  eventId: string,
-  now: Date,
-): FarhaPhase1BudgetCategory[] => {
-  const timestamp = now.toISOString();
+export const addBudgetCategory = (state: FarhaPhase1State): FarhaPhase1State => state;
+export const deleteBudgetCategoryCascade = (state: FarhaPhase1State): FarhaPhase1State => state;
+export const upsertPhase1BudgetItem = (
+  state: FarhaPhase1State,
+  draft: BudgetItemDraft,
+  now = new Date(),
+): FarhaPhase1State => {
+  const category = getCategoryById(state, draft.categoryId);
+  return upsertTask(state, {
+    id: draft.id,
+    occasionId: category?.eventId ?? state.activeOccasionId ?? '',
+    category: category?.key,
+    customCategory: category?.customName,
+    title: draft.name,
+    status: 'pending',
+    plannedCost: draft.plannedCost,
+    actualCost: draft.actualCost,
+    depositPaid: draft.depositPaid,
+    dueDate: draft.dueDate,
+    notes: draft.notes,
+  }, now);
+};
+export const deletePhase1BudgetItem = deleteTask;
+export const upsertChecklistItem = (
+  state: FarhaPhase1State,
+  draft: ChecklistItemDraft,
+  now = new Date(),
+): FarhaPhase1State => upsertTask(state, {
+  id: draft.id,
+  occasionId: draft.eventId,
+  title: draft.title,
+  category: getCategoryById(state, draft.categoryId)?.key,
+  dueDate: draft.dueDate,
+  notes: draft.notes,
+  status: draft.id ? getTaskById(state, draft.id)?.status ?? 'pending' : 'pending',
+}, now);
+export const setChecklistStatus = setTaskStatus;
+export const deleteChecklistItem = deleteTask;
+export const upsertSavingsContribution = (state: FarhaPhase1State): FarhaPhase1State => state;
+export const deleteSavingsContribution = (state: FarhaPhase1State): FarhaPhase1State => state;
+export const setSavingsMonthlyGoal = (state: FarhaPhase1State): FarhaPhase1State => state;
+export const confirmSavingsAllocations = (state: FarhaPhase1State): FarhaPhase1State => state;
+export const calculateFundBalance = (): number => 0;
+export const getContributedThisMonth = (): number => 0;
+export const getSavingsSummary = (): SavingsSummary => ({
+  balance: 0,
+  contributedThisMonth: 0,
+  monthlyProgress: 0,
+});
+export const getAllocatableBudgetItems = (): FarhaPhase1BudgetItem[] => [];
+export const suggestSavingsAllocations = (): SavingsAllocationInput[] => [];
+export const getEventSavingsContributions = () => [];
+export const getEventSavingsAllocations = () => [];
+export const getSavingsContributionById = (
+  _state?: FarhaPhase1State,
+  _contributionId?: string,
+): undefined => undefined;
 
-  return defaultPhase1BudgetCategories.map((category, index) => ({
-    id: createId(`${eventId}-category-${category.key}-${index}`, now),
-    eventId,
-    key: category.key,
-    nameKey: category.nameKey,
-    isDefault: true,
-    createdAt: timestamp,
-    updatedAt: timestamp,
-  }));
+export const getEventCategories = (
+  state: FarhaPhase1State,
+  eventId?: string,
+): FarhaPhase1BudgetCategory[] => defaultPhase1BudgetCategories.map((category) => ({
+  id: `${eventId ?? state.activeOccasionId ?? 'occasion'}-${category.key}`,
+  eventId: eventId ?? state.activeOccasionId ?? '',
+  key: category.key,
+  nameKey: category.nameKey,
+  isDefault: true,
+  createdAt: state.updatedAt,
+  updatedAt: state.updatedAt,
+}));
+
+export const getCategoryById = (
+  state: FarhaPhase1State,
+  categoryId?: string,
+): FarhaPhase1BudgetCategory | undefined =>
+  getEventCategories(state, state.activeOccasionId).find((category) => category.id === categoryId);
+
+export const getCategoryItems = (
+  state: FarhaPhase1State,
+  categoryId?: string,
+): FarhaPhase1Task[] => {
+  const category = getCategoryById(state, categoryId);
+  if (!category) return [];
+  return getEventTasks(state, category.eventId).filter((task) => task.category === category.key);
 };
 
-const seedChecklistItems = (
-  event: FarhaPhase1Event,
-  _notificationsEnabled: boolean,
-  now: Date,
-): FarhaPhase1ChecklistItem[] => {
+export const getEventBudgetItems = getEventTasks;
+export const getBudgetItemById = getTaskById;
+export const getEventChecklistItems = getEventTasks;
+export const getChecklistItemById = getTaskById;
+
+const seedTasks = (occasion: FarhaPhase1Occasion, now: Date): FarhaPhase1Task[] => {
   const timestamp = now.toISOString();
-  const templates = standardChecklistTemplates[event.type] ?? [];
+  const templates = standardChecklistTemplates[occasion.type] ?? [];
 
   return templates.map((template, index) => ({
-    id: createId(`${event.id}-checklist-${index}`, now),
-    eventId: event.id,
+    id: createId(`${occasion.id}-task-${index}`, now),
+    occasionId: occasion.id,
     title: template.titleKey,
     titleKey: template.titleKey,
-    dueDate: subtractDays(event.date, template.offsetDaysBeforeEvent),
-    offsetDaysBeforeEvent: template.offsetDaysBeforeEvent,
+    category: inferCategoryFromTitleKey(template.titleKey),
+    dueDate: subtractDays(occasion.date, template.offsetDaysBeforeEvent),
+    offsetDaysBeforeOccasion: template.offsetDaysBeforeEvent,
     status: 'pending',
     source: 'template',
+    depositPaid: 0,
     createdAt: timestamp,
     updatedAt: timestamp,
   }));
 };
 
-const createNotificationForChecklistItem = (
-  event: FarhaPhase1Event,
-  item: FarhaPhase1ChecklistItem,
+const refreshTaskNotifications = (
+  state: FarhaPhase1State,
+  occasionId: string,
   now: Date,
 ): FarhaPhase1ScheduledNotification[] => {
-  if (item.status !== 'pending' || !item.dueDate) return [];
-  if (differenceInCalendarDays(item.dueDate, now.toISOString().slice(0, 10)) < 0) return [];
+  const retained = state.scheduledNotifications.filter(
+    (notification) => notification.occasionId !== occasionId,
+  );
+  if (!state.notificationsEnabled) return retained;
 
-  return [{
-    id: createId(`notification-${item.id}`, now),
-    eventId: event.id,
-    checklistItemId: item.id,
-    fireAt: `${item.dueDate}T09:00:00`,
-    title: item.titleKey ?? item.title,
-  }];
+  const futureNotifications = getEventTasks(state, occasionId).flatMap((task) =>
+    createNotificationForTask(task, now),
+  );
+  return [...retained, ...futureNotifications];
 };
 
-const normalizeBudgetDraft = (draft: BudgetItemDraft): Omit<FarhaPhase1BudgetItem, 'id' | 'createdAt' | 'updatedAt'> => ({
-  categoryId: draft.categoryId,
-  name: draft.name.trim(),
-  plannedCost: draft.plannedCost,
-  actualCost: draft.actualCost,
-  depositPaid: draft.depositPaid,
+const createNotificationForTask = (
+  task: FarhaPhase1Task,
+  now: Date,
+): FarhaPhase1ScheduledNotification[] => {
+  const today = now.toISOString().slice(0, 10);
+  const reminders: FarhaPhase1ScheduledNotification[] = [];
+
+  if (task.status === 'pending' && task.dueDate && differenceInCalendarDays(task.dueDate, today) >= 0) {
+    reminders.push({
+      id: createId(`notification-${task.id}`, now),
+      occasionId: task.occasionId,
+      taskId: task.id,
+      fireAt: `${task.dueDate}T09:00:00`,
+      title: task.titleKey ?? task.title,
+    });
+  }
+
+  if (
+    task.paymentPlan &&
+    calculateTaskBalance(task) > 0 &&
+    differenceInCalendarDays(task.paymentPlan.nextDueDate, today) >= 0
+  ) {
+    reminders.push({
+      id: createId(`notification-payment-${task.id}`, now),
+      occasionId: task.occasionId,
+      taskId: task.id,
+      fireAt: `${task.paymentPlan.nextDueDate}T18:00:00`,
+      title: 'farha.phase1.tasks.paymentReminder',
+    });
+  }
+
+  return reminders;
+};
+
+const normalizeTaskDraft = (
+  draft: TaskDraft,
+): Omit<FarhaPhase1Task, 'id' | 'source' | 'createdAt' | 'updatedAt'> => ({
+  occasionId: draft.occasionId,
+  title: draft.title.trim(),
+  category: draft.category,
+  customCategory: normalizeOptionalText(draft.customCategory),
   dueDate: normalizeOptionalText(draft.dueDate),
   notes: normalizeOptionalText(draft.notes),
+  status: draft.status,
+  plannedCost: draft.plannedCost,
+  actualCost: draft.actualCost,
+  depositPaid: draft.depositPaid ?? 0,
+  paymentPlan: draft.paymentPlan,
 });
+
+const migrateLegacyTasks = (
+  state: LegacyPhase1State,
+  occasions: FarhaPhase1Occasion[],
+  now: Date,
+): FarhaPhase1Task[] => {
+  const timestamp = state.updatedAt ?? now.toISOString();
+  const categoriesById = new Map((state.budgetCategories ?? []).map((category) => [category.id, category]));
+  const occasionIds = new Set(occasions.map((occasion) => occasion.id));
+  const checklistTasks = (state.checklistItems ?? []).flatMap((item) => {
+    if (!item.eventId) return [];
+    if (!occasionIds.has(item.eventId)) return [];
+    const category = item.categoryId ? categoriesById.get(item.categoryId) : undefined;
+    const linkedBudget = (state.budgetItems ?? []).find((budgetItem) =>
+      item.categoryId && budgetItem.categoryId === item.categoryId &&
+      normalizeSearchTitle(budgetItem.name ?? budgetItem.title) === normalizeSearchTitle(item.title),
+    );
+
+    return [{
+      id: item.id,
+      occasionId: item.eventId,
+      title: item.title,
+      titleKey: item.titleKey,
+      category: category?.key,
+      customCategory: category?.customName,
+      dueDate: item.dueDate,
+      offsetDaysBeforeOccasion: item.offsetDaysBeforeEvent,
+      status: item.status,
+      source: item.source,
+      plannedCost: linkedBudget?.plannedCost,
+      actualCost: linkedBudget?.actualCost,
+      depositPaid: linkedBudget?.depositPaid ?? 0,
+      notes: item.notes ?? linkedBudget?.notes,
+      createdAt: item.createdAt,
+      updatedAt: item.updatedAt,
+    }];
+  });
+  const taskIds = new Set(checklistTasks.map((task) => task.id));
+  const budgetTasks = (state.budgetItems ?? []).flatMap((item) => {
+    if (!item.categoryId) return [];
+    const category = categoriesById.get(item.categoryId);
+    if (!category || !occasionIds.has(category.eventId)) return [];
+    const alreadyMerged = checklistTasks.some((task) =>
+      task.category === category.key && normalizeSearchTitle(task.title) === normalizeSearchTitle(item.name ?? item.title),
+    );
+    if (alreadyMerged) return [];
+
+    return [{
+      id: taskIds.has(item.id) ? createId(`task-${item.id}`, now) : item.id,
+      occasionId: category.eventId,
+      title: item.name ?? item.title,
+      category: category.key,
+      customCategory: category.customName,
+      dueDate: item.dueDate,
+      status: 'pending' as const,
+      source: 'custom' as const,
+      plannedCost: item.plannedCost,
+      actualCost: item.actualCost,
+      depositPaid: item.depositPaid,
+      notes: item.notes,
+      createdAt: item.createdAt,
+      updatedAt: item.updatedAt,
+    }];
+  });
+
+  return normalizeTasks([...checklistTasks, ...budgetTasks], occasions).map((task) => ({
+    ...task,
+    updatedAt: task.updatedAt ?? timestamp,
+  }));
+};
+
+const normalizeOccasions = (occasions: FarhaPhase1Occasion[]): FarhaPhase1Occasion[] =>
+  occasions.map((occasion) => ({
+    ...occasion,
+    type: phase1EventTypes.includes(occasion.type) ? occasion.type : 'other',
+  }));
+
+const normalizeTasks = (
+  tasks: FarhaPhase1Task[],
+  occasions: FarhaPhase1Occasion[],
+): FarhaPhase1Task[] => {
+  const occasionIds = new Set(occasions.map((occasion) => occasion.id));
+  return tasks
+    .filter((task) => occasionIds.has(task.occasionId))
+    .map((task) => ({
+      ...task,
+      depositPaid: task.depositPaid ?? 0,
+      status: task.status ?? 'pending',
+      source: task.source ?? 'custom',
+    }));
+};
+
+const normalizeNotifications = (
+  notifications: LegacyPhase1State['scheduledNotifications'],
+  tasks: FarhaPhase1Task[],
+): FarhaPhase1ScheduledNotification[] => {
+  const taskById = new Map(tasks.map((task) => [task.id, task]));
+  return (notifications ?? []).flatMap((notification) => {
+    const taskId = 'taskId' in notification ? notification.taskId : notification.checklistItemId;
+    const task = taskById.get(taskId);
+    if (!task) return [];
+    return [{
+      id: notification.id,
+      occasionId: task.occasionId,
+      taskId,
+      fireAt: notification.fireAt,
+      title: notification.title,
+    }];
+  });
+};
+
+const normalizeActiveOccasionId = (
+  requestedId: string | undefined,
+  occasions: FarhaPhase1Occasion[],
+): string | undefined =>
+  requestedId && occasions.some((occasion) => occasion.id === requestedId)
+    ? requestedId
+    : occasions[0]?.id;
+
+const hasTaskCost = (
+  task: Pick<FarhaPhase1Task, 'plannedCost' | 'actualCost' | 'depositPaid'>,
+): boolean =>
+  typeof task.plannedCost === 'number' ||
+  typeof task.actualCost === 'number' ||
+  task.depositPaid > 0;
+
+const inferCategoryFromTitleKey = (titleKey: string): FarhaPhase1TaskCategoryKey | undefined => {
+  if (titleKey.includes('Venue')) return 'venue';
+  if (titleKey.includes('Hotel')) return 'hotel';
+  if (titleKey.includes('Dress')) return 'dress';
+  if (titleKey.includes('Suit')) return 'groomSuit';
+  if (titleKey.includes('Makeup')) return 'makeup';
+  if (titleKey.includes('Barber')) return 'grooming';
+  if (titleKey.includes('Gold') || titleKey.includes('Rings')) return 'gold';
+  if (titleKey.includes('Catering')) return 'catering';
+  if (titleKey.includes('Photo')) return 'photoVideo';
+  if (titleKey.includes('Entertainment')) return 'entertainment';
+  if (titleKey.includes('Gift')) return 'gifts';
+  return undefined;
+};
 
 const shouldRecordInterstitial = (state: FarhaPhase1State, now: Date): boolean => {
   if (state.isPro) return false;
   if (!state.lastInterstitialShownAt) return true;
-
   const minutesSinceLast = (now.getTime() - new Date(state.lastInterstitialShownAt).getTime()) / 60000;
   return minutesSinceLast >= 4;
 };
 
-const refreshSavingsGoalNotifications = (
-  state: FarhaPhase1State,
-  eventId: string,
-  now: Date,
-): FarhaPhase1ScheduledNotification[] => {
-  const withoutSavingsReminder = state.scheduledNotifications.filter(
-    (notification) => notification.checklistItemId !== `savings-goal-${eventId}`,
-  );
-  if (!state.notificationsEnabled) return withoutSavingsReminder;
-
-  const summary = getSavingsSummary(state, eventId, now);
-  if (!summary.monthlyGoal || summary.contributedThisMonth >= summary.monthlyGoal) {
-    return withoutSavingsReminder;
-  }
-
-  const reminderDate = getMonthEndReminderDate(now);
-  if (!reminderDate) return withoutSavingsReminder;
-
-  return [
-    ...withoutSavingsReminder,
-    {
-      id: createId(`notification-savings-goal-${eventId}`, now),
-      eventId,
-      checklistItemId: `savings-goal-${eventId}`,
-      fireAt: `${reminderDate}T18:00:00`,
-      title: 'farha.phase1.savings.goalReminder',
-    },
-  ];
-};
-
-const getMonthEndReminderDate = (now: Date): string | undefined => {
-  const date = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0, 12));
-  date.setUTCDate(date.getUTCDate() - 3);
-  const reminder = date.toISOString().slice(0, 10);
-  return differenceInCalendarDays(reminder, now.toISOString().slice(0, 10)) >= 0
-    ? reminder
-    : undefined;
-};
-
-const compareBudgetItemsForAllocation = (
-  first: FarhaPhase1BudgetItem,
-  second: FarhaPhase1BudgetItem,
-): number => {
+const compareTasks = (first: FarhaPhase1Task, second: FarhaPhase1Task): number => {
   const firstDate = first.dueDate ?? '9999-12-31';
   const secondDate = second.dueDate ?? '9999-12-31';
-  const dateCompare = firstDate.localeCompare(secondDate);
-  return dateCompare || first.name.localeCompare(second.name);
-};
-
-const compareChecklistItems = (
-  first: FarhaPhase1ChecklistItem,
-  second: FarhaPhase1ChecklistItem,
-): number => {
-  const firstDate = first.dueDate ?? '9999-12-31';
-  const secondDate = second.dueDate ?? '9999-12-31';
-  return firstDate.localeCompare(secondDate);
+  return firstDate.localeCompare(secondDate) || first.title.localeCompare(second.title);
 };
 
 const subtractDays = (dateString: string, days: number): string => {
   const date = new Date(`${dateString}T12:00:00.000Z`);
   date.setUTCDate(date.getUTCDate() - days);
+  return date.toISOString().slice(0, 10);
+};
+
+const addMonths = (dateString: string, months: number): string => {
+  const date = new Date(`${dateString}T12:00:00.000Z`);
+  date.setUTCMonth(date.getUTCMonth() + months);
   return date.toISOString().slice(0, 10);
 };
 
@@ -1032,8 +964,16 @@ const normalizeOptionalText = (value?: string): string | undefined => {
   return normalized ? normalized : undefined;
 };
 
+const normalizeSearchTitle = (value: string): string =>
+  value.trim().toLocaleLowerCase();
+
 const sumBy = <T>(items: T[], getValue: (item: T) => number): number =>
   items.reduce((total, item) => total + getValue(item), 0);
 
 const createId = (prefix: string, now: Date): string =>
   `${prefix}-${now.getTime()}-${Math.random().toString(36).slice(2, 8)}`;
+
+const _budgetBadgeTypeCheck: BudgetBadgeStatus = 'on';
+const _budgetPaymentTypeCheck: BudgetItemPaymentStatus = 'unpaid';
+void _budgetBadgeTypeCheck;
+void _budgetPaymentTypeCheck;

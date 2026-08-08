@@ -11,7 +11,8 @@ import type { Phase1TranslationFn } from '../../../core/planner/screenTypes';
 export const getScreenEvent = (
   controller: Phase1PlannerController,
 ): FarhaPhase1Event | undefined =>
-  controller.getEventById(controller.route.params?.eventId) ?? controller.activeEvent;
+  controller.getEventById(controller.route.params?.occasionId ?? controller.route.params?.eventId) ??
+  controller.activeEvent;
 
 export const money = (t: Phase1TranslationFn, amount: number): string =>
   `${formatCurrency(amount)} ${t('farha.phase1.currency')}`;

@@ -9,11 +9,6 @@ import { useTheme } from '@dawwar/theme';
 import type { Phase1PlannerController } from '../core/planner/usePhase1Planner';
 import type { Phase1Route, Phase1ScreenName } from '../core/planner/domain/phase1Types';
 import {
-  BudgetItemFormScreen,
-  BudgetItemListScreen,
-} from '../features/budget/screens';
-import { ChecklistItemEditScreen } from '../features/checklist/screens';
-import {
   EventCreateScreen,
   EventEditScreen,
   EventListScreen,
@@ -23,12 +18,7 @@ import {
   OnboardingWelcomeScreen,
   SplashScreen,
 } from '../features/onboarding/screens';
-import { ShareCardPreviewScreen } from '../features/sharing/screens';
-import {
-  SavingsAllocationScreen,
-  SavingsContributionFormScreen,
-  SavingsFundScreen,
-} from '../features/savings/screens';
+import { TaskFormScreen } from '../features/tasks/screens';
 import { FarhaTabs } from './FarhaTabs';
 import { FARHA_ROOT_ROUTES } from './routes';
 import type { FarhaRootParamList } from './types';
@@ -77,16 +67,10 @@ export function FarhaNavigator({ controller }: FarhaNavigatorProps) {
       >
         <RootStack.Screen name={FARHA_ROOT_ROUTES.SPLASH} component={SplashScreen} />
         <RootStack.Screen name={FARHA_ROOT_ROUTES.ONBOARDING} component={OnboardingWelcomeScreen} />
-        <RootStack.Screen name={FARHA_ROOT_ROUTES.EVENT_CREATE} component={EventCreateScreen} />
-        <RootStack.Screen name={FARHA_ROOT_ROUTES.EVENT_LIST} component={EventListScreen} />
-        <RootStack.Screen name={FARHA_ROOT_ROUTES.EVENT_EDIT} component={EventEditScreen} />
-        <RootStack.Screen name={FARHA_ROOT_ROUTES.BUDGET_ITEM_LIST} component={BudgetItemListScreen} />
-        <RootStack.Screen name={FARHA_ROOT_ROUTES.BUDGET_ITEM_FORM} component={BudgetItemFormScreen} />
-        <RootStack.Screen name={FARHA_ROOT_ROUTES.CHECKLIST_ITEM_EDIT} component={ChecklistItemEditScreen} />
-        <RootStack.Screen name={FARHA_ROOT_ROUTES.SAVINGS_FUND} component={SavingsFundScreen} />
-        <RootStack.Screen name={FARHA_ROOT_ROUTES.SAVINGS_CONTRIBUTION_FORM} component={SavingsContributionFormScreen} />
-        <RootStack.Screen name={FARHA_ROOT_ROUTES.SAVINGS_ALLOCATION} component={SavingsAllocationScreen} />
-        <RootStack.Screen name={FARHA_ROOT_ROUTES.SHARE_CARD_PREVIEW} component={ShareCardPreviewScreen} />
+        <RootStack.Screen name={FARHA_ROOT_ROUTES.OCCASION_CREATE} component={EventCreateScreen} />
+        <RootStack.Screen name={FARHA_ROOT_ROUTES.OCCASION_LIST} component={EventListScreen} />
+        <RootStack.Screen name={FARHA_ROOT_ROUTES.OCCASION_EDIT} component={EventEditScreen} />
+        <RootStack.Screen name={FARHA_ROOT_ROUTES.TASK_FORM} component={TaskFormScreen} />
         <RootStack.Screen name={FARHA_ROOT_ROUTES.PRO_UPGRADE} component={ProUpgradeScreen} />
         <RootStack.Screen name={FARHA_ROOT_ROUTES.TABS} component={FarhaTabs} />
       </RootStack.Navigator>
@@ -124,7 +108,7 @@ function applyPhase1Route(
     index: 0,
     routes: [
       {
-        name: route.name as Exclude<Phase1ScreenName, 'EventDashboardScreen' | 'BudgetCategoryListScreen' | 'ChecklistTimelineScreen' | 'SettingsScreen'>,
+        name: route.name as Exclude<Phase1ScreenName, 'OccasionDashboardScreen' | 'TaskListScreen' | 'ShareCardPreviewScreen' | 'SettingsScreen'>,
         params: route.params,
       },
     ],

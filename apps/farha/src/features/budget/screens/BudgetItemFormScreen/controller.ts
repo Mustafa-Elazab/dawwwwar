@@ -99,8 +99,8 @@ function budgetItemToForm(
   }
 
   return {
-    categoryId: item.categoryId,
-    name: item.name,
+    categoryId: item.categoryId ?? category?.id ?? '',
+    name: item.name ?? item.title,
     plannedCost: item.plannedCost ? String(item.plannedCost) : '',
     actualCost: typeof item.actualCost === 'number' ? String(item.actualCost) : '',
     depositPaid: item.depositPaid ? String(item.depositPaid) : '',

@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 
 import {
   calculateBudgetTotals,
-  getChecklistSummary,
+  getTaskSummary,
 } from '../../../../core/planner/domain/phase1Logic';
 import { usePlannerController } from '../../../../core/planner/context/PlannerControllerContext';
 import { getScreenEvent } from '../../../planner/utils/helpers';
@@ -10,35 +10,27 @@ import { getScreenEvent } from '../../../planner/utils/helpers';
 export function useController() {
   const appController = usePlannerController();
   const event = getScreenEvent(appController);
-  const budgetItems = useMemo(
-    () => appController.getEventBudgetItems(event?.id),
+  const tasks = useMemo(
+    () => appController.getEventTasks(event?.id),
     [appController, event?.id],
   );
-  const checklistItems = useMemo(
-    () => appController.getEventChecklistItems(event?.id),
-    [appController, event?.id],
-  );
-  const budgetTotals = useMemo(() => calculateBudgetTotals(budgetItems), [budgetItems]);
+  const budgetTotals = useMemo(() => calculateBudgetTotals(tasks), [tasks]);
   const savingsSummary = useMemo(
     () => appController.getSavingsSummary(event?.id),
     [appController, event?.id],
   );
-  const checklistSummary = useMemo(
-    () => getChecklistSummary(checklistItems),
-    [checklistItems],
-  );
+  const taskSummary = useMemo(() => getTaskSummary(tasks), [tasks]);
 
   return {
     event,
     budgetTotals,
     savingsSummary,
-    checklistSummary,
+    checklistSummary: taskSummary,
+    taskSummary,
     isPro: appController.state.isPro,
-    editEvent: () => event && appController.navigate('EventEditScreen', { eventId: event.id }),
-    switchEvent: () => appController.navigate('EventListScreen'),
-    openBudget: () => appController.openTab('budget'),
-    openSavings: () => event && appController.navigate('SavingsFundScreen', { eventId: event.id }),
-    openChecklist: () => appController.openTab('checklist'),
-    shareResults: () => event && appController.navigate('ShareCardPreviewScreen', { eventId: event.id }),
+    editEvent: () => event && appController.navigate('OccasionEditScreen', { occasionId: event.id }),
+    switchEvent: () => appController.navigate('OccasionListScreen'),
+    openTasks: () => appController.openTab('tasks'),
+    shareResults: () => appController.openTab('share'),
   };
 }

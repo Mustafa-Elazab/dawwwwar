@@ -1,147 +1,120 @@
 # Farha App Status Board
 
 Farha is a standalone React Native app in `apps/farha`, packaged as
-`@dawwar/farha`. The milestone source is `FARHA_MONOREPO_BUILD_PLAN.md`; the
-current Phase 1 screen/functionality spec is
-`FARHA_PHASE1_COMPLETE_SPEC_PROMPT.md`.
+`@dawwar/farha`. Phase 1 is an offline-first planner for occasions such as
+weddings, engagements, anniversaries, graduations, and other celebrations.
 
-## Active Milestone
+## Current Scope
 
-**Phase 1 app shell - S1 through S14**
+- Product scope: Phase 1 planner MVP only.
+- Active model: `Occasion` plus unified `Task`.
+- Boundary: no backend changes, no changes to customer/driver/merchant/admin,
+  no vendor directory work, and no Phase 2/Phase 3 work.
+- Native scope: existing Android packaging, splash/icon assets, Firebase,
+  AdMob, and Play Billing wiring remain in place.
 
-- Status: implemented in local offline code and Android debug-build verified on
-  2026-08-02.
-- Product scope: Phase 1 planner MVP only. Navigation, onboarding, events,
-  budget, checklist, share preview, Pro/settings gates, and local reminder
-  records are included.
-- Boundary: no backend changes, no changes to other apps, and no Phase 2/Phase
-  3 work. Shared UI changes are limited to header prop support outside a
-  navigation container and a self-contained `SegmentedControl` item contract.
+## Architecture Snapshot
 
-## Team-Lead Sign-Offs
+- App shell: `apps/farha/src/app/App.tsx` initializes localization, Firebase,
+  ads, boot splash, providers, and `FarhaPlannerApp`.
+- Navigation: `apps/farha/src/navigation` owns `NavigationContainer`, the
+  native stack, and the bottom tab navigator from
+  `@react-navigation/bottom-tabs`.
+- Tabs: `Home | Tasks | Share | Settings`.
+- Planner core: `apps/farha/src/core/planner` owns the offline repository,
+  controller provider, route state, schema migration, formulas, validation,
+  and notification records.
+- Storage key: `farha.phase1.v2`; loader also reads and migrates
+  `farha.phase1.v1`.
+- State management: Redux/Redux Toolkit is not used. The planner controller
+  owns local offline state; this is still the right scale for Phase 1.
 
-| Hat | Latest status | Notes |
+## Unified Model
+
+`Occasion` replaces the old UI/code term “Event”:
+
+- `id`, `type`, `title`, `date`, `createdAt`, `updatedAt`
+- Types: `wedding`, `engagement`, `anniversary`, `graduation`, `other`
+
+`Task` replaces separate budget item and checklist item rows:
+
+- Action fields: `title`, `category`, `dueDate`, `status`, `notes`
+- Money fields: `plannedCost`, `actualCost`, `depositPaid`
+- Payment plan: `{ monthlyAmount, nextDueDate }`
+- Formula: balance remaining is `(actualCost ?? plannedCost) - depositPaid`
+- Completion: skipped tasks are excluded from the actionable denominator
+- Payment badges: unpaid, partial, paid are computed from task cost/deposit
+- Reminder records: pending task due dates and payment-plan next due dates are
+  recorded when notifications are enabled
+
+The migration combines legacy `budgetItems` and `checklistItems` into `tasks`.
+Matched rows with the same category and title become one task with both action
+and money fields.
+
+## Screens And Flows
+
+| Screen | Route | Purpose |
 |---|---|---|
-| Product manager | done for Phase 1 shell | Scope follows S1-S14 in the complete spec, with Phase 2/vendor/backend excluded. |
-| Architect | done for Phase 1 shell | Data is app-local, offline-first, and behind a Phase 1 repository/use-case layer. No new native SDKs were added. |
-| Engineer | done for Phase 1 shell | Native stack navigation, bottom tabs, all named screens, local events/budget/checklist, Pro flag, share payload, settings, and local notification records are implemented. |
-| QA | done for Phase 1 code checks | Type-check, lint, unit tests, and Android debug build passed on 2026-08-02. Rendered device QA is still tracked below. |
-| Localization/RTL reviewer | done for code copy | Phase 1 visible strings are registered in Arabic and English; rendered RTL/device QA remains pending. |
-| Release manager | blocked for store/native SDK pieces | Real AdMob, UMP, Play Billing, OS notifications, image capture, signing, tester gates, and store assets still need release setup. |
+| Splash | `SplashScreen` | Boot loading and route resolution. |
+| Onboarding | `OnboardingWelcomeScreen` | First-run introduction and onboarding completion. |
+| Occasion create | `OccasionCreateScreen` | Creates an occasion and seeds task templates. |
+| Occasion list | `OccasionListScreen` | Pro multi-occasion switcher and add flow. |
+| Home | `OccasionDashboardScreen` | Curved header, countdown, task/money summary, next actions, share entry. |
+| Occasion edit | `OccasionEditScreen` | Edit/delete an occasion and refresh template dates. |
+| Tasks | `TaskListScreen` | Unified task list grouped by due date or category, status quick actions, payment quick logging. |
+| Task form | `TaskFormScreen` | Add/edit title, category, due date, status, notes, optional cost, optional installments. |
+| Share | `ShareCardPreviewScreen` | Permanent tab with preview and native text share payload. |
+| Pro | `ProUpgradeScreen` | Pro upgrade/restore via the replaceable billing client. |
+| Settings | `SettingsScreen` | Language, notifications toggle, Pro state, about, and clear data. |
 
-## Publish-Oriented Snapshot
+Legacy budget/checklist/savings screen files are no longer in the live
+navigator. They remain compilable during cleanup through compatibility aliases,
+but the active user flow is the unified Tasks model.
 
-- Workspace: `pnpm-workspace.yaml` covers `apps/*`, so Farha is included as
-  `@dawwar/farha`.
-- App shell: `App.tsx` initializes shared localization, registers Farha's
-  Arabic/English copy, hides the native splash, and renders the planner through
-  shared providers.
-- Navigation: `src/navigation` owns the `NavigationContainer`, native root
-  stack, bottom tab navigator created with `createBottomTabNavigator`, route
-  constants, and typed route params.
-- Data: `src/core/planner` is the single active offline planner domain and
-  persistence layer. Legacy M0/M1 prototype screens, repositories, tests, and
-  translation blocks were removed during publish-readiness cleanup.
-- Native permissions: Android currently keeps only `INTERNET`.
+## Theme And UI
 
-## Phase 1 Implementation Snapshot
+- `@dawwar/theme` now supports generic light/dark color overrides on
+  `ThemeProvider`.
+- Farha passes a light override based on the brand palette:
+  `#7A2039`, `#F7E3E2`, `#FDF6F3`, `#C98995`, `#5C1B2E`, `#B08A90`.
+- `CurvedHeader` in `features/planner/components` provides the deep header and
+  asymmetric blush content curve.
+- Cards use cream backgrounds, softer shadows, larger radius, and press
+  feedback through shared `AppCard`/`AppPressable`.
+- Task rows and dashboard cards use staggered Reanimated `FadeInUp` entrances.
+- Marking a task done shows a short check pop on the completed row.
+- Bottom tabs use a filled deep-color active icon circle.
 
-- App shell: `FarhaPlannerApp` owns only the planner controller/provider
-  boundary. `src/navigation` owns Farha's `NavigationContainer`, native root
-  stack, customer-style bottom tab navigator, route constants, and typed
-  navigation params.
-- Feature structure: screens now live under feature-owned modules such as
-  `features/events`, `features/budget`, `features/checklist`,
-  `features/sharing`, `features/monetization`, `features/settings`, and
-  `features/onboarding`. Each screen folder owns its `index.tsx`, `styles.ts`,
-  and `controller.ts`; screens render `AppScreenTemplate` directly with
-  `headerProps`, while feature components and utilities stay feature-local.
-- Planner core: `core/planner` owns the Phase 1 repository, MMKV storage key
-  `farha.phase1.v1`, domain logic, domain types, route state, Pro flag,
-  notifications toggle, and planner controller provider. `features/planner`
-  now contains only shared planner UI helpers such as screen chrome, date input,
-  missing-event state, and formatting/confirmation helpers.
-- State management: Farha intentionally does not use Redux/Redux Toolkit yet.
-  Phase 1 state is local offline workflow state owned by the planner
-  controller plus MMKV repository; React Query remains available for future
-  server state, and Redux can be introduced later only if app-wide client state
-  grows beyond the planner provider boundary.
-- Events: first-launch routing, onboarding, event create/list/edit/delete,
-  free-tier one-event gate, and Pro multi-event switching are implemented.
-- Budget: default categories, custom categories, item add/edit/delete,
-  live balance warning, item payment status, category totals, and event
-  over/under formulas are implemented.
-- Checklist: wedding/engagement/anniversary templates from the Phase 1 spec
-  are seeded, `Other` starts empty, task add/edit/delete/done/skipped flows
-  exist, and completion excludes skipped tasks.
-- Sharing: share-card preview and native `Share.share` payload are
-  implemented. Optional image capture/save remains a native SDK follow-up.
-- Monetization/settings: free one-event gating, local Pro unlock/restore flag,
-  replaceable `Phase1BillingClient` adapter, language switch, notifications
-  toggle, about, and clear-data reset are implemented. Fake ad UI was removed;
-  real AdMob/UMP/Play Billing SDK wiring remains a release task.
-- Notifications: future pending checklist tasks create local scheduled
-  notification records. OS-level notification scheduling remains a native SDK
-  follow-up.
-- Android packaging: Farha debug builds are Metro-attached for reload/HMR and
-  allow local cleartext traffic so emulators can reach Metro at
-  `10.0.2.2:8081`. Release-style builds package `index.android.bundle` and
-  React image assets for installs that must launch without Metro, and keep
-  cleartext traffic disabled. The branded Android launcher icon and native
-  bootsplash logo are generated from the Farha rings logo.
+## Localization And RTL
 
-## Phase 1 Screen Catalog
+- Farha registers Arabic and English strings in
+  `apps/farha/src/app/i18n/phase1Resources.ts`.
+- New visible copy for Tasks, graduation, payment plans, and task deletion is
+  localized.
+- Main shared layout styles use start/end or `textAlign: 'auto'`; rendered RTL
+  QA on device is still required before store release.
 
-| Screen | Code status | Notes |
+## Verification Log
+
+| Date | Scope | Result |
 |---|---|---|
-| S1 `SplashScreen` | done | Boot route exists and resolves from local state. |
-| S2 `OnboardingWelcomeScreen` | done | Sets onboarded state and routes to event creation. |
-| S3 `EventCreateScreen` | done | Creates event, categories, checklist templates, and notification records. |
-| S4 `EventListScreen` | done | Pro multi-event switcher with free-tier upsell path. |
-| S5 `EventDashboardScreen` | done | Home tab summaries, share action, edit/switch actions, and no fake ad UI. |
-| S6 `EventEditScreen` | done | Edit/delete with cascading local cleanup. |
-| S7 `BudgetCategoryListScreen` | done | Category totals, custom category add, delete cascade. |
-| S8 `BudgetItemListScreen` | done | Category item list with payment status badges. |
-| S9 `BudgetItemFormScreen` | done | Add/edit/delete, live balance, non-blocking deposit warning. |
-| S10 `ChecklistTimelineScreen` | done | Template/custom checklist timeline using `StepIndicator` plus task rows. |
-| S11 `ChecklistItemEditScreen` | done | Add/edit/delete/done/skipped and notification record updates. |
-| S12 `ShareCardPreviewScreen` | done | Preview and native text share done; optional image capture/save pending. |
-| S13 `ProUpgradeScreen` | done | Pro benefits, local unlock/restore, and replaceable billing client done; Play Billing SDK pending for release. |
-| S14 `SettingsScreen` | done | Language, notifications toggle, Pro row, about, and clear data. |
-
-## Shared Package Drift Review
-
-| Package | M0 finding |
-|---|---|
-| `@dawwar/ui` | Required M0 exports are present: `AppScreenTemplate`, `AppText`, `AppCard`, `SectionHeader`, and `AppButton`. `Header` supports explicit back handlers outside React Navigation and optional bottom header content. `SegmentedControl` owns its item/text contract. The planned future exports such as `ListRow`, `StepIndicator`, `FormField`, `AppInput`, `BottomSheet`, `SearchBar`, `EmptyState`, `ErrorState`, `Tabs`, and `SegmentedControl` are also available. |
-| `@dawwar/theme` | `ThemeProvider`, `useTheme`, colors, spacing, typography, radius, shadows, and animation tokens are exported. |
-| `@dawwar/i18n` | `useLocalizationInitialization`, `i18n`, `useTranslation`, language storage, and RTL helpers are exported. Farha registers app-local keys for M0. |
-| `@dawwar/types` | Shared generic models/enums/API/navigation exports are available. Farha event/budget/checklist types should stay local unless another app needs them. |
-| `@dawwar/api-client` | Available but intentionally unused in Phase 1; reserve it for Phase 2 vendor-directory reads after explicit authorization. |
-
-## Open Questions And Human Decisions
-
-| Item | Status | Owner |
-|---|---|---|
-| Confirm production brand and final Android package name | in progress | Human + release manager |
-| Choose personal vs organization Google Play developer account | blocked on human | Human |
-| Recruit 12 opted-in testers for 14 continuous days if using a post-Nov 13, 2023 personal Play account | blocked on human | Human |
-| Choose and host the public privacy policy URL | blocked on human | Human |
-| Create/configure AdMob account and payout details | blocked on human | Human |
-| Configure Play Billing products and license testers | blocked on human | Human + release manager |
-| Authorize backend changes for Phase 2 vendor directory | blocked on human | Human, before M5 only |
+| 2026-08-02 | Phase 1 S1-S14 implementation | done |
+| 2026-08-02 | Android debug bundle and Metro attach fixes | done |
+| 2026-08-03 | Navigation moved to `src/navigation`; planner logic moved to `core/planner` | done |
+| 2026-08-03 | Publish-readiness cleanup and Farha publish report | done |
+| 2026-08-09 | Unified Occasion/Task model migration | done |
+| 2026-08-09 | Farha curved theme override and task animations | done |
+| 2026-08-09 | `pnpm --filter @dawwar/farha type-check` | done |
+| 2026-08-09 | `pnpm --filter @dawwar/farha test -- --runInBand` | done |
+| 2026-08-09 | `pnpm --filter @dawwar/farha lint` | done |
 
 ## Ready-To-Publish Checklist
-
-Status values: `not started`, `in progress`, `blocked on human`, `done`.
-
-### A. App Completeness
 
 | Checklist item | Status |
 |---|---|
 | M0 monorepo integration and discovery implemented and accepted | done |
-| M1 events and budget core implemented and accepted | done |
-| M2 checklist and timeline implemented and accepted | done |
+| M1 events/occasions and budget core implemented and accepted | done |
+| M2 unified tasks timeline implemented and accepted | done |
 | M3 shareable report card implemented and accepted | done |
 | M4 monetization implemented and accepted | done |
 | M5 vendor directory explicitly authorized, implemented, and accepted | blocked on human |
@@ -152,97 +125,12 @@ Status values: `not started`, `in progress`, `blocked on human`, `done`.
 | Basic accessibility: font scaling, touch targets, contrast | in progress |
 | No crashes on a low/mid-end Android profile | not started |
 
-M4 is marked done for the Phase 1 code path: free gates and the local Pro
-purchase/restore adapter exist. Fake ad UI was removed; store-account setup and
-real AdMob/UMP/Play Billing SDK verification remain tracked in sections C and D.
+## Release Follow-Ups
 
-### B. Store Listing Assets
-
-| Checklist item | Status |
-|---|---|
-| App icon and adaptive icon ready | not started |
-| Feature graphic ready | not started |
-| Arabic screenshots ready | not started |
-| English screenshots ready | not started |
-| Short store description, Arabic primary | not started |
-| Full store description, Arabic primary | not started |
-| Privacy policy page hosted at public URL | blocked on human |
-| Content rating questionnaire completed | not started |
-| Data safety form matches local storage, ads, billing, and consent behavior | not started |
-
-### C. Monetization And Billing
-
-| Checklist item | Status |
-|---|---|
-| AdMob app and ad units configured | blocked on human |
-| UMP consent flow implemented | not started |
-| Play Billing one-time Pro unlock implemented | in progress |
-| Play Billing license testers configured and verified | blocked on human |
-| At least one non-card Egyptian test purchase path verified | blocked on human |
-
-### D. Play Console And Release
-
-| Checklist item | Status |
-|---|---|
-| Developer account type selected | blocked on human |
-| 12 opted-in testers recruited for required closed testing gate, if applicable | blocked on human |
-| Package name finalized | in progress |
-| Signed release configured with Play App Signing | not started |
-| Internal testing release completed | not started |
-| Closed testing release completed | not started |
-| Production access granted | not started |
-| Production release visible on Google Play | not started |
-
-### E. Legal And Compliance
-
-| Checklist item | Status |
-|---|---|
-| Privacy policy matches actual app collection and SDK behavior | not started |
-| Age rating positioned for adults/life events, not kids | not started |
-| No Phase 2 vendor payment collection inside the Android app | done |
-| No vendor login, booking, calendar, or messaging UI inside `apps/farha` | done |
-
-## Verification Log
-
-| Date | Scope | Result |
-|---|---|---|
-| 2026-07-31 | M0 documentation/status-board alignment | done |
-| 2026-07-31 | `pnpm --filter @dawwar/farha type-check` | done |
-| 2026-07-31 | `pnpm --filter @dawwar/farha lint` | done |
-| 2026-07-31 | `pnpm --filter @dawwar/farha test` | done |
-| 2026-07-31 | `./gradlew :app:assembleDebug` from `apps/farha/android` | done |
-| 2026-08-01 | M1 events and budget core implementation | done |
-| 2026-08-01 | `pnpm --filter @dawwar/farha type-check` | done |
-| 2026-08-01 | `pnpm --filter @dawwar/farha lint` | done |
-| 2026-08-01 | `pnpm --filter @dawwar/farha test` | done |
-| 2026-08-01 | `./gradlew :app:assembleDebug` from `apps/farha/android` | done |
-| 2026-08-02 | Phase 1 S1-S14 implementation | done |
-| 2026-08-02 | `pnpm --filter @dawwar/farha type-check` | done |
-| 2026-08-02 | `pnpm --filter @dawwar/farha lint` | done |
-| 2026-08-02 | `pnpm --filter @dawwar/farha test` | done |
-| 2026-08-02 | `./gradlew :app:assembleDebug` from `apps/farha/android` | done |
-| 2026-08-02 | Phase 1 screen folder/controller refactor | done |
-| 2026-08-02 | Debug APK contains `assets/index.android.bundle` | done |
-| 2026-08-02 | Screen-local `controller.ts` colocation refactor | done |
-| 2026-08-02 | UI cleanup: icon back, calendar dates, card padding, customer-style bottom tabs, no fake ads | done |
-| 2026-08-02 | Feature-owned screen architecture and bundled asset verification | done |
-| 2026-08-02 | Direct `AppScreenTemplate` header props and planner tab screen registry | done |
-| 2026-08-02 | `pnpm --filter @dawwar/ui type-check` | done |
-| 2026-08-02 | Language persistence and Metro-connected debug startup fix | done |
-| 2026-08-02 | Branded splash background/logo animation and launcher icon assets | done |
-| 2026-08-02 | Farha image assets included in Android packaged builds | done |
-| 2026-08-03 | Debug build restored to Metro-attached reload mode | done |
-| 2026-08-03 | Debug-only cleartext Metro traffic enabled for Android attach | done |
-| 2026-08-03 | Native stack and bottom-tab navigation moved to `src/navigation`; planner logic moved to `core/planner` | done |
-| 2026-08-03 | Publish-readiness cleanup removed legacy M0/M1 prototype code and added Farha publish report | done |
-
-## Native/Release Follow-Ups
-
-- Add real OS notification scheduling/cancelation behind the local
-  notification records.
-- Add optional image capture/save for `ShareCardPreviewScreen`; text share works
-  now.
-- Add AdMob + UMP SDKs and real Play Billing before production monetization
-  release.
+- Wire real OS-level local notification scheduling/cancelation behind the
+  existing notification records.
 - Run rendered Arabic/English RTL QA on emulator/device.
 - Run offline kill/reopen data-loss QA on device.
+- Verify Android release signing, Play Billing products, AdMob units, UMP
+  consent, privacy policy, and Play Console tester gates with human-owned
+  accounts.
