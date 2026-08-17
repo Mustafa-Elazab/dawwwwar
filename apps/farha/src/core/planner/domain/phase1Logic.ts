@@ -3,6 +3,7 @@ import { standardChecklistTemplates } from '../data/checklistTemplates';
 import type {
   BudgetBadgeStatus,
   BudgetCategoryDraft,
+  BudgetHealth,
   BudgetItemDraft,
   BudgetItemPaymentStatus,
   BudgetTotals,
@@ -47,7 +48,7 @@ export const phase1TaskCategories: FarhaPhase1TaskCategoryKey[] =
 
 export const createInitialPhase1State = (now = new Date()): FarhaPhase1State => ({
   schemaVersion: FARHA_PHASE1_SCHEMA_VERSION,
-  hasOnboarded: false,
+  hasOnboarded: true,
   isPro: false,
   notificationsEnabled: true,
   occasions: [],
@@ -86,7 +87,6 @@ export const migratePhase1State = (
 };
 
 export const resolveBootRoute = (state: FarhaPhase1State): Phase1Route => {
-  if (!state.hasOnboarded) return { name: 'OnboardingWelcomeScreen' };
   if (!state.occasions.length) return { name: 'OccasionCreateScreen' };
   if (state.occasions.length === 1 || !state.isPro) {
     return {
@@ -123,10 +123,16 @@ export const createOccasionWithSeeds = (
     type: draft.type,
     title: draft.title.trim(),
     date: draft.date,
+    categoryKeys: normalizeCategoryKeys(draft.categoryKeys),
+    budgetSpent: draft.budgetSpent,
+    budgetAvailable: draft.budgetAvailable,
+    budgetTarget: draft.budgetTarget,
     createdAt: timestamp,
     updatedAt: timestamp,
   };
-  const seededTasks = seedTasks(occasion, now);
+  const seededTasks = seedTasks(occasion, now).filter(
+    (task) => !task.category || occasion.categoryKeys.includes(task.category),
+  );
   const nextState: FarhaPhase1State = {
     ...state,
     hasOnboarded: true,
@@ -163,6 +169,10 @@ export const updateOccasionWithTemplateDueDates = (
     type: draft.type,
     title: draft.title.trim(),
     date: draft.date,
+    categoryKeys: normalizeCategoryKeys(draft.categoryKeys),
+    budgetSpent: draft.budgetSpent,
+    budgetAvailable: draft.budgetAvailable,
+    budgetTarget: draft.budgetTarget,
     updatedAt: timestamp,
   };
   const tasks = state.tasks.map((task) => {
@@ -445,6 +455,32 @@ export const calculateBudgetTotals = (tasks: FarhaPhase1Task[]): BudgetTotals =>
   };
 };
 
+export const calculateBudgetHealth = (
+  occasion: FarhaPhase1Occasion,
+  tasks: FarhaPhase1Task[],
+): BudgetHealth => {
+  const totals = calculateBudgetTotals(tasks);
+  const spentTotal = occasion.budgetSpent + totals.depositTotal;
+  const plannedTotal = Math.max(occasion.budgetTarget, totals.actualTotal);
+  const plannedRemaining = Math.max(plannedTotal - spentTotal, 0);
+  const availableAfterPlanned = occasion.budgetAvailable - plannedRemaining;
+  const spentProgress = plannedTotal > 0 ? Math.min(spentTotal / plannedTotal, 1) : 0;
+
+  return {
+    spentTotal,
+    availableTotal: occasion.budgetAvailable,
+    targetTotal: plannedTotal,
+    plannedRemaining,
+    availableAfterPlanned,
+    spentProgress,
+    status: spentTotal > plannedTotal
+      ? 'over'
+      : availableAfterPlanned < 0
+        ? 'watch'
+        : 'healthy',
+  };
+};
+
 export const getTaskSummary = (tasks: FarhaPhase1Task[]): TaskSummary => {
   const actionableItems = tasks.filter((task) => task.status !== 'skipped');
   const doneCount = actionableItems.filter((task) => task.status === 'done').length;
@@ -475,10 +511,13 @@ export const getChecklistSummary = (tasks: FarhaPhase1Task[]): ChecklistSummary 
 
 export const validateEventDraft = (
   draft: EventFormDraft,
-): ValidationResult<'title' | 'date'> => {
-  const errors: ValidationResult<'title' | 'date'>['errors'] = {};
+): ValidationResult<'title' | 'date' | 'budgetSpent' | 'budgetAvailable' | 'budgetTarget'> => {
+  const errors: ValidationResult<'title' | 'date' | 'budgetSpent' | 'budgetAvailable' | 'budgetTarget'>['errors'] = {};
   if (!draft.title.trim()) errors.title = 'required';
   if (!isValidDate(draft.date)) errors.date = 'required';
+  if (!isValidCurrency(draft.budgetSpent)) errors.budgetSpent = 'invalidAmount';
+  if (!isValidCurrency(draft.budgetAvailable)) errors.budgetAvailable = 'invalidAmount';
+  if (!isValidCurrency(draft.budgetTarget)) errors.budgetTarget = 'invalidAmount';
   return { isValid: Object.keys(errors).length === 0, errors, warnings: {} };
 };
 
@@ -661,15 +700,23 @@ export const getSavingsContributionById = (
 export const getEventCategories = (
   state: FarhaPhase1State,
   eventId?: string,
-): FarhaPhase1BudgetCategory[] => defaultPhase1BudgetCategories.map((category) => ({
-  id: `${eventId ?? state.activeOccasionId ?? 'occasion'}-${category.key}`,
-  eventId: eventId ?? state.activeOccasionId ?? '',
-  key: category.key,
-  nameKey: category.nameKey,
-  isDefault: true,
-  createdAt: state.updatedAt,
-  updatedAt: state.updatedAt,
-}));
+): FarhaPhase1BudgetCategory[] => {
+  const occasionId = eventId ?? state.activeOccasionId ?? '';
+  const occasion = getOccasionById(state, occasionId);
+  const selectedKeys = new Set(normalizeCategoryKeys(occasion?.categoryKeys));
+
+  return defaultPhase1BudgetCategories
+    .filter((category) => selectedKeys.has(category.key))
+    .map((category) => ({
+      id: `${occasionId || 'occasion'}-${category.key}`,
+      eventId: occasionId,
+      key: category.key,
+      nameKey: category.nameKey,
+      isDefault: true,
+      createdAt: state.updatedAt,
+      updatedAt: state.updatedAt,
+    }));
+};
 
 export const getCategoryById = (
   state: FarhaPhase1State,
@@ -851,6 +898,10 @@ const normalizeOccasions = (occasions: FarhaPhase1Occasion[]): FarhaPhase1Occasi
   occasions.map((occasion) => ({
     ...occasion,
     type: phase1EventTypes.includes(occasion.type) ? occasion.type : 'other',
+    categoryKeys: normalizeCategoryKeys(occasion.categoryKeys),
+    budgetSpent: Number.isFinite(occasion.budgetSpent) ? occasion.budgetSpent : 0,
+    budgetAvailable: Number.isFinite(occasion.budgetAvailable) ? occasion.budgetAvailable : 0,
+    budgetTarget: Number.isFinite(occasion.budgetTarget) ? occasion.budgetTarget : 0,
   }));
 
 const normalizeTasks = (
@@ -901,6 +952,13 @@ const hasTaskCost = (
   typeof task.plannedCost === 'number' ||
   typeof task.actualCost === 'number' ||
   task.depositPaid > 0;
+
+const normalizeCategoryKeys = (
+  categoryKeys?: FarhaPhase1TaskCategoryKey[],
+): FarhaPhase1TaskCategoryKey[] => {
+  const keys = categoryKeys?.filter((key) => phase1TaskCategories.includes(key)) ?? phase1TaskCategories;
+  return keys.length ? Array.from(new Set(keys)) : phase1TaskCategories;
+};
 
 const inferCategoryFromTitleKey = (titleKey: string): FarhaPhase1TaskCategoryKey | undefined => {
   if (titleKey.includes('Venue')) return 'venue';

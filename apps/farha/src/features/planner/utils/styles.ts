@@ -64,6 +64,16 @@ export const createPhase1ScreenStyles = (colors: AppColors) =>
       flexWrap: 'wrap',
       gap: spacing[2],
     },
+    choiceChip: {
+      minHeight: 42,
+      minWidth: 104,
+      borderRadius: radius.full,
+      borderWidth: 1,
+      paddingHorizontal: spacing[3],
+      paddingVertical: spacing[2],
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
     formGrid: {
       flexDirection: 'row',
       gap: spacing[3],

@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 
 import {
+  calculateBudgetHealth,
   calculateBudgetTotals,
   getTaskSummary,
 } from '../../../../core/planner/domain/phase1Logic';
@@ -20,6 +21,10 @@ export function useController() {
     [appController, event?.id],
   );
   const taskSummary = useMemo(() => getTaskSummary(tasks), [tasks]);
+  const budgetHealth = useMemo(
+    () => event ? calculateBudgetHealth(event, tasks) : undefined,
+    [event, tasks],
+  );
 
   return {
     event,
@@ -27,6 +32,7 @@ export function useController() {
     savingsSummary,
     checklistSummary: taskSummary,
     taskSummary,
+    budgetHealth,
     isPro: appController.state.isPro,
     editEvent: () => event && appController.navigate('OccasionEditScreen', { occasionId: event.id }),
     switchEvent: () => appController.navigate('OccasionListScreen'),

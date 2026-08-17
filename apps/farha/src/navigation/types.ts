@@ -14,7 +14,6 @@ export type FarhaTabParamList = {
 
 export type FarhaRootParamList = {
   [FARHA_ROOT_ROUTES.SPLASH]: FarhaRouteParams;
-  [FARHA_ROOT_ROUTES.ONBOARDING]: FarhaRouteParams;
   [FARHA_ROOT_ROUTES.OCCASION_CREATE]: FarhaRouteParams;
   [FARHA_ROOT_ROUTES.OCCASION_LIST]: FarhaRouteParams;
   [FARHA_ROOT_ROUTES.OCCASION_EDIT]: FarhaRouteParams;

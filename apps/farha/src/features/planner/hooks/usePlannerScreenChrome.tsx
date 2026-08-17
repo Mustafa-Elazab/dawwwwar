@@ -63,6 +63,9 @@ export function usePlannerScreenChrome({
           subtitle={subtitle}
           onBackPress={showBack ? controller.goBack : undefined}
           action={headerActions}
+          tipTitle={t('farha.phase1.tips.title')}
+          tipBody={t(`farha.phase1.tips.${getTipKey(controller.route.name)}`)}
+          tipCloseLabel={t('farha.phase1.confirm.ok')}
         />
       ),
       footer: undefined,
@@ -74,3 +77,11 @@ export function usePlannerScreenChrome({
     },
   };
 }
+
+const getTipKey = (routeName: string): string => {
+  if (routeName.includes('Create') || routeName.includes('Edit')) return 'create';
+  if (routeName.includes('Task')) return 'tasks';
+  if (routeName.includes('Share')) return 'share';
+  if (routeName.includes('Settings')) return 'settings';
+  return 'home';
+};

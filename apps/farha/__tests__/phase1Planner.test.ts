@@ -1,4 +1,5 @@
 import {
+  calculateBudgetHealth,
   calculateBudgetTotals,
   createEventWithSeeds,
   createInitialPhase1State,
@@ -21,51 +22,63 @@ import {
   createPhase1BillingClient,
   type Phase1BillingAdapter,
 } from '../src/features/monetization/data/phase1Billing';
+import type {
+  FarhaPhase1EventType,
+  OccasionFormDraft,
+} from '../src/core/planner/domain/phase1Types';
 
 describe('Farha Phase 1 planner logic', () => {
   const now = new Date('2026-08-02T09:00:00.000Z');
+  const occasionDraft = (
+    type: FarhaPhase1EventType,
+    title: string,
+    date: string,
+    overrides: Partial<OccasionFormDraft> = {},
+  ): OccasionFormDraft => ({
+    type,
+    title,
+    date,
+    categoryKeys: ['venue', 'dress', 'photoVideo', 'catering'],
+    budgetSpent: 0,
+    budgetAvailable: 0,
+    budgetTarget: 0,
+    ...overrides,
+  });
 
-  it('routes first launch, empty onboarded state, single occasion, and Pro multi-occasion state', () => {
+  it('routes first launch, single occasion, and Pro multi-occasion state without onboarding gate', () => {
     const initial = createInitialPhase1State(now);
-    expect(resolveBootRoute(initial).name).toBe('OnboardingWelcomeScreen');
+    expect(resolveBootRoute(initial).name).toBe('OccasionCreateScreen');
 
-    const onboarded = { ...initial, hasOnboarded: true };
-    expect(resolveBootRoute(onboarded).name).toBe('OccasionCreateScreen');
-
-    const oneOccasion = createEventWithSeeds(onboarded, {
-      type: 'wedding',
-      title: 'Wedding',
-      date: '2027-08-02',
-    }, now);
+    const oneOccasion = createEventWithSeeds(initial, occasionDraft('wedding', 'Wedding', '2027-08-02'), now);
     expect(resolveBootRoute(oneOccasion).name).toBe('OccasionDashboardScreen');
 
-    const twoOccasions = createEventWithSeeds({ ...oneOccasion, isPro: true }, {
-      type: 'graduation',
-      title: 'Graduation',
-      date: '2027-01-02',
-    }, now);
+    const twoOccasions = createEventWithSeeds(
+      { ...oneOccasion, isPro: true },
+      occasionDraft('graduation', 'Graduation', '2027-01-02'),
+      now,
+    );
     expect(resolveBootRoute(twoOccasions).name).toBe('OccasionListScreen');
   });
 
   it('seeds default task categories and graduation tasks', () => {
-    const state = createEventWithSeeds(createInitialPhase1State(now), {
-      type: 'graduation',
-      title: 'Graduation',
-      date: '2027-08-02',
-    }, now);
+    const state = createEventWithSeeds(
+      createInitialPhase1State(now),
+      occasionDraft('graduation', 'Graduation', '2027-08-02'),
+      now,
+    );
 
-    expect(getEventCategories(state, state.activeOccasionId)).toHaveLength(12);
-    expect(getEventTasks(state, state.activeOccasionId)).toHaveLength(
-      standardChecklistTemplates.graduation?.length,
+    expect(getEventCategories(state, state.activeOccasionId)).toHaveLength(4);
+    expect(getEventTasks(state, state.activeOccasionId).length).toBeLessThanOrEqual(
+      standardChecklistTemplates.graduation?.length ?? 0,
     );
   });
 
   it('uses planned cost as the actual base when actual/quoted cost is absent', () => {
-    const state = createEventWithSeeds(createInitialPhase1State(now), {
-      type: 'engagement',
-      title: 'Engagement',
-      date: '2027-02-02',
-    }, now);
+    const state = createEventWithSeeds(
+      createInitialPhase1State(now),
+      occasionDraft('engagement', 'Engagement', '2027-02-02'),
+      now,
+    );
     const withTask = upsertTask(state, {
       occasionId: state.activeOccasionId ?? '',
       title: 'Venue',
@@ -105,11 +118,11 @@ describe('Farha Phase 1 planner logic', () => {
   });
 
   it('excludes skipped tasks from completion denominator', () => {
-    const state = createEventWithSeeds(createInitialPhase1State(now), {
-      type: 'anniversary',
-      title: 'Anniversary',
-      date: '2027-01-02',
-    }, now);
+    const state = createEventWithSeeds(
+      createInitialPhase1State(now),
+      occasionDraft('anniversary', 'Anniversary', '2027-01-02', { categoryKeys: ['venue', 'gifts'] }),
+      now,
+    );
     const items = getEventTasks(state, state.activeOccasionId);
     const withDone = setTaskStatus(state, items[0].id, 'done', now);
     const withSkipped = setTaskStatus(withDone, items[1].id, 'skipped', now);
@@ -122,11 +135,11 @@ describe('Farha Phase 1 planner logic', () => {
   });
 
   it('stores future task and payment-plan notification records and cancels them when reminders are disabled', () => {
-    const state = createEventWithSeeds(createInitialPhase1State(now), {
-      type: 'engagement',
-      title: 'Engagement',
-      date: '2027-02-02',
-    }, now);
+    const state = createEventWithSeeds(
+      createInitialPhase1State(now),
+      occasionDraft('engagement', 'Engagement', '2027-02-02'),
+      now,
+    );
     const withPlan = upsertTask(state, {
       occasionId: state.activeOccasionId ?? '',
       title: 'Pay hall installment',
@@ -146,11 +159,11 @@ describe('Farha Phase 1 planner logic', () => {
   });
 
   it('logs a monthly payment, advances next due date, and stops reminders when paid off', () => {
-    const state = createEventWithSeeds(createInitialPhase1State(now), {
-      type: 'wedding',
-      title: 'Wedding',
-      date: '2027-08-02',
-    }, now);
+    const state = createEventWithSeeds(
+      createInitialPhase1State(now),
+      occasionDraft('wedding', 'Wedding', '2027-08-02'),
+      now,
+    );
     const withPlan = upsertTask(state, {
       occasionId: state.activeOccasionId ?? '',
       title: 'Dress',
@@ -191,6 +204,10 @@ describe('Farha Phase 1 planner logic', () => {
         type: 'wedding',
         title: 'Wedding',
         date: '2027-01-01',
+        categoryKeys: ['venue'],
+        budgetSpent: 0,
+        budgetAvailable: 0,
+        budgetTarget: 0,
         createdAt: now.toISOString(),
         updatedAt: now.toISOString(),
       }],
@@ -234,11 +251,11 @@ describe('Farha Phase 1 planner logic', () => {
   });
 
   it('cascades occasion deletion through tasks and notifications', () => {
-    const state = createEventWithSeeds(createInitialPhase1State(now), {
-      type: 'wedding',
-      title: 'Wedding',
-      date: '2027-08-02',
-    }, now);
+    const state = createEventWithSeeds(
+      createInitialPhase1State(now),
+      occasionDraft('wedding', 'Wedding', '2027-08-02'),
+      now,
+    );
     const deleted = deleteEventCascade(state, state.activeOccasionId ?? '', now);
 
     expect(deleted.occasions).toHaveLength(0);
@@ -247,15 +264,49 @@ describe('Farha Phase 1 planner logic', () => {
   });
 
   it('generates a share payload with occasion, task progress, money totals, and Farha mark', () => {
-    const state = createEventWithSeeds(createInitialPhase1State(now), {
-      type: 'wedding',
-      title: 'Family Wedding',
-      date: '2027-08-02',
-    }, now);
+    const state = createEventWithSeeds(
+      createInitialPhase1State(now),
+      occasionDraft('wedding', 'Family Wedding', '2027-08-02', {
+        budgetSpent: 1000,
+        budgetAvailable: 5000,
+        budgetTarget: 6000,
+      }),
+      now,
+    );
 
     expect(createSharePayload(state, state.activeOccasionId ?? '')).toContain('Family Wedding');
     expect(createSharePayload(state, state.activeOccasionId ?? '')).toContain('Tasks:');
     expect(createSharePayload(state, state.activeOccasionId ?? '')).toContain('Made with Farha');
+  });
+
+  it('computes budget health from occasion money fields and unpaid task balances', () => {
+    const state = createEventWithSeeds(
+      createInitialPhase1State(now),
+      occasionDraft('wedding', 'Wedding', '2027-08-02', {
+        budgetSpent: 1000,
+        budgetAvailable: 3000,
+        budgetTarget: 5000,
+      }),
+      now,
+    );
+    const withTask = upsertTask(state, {
+      occasionId: state.activeOccasionId ?? '',
+      title: 'Venue',
+      category: 'venue',
+      status: 'pending',
+      plannedCost: 2000,
+      depositPaid: 0,
+    }, now);
+    const occasion = withTask.occasions[0];
+
+    expect(calculateBudgetHealth(occasion, getEventTasks(withTask, occasion.id))).toMatchObject({
+      spentTotal: 1000,
+      availableTotal: 3000,
+      targetTotal: 5000,
+      plannedRemaining: 4000,
+      availableAfterPlanned: -1000,
+      status: 'watch',
+    });
   });
 
   it('keeps Phase 1 Pro purchase and restore behind a Play Billing adapter', async () => {

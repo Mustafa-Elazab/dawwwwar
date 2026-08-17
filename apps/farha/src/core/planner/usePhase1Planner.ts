@@ -315,7 +315,7 @@ export const usePhase1Planner = (): Phase1PlannerController => {
     repository.clear();
     const nextState = clearAllPhase1Data();
     persist(nextState);
-    reset('OnboardingWelcomeScreen');
+    reset('OccasionCreateScreen');
   }, [persist, reset]);
 
   const shareActiveEvent = useCallback(async () => {

@@ -14,10 +14,7 @@ import {
   EventListScreen,
 } from '../features/events/screens';
 import { ProUpgradeScreen } from '../features/monetization/screens';
-import {
-  OnboardingWelcomeScreen,
-  SplashScreen,
-} from '../features/onboarding/screens';
+import { SplashScreen } from '../features/onboarding/screens';
 import { TaskFormScreen } from '../features/tasks/screens';
 import { FarhaTabs } from './FarhaTabs';
 import { FARHA_ROOT_ROUTES } from './routes';
@@ -66,7 +63,6 @@ export function FarhaNavigator({ controller }: FarhaNavigatorProps) {
         screenOptions={screenOptions}
       >
         <RootStack.Screen name={FARHA_ROOT_ROUTES.SPLASH} component={SplashScreen} />
-        <RootStack.Screen name={FARHA_ROOT_ROUTES.ONBOARDING} component={OnboardingWelcomeScreen} />
         <RootStack.Screen name={FARHA_ROOT_ROUTES.OCCASION_CREATE} component={EventCreateScreen} />
         <RootStack.Screen name={FARHA_ROOT_ROUTES.OCCASION_LIST} component={EventListScreen} />
         <RootStack.Screen name={FARHA_ROOT_ROUTES.OCCASION_EDIT} component={EventEditScreen} />

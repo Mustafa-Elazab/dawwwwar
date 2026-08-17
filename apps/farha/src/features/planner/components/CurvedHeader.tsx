@@ -1,17 +1,31 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useTheme, spacing } from '@dawwar/theme';
 import { AppIcon, AppPressable, AppText } from '@dawwar/ui';
+
+import { GuidedTipOverlay } from '../../tips/components';
 
 interface CurvedHeaderProps {
   title: string;
   subtitle?: string;
   onBackPress?: () => void;
   action?: React.ReactNode;
+  tipTitle: string;
+  tipBody: string;
+  tipCloseLabel: string;
 }
 
-export function CurvedHeader({ title, subtitle, onBackPress, action }: CurvedHeaderProps) {
+export function CurvedHeader({
+  title,
+  subtitle,
+  onBackPress,
+  action,
+  tipTitle,
+  tipBody,
+  tipCloseLabel,
+}: CurvedHeaderProps) {
   const { colors } = useTheme();
+  const [isTipVisible, setIsTipVisible] = useState(false);
 
   return (
     <View style={[styles.header, { backgroundColor: colors.primary }]}>
@@ -38,12 +52,25 @@ export function CurvedHeader({ title, subtitle, onBackPress, action }: CurvedHea
             ) : null}
           </View>
         </View>
-        {action ?? (
-          <View style={[styles.iconCircle, { backgroundColor: colors.primaryDark }]}>
-            <AppIcon name="bell-outline" size={22} color={colors.primaryText} />
-          </View>
-        )}
+        <View style={styles.actions}>
+          {action}
+          <AppPressable
+            accessibilityRole="button"
+            accessibilityLabel={tipTitle}
+            onPress={() => setIsTipVisible(true)}
+            style={[styles.iconCircle, { backgroundColor: colors.primaryDark }]}
+          >
+            <AppIcon name="help-circle-outline" size={22} color={colors.primaryText} />
+          </AppPressable>
+        </View>
       </View>
+      <GuidedTipOverlay
+        visible={isTipVisible}
+        title={tipTitle}
+        body={tipBody}
+        closeLabel={tipCloseLabel}
+        onClose={() => setIsTipVisible(false)}
+      />
     </View>
   );
 }
@@ -85,5 +112,9 @@ const styles = StyleSheet.create({
     borderRadius: 23,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  actions: {
+    alignItems: 'flex-end',
+    gap: spacing[2],
   },
 });

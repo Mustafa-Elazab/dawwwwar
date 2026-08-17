@@ -33,8 +33,13 @@ weddings, engagements, anniversaries, graduations, and other celebrations.
 
 `Occasion` replaces the old UI/code term “Event”:
 
-- `id`, `type`, `title`, `date`, `createdAt`, `updatedAt`
+- `id`, `type`, `title`, `date`, `categoryKeys`, `budgetSpent`,
+  `budgetAvailable`, `budgetTarget`, `createdAt`, `updatedAt`
 - Types: `wedding`, `engagement`, `anniversary`, `graduation`, `other`
+- Each occasion owns its own selected task categories. Create/edit uses a
+  horizontal occasion-type list plus category chips.
+- Budget health combines the occasion starting money fields with task deposits
+  and planned balances.
 
 `Task` replaces separate budget item and checklist item rows:
 
@@ -56,10 +61,10 @@ and money fields.
 | Screen | Route | Purpose |
 |---|---|---|
 | Splash | `SplashScreen` | Boot loading and route resolution. |
-| Onboarding | `OnboardingWelcomeScreen` | First-run introduction and onboarding completion. |
-| Occasion create | `OccasionCreateScreen` | Creates an occasion and seeds task templates. |
+| Guided tips | Header help icon | Replaces first-run onboarding with contextual how-to-use tips in an overlay. |
+| Occasion create | `OccasionCreateScreen` | Creates an occasion with type, owned categories, spent/available/target money fields, and seeded unpaid task templates. |
 | Occasion list | `OccasionListScreen` | Pro multi-occasion switcher and add flow. |
-| Home | `OccasionDashboardScreen` | Curved header, countdown, task/money summary, next actions, share entry. |
+| Home | `OccasionDashboardScreen` | Curved header, countdown, task/money summary, Budget Health, next actions, share entry. |
 | Occasion edit | `OccasionEditScreen` | Edit/delete an occasion and refresh template dates. |
 | Tasks | `TaskListScreen` | Unified task list grouped by due date or category, status quick actions, payment quick logging. |
 | Task form | `TaskFormScreen` | Add/edit title, category, due date, status, notes, optional cost, optional installments. |
@@ -79,6 +84,8 @@ but the active user flow is the unified Tasks model.
   `#7A2039`, `#F7E3E2`, `#FDF6F3`, `#C98995`, `#5C1B2E`, `#B08A90`.
 - `CurvedHeader` in `features/planner/components` provides the deep header and
   asymmetric blush content curve.
+- A help icon in the header opens a dimmed guided-tip overlay with a white
+  speech bubble and pointer, matching the provided reference pattern.
 - Cards use cream backgrounds, softer shadows, larger radius, and press
   feedback through shared `AppCard`/`AppPressable`.
 - Task rows and dashboard cards use staggered Reanimated `FadeInUp` entrances.
@@ -90,7 +97,8 @@ but the active user flow is the unified Tasks model.
 - Farha registers Arabic and English strings in
   `apps/farha/src/app/i18n/phase1Resources.ts`.
 - New visible copy for Tasks, graduation, payment plans, and task deletion is
-  localized.
+  localized. The tips overlay, event category copy, starting budget fields, and
+  Budget Health feature are localized in Arabic and English.
 - Main shared layout styles use start/end or `textAlign: 'auto'`; rendered RTL
   QA on device is still required before store release.
 
@@ -107,6 +115,7 @@ but the active user flow is the unified Tasks model.
 | 2026-08-09 | `pnpm --filter @dawwar/farha type-check` | done |
 | 2026-08-09 | `pnpm --filter @dawwar/farha test -- --runInBand` | done |
 | 2026-08-09 | `pnpm --filter @dawwar/farha lint` | done |
+| 2026-08-18 | Onboarding replaced with guided tips; occasion categories and Budget Health added | done |
 
 ## Ready-To-Publish Checklist
 

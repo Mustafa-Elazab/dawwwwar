@@ -1,6 +1,5 @@
 export type ActivePhase1ScreenName =
   | 'SplashScreen'
-  | 'OnboardingWelcomeScreen'
   | 'OccasionCreateScreen'
   | 'OccasionListScreen'
   | 'OccasionDashboardScreen'
@@ -81,6 +80,10 @@ export interface FarhaPhase1Occasion {
   type: FarhaPhase1OccasionType;
   title: string;
   date: string;
+  categoryKeys: FarhaPhase1TaskCategoryKey[];
+  budgetSpent: number;
+  budgetAvailable: number;
+  budgetTarget: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -205,6 +208,10 @@ export interface OccasionFormDraft {
   type: FarhaPhase1OccasionType;
   title: string;
   date: string;
+  categoryKeys: FarhaPhase1TaskCategoryKey[];
+  budgetSpent: number;
+  budgetAvailable: number;
+  budgetTarget: number;
 }
 
 export type EventFormDraft = OccasionFormDraft;
@@ -281,6 +288,16 @@ export interface BudgetTotals {
   depositTotal: number;
   balanceTotal: number;
   badge: BudgetBadgeStatus;
+}
+
+export interface BudgetHealth {
+  spentTotal: number;
+  availableTotal: number;
+  targetTotal: number;
+  plannedRemaining: number;
+  availableAfterPlanned: number;
+  spentProgress: number;
+  status: 'healthy' | 'watch' | 'over';
 }
 
 export interface TaskSummary {

@@ -1,6 +1,5 @@
 export const FARHA_ROOT_ROUTES = {
   SPLASH: 'SplashScreen',
-  ONBOARDING: 'OnboardingWelcomeScreen',
   OCCASION_CREATE: 'OccasionCreateScreen',
   OCCASION_LIST: 'OccasionListScreen',
   OCCASION_EDIT: 'OccasionEditScreen',
