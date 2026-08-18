@@ -1,31 +1,28 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useTheme, spacing } from '@dawwar/theme';
 import { AppIcon, AppPressable, AppText } from '@dawwar/ui';
 
-import { GuidedTipOverlay } from '../../tips/components';
-
 interface CurvedHeaderProps {
   title: string;
   subtitle?: string;
+  backLabel: string;
   onBackPress?: () => void;
   action?: React.ReactNode;
-  tipTitle: string;
-  tipBody: string;
-  tipCloseLabel: string;
+  helpLabel: string;
+  onHelpPress: () => void;
 }
 
 export function CurvedHeader({
   title,
   subtitle,
+  backLabel,
   onBackPress,
   action,
-  tipTitle,
-  tipBody,
-  tipCloseLabel,
+  helpLabel,
+  onHelpPress,
 }: CurvedHeaderProps) {
   const { colors } = useTheme();
-  const [isTipVisible, setIsTipVisible] = useState(false);
 
   return (
     <View style={[styles.header, { backgroundColor: colors.primary }]}>
@@ -34,7 +31,7 @@ export function CurvedHeader({
           {onBackPress ? (
             <AppPressable
               accessibilityRole="button"
-              accessibilityLabel="Back"
+              accessibilityLabel={backLabel}
               onPress={onBackPress}
               style={[styles.backButton, { borderColor: colors.primaryMuted }]}
             >
@@ -56,21 +53,14 @@ export function CurvedHeader({
           {action}
           <AppPressable
             accessibilityRole="button"
-            accessibilityLabel={tipTitle}
-            onPress={() => setIsTipVisible(true)}
+            accessibilityLabel={helpLabel}
+            onPress={onHelpPress}
             style={[styles.iconCircle, { backgroundColor: colors.primaryDark }]}
           >
             <AppIcon name="help-circle-outline" size={22} color={colors.primaryText} />
           </AppPressable>
         </View>
       </View>
-      <GuidedTipOverlay
-        visible={isTipVisible}
-        title={tipTitle}
-        body={tipBody}
-        closeLabel={tipCloseLabel}
-        onClose={() => setIsTipVisible(false)}
-      />
     </View>
   );
 }

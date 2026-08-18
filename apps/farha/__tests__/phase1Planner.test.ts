@@ -1,6 +1,7 @@
 import {
   calculateBudgetHealth,
   calculateBudgetTotals,
+  advanceWalkthrough,
   createEventWithSeeds,
   createInitialPhase1State,
   createSharePayload,
@@ -12,8 +13,10 @@ import {
   logTaskPayment,
   migratePhase1State,
   resolveBootRoute,
+  restartWalkthrough,
   setNotificationsEnabled,
   setTaskStatus,
+  skipWalkthrough,
   upsertTask,
   validateTaskDraft,
 } from '../src/core/planner/domain/phase1Logic';
@@ -48,9 +51,11 @@ describe('Farha Phase 1 planner logic', () => {
   it('routes first launch, single occasion, and Pro multi-occasion state without onboarding gate', () => {
     const initial = createInitialPhase1State(now);
     expect(resolveBootRoute(initial).name).toBe('OccasionCreateScreen');
+    expect(initial.walkthroughStep).toBe('createEvent');
 
     const oneOccasion = createEventWithSeeds(initial, occasionDraft('wedding', 'Wedding', '2027-08-02'), now);
     expect(resolveBootRoute(oneOccasion).name).toBe('OccasionDashboardScreen');
+    expect(oneOccasion.walkthroughStep).toBe('dashboardOverview');
 
     const twoOccasions = createEventWithSeeds(
       { ...oneOccasion, isPro: true },
@@ -307,6 +312,21 @@ describe('Farha Phase 1 planner logic', () => {
       availableAfterPlanned: -1000,
       status: 'watch',
     });
+  });
+
+  it('advances, restarts, and skips the first-run walkthrough guide', () => {
+    const initial = createInitialPhase1State(now);
+    const categoryStep = advanceWalkthrough(initial, undefined, now);
+    const budgetStep = advanceWalkthrough(categoryStep, undefined, now);
+    const skipped = skipWalkthrough(budgetStep, now);
+
+    expect(categoryStep.walkthroughStep).toBe('eventCategories');
+    expect(budgetStep.walkthroughStep).toBe('eventBudget');
+    expect(skipped.walkthroughStep).toBe('completed');
+
+    const withEvent = createEventWithSeeds(skipped, occasionDraft('wedding', 'Wedding', '2027-08-02'), now);
+    expect(restartWalkthrough(withEvent, now).walkthroughStep).toBe('dashboardOverview');
+    expect(advanceWalkthrough(withEvent, 'addTask', now).walkthroughStep).toBe('addTask');
   });
 
   it('keeps Phase 1 Pro purchase and restore behind a Play Billing adapter', async () => {

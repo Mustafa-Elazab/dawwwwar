@@ -61,11 +61,11 @@ export function usePlannerScreenChrome({
         <CurvedHeader
           title={title}
           subtitle={subtitle}
+          backLabel={t('farha.phase1.actions.back')}
           onBackPress={showBack ? controller.goBack : undefined}
           action={headerActions}
-          tipTitle={t('farha.phase1.tips.title')}
-          tipBody={t(`farha.phase1.tips.${getTipKey(controller.route.name)}`)}
-          tipCloseLabel={t('farha.phase1.confirm.ok')}
+          helpLabel={t('farha.phase1.walkthrough.replay')}
+          onHelpPress={controller.restartWalkthrough}
         />
       ),
       footer: undefined,
@@ -77,11 +77,3 @@ export function usePlannerScreenChrome({
     },
   };
 }
-
-const getTipKey = (routeName: string): string => {
-  if (routeName.includes('Create') || routeName.includes('Edit')) return 'create';
-  if (routeName.includes('Task')) return 'tasks';
-  if (routeName.includes('Share')) return 'share';
-  if (routeName.includes('Settings')) return 'settings';
-  return 'home';
-};

@@ -1,1 +1,1 @@
-export { GuidedTipOverlay } from './GuidedTipOverlay';
+export { AppWalkthroughGuide } from './AppWalkthroughGuide';

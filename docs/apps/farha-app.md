@@ -28,6 +28,8 @@ weddings, engagements, anniversaries, graduations, and other celebrations.
   `farha.phase1.v1`.
 - State management: Redux/Redux Toolkit is not used. The planner controller
   owns local offline state; this is still the right scale for Phase 1.
+- First-run education: the same offline state stores `walkthroughStep` so the
+  app can auto-run the walkthrough once and replay it from the header help icon.
 
 ## Unified Model
 
@@ -61,7 +63,7 @@ and money fields.
 | Screen | Route | Purpose |
 |---|---|---|
 | Splash | `SplashScreen` | Boot loading and route resolution. |
-| Guided tips | Header help icon | Replaces first-run onboarding with contextual how-to-use tips in an overlay. |
+| Walkthrough guide | App root + header help icon | Replaces first-run onboarding with a dimmed tooltip sequence: create occasion, categories, budget fields, Home, Tasks tab, Add task, and task form. |
 | Occasion create | `OccasionCreateScreen` | Creates an occasion with type, owned categories, spent/available/target money fields, and seeded unpaid task templates. |
 | Occasion list | `OccasionListScreen` | Pro multi-occasion switcher and add flow. |
 | Home | `OccasionDashboardScreen` | Curved header, countdown, task/money summary, Budget Health, next actions, share entry. |
@@ -84,8 +86,9 @@ but the active user flow is the unified Tasks model.
   `#7A2039`, `#F7E3E2`, `#FDF6F3`, `#C98995`, `#5C1B2E`, `#B08A90`.
 - `CurvedHeader` in `features/planner/components` provides the deep header and
   asymmetric blush content curve.
-- A help icon in the header opens a dimmed guided-tip overlay with a white
-  speech bubble and pointer, matching the provided reference pattern.
+- A help icon in the header restarts the app walkthrough. The guide uses a
+  dimmed overlay, highlighted target zone, pointer, and compact tooltip card,
+  matching the provided reference pattern.
 - Cards use cream backgrounds, softer shadows, larger radius, and press
   feedback through shared `AppCard`/`AppPressable`.
 - Task rows and dashboard cards use staggered Reanimated `FadeInUp` entrances.
@@ -97,8 +100,8 @@ but the active user flow is the unified Tasks model.
 - Farha registers Arabic and English strings in
   `apps/farha/src/app/i18n/phase1Resources.ts`.
 - New visible copy for Tasks, graduation, payment plans, and task deletion is
-  localized. The tips overlay, event category copy, starting budget fields, and
-  Budget Health feature are localized in Arabic and English.
+  localized. The walkthrough guide, event category copy, starting budget fields,
+  and Budget Health feature are localized in Arabic and English.
 - Main shared layout styles use start/end or `textAlign: 'auto'`; rendered RTL
   QA on device is still required before store release.
 
@@ -115,7 +118,8 @@ but the active user flow is the unified Tasks model.
 | 2026-08-09 | `pnpm --filter @dawwar/farha type-check` | done |
 | 2026-08-09 | `pnpm --filter @dawwar/farha test -- --runInBand` | done |
 | 2026-08-09 | `pnpm --filter @dawwar/farha lint` | done |
-| 2026-08-18 | Onboarding replaced with guided tips; occasion categories and Budget Health added | done |
+| 2026-08-18 | Onboarding route removed; occasion categories and Budget Health added | done |
+| 2026-08-18 | Generic tips replaced with first-run walkthrough tooltip guide | done |
 
 ## Ready-To-Publish Checklist
 

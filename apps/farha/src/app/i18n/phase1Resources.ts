@@ -82,13 +82,42 @@ export const phase1Resources = {
         over: 'Over target',
       },
     },
-    tips: {
-      title: 'How to use this screen',
-      home: 'Review your occasion health here: money, next task, and sharing are all one tap away.',
-      create: 'Start with the occasion type, choose only the categories you need, then enter what you spent, what you have, and your target.',
-      tasks: 'Each task starts unpaid. Add a cost only when needed, then log payments from the task row.',
-      share: 'Use this tab when you want to send a clean progress summary to family.',
-      settings: 'Language, reminders, Pro, and local data controls live here.',
+    walkthrough: {
+      replay: 'Show app walkthrough',
+      next: 'Next',
+      skip: 'Skip',
+      finish: 'Finish',
+      gotIt: 'Got it',
+      openTasks: 'Open tasks',
+      openTaskForm: 'Open task form',
+      createEvent: {
+        title: 'Create your first occasion',
+        body: 'Fill the title and date, then use this button to create the occasion and start planning.',
+      },
+      eventCategories: {
+        title: 'Choose only what belongs',
+        body: 'Each occasion owns its categories. Pick the vendors and cost groups you really need before tasks are seeded.',
+      },
+      eventBudget: {
+        title: 'Add your money starting point',
+        body: 'Already spent, money available, and need to spend help Farha calculate Budget Health later. After filling the form, tap Create event.',
+      },
+      dashboardOverview: {
+        title: 'Watch the plan from Home',
+        body: 'Home shows money health, task progress, the next action, and a quick share path for this occasion.',
+      },
+      tasksTab: {
+        title: 'Move to Tasks',
+        body: 'Use the bottom Tasks tab when you want the full checklist, payments, and custom actions.',
+      },
+      addTask: {
+        title: 'Add a real task',
+        body: 'Tap Add task to create your own action. Tasks start unpaid until you add cost or log a payment.',
+      },
+      taskForm: {
+        title: 'Build the task details',
+        body: 'Add title, category, date, notes, and optional cost details. Leave cost off for simple unpaid checklist tasks.',
+      },
     },
     tasks: {
       title: 'Tasks',
@@ -437,13 +466,42 @@ export const phase1Resources = {
         over: 'أعلى من الهدف',
       },
     },
-    tips: {
-      title: 'طريقة استخدام الشاشة',
-      home: 'راجعي حالة المناسبة هنا: الفلوس، المهمة القادمة، والمشاركة كلها قريبة.',
-      create: 'ابدئي بنوع المناسبة، اختاري التصنيفات المطلوبة فقط، ثم اكتبي المصروف والمتاح والهدف.',
-      tasks: 'كل مهمة تبدأ غير مدفوعة. أضيفي تكلفة عند الحاجة فقط، ثم سجلي الدفعات من صف المهمة.',
-      share: 'استخدمي هذا التبويب لإرسال ملخص واضح للعائلة.',
-      settings: 'اللغة، التذكيرات، برو، والتحكم في البيانات المحلية هنا.',
+    walkthrough: {
+      replay: 'عرض شرح التطبيق',
+      next: 'التالي',
+      skip: 'تخطي',
+      finish: 'إنهاء',
+      gotIt: 'فهمت',
+      openTasks: 'فتح المهام',
+      openTaskForm: 'فتح نموذج المهمة',
+      createEvent: {
+        title: 'أنشئي أول مناسبة',
+        body: 'اكتبي الاسم والتاريخ، ثم استخدمي هذا الزر لإنشاء المناسبة وبدء التخطيط.',
+      },
+      eventCategories: {
+        title: 'اختاري ما يخص المناسبة فقط',
+        body: 'كل مناسبة لها تصنيفات خاصة بها. اختاري الموردين ومجموعات التكلفة المطلوبة قبل إنشاء المهام.',
+      },
+      eventBudget: {
+        title: 'أضيفي نقطة بداية الفلوس',
+        body: 'المصروف بالفعل، والفلوس المتاحة، والمطلوب صرفه يساعدوا فرحة في حساب حالة الميزانية لاحقا. بعد ملء النموذج اضغطي إنشاء مناسبة.',
+      },
+      dashboardOverview: {
+        title: 'تابعي الخطة من الرئيسية',
+        body: 'الرئيسية تعرض حالة الفلوس، تقدم المهام، الخطوة القادمة، وطريق سريع لمشاركة ملخص المناسبة.',
+      },
+      tasksTab: {
+        title: 'انتقلي إلى المهام',
+        body: 'استخدمي تبويب المهام بالأسفل للوصول إلى القائمة الكاملة، الدفعات، والخطوات المخصصة.',
+      },
+      addTask: {
+        title: 'أضيفي مهمة فعلية',
+        body: 'اضغطي إضافة مهمة لإنشاء خطوة خاصة بك. كل مهمة تبدأ غير مدفوعة إلى أن تضيفي تكلفة أو تسجلي دفعة.',
+      },
+      taskForm: {
+        title: 'اكتبي تفاصيل المهمة',
+        body: 'أضيفي العنوان، التصنيف، التاريخ، الملاحظات، وتفاصيل التكلفة عند الحاجة. اتركي التكلفة مغلقة للمهام البسيطة.',
+      },
     },
     tasks: {
       title: 'المهام',

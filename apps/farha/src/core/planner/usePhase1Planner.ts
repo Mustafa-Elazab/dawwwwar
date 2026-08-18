@@ -4,6 +4,7 @@ import { Share } from 'react-native';
 import {
   clearAllPhase1Data,
   completeOnboarding,
+  advanceWalkthrough,
   createEventWithSeeds,
   createSharePayload,
   deleteEventCascade,
@@ -25,10 +26,13 @@ import {
   getTaskSummary,
   logTaskPayment,
   resolveBootRoute,
+  restartWalkthrough,
   setActiveEvent,
   setNotificationsEnabled,
   setProStatus,
   setTaskStatus,
+  setWalkthroughStep,
+  skipWalkthrough,
   updateEventWithTemplateDueDates,
   upsertChecklistItem,
   upsertPhase1BudgetItem,
@@ -46,6 +50,7 @@ import type {
   FarhaPhase1SavingsContribution,
   FarhaPhase1State,
   FarhaPhase1Task,
+  FarhaPhase1WalkthroughStep,
   Phase1Route,
   Phase1ScreenName,
   Phase1TabKey,
@@ -77,6 +82,7 @@ export interface Phase1PlannerController {
   activeCategories: FarhaPhase1BudgetCategory[];
   activeBudgetItems: FarhaPhase1Task[];
   activeChecklistItems: FarhaPhase1Task[];
+  walkthroughStep: FarhaPhase1WalkthroughStep;
   errorMessageKey?: string;
   reload: () => void;
   navigate: (name: Phase1ScreenName, params?: Phase1Route['params']) => void;
@@ -84,6 +90,10 @@ export interface Phase1PlannerController {
   goBack: () => void;
   openTab: (tab: Phase1TabKey) => void;
   completeOnboarding: () => void;
+  advanceWalkthrough: (nextStep?: FarhaPhase1WalkthroughStep) => void;
+  skipWalkthrough: () => void;
+  restartWalkthrough: () => void;
+  setWalkthroughStep: (step: FarhaPhase1WalkthroughStep) => void;
   createEvent: (draft: EventFormDraft) => boolean;
   updateEvent: (draft: EventFormDraft) => void;
   deleteEvent: (eventId: string) => void;
@@ -222,6 +232,22 @@ export const usePhase1Planner = (): Phase1PlannerController => {
     reset('OccasionCreateScreen');
   }, [persist, reset, state]);
 
+  const setWalkthroughStepAction = useCallback((step: FarhaPhase1WalkthroughStep) => {
+    persist(setWalkthroughStep(state, step));
+  }, [persist, state]);
+
+  const advanceWalkthroughAction = useCallback((nextStep?: FarhaPhase1WalkthroughStep) => {
+    persist(advanceWalkthrough(state, nextStep));
+  }, [persist, state]);
+
+  const skipWalkthroughAction = useCallback(() => {
+    persist(skipWalkthrough(state));
+  }, [persist, state]);
+
+  const restartWalkthroughAction = useCallback(() => {
+    persist(restartWalkthrough(state));
+  }, [persist, state]);
+
   const createEventAction = useCallback((draft: EventFormDraft) => {
     if (!state.isPro && state.occasions.length >= 1) {
       navigate('ProUpgradeScreen', { from: 'OccasionCreateScreen' });
@@ -336,6 +362,7 @@ export const usePhase1Planner = (): Phase1PlannerController => {
     activeCategories,
     activeBudgetItems: activeTasks,
     activeChecklistItems: activeTasks,
+    walkthroughStep: state.walkthroughStep,
     errorMessageKey,
     reload,
     navigate,
@@ -343,6 +370,10 @@ export const usePhase1Planner = (): Phase1PlannerController => {
     goBack,
     openTab,
     completeOnboarding: completeOnboardingAction,
+    advanceWalkthrough: advanceWalkthroughAction,
+    skipWalkthrough: skipWalkthroughAction,
+    restartWalkthrough: restartWalkthroughAction,
+    setWalkthroughStep: setWalkthroughStepAction,
     createEvent: createEventAction,
     updateEvent: updateEventAction,
     deleteEvent: deleteEventAction,

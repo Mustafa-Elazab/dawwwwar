@@ -19,6 +19,7 @@ import type {
   FarhaPhase1ScheduledNotification,
   FarhaPhase1State,
   FarhaPhase1Task,
+  FarhaPhase1WalkthroughStep,
   FarhaPhase1TaskCategoryKey,
   LegacyPhase1State,
   OccasionFormDraft,
@@ -34,6 +35,17 @@ import type {
 } from './phase1Types';
 
 export const FARHA_PHASE1_SCHEMA_VERSION = 2;
+
+export const phase1WalkthroughSteps: FarhaPhase1WalkthroughStep[] = [
+  'createEvent',
+  'eventCategories',
+  'eventBudget',
+  'dashboardOverview',
+  'tasksTab',
+  'addTask',
+  'taskForm',
+  'completed',
+];
 
 export const phase1EventTypes: FarhaPhase1EventType[] = [
   'engagement',
@@ -54,6 +66,7 @@ export const createInitialPhase1State = (now = new Date()): FarhaPhase1State => 
   occasions: [],
   tasks: [],
   scheduledNotifications: [],
+  walkthroughStep: 'createEvent',
   updatedAt: now.toISOString(),
 });
 
@@ -81,6 +94,7 @@ export const migratePhase1State = (
     occasions,
     tasks,
     scheduledNotifications: normalizeNotifications(state.scheduledNotifications ?? [], tasks),
+    walkthroughStep: normalizeWalkthroughStep(state.walkthroughStep),
     lastInterstitialShownAt: state.lastInterstitialShownAt,
     updatedAt: state.updatedAt ?? fallback.updatedAt,
   };
@@ -139,6 +153,7 @@ export const createOccasionWithSeeds = (
     activeOccasionId: occasion.id,
     occasions: [...state.occasions, occasion],
     tasks: [...state.tasks, ...seededTasks],
+    walkthroughStep: getPostCreateWalkthroughStep(state.walkthroughStep),
     updatedAt: timestamp,
   };
 
@@ -389,6 +404,34 @@ export const setNotificationsEnabled = (
     ),
   };
 };
+
+export const setWalkthroughStep = (
+  state: FarhaPhase1State,
+  step: FarhaPhase1WalkthroughStep,
+  now = new Date(),
+): FarhaPhase1State => ({
+  ...state,
+  walkthroughStep: step,
+  updatedAt: now.toISOString(),
+});
+
+export const advanceWalkthrough = (
+  state: FarhaPhase1State,
+  nextStep?: FarhaPhase1WalkthroughStep,
+  now = new Date(),
+): FarhaPhase1State =>
+  setWalkthroughStep(state, nextStep ?? getNextWalkthroughStep(state.walkthroughStep), now);
+
+export const skipWalkthrough = (
+  state: FarhaPhase1State,
+  now = new Date(),
+): FarhaPhase1State => setWalkthroughStep(state, 'completed', now);
+
+export const restartWalkthrough = (
+  state: FarhaPhase1State,
+  now = new Date(),
+): FarhaPhase1State =>
+  setWalkthroughStep(state, state.occasions.length ? 'dashboardOverview' : 'createEvent', now);
 
 export const clearAllPhase1Data = (now = new Date()): FarhaPhase1State =>
   createInitialPhase1State(now);
@@ -758,6 +801,20 @@ const seedTasks = (occasion: FarhaPhase1Occasion, now: Date): FarhaPhase1Task[] 
   }));
 };
 
+const getNextWalkthroughStep = (
+  step: FarhaPhase1WalkthroughStep,
+): FarhaPhase1WalkthroughStep => {
+  const index = phase1WalkthroughSteps.indexOf(step);
+  return phase1WalkthroughSteps[index + 1] ?? 'completed';
+};
+
+const getPostCreateWalkthroughStep = (
+  step: FarhaPhase1WalkthroughStep,
+): FarhaPhase1WalkthroughStep =>
+  step === 'createEvent' || step === 'eventCategories' || step === 'eventBudget'
+    ? 'dashboardOverview'
+    : step;
+
 const refreshTaskNotifications = (
   state: FarhaPhase1State,
   occasionId: string,
@@ -959,6 +1016,11 @@ const normalizeCategoryKeys = (
   const keys = categoryKeys?.filter((key) => phase1TaskCategories.includes(key)) ?? phase1TaskCategories;
   return keys.length ? Array.from(new Set(keys)) : phase1TaskCategories;
 };
+
+const normalizeWalkthroughStep = (
+  step?: FarhaPhase1WalkthroughStep,
+): FarhaPhase1WalkthroughStep =>
+  step && phase1WalkthroughSteps.includes(step) ? step : 'createEvent';
 
 const inferCategoryFromTitleKey = (titleKey: string): FarhaPhase1TaskCategoryKey | undefined => {
   if (titleKey.includes('Venue')) return 'venue';

@@ -59,6 +59,15 @@ export type ChecklistSource = TaskSource;
 export type TaskPaymentStatus = 'unpaid' | 'partial' | 'paid';
 export type BudgetItemPaymentStatus = TaskPaymentStatus;
 export type BudgetBadgeStatus = 'over' | 'on';
+export type FarhaPhase1WalkthroughStep =
+  | 'createEvent'
+  | 'eventCategories'
+  | 'eventBudget'
+  | 'dashboardOverview'
+  | 'tasksTab'
+  | 'addTask'
+  | 'taskForm'
+  | 'completed';
 
 export interface Phase1Route {
   name: Phase1ScreenName;
@@ -174,6 +183,7 @@ export interface FarhaPhase1State {
   occasions: FarhaPhase1Occasion[];
   tasks: FarhaPhase1Task[];
   scheduledNotifications: FarhaPhase1ScheduledNotification[];
+  walkthroughStep: FarhaPhase1WalkthroughStep;
   lastInterstitialShownAt?: string;
   updatedAt: string;
 }
@@ -188,6 +198,7 @@ export interface LegacyPhase1State {
   budgetCategories?: FarhaPhase1BudgetCategory[];
   budgetItems?: FarhaPhase1BudgetItem[];
   checklistItems?: FarhaPhase1ChecklistItem[];
+  walkthroughStep?: FarhaPhase1WalkthroughStep;
   scheduledNotifications?: Array<
     FarhaPhase1ScheduledNotification | {
       id: string;
