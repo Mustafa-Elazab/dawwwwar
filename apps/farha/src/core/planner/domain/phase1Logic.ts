@@ -141,6 +141,7 @@ export const createOccasionWithSeeds = (
     budgetSpent: draft.budgetSpent,
     budgetAvailable: draft.budgetAvailable,
     budgetTarget: draft.budgetTarget,
+    coverPhotoUri: normalizeOptionalText(draft.coverPhotoUri),
     createdAt: timestamp,
     updatedAt: timestamp,
   };
@@ -188,6 +189,7 @@ export const updateOccasionWithTemplateDueDates = (
     budgetSpent: draft.budgetSpent,
     budgetAvailable: draft.budgetAvailable,
     budgetTarget: draft.budgetTarget,
+    coverPhotoUri: normalizeOptionalText(draft.coverPhotoUri),
     updatedAt: timestamp,
   };
   const tasks = state.tasks.map((task) => {
@@ -959,6 +961,7 @@ const normalizeOccasions = (occasions: FarhaPhase1Occasion[]): FarhaPhase1Occasi
     budgetSpent: Number.isFinite(occasion.budgetSpent) ? occasion.budgetSpent : 0,
     budgetAvailable: Number.isFinite(occasion.budgetAvailable) ? occasion.budgetAvailable : 0,
     budgetTarget: Number.isFinite(occasion.budgetTarget) ? occasion.budgetTarget : 0,
+    coverPhotoUri: normalizeOptionalText(occasion.coverPhotoUri),
   }));
 
 const normalizeTasks = (

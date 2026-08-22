@@ -3,6 +3,7 @@ import React from 'react';
 import { PlannerControllerProvider } from '../../core/planner/context/PlannerControllerContext';
 import { usePhase1Planner } from '../../core/planner/usePhase1Planner';
 import { AppWalkthroughGuide } from '../tips/components';
+import { WalkthroughTargetProvider } from '../tips/components/WalkthroughTargetContext';
 import { FarhaNavigator } from '../../navigation/FarhaNavigator';
 
 export function FarhaPlannerApp() {
@@ -10,8 +11,10 @@ export function FarhaPlannerApp() {
 
   return (
     <PlannerControllerProvider controller={controller}>
-      <FarhaNavigator controller={controller} />
-      <AppWalkthroughGuide />
+      <WalkthroughTargetProvider>
+        <FarhaNavigator controller={controller} />
+        <AppWalkthroughGuide />
+      </WalkthroughTargetProvider>
     </PlannerControllerProvider>
   );
 }

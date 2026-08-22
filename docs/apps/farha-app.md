@@ -11,7 +11,8 @@ weddings, engagements, anniversaries, graduations, and other celebrations.
 - Boundary: no backend changes, no changes to customer/driver/merchant/admin,
   no vendor directory work, and no Phase 2/Phase 3 work.
 - Native scope: existing Android packaging, splash/icon assets, Firebase,
-  AdMob, and Play Billing wiring remain in place.
+  AdMob, Play Billing wiring, and local photo-picker metadata remain in place.
+  Ad rendering is currently disabled with `ADS_ENABLED = false`.
 
 ## Architecture Snapshot
 
@@ -36,7 +37,8 @@ weddings, engagements, anniversaries, graduations, and other celebrations.
 `Occasion` replaces the old UI/code term “Event”:
 
 - `id`, `type`, `title`, `date`, `categoryKeys`, `budgetSpent`,
-  `budgetAvailable`, `budgetTarget`, `createdAt`, `updatedAt`
+  `budgetAvailable`, `budgetTarget`, optional `coverPhotoUri`, `createdAt`,
+  `updatedAt`
 - Types: `wedding`, `engagement`, `anniversary`, `graduation`, `other`
 - Each occasion owns its own selected task categories. Create/edit uses a
   horizontal occasion-type list plus category chips.
@@ -64,13 +66,13 @@ and money fields.
 |---|---|---|
 | Splash | `SplashScreen` | Boot loading and route resolution. |
 | Walkthrough guide | App root + header help icon | Replaces first-run onboarding with a dimmed tooltip sequence: create occasion, categories, budget fields, Home, Tasks tab, Add task, and task form. |
-| Occasion create | `OccasionCreateScreen` | Creates an occasion with type, owned categories, spent/available/target money fields, and seeded unpaid task templates. |
+| Occasion create | `OccasionCreateScreen` | Creates an occasion with type, owned categories, optional local cover photo, spent/available/target money fields, and seeded unpaid task templates. |
 | Occasion list | `OccasionListScreen` | Pro multi-occasion switcher and add flow. |
-| Home | `OccasionDashboardScreen` | Curved header, countdown, task/money summary, Budget Health, next actions, share entry. |
-| Occasion edit | `OccasionEditScreen` | Edit/delete an occasion and refresh template dates. |
+| Home | `OccasionDashboardScreen` | Curved header with optional cover photo, countdown, task/money summary, Budget Health, next actions, share entry. |
+| Occasion edit | `OccasionEditScreen` | Edit/delete an occasion, change/remove the optional cover photo, and refresh template dates. |
 | Tasks | `TaskListScreen` | Unified task list grouped by due date or category, status quick actions, payment quick logging. |
 | Task form | `TaskFormScreen` | Add/edit title, category, due date, status, notes, optional cost, optional installments. |
-| Share | `ShareCardPreviewScreen` | Permanent tab with preview and native text share payload. |
+| Share | `ShareCardPreviewScreen` | Permanent tab with a styled preview card, optional cover-photo background, and native text share payload. |
 | Pro | `ProUpgradeScreen` | Pro upgrade/restore via the replaceable billing client. |
 | Settings | `SettingsScreen` | Language, notifications toggle, Pro state, about, and clear data. |
 
@@ -86,11 +88,12 @@ but the active user flow is the unified Tasks model.
   `#7A2039`, `#F7E3E2`, `#FDF6F3`, `#C98995`, `#5C1B2E`, `#B08A90`.
 - `CurvedHeader` in `features/planner/components` provides the deep header and
   asymmetric blush content curve.
-- A help icon in the header restarts the app walkthrough. The guide uses a
-  dimmed overlay, highlighted target zone, pointer, and compact tooltip card,
-  matching the provided reference pattern.
-- Cards use cream backgrounds, softer shadows, larger radius, and press
-  feedback through shared `AppCard`/`AppPressable`.
+- A help icon in the header restarts the app walkthrough. The guide registers
+  real target elements, measures them with `measureInWindow` at show-time,
+  scrolls off-screen targets into view, then positions the dimmed overlay,
+  highlighted target zone, pointer, and compact tooltip card.
+- Cards and inputs use soft filled surfaces, subtle borders, larger radius, and
+  press feedback through shared `AppCard`/`AppPressable`.
 - Task rows and dashboard cards use staggered Reanimated `FadeInUp` entrances.
 - Marking a task done shows a short check pop on the completed row.
 - Bottom tabs use a filled deep-color active icon circle.
@@ -99,7 +102,8 @@ but the active user flow is the unified Tasks model.
 
 - Farha registers Arabic and English strings in
   `apps/farha/src/app/i18n/phase1Resources.ts`.
-- New visible copy for Tasks, graduation, payment plans, and task deletion is
+- New visible copy for Tasks, graduation, payment plans, task deletion, cover
+  photos, share-card save-image status, and picker errors is
   localized. The walkthrough guide, event category copy, starting budget fields,
   and Budget Health feature are localized in Arabic and English.
 - Main shared layout styles use start/end or `textAlign: 'auto'`; rendered RTL
@@ -120,6 +124,7 @@ but the active user flow is the unified Tasks model.
 | 2026-08-09 | `pnpm --filter @dawwar/farha lint` | done |
 | 2026-08-18 | Onboarding route removed; occasion categories and Budget Health added | done |
 | 2026-08-18 | Generic tips replaced with first-run walkthrough tooltip guide | done |
+| 2026-08-22 | Walkthrough target measurement/auto-scroll, share-card redesign, picker-only date display, optional cover photos, and ad feature flag | done |
 
 ## Ready-To-Publish Checklist
 
@@ -144,6 +149,6 @@ but the active user flow is the unified Tasks model.
   existing notification records.
 - Run rendered Arabic/English RTL QA on emulator/device.
 - Run offline kill/reopen data-loss QA on device.
-- Verify Android release signing, Play Billing products, AdMob units, UMP
-  consent, privacy policy, and Play Console tester gates with human-owned
-  accounts.
+- Verify Android release signing, Play Billing products, AdMob units,
+  `ADS_ENABLED` rollout timing, UMP consent, privacy policy, and Play Console
+  tester gates with human-owned accounts.

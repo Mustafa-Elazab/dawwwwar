@@ -67,7 +67,6 @@ function ChoiceChip({ label, selected, onPress, selectedColor }: ChoiceChipProps
       style={[
         {
           minHeight: 42,
-          maxWidth: '48%',
           borderRadius: 999,
           borderWidth: 1,
           paddingHorizontal: 12,

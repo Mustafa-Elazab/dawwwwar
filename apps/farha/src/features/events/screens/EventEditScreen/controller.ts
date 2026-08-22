@@ -8,6 +8,7 @@ import {
   getScreenEvent,
 } from '../../../planner/utils/helpers';
 import { eventToForm, type EventFormState } from '../../utils/eventForm';
+import { pickOccasionCoverPhoto } from '../../utils/coverPhotoPicker';
 
 export function useController() {
   const appController = usePlannerController();
@@ -15,6 +16,7 @@ export function useController() {
   const event = getScreenEvent(appController);
   const [form, setForm] = useState<EventFormState>(eventToForm(event));
   const [submitted, setSubmitted] = useState(false);
+  const [photoErrorKey, setPhotoErrorKey] = useState<string | undefined>();
 
   useEffect(() => setForm(eventToForm(event)), [event]);
 
@@ -38,11 +40,24 @@ export function useController() {
     );
   };
 
+  const pickCoverPhoto = async () => {
+    try {
+      setPhotoErrorKey(undefined);
+      const coverPhotoUri = await pickOccasionCoverPhoto();
+      if (coverPhotoUri) setForm((current) => ({ ...current, coverPhotoUri }));
+    } catch {
+      setPhotoErrorKey('farha.phase1.errors.photoPicker');
+    }
+  };
+
   return {
     event,
     form,
     submitted,
+    photoErrorKey,
     setForm,
+    pickCoverPhoto,
+    removeCoverPhoto: () => setForm((current) => ({ ...current, coverPhotoUri: undefined })),
     save,
     deleteEvent,
   };

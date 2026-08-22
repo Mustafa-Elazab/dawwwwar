@@ -93,6 +93,7 @@ export interface FarhaPhase1Occasion {
   budgetSpent: number;
   budgetAvailable: number;
   budgetTarget: number;
+  coverPhotoUri?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -223,6 +224,7 @@ export interface OccasionFormDraft {
   budgetSpent: number;
   budgetAvailable: number;
   budgetTarget: number;
+  coverPhotoUri?: string;
 }
 
 export type EventFormDraft = OccasionFormDraft;

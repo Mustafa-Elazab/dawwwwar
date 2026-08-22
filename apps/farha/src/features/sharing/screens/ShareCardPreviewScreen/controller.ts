@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 
 import {
   calculateBudgetTotals,
-  createSharePayload,
   getTaskSummary,
 } from '../../../../core/planner/domain/phase1Logic';
 import { usePlannerController } from '../../../../core/planner/context/PlannerControllerContext';
@@ -19,16 +18,10 @@ export function useController() {
     () => getTaskSummary(appController.getEventTasks(event?.id)),
     [appController, event?.id],
   );
-  const sharePayload = useMemo(
-    () => (event ? createSharePayload(appController.state, event.id) : ''),
-    [appController.state, event],
-  );
-
   return {
     event,
     totals,
     summary,
-    sharePayload,
     share: appController.shareActiveEvent,
   };
 }

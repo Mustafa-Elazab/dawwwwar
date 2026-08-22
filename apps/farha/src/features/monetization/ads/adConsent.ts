@@ -1,8 +1,12 @@
 import mobileAds, { AdsConsent } from 'react-native-google-mobile-ads';
 
+export const ADS_ENABLED = false;
+
 let consentReady = false;
 
 export async function initializeFarhaAds(): Promise<void> {
+  if (!ADS_ENABLED) return;
+
   try {
     await AdsConsent.requestInfoUpdate();
     await AdsConsent.loadAndShowConsentFormIfRequired();
@@ -14,5 +18,5 @@ export async function initializeFarhaAds(): Promise<void> {
 }
 
 export function canRequestFarhaAds(isPro: boolean): boolean {
-  return !isPro && consentReady;
+  return ADS_ENABLED && !isPro && consentReady;
 }

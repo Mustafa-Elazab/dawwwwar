@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   I18nManager,
   Modal,
@@ -16,6 +16,7 @@ import type {
   FarhaPhase1WalkthroughStep,
   Phase1ScreenName,
 } from '../../../core/planner/domain/phase1Types';
+import { useWalkthroughTargetController } from './WalkthroughTargetContext';
 
 interface TargetRect {
   top: number;
@@ -84,12 +85,35 @@ export function AppWalkthroughGuide() {
   const { colors } = useTheme();
   const { width, height } = useWindowDimensions();
   const controller = usePlannerController();
+  const targetController = useWalkthroughTargetController();
+  const [measuredTarget, setMeasuredTarget] = useState<TargetRect | undefined>();
   const step = getVisibleStep(controller.walkthroughStep, controller.route.name);
+
+  useEffect(() => {
+    let cancelled = false;
+    setMeasuredTarget(undefined);
+
+    if (!step || !targetController) return undefined;
+
+    const measure = async () => {
+      const nextTarget = await targetController.measureTarget(step, height);
+      if (!cancelled) setMeasuredTarget(nextTarget);
+    };
+
+    const firstMeasure = setTimeout(measure, 80);
+    const secondMeasure = setTimeout(measure, 420);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(firstMeasure);
+      clearTimeout(secondMeasure);
+    };
+  }, [height, step, targetController]);
 
   if (!step || controller.status !== 'ready') return null;
 
   const config = STEP_CONFIG[step];
-  const target = getTargetRect(step, width, height);
+  const target = measuredTarget ?? getTargetRect(step, width, height);
   const targetCenter = target.left + target.width / 2;
   const isTooltipAboveTarget = target.top > height * 0.52;
   const tooltipTop = isTooltipAboveTarget

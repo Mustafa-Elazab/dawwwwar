@@ -15,7 +15,6 @@ export function OnboardingWelcomeScreen() {
   const ctrl = useController();
   const screen = usePlannerScreenChrome({
     title: t('farha.phase1.onboarding.title'),
-    subtitle: t('farha.phase1.onboarding.subtitle'),
   });
 
   return (

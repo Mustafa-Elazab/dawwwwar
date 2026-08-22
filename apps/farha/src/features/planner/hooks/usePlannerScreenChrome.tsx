@@ -14,6 +14,7 @@ interface PlannerScreenChromeOptions {
   showBack?: boolean;
   showTabs?: boolean;
   headerActions?: React.ReactNode;
+  coverPhotoUri?: string;
 }
 
 interface PlannerScreenChrome {
@@ -41,6 +42,7 @@ export function usePlannerScreenChrome({
   subtitle,
   showBack,
   headerActions,
+  coverPhotoUri,
 }: PlannerScreenChromeOptions): PlannerScreenChrome {
   const { t } = useTranslation();
   const { colors } = useTheme();
@@ -66,6 +68,7 @@ export function usePlannerScreenChrome({
           action={headerActions}
           helpLabel={t('farha.phase1.walkthrough.replay')}
           onHelpPress={controller.restartWalkthrough}
+          coverPhotoUri={coverPhotoUri}
         />
       ),
       footer: undefined,

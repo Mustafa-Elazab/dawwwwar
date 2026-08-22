@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { ScrollView, View } from 'react-native';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { useTranslation } from '@dawwar/i18n';
@@ -18,6 +18,7 @@ import { BudgetSummaryCard } from '../../../budget/components';
 import { FarhaAdBanner } from '../../../monetization/ads/FarhaAdBanner';
 import { usePlannerScreenChrome } from '../../../planner/hooks/usePlannerScreenChrome';
 import { MissingEventState } from '../../../planner/states/MissingEventState';
+import { WalkthroughTarget } from '../../../tips/components/WalkthroughTargetContext';
 import { TaskRow } from '../../components';
 import { useController } from './controller';
 import { createStyles } from './styles';
@@ -26,6 +27,7 @@ export function TaskListScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
+  const scrollRef = useRef<ScrollView>(null);
   const ctrl = useController();
   const screen = usePlannerScreenChrome({
     title: t('farha.phase1.tasks.title'),
@@ -37,7 +39,7 @@ export function TaskListScreen() {
 
   return (
     <AppScreenTemplate {...screen.templateProps}>
-      <ScrollView {...screen.scrollViewProps}>
+      <ScrollView ref={scrollRef} {...screen.scrollViewProps}>
         <Animated.View entering={FadeInUp.duration(260)}>
           <BudgetSummaryCard title={t('farha.phase1.tasks.summaryTitle')} totals={ctrl.totals} />
         </Animated.View>
@@ -60,7 +62,9 @@ export function TaskListScreen() {
             onChange={(key) => ctrl.setGrouping(key === 'category' ? 'category' : 'dueDate')}
           />
         </View>
-        <AppButton label={t('farha.phase1.actions.addTask')} onPress={ctrl.addTask} fullWidth />
+        <WalkthroughTarget step="addTask" scrollRef={scrollRef}>
+          <AppButton label={t('farha.phase1.actions.addTask')} onPress={ctrl.addTask} fullWidth />
+        </WalkthroughTarget>
         <FarhaAdBanner isPro={ctrl.isPro} placement="tasks" />
         {ctrl.paymentTask ? (
           <View style={styles.paymentBox}>

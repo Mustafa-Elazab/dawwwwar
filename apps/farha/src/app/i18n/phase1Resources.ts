@@ -33,6 +33,9 @@ export const phase1Resources = {
       shareResults: 'Share results',
       share: 'Share',
       saveImage: 'Save image',
+      addCoverPhoto: 'Add cover photo',
+      changeCoverPhoto: 'Change photo',
+      removeCoverPhoto: 'Remove photo',
       upgrade: 'Upgrade',
       restorePurchase: 'Restore purchase',
       clearAllData: 'Clear all data',
@@ -59,6 +62,9 @@ export const phase1Resources = {
       titlePlaceholder: 'e.g. My wedding',
       typeLabel: 'Occasion type',
       categoriesLabel: 'Occasion categories',
+      coverPhotoLabel: 'Cover photo',
+      coverPhotoBody: 'Add an optional photo from this device to personalize the dashboard and share card.',
+      coverPhotoSelected: 'Cover photo selected',
     },
     eventEdit: {
       title: 'Edit event',
@@ -210,7 +216,9 @@ export const phase1Resources = {
       title: 'Share card',
       subtitle: 'Preview the summary before sharing.',
       budgetLine: 'Budget: {{planned}} planned / {{actual}} actual',
+      tasks: 'Tasks',
       madeWith: 'Made with Farha',
+      saveImageUnavailable: 'Image saving is coming later. Sharing is available now.',
     },
     pro: {
       title: 'Farha Pro',
@@ -245,7 +253,7 @@ export const phase1Resources = {
     labels: {
       eventTitle: 'Event title',
       eventDate: 'Event date',
-      datePlaceholder: 'YYYY-MM-DD',
+      datePlaceholder: 'Choose date',
       planned: 'Planned',
       actual: 'Actual',
       deposits: 'Deposits',
@@ -302,7 +310,7 @@ export const phase1Resources = {
     validation: {
       required: 'Required',
       invalidAmount: 'Enter a valid amount',
-      invalidDate: 'Use YYYY-MM-DD',
+      invalidDate: 'Choose a valid date',
       depositOverTotal: 'Deposit is more than the total',
     },
     countdown: {
@@ -331,6 +339,7 @@ export const phase1Resources = {
       load: 'Farha could not load local data. Try again.',
       save: 'Farha could not save local data. Try again.',
       billing: 'Farha could not complete the Pro action. Try again.',
+      photoPicker: 'Farha could not open the photo picker. Try again.',
       missingEvent: 'Event not found',
       missingCategory: 'Category not found',
     },
@@ -417,6 +426,9 @@ export const phase1Resources = {
       shareResults: 'مشاركة الملخص',
       share: 'مشاركة',
       saveImage: 'حفظ صورة',
+      addCoverPhoto: 'إضافة صورة غلاف',
+      changeCoverPhoto: 'تغيير الصورة',
+      removeCoverPhoto: 'إزالة الصورة',
       upgrade: 'ترقية',
       restorePurchase: 'استعادة الشراء',
       clearAllData: 'مسح كل البيانات',
@@ -443,6 +455,9 @@ export const phase1Resources = {
       titlePlaceholder: 'مثلا: فرحي',
       typeLabel: 'نوع المناسبة',
       categoriesLabel: 'تصنيفات المناسبة',
+      coverPhotoLabel: 'صورة الغلاف',
+      coverPhotoBody: 'أضيفي صورة اختيارية من هذا الجهاز لتظهر في الرئيسية وكارت المشاركة.',
+      coverPhotoSelected: 'تم اختيار صورة الغلاف',
     },
     eventEdit: {
       title: 'تعديل المناسبة',
@@ -594,7 +609,9 @@ export const phase1Resources = {
       title: 'كارت المشاركة',
       subtitle: 'راجعي الملخص قبل المشاركة.',
       budgetLine: 'الميزانية: {{planned}} مخطط / {{actual}} فعلي',
+      tasks: 'المهام',
       madeWith: 'تم بواسطة فرحة',
+      saveImageUnavailable: 'حفظ الصورة سيضاف لاحقا. المشاركة متاحة الآن.',
     },
     pro: {
       title: 'فرحة برو',
@@ -629,7 +646,7 @@ export const phase1Resources = {
     labels: {
       eventTitle: 'اسم المناسبة',
       eventDate: 'تاريخ المناسبة',
-      datePlaceholder: 'YYYY-MM-DD',
+      datePlaceholder: 'اختيار التاريخ',
       planned: 'المخطط',
       actual: 'الفعلي',
       deposits: 'العربون',
@@ -686,7 +703,7 @@ export const phase1Resources = {
     validation: {
       required: 'مطلوب',
       invalidAmount: 'اكتبي رقم صحيح',
-      invalidDate: 'استخدمي YYYY-MM-DD',
+      invalidDate: 'اختاري تاريخا صحيحا',
       depositOverTotal: 'العربون أكبر من الإجمالي',
     },
     countdown: {
@@ -715,6 +732,7 @@ export const phase1Resources = {
       load: 'لم نتمكن من تحميل البيانات المحلية. حاولي مرة أخرى.',
       save: 'لم نتمكن من حفظ البيانات المحلية. حاولي مرة أخرى.',
       billing: 'لم نتمكن من إكمال إجراء Pro. حاولي مرة أخرى.',
+      photoPicker: 'لم نتمكن من فتح اختيار الصور. حاولي مرة أخرى.',
       missingEvent: 'المناسبة غير موجودة',
       missingCategory: 'التصنيف غير موجود',
     },

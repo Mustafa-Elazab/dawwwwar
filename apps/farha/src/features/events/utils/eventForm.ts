@@ -15,6 +15,7 @@ export interface EventFormState {
   budgetSpent: number;
   budgetAvailable: number;
   budgetTarget: number;
+  coverPhotoUri?: string;
 }
 
 export const getDefaultFutureDate = (): string => {
@@ -43,5 +44,6 @@ export const eventToForm = (event?: FarhaPhase1Event): EventFormState => {
     budgetSpent: event.budgetSpent,
     budgetAvailable: event.budgetAvailable,
     budgetTarget: event.budgetTarget,
+    coverPhotoUri: event.coverPhotoUri,
   };
 };

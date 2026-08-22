@@ -2,17 +2,22 @@ import React, { useMemo, useState } from 'react';
 import {
   I18nManager,
   Modal,
+  Platform,
   Pressable,
   StyleSheet,
+  View,
   type StyleProp,
   type ViewStyle,
-  View,
 } from 'react-native';
+import DateTimePicker, {
+  DateTimePickerAndroid,
+  type DateTimePickerEvent,
+} from '@react-native-community/datetimepicker';
 import { i18n, useTranslation } from '@dawwar/i18n';
 import { useTheme } from '@dawwar/theme';
-import { AppIcon, AppPressable, AppText } from '@dawwar/ui';
 import type { AppColors } from '@dawwar/theme';
 import { radius, spacing } from '@dawwar/theme';
+import { AppIcon, AppPressable, AppText } from '@dawwar/ui';
 
 interface DateFieldProps {
   label: string;
@@ -38,27 +43,38 @@ export function DateField({
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const [visible, setVisible] = useState(false);
-  const [viewDate, setViewDate] = useState(() => parseIsoDate(value) ?? todayUtc());
-
   const selectedDate = parseIsoDate(value);
+  const [visible, setVisible] = useState(false);
+  const [iosDraftDate, setIosDraftDate] = useState(() => selectedDate ?? today());
   const locale = i18n.language === 'ar' ? 'ar-EG' : 'en-US';
-  const monthTitle = formatMonthTitle(viewDate, locale);
-  const weekdays = useMemo(() => getWeekdays(locale), [locale]);
-  const days = useMemo(() => getCalendarDays(viewDate), [viewDate]);
+  const displayValue = selectedDate ? formatSelectedDate(selectedDate, locale) : '';
 
   const open = () => {
-    setViewDate(selectedDate ?? todayUtc());
-    setVisible(true);
-  };
+    const pickerDate = selectedDate ?? today();
+    setIosDraftDate(pickerDate);
 
-  const selectDate = (date: Date) => {
-    onChange(toIsoDate(date));
-    setVisible(false);
+    if (Platform.OS === 'android') {
+      DateTimePickerAndroid.open({
+        value: pickerDate,
+        mode: 'date',
+        display: 'default',
+        onChange: (_event: DateTimePickerEvent, date?: Date) => {
+          if (date) onChange(toIsoDate(date));
+        },
+      });
+      return;
+    }
+
+    setVisible(true);
   };
 
   const clear = () => {
     onChange('');
+    setVisible(false);
+  };
+
+  const confirmIosDate = () => {
+    onChange(toIsoDate(iosDraftDate));
     setVisible(false);
   };
 
@@ -71,10 +87,7 @@ export function DateField({
         accessibilityRole="button"
         accessibilityLabel={t('farha.phase1.calendar.open')}
         testID={testID}
-        style={[
-          styles.field,
-          error ? { borderColor: colors.error } : null,
-        ]}
+        style={[styles.field, error ? { borderColor: colors.error } : null]}
         onPress={open}
       >
         <AppText
@@ -84,7 +97,7 @@ export function DateField({
           numberOfLines={1}
           style={styles.fieldText}
         >
-          {value || placeholder || t('farha.phase1.labels.datePlaceholder')}
+          {displayValue || placeholder || t('farha.phase1.labels.datePlaceholder')}
         </AppText>
         <AppIcon name="calendar-month-outline" size={22} color={colors.icon} />
       </AppPressable>
@@ -111,76 +124,15 @@ export function DateField({
               </AppPressable>
             </View>
 
-            <View style={styles.monthRow}>
-              <AppPressable
-                accessibilityRole="button"
-                accessibilityLabel={t('farha.phase1.calendar.previousMonth')}
-                style={styles.iconButton}
-                onPress={() => setViewDate(addMonths(viewDate, -1))}
-              >
-                <AppIcon
-                  name={I18nManager.isRTL ? 'chevron-right' : 'chevron-left'}
-                  size={24}
-                  color={colors.text}
-                />
-              </AppPressable>
-              <AppText variant="label" align="center" style={styles.monthTitle}>
-                {monthTitle}
-              </AppText>
-              <AppPressable
-                accessibilityRole="button"
-                accessibilityLabel={t('farha.phase1.calendar.nextMonth')}
-                style={styles.iconButton}
-                onPress={() => setViewDate(addMonths(viewDate, 1))}
-              >
-                <AppIcon
-                  name={I18nManager.isRTL ? 'chevron-left' : 'chevron-right'}
-                  size={24}
-                  color={colors.text}
-                />
-              </AppPressable>
-            </View>
-
-            <View style={styles.weekdayRow}>
-              {weekdays.map((weekday) => (
-                <AppText key={weekday} variant="caption" color={colors.textSecondary} align="center" style={styles.weekday}>
-                  {weekday}
-                </AppText>
-              ))}
-            </View>
-
-            <View style={styles.dayGrid}>
-              {days.map((date, index) => {
-                const key = date ? toIsoDate(date) : `empty-${index}`;
-                const selected = !!date && !!selectedDate && toIsoDate(date) === toIsoDate(selectedDate);
-                const today = !!date && toIsoDate(date) === toIsoDate(todayUtc());
-
-                return (
-                  <Pressable
-                    key={key}
-                    accessibilityRole={date ? 'button' : undefined}
-                    accessibilityState={selected ? { selected: true } : undefined}
-                    disabled={!date}
-                    style={[
-                      styles.dayButton,
-                      today ? styles.todayButton : null,
-                      selected ? { backgroundColor: colors.primary, borderColor: colors.primary } : null,
-                    ]}
-                    onPress={() => date && selectDate(date)}
-                  >
-                    {date ? (
-                      <AppText
-                        variant="label"
-                        align="center"
-                        color={selected ? colors.primaryText : colors.text}
-                      >
-                        {String(date.getUTCDate())}
-                      </AppText>
-                    ) : null}
-                  </Pressable>
-                );
-              })}
-            </View>
+            <DateTimePicker
+              value={iosDraftDate}
+              mode="date"
+              display="spinner"
+              locale={locale}
+              onChange={(_event, date) => {
+                if (date) setIosDraftDate(date);
+              }}
+            />
 
             <View style={styles.actions}>
               {allowClear ? (
@@ -190,9 +142,18 @@ export function DateField({
                   </AppText>
                 </AppPressable>
               ) : null}
-              <AppPressable accessibilityRole="button" style={styles.actionButton} onPress={() => setVisible(false)}>
+              <AppPressable
+                accessibilityRole="button"
+                style={styles.actionButton}
+                onPress={() => setVisible(false)}
+              >
                 <AppText variant="label" color={colors.primary} align="center">
                   {t('farha.phase1.confirm.cancel')}
+                </AppText>
+              </AppPressable>
+              <AppPressable accessibilityRole="button" style={styles.actionButton} onPress={confirmIosDate}>
+                <AppText variant="label" color={colors.primary} align="center">
+                  {t('farha.phase1.confirm.ok')}
                 </AppText>
               </AppPressable>
             </View>
@@ -203,19 +164,19 @@ export function DateField({
   );
 }
 
-const todayUtc = () => {
+const today = () => {
   const now = new Date();
-  return new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate());
 };
 
 const parseIsoDate = (value: string) => {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return undefined;
   const [year, month, day] = value.split('-').map(Number);
-  const date = new Date(Date.UTC(year, month - 1, day));
+  const date = new Date(year, month - 1, day);
   if (
-    date.getUTCFullYear() !== year ||
-    date.getUTCMonth() !== month - 1 ||
-    date.getUTCDate() !== day
+    date.getFullYear() !== year ||
+    date.getMonth() !== month - 1 ||
+    date.getDate() !== day
   ) {
     return undefined;
   }
@@ -223,57 +184,29 @@ const parseIsoDate = (value: string) => {
   return date;
 };
 
-const toIsoDate = (date: Date) => date.toISOString().slice(0, 10);
-
-const addMonths = (date: Date, months: number) =>
-  new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + months, 1));
-
-const getCalendarDays = (viewDate: Date) => {
-  const year = viewDate.getUTCFullYear();
-  const month = viewDate.getUTCMonth();
-  const firstDay = new Date(Date.UTC(year, month, 1));
-  const daysInMonth = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
-  const leadingDays = firstDay.getUTCDay();
-  const days: Array<Date | undefined> = [];
-
-  for (let index = 0; index < leadingDays; index += 1) {
-    days.push(undefined);
-  }
-
-  for (let day = 1; day <= daysInMonth; day += 1) {
-    days.push(new Date(Date.UTC(year, month, day)));
-  }
-
-  while (days.length % 7 !== 0) {
-    days.push(undefined);
-  }
-
-  return days;
+const toIsoDate = (date: Date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 };
 
-const getWeekdays = (locale: string) => {
-  const sunday = new Date(Date.UTC(2026, 7, 2));
-  return Array.from({ length: 7 }, (_, index) => {
-    const date = new Date(sunday);
-    date.setUTCDate(sunday.getUTCDate() + index);
-    return new Intl.DateTimeFormat(locale, { weekday: 'short' }).format(date);
-  });
-};
-
-const formatMonthTitle = (date: Date, locale: string) =>
-  new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' }).format(date);
+const formatSelectedDate = (date: Date, locale: string) =>
+  new Intl.DateTimeFormat(locale, {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  }).format(date);
 
 const createStyles = (colors: AppColors) =>
   StyleSheet.create({
-    container: {
-      gap: spacing[2],
-    },
+    container: {},
     field: {
       minHeight: 52,
-      borderWidth: 1.5,
+      borderWidth: StyleSheet.hairlineWidth,
       borderColor: colors.border,
-      borderRadius: radius.md,
-      backgroundColor: colors.surface,
+      borderRadius: radius.lg,
+      backgroundColor: colors.card,
       paddingHorizontal: spacing[4],
       flexDirection: 'row',
       alignItems: 'center',
@@ -309,40 +242,6 @@ const createStyles = (colors: AppColors) =>
       alignItems: 'center',
       justifyContent: 'center',
       backgroundColor: colors.surfaceVariant,
-    },
-    monthRow: {
-      flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      gap: spacing[3],
-    },
-    monthTitle: {
-      flex: 1,
-    },
-    weekdayRow: {
-      flexDirection: 'row',
-      gap: spacing[1],
-    },
-    weekday: {
-      flex: 1,
-    },
-    dayGrid: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      gap: spacing[1],
-    },
-    dayButton: {
-      width: '13.4%',
-      minHeight: 42,
-      borderRadius: radius.full,
-      borderWidth: 1,
-      borderColor: 'transparent',
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    todayButton: {
-      borderColor: colors.primary,
-      backgroundColor: colors.primaryLight,
     },
     actions: {
       minHeight: 44,

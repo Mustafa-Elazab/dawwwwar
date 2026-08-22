@@ -6,7 +6,6 @@ export const createPhase1ScreenStyles = (colors: AppColors) =>
   StyleSheet.create({
     screenContent: {
       flex: 1,
-      marginTop: -48,
       borderTopLeftRadius: 56,
       overflow: 'hidden',
       backgroundColor: colors.surface,
@@ -151,6 +150,31 @@ export const createPhase1ScreenStyles = (colors: AppColors) =>
       padding: spacing[5],
       justifyContent: 'space-between',
       gap: spacing[4],
+    },
+    coverPhotoEmpty: {
+      minHeight: 118,
+      borderRadius: radius.lg,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.border,
+      backgroundColor: colors.card,
+      padding: spacing[4],
+      justifyContent: 'center',
+    },
+    coverPhotoPreview: {
+      minHeight: 144,
+      borderRadius: radius.lg,
+      overflow: 'hidden',
+      justifyContent: 'flex-end',
+      backgroundColor: colors.primaryLight,
+    },
+    coverPhotoImage: {
+      borderRadius: radius.lg,
+    },
+    coverPhotoOverlay: {
+      minHeight: 54,
+      backgroundColor: 'rgba(0, 0, 0, 0.34)',
+      justifyContent: 'center',
+      paddingHorizontal: spacing[4],
     },
     bottomTabs: {
       borderTopWidth: StyleSheet.hairlineWidth,

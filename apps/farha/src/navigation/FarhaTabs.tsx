@@ -10,6 +10,7 @@ import { EventDashboardScreen } from '../features/events/screens';
 import { ShareCardPreviewScreen } from '../features/sharing/screens';
 import { SettingsScreen } from '../features/settings/screens';
 import { TaskListScreen } from '../features/tasks/screens';
+import { WalkthroughTarget } from '../features/tips/components/WalkthroughTargetContext';
 import { FARHA_TAB_ROUTES } from './routes';
 import type { FarhaTabParamList } from './types';
 import { PLANNER_TAB_CONFIG, PLANNER_TAB_KEYS } from './plannerTabs';
@@ -63,9 +64,8 @@ function FarhaTabBar({ state, navigation }: BottomTabBarProps) {
               }
             };
 
-            return (
+            const tabButton = (
               <Pressable
-                key={tab}
                 accessibilityRole="button"
                 accessibilityState={isFocused ? { selected: true } : undefined}
                 accessibilityLabel={t(config.labelKey)}
@@ -96,6 +96,14 @@ function FarhaTabBar({ state, navigation }: BottomTabBarProps) {
                   </AppText>
                 </View>
               </Pressable>
+            );
+
+            return tab === 'tasks' ? (
+              <WalkthroughTarget key={tab} step="tasksTab" style={styles.tabTarget}>
+                {tabButton}
+              </WalkthroughTarget>
+            ) : (
+              <React.Fragment key={tab}>{tabButton}</React.Fragment>
             );
           })}
         </View>
@@ -147,6 +155,9 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  tabTarget: {
+    flex: 1,
   },
   tabItem: {
     minWidth: 54,

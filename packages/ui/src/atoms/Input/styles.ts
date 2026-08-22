@@ -19,10 +19,10 @@ export const createStyles = (colors: AppColors, isFocused: boolean, hasError: bo
     inputRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      borderWidth: 1.5,
-      borderRadius: radius.md,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderRadius: radius.lg,
       paddingHorizontal: space.md,
-      backgroundColor: colors.surface,
+      backgroundColor: colors.card,
     },
     input: {
       flex: 1,

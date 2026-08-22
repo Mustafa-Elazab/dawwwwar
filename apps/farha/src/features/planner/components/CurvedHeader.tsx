@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { ImageBackground, StyleSheet, View } from 'react-native';
 import { useTheme, spacing } from '@dawwar/theme';
 import { AppIcon, AppPressable, AppText } from '@dawwar/ui';
 
@@ -11,6 +11,7 @@ interface CurvedHeaderProps {
   action?: React.ReactNode;
   helpLabel: string;
   onHelpPress: () => void;
+  coverPhotoUri?: string;
 }
 
 export function CurvedHeader({
@@ -21,11 +22,12 @@ export function CurvedHeader({
   action,
   helpLabel,
   onHelpPress,
+  coverPhotoUri,
 }: CurvedHeaderProps) {
   const { colors } = useTheme();
 
-  return (
-    <View style={[styles.header, { backgroundColor: colors.primary }]}>
+  const content = (
+    <View style={[styles.headerContent, coverPhotoUri ? styles.photoOverlay : null]}>
       <View style={styles.row}>
         <View style={styles.titleBlock}>
           {onBackPress ? (
@@ -51,16 +53,23 @@ export function CurvedHeader({
         </View>
         <View style={styles.actions}>
           {action}
-          <AppPressable
-            accessibilityRole="button"
-            accessibilityLabel={helpLabel}
-            onPress={onHelpPress}
-            style={[styles.iconCircle, { backgroundColor: colors.primaryDark }]}
-          >
-            <AppIcon name="help-circle-outline" size={22} color={colors.primaryText} />
-          </AppPressable>
+         
         </View>
       </View>
+    </View>
+  );
+
+  return (
+    <View style={[styles.header, { backgroundColor: colors.primary }]}>
+      {coverPhotoUri ? (
+        <ImageBackground
+          source={{ uri: coverPhotoUri }}
+          resizeMode="cover"
+          style={styles.photoBackground}
+        >
+          {content}
+        </ImageBackground>
+      ) : content}
     </View>
   );
 }
@@ -68,9 +77,18 @@ export function CurvedHeader({
 const styles = StyleSheet.create({
   header: {
     minHeight: 132,
+    overflow: 'hidden',
+  },
+  headerContent: {
     paddingHorizontal: spacing[4],
-    paddingTop: spacing[3],
+    paddingTop: spacing[4],
     paddingBottom: spacing[8],
+  },
+  photoBackground: {
+    minHeight: 132,
+  },
+  photoOverlay: {
+    backgroundColor: 'rgba(0, 0, 0, 0.34)',
   },
   row: {
     flexDirection: 'row',
